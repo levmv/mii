@@ -27,23 +27,31 @@ class Sort {
         if($parent_field) {
 
             $value = (new Query)
-                ->select([DB::expr('MAX('.$this->_field.')'),  $this->_field])
-                ->from($this->_model->get_table_name())
+                ->select([
+                    [DB::expr('MAX('.$this->_field.')'),  $this->_field]
+                ])
+                ->from($this->_model->get_table())
                 ->where($parent_field, '=', $this->_model->get($parent_field))
                 ->one();
 
-            if($value)
-                $value = $value->get($this->_field, 0);
+            if($value) {
+                $value = $value[$this->_field] ?: 0;
+            }
+            echo $value;exit;
+
 
         } else {
 
             $value = (new Query)
-                ->select([DB::expr('MAX('.$this->_field.')'), $this->_field])
-                ->from($this->_model->get_table_name())
+                ->select([
+                    [DB::expr('MAX('.$this->_field.')'), $this->_field]
+                ])
+                ->from($this->_model->get_table())
                 ->one();
 
-            if($value)
-                $value = $value->get($this->_field, 0);
+            if($value) {
+                $value = $value[$this->_field] ?: 0;
+            }
 
         }
 
