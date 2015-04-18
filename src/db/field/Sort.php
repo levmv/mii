@@ -37,8 +37,6 @@ class Sort {
             if($value) {
                 $value = $value[$this->_field] ?: 0;
             }
-            echo $value;exit;
-
 
         } else {
 
