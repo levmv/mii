@@ -1,0 +1,117 @@
+<?php
+
+namespace mii\auth;
+
+use mii\db\Database;
+use mii\db\DB;
+use mii\db\ORM;
+use mii\db\Query;
+use Mii;
+
+class User extends ORM{
+
+
+
+    public function on_create() {
+        $this->password = Mii::$app->auth()->hash($this->password);
+
+    }
+
+
+    public function on_update() {
+        if(isset($this->_changed['password']))
+            $this->password = Mii::$app->auth()->hash($this->password);
+    }
+
+
+    public function find_user($username) {
+        return static::find()->where('username', '=', $username)->one();
+
+    }
+
+    public function complete_login() {
+
+    }
+
+    public function has_role($role_name)
+    {
+        $roles = $this->get_roles();
+
+
+        foreach ($roles as $role) {
+            if ($role === $role_name)
+                return true;
+        }
+
+        return false;
+    }
+
+    public function update_roles($roles) {
+
+        DB::delete('DELETE FROM roles_users WHERE user_id = :id', [':id' => $this->id]);
+
+        foreach($roles as $role) {
+            DB::insert('INSERT INTO roles_users VALUES(:user_id, :role_id)', [
+                ':user_id' => $this->id,
+                ':role_id' => $role
+            ]);
+        }
+    }
+
+
+    public function get_roles() {
+        if(!$this->id)
+            return [];
+
+        $list = [];
+
+        if($this->roles_cache AND !empty($this->roles_cache )) {
+            $list = explode(':',$this->roles_cache);
+
+        } else {
+            $roles = Role::find()
+                        ->join('roles_users')->on('roles_users.role_id','=','roles.id')
+                        ->where('roles_users.user_id','=',$this->id)
+                        ->all();
+
+
+            foreach($roles as $item)
+                $list[] = $item->name;
+
+            if(!empty($list)) {
+                $this->roles_cache = implode(':',$list);
+                (new Query)
+                    ->table($this->get_table())
+                    ->set(['roles_cache' => $this->roles_cache])
+                    ->where('id', '=', $this->id)
+                    ->update();
+            }
+        }
+
+        return $list;
+    }
+
+    public function get_roles_desc() {
+        static $all_roles = false;
+
+        if(!$all_roles) {
+            $roles = Role::all();
+
+            foreach($roles as $item)
+                $all_roles[$item->name] = $item->title;
+        }
+
+
+        $roles = $this->get_roles();
+
+
+        $list = [];
+        foreach($roles as $role_name)
+            $list[] = $all_roles[$role_name];
+
+        return $list;
+    }
+
+
+
+}
