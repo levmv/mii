@@ -771,14 +771,11 @@ class Query
      * @param   ...
      * @return  $this
      */
-    public function values(array $values)
+    public function values(...$values)
     {
         if (!is_array($this->_values)) {
-            throw new Kohana_Exception('INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
+            throw new DatabaseException('INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
         }
-
-        // Get all of the passed values
-        $values = func_get_args();
 
         $this->_values = array_merge($this->_values, $values);
 
@@ -842,6 +839,7 @@ class Query
             $quote = [$db, 'quote'];
 
             $groups = [];
+
             foreach ($this->_values as $group) {
                 foreach ($group as $offset => $value) {
                     if ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
@@ -1294,10 +1292,10 @@ class Query
      * Set the table and columns for an insert.
      *
      * @param   mixed $table table name or array($table, $alias) or object
-     * @param   array $columns column names
-     * @return  void
+     * @param   array $insert_data "column name" => "value" assoc array
+     * @return  $this
      */
-    public function insert($table = NULL, array $columns = NULL)
+    public function insert($table = NULL, array $insert_data = NULL)
     {
         $this->_type = Database::INSERT;
 
@@ -1306,12 +1304,16 @@ class Query
             $this->_table = $table;
         }
 
-        if ($columns) {
-            // Set the column names
-            $this->_columns = $columns;
+        if ($insert_data) {
+            $group = [];
+            foreach($insert_data as $key => $value) {
+                $this->_columns[] = $key;
+                $group[] = $value;
+            }
+            $this->_values[] = $group;
         }
 
-        return $this->execute();
+        return $this;
     }
 
     /**
@@ -1328,7 +1330,7 @@ class Query
             $this->table($table);
         }
 
-        return $this->execute();
+        return $this;
     }
 
 
@@ -1340,7 +1342,21 @@ class Query
             $this->table($table);
         }
 
-        return $this->execute();
+        return $this;
+    }
+
+    public function count() {
+        $this->_type = Database::SELECT;
+
+        $old_select = $this->_select;
+
+        $this->_select = [DB::expr('COUNT(*)')];
+
+        $count =  $this->execute()->count();
+
+        $this->_select = $old_select;
+
+        return $count;
     }
 
 

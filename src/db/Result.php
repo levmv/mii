@@ -195,7 +195,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param   mixed $default default value if the column does not exist
      * @return  mixed
      */
-    public function get($name, $default = NULL)
+    public function column($name, $default = NULL)
     {
         $row = $this->current();
 

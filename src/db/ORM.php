@@ -37,7 +37,7 @@ class ORM
     public static function all() {
         $class = new static();
 
-        return $class->query()->all();
+        return $class->query()->get();
     }
 
     public function query() {
@@ -233,10 +233,10 @@ class ORM
 
 
         return (new Query)
-            ->table($this->get_table())
+            ->update($this->get_table())
             ->set(array_intersect_key($this->_data, $this->_changed))
             ->where('id', '=', $this->_data['id'])
-            ->update();
+            ->execute();
     }
 
     /**
@@ -256,10 +256,10 @@ class ORM
 
         $columns = array_keys($this->_data);
         $id = (new Query())
-            ->table($this->get_table())
+            ->insert($this->get_table())
             ->columns($columns)
             ->values($this->_data)
-            ->insert();
+            ->execute();
 
         $this->_loaded = true;
 
