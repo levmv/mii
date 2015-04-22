@@ -2,14 +2,11 @@
 
 namespace mii\db;
 
-use Mii;
 use mii\util\Profiler;
 
 /**
- * Database connection wrapper/helper.
+ * Database connection/query wrapper/helper.
  *
- * You may get a database instance using `Database::instance('name')` where
- * name is the [config](database/config) group.
  *
  * @copyright  (c) 2015 Lev Morozov
  * @copyright  (c) 2008-2012 Kohana Team
@@ -32,28 +29,32 @@ class Database
      * @var  array  Database instances
      */
     public static $instances = [];
+
     /**
      * @var  string  the last query executed
      */
     public $last_query;
+
+    /**
+     * @var string Character that is used to quote identifiers
+     */
     protected $_identifier = '`';
 
-    // Character that is used to quote identifiers
+    /**
+     * @var string Instance name
+     */
     protected $_instance;
 
-    // Instance name
     /**
-    * @var \mysqli
+     * @var \mysqli Raw server connection
      */
     protected $_connection;
 
-    // Raw server connection
+    /**
+     * @var array configuration array
+     */
     protected $_config;
 
-    // Configuration array
-    protected $_connection_id;
-
-    // Identifier for this connection within the PHP driver
 
     /**
      * Stores the database configuration locally and name the instance.
@@ -101,14 +102,8 @@ class Database
         if (!isset(Database::$instances[$name])) {
             if ($config === NULL) {
                 // Load the configuration for this database
-                $config = Mii::$app->config('database')[$name];
+                $config = config('database')[$name];
             }
-
-            if (!isset($config['type'])) {
-                throw new DatabaseException('Database type not defined in :name configuration',
-                    [':name' => $name]);
-            }
-
 
             // Store the database instance
             Database::$instances[$name] = new Database($name, $config);
@@ -145,7 +140,7 @@ class Database
     {
         try {
             // Database is assumed disconnected
-            $status = TRUE;
+            $status = true;
 
             if (is_resource($this->_connection)) {
                 if ($status = $this->_connection->close()) {
@@ -193,7 +188,7 @@ class Database
      * @return  array    list (insert id, row count) for INSERT queries
      * @return  integer  number of affected rows for all other queries
      */
-    public function query($type, $sql, $as_object = FALSE, array $params = NULL)
+    public function query($type, $sql, $as_object = false, array $params = NULL)
     {
         // Make sure the database is connected
         $this->_connection or $this->connect();
@@ -204,7 +199,7 @@ class Database
         }
 
         // Execute the query
-        if (($result = $this->_connection->query($sql)) === FALSE) {
+        if (($result = $this->_connection->query($sql)) === false) {
             if (isset($benchmark)) {
                 // This benchmark is worthless
                 Profiler::delete($benchmark);
@@ -278,9 +273,6 @@ class Database
                 $e->getCode());
         }
 
-        // \xFF is a better delimiter, but the PHP driver uses underscore
-        $this->_connection_id = sha1($hostname . '_' . $username . '_' . $password);
-
         if (!empty($this->_config['charset'])) {
             // Set the character set
             $this->set_charset($this->_config['charset']);
@@ -315,7 +307,7 @@ class Database
 
         $status = $this->_connection->set_charset($charset);
 
-        if ($status === FALSE) {
+        if ($status === false) {
             throw new DatabaseException(':error', [':error' => $this->_connection->error], $this->_connection->errno);
         }
     }
@@ -340,9 +332,9 @@ class Database
     {
         if ($value === NULL) {
             return 'NULL';
-        } elseif ($value === TRUE) {
+        } elseif ($value === true) {
             return "'1'";
-        } elseif ($value === FALSE) {
+        } elseif ($value === false) {
             return "'0'";
         } elseif (is_int($value)) {
             return (int)$value;
@@ -381,7 +373,7 @@ class Database
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
-        if (($value = $this->_connection->real_escape_string((string)$value)) === FALSE) {
+        if (($value = $this->_connection->real_escape_string((string)$value)) === false) {
             throw new DatabaseException(':error', [
                 ':error' => $this->_connection->error,
             ], $this->_connection->errno);
@@ -501,7 +493,7 @@ class Database
 
             if ($column === '*') {
                 return $column;
-            } elseif (strpos($column, '.') !== FALSE) {
+            } elseif (strpos($column, '.') !== false) {
                 $parts = explode('.', $column);
 
                 if ($prefix = $this->table_prefix()) {
@@ -581,7 +573,7 @@ class Database
 
             $table = str_replace($this->_identifier, $escaped_identifier, $table);
 
-            if (strpos($table, '.') !== FALSE) {
+            if (strpos($table, '.') !== false) {
                 $parts = explode('.', $table);
 
                 if ($prefix = $this->table_prefix()) {
@@ -645,7 +637,7 @@ class Database
 
             $value = str_replace($this->_identifier, $escaped_identifier, $value);
 
-            if (strpos($value, '.') !== FALSE) {
+            if (strpos($value, '.') !== false) {
                 $parts = explode('.', $value);
 
                 foreach ($parts as & $part) {
@@ -666,4 +658,4 @@ class Database
         return $value;
     }
 
-} // End Database_Connection
+}

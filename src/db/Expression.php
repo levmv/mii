@@ -4,21 +4,12 @@ namespace mii\db;
 
 /**
  * Database expressions can be used to add unescaped SQL fragments to a
- * [Database_Query_Builder] object.
+ * [Query] object.
  *
- * For example, you can use an expression to generate a column alias:
- *
- *     // SELECT CONCAT(first_name, last_name) AS full_name
- *     $query = DB::select(array(DB::expr('CONCAT(first_name, last_name)'), 'full_name')));
- *
- * More examples are available on the [Query Builder](database/query/builder#database-expressions) page
- *
- * @package    Kohana/Database
- * @category   Base
- * @author     Kohana Team
+ * @copyright  (c) 2015 Lev Morozov
  * @copyright  (c) 2009 Kohana Team
- * @license    http://kohanaphp.com/license
  */
+
 class Expression {
 
     // Unquoted parameters
@@ -138,4 +129,4 @@ class Expression {
         return $value;
     }
 
-} // End Database_Expression
+}

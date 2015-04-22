@@ -15,22 +15,6 @@ class DB
         return static::query(Database::SELECT, $q, $params);
     }
 
-    static function query($type, $q, array $params = [])
-    {
-
-        $db = Database::instance();
-
-        if (!empty($params)) {
-            // Quote all of the values
-            $values = array_map([$db, 'quote'], $params);
-
-            // Replace the values in the SQL
-            $q = strtr($q, $values);
-        }
-
-        return $db->query($type, $q);
-    }
-
     /**
      * @param string $q
      * @return Result
@@ -57,6 +41,24 @@ class DB
     {
         return static::query(Database::DELETE, $q, $params);
     }
+
+
+    static function query($type, $q, array $params = [])
+    {
+
+        $db = Database::instance();
+
+        if (!empty($params)) {
+            // Quote all of the values
+            $values = array_map([$db, 'quote'], $params);
+
+            // Replace the values in the SQL
+            $q = strtr($q, $values);
+        }
+
+        return $db->query($type, $q);
+    }
+
 
     /**
      * @param string $value

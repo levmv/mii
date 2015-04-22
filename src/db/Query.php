@@ -3,7 +3,7 @@
 namespace mii\db;
 
 /**
- * Database query wrapper.
+ * Database Query Builder
  *
  * @copyright  (c) 2015 Lev Morozov
  * @copyright  (c) 2008-2009 Kohana Team
