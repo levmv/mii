@@ -3,13 +3,10 @@
 namespace mii\db;
 
 /**
- * Database query wrapper.  See [Parameterized Statements](database/query/parameterized) for usage and examples.
+ * Database query wrapper.
  *
- * @package    Kohana/Database
- * @category   Query
- * @author     Kohana Team
+ * @copyright  (c) 2015 Lev Morozov
  * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license
  */
 class Query
 {
@@ -105,8 +102,8 @@ class Query
         try {
             // Return the SQL string
             return $this->compile(Database::instance());
-        } catch (Exception $e) {
-            return Exception::text($e);
+        } catch (DatabaseException $e) {
+            return DatabaseException::text($e);
         }
     }
 
@@ -458,8 +455,9 @@ class Query
      * @param boolean $all decides if it's an UNION or UNION ALL clause
      * @return $this
      */
-    public function union($select, $all = true)
-    {
+    public function union($select, $all = true) {
+
+        // TODO
         if (is_string($select)) {
             $select = DB::select()->from($select);
         }
@@ -804,10 +802,10 @@ class Query
      * @param   object $query Database_Query of SELECT type
      * @return  $this
      */
-    public function subselect(Database_Query $query)
+    public function subselect(Query $query)
     {
         if ($query->type() !== Database::SELECT) {
-            throw new Kohana_Exception('Only SELECT queries can be combined with INSERT queries');
+            throw new DatabaseException('Only SELECT queries can be combined with INSERT queries');
         }
 
         $this->_values = $query;
@@ -835,8 +833,6 @@ class Query
         $query .= ' (' . implode(', ', array_map([$db, 'quote_column'], $this->_columns)) . ') ';
 
         if (is_array($this->_values)) {
-            // Callback for quoting values
-            $quote = [$db, 'quote'];
 
             $groups = [];
 
@@ -1241,7 +1237,7 @@ class Query
      * @param   mixed $db Database instance or name of instance
      * @param   mixed   result object classname, TRUE for stdClass or FALSE for array
      * @param   array    result object constructor arguments
-     * @return  object   Database_Result for SELECT queries
+     * @return  Result   Result for SELECT queries
      * @return  mixed    the insert id for INSERT queries
      * @return  integer  number of affected rows for all other queries
      */
@@ -1300,7 +1296,7 @@ class Query
         $this->_type = Database::INSERT;
 
         if ($table) {
-            // Set the inital table name
+            // Set the initial table name
             $this->_table = $table;
         }
 

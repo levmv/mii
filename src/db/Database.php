@@ -11,16 +11,8 @@ use mii\util\Profiler;
  * You may get a database instance using `Database::instance('name')` where
  * name is the [config](database/config) group.
  *
- * This class provides connection instance management via Database Drivers, as
- * well as quoting, escaping and other related functions. Querys are done using
- * [Database_Query] and [Database_Query_Builder] objects, which can be easily
- * created using the [DB] helper class.
- *
- * @package    Kohana/Database
- * @category   Base
- * @author     Kohana Team
+ * @copyright  (c) 2015 Lev Morozov
  * @copyright  (c) 2008-2012 Kohana Team
- * @license    http://kohanaphp.com/license
  */
 class Database
 {
@@ -39,7 +31,7 @@ class Database
     /**
      * @var  array  Database instances
      */
-    public static $instances = array();
+    public static $instances = [];
     /**
      * @var  string  the last query executed
      */
@@ -50,6 +42,9 @@ class Database
     protected $_instance;
 
     // Instance name
+    /**
+    * @var \mysqli
+     */
     protected $_connection;
 
     // Raw server connection
@@ -110,8 +105,8 @@ class Database
             }
 
             if (!isset($config['type'])) {
-                throw new Exception('Database type not defined in :name configuration',
-                    array(':name' => $name));
+                throw new DatabaseException('Database type not defined in :name configuration',
+                    [':name' => $name]);
             }
 
 
@@ -215,10 +210,10 @@ class Database
                 Profiler::delete($benchmark);
             }
 
-            throw new DatabaseException(':error [ :query ]', array(
+            throw new DatabaseException(':error [ :query ]', [
                 ':error' => $this->_connection->error,
                 ':query' => $sql
-            ), $this->_connection->errno);
+            ], $this->_connection->errno);
         }
 
         if (isset($benchmark)) {
@@ -250,7 +245,7 @@ class Database
      *
      *     $db->connect();
      *
-     * @throws  Database_Exception
+     * @throws  DatabaseException
      * @return  void
      */
     public function connect()
@@ -258,15 +253,15 @@ class Database
         if ($this->_connection)
             return;
 
-        // Extract the connection parameters, adding required variabels
-        extract($this->_config['connection'] + array(
+        // Extract the connection parameters, adding required variables
+        extract($this->_config['connection'] + [
                 'database' => '',
                 'hostname' => '',
                 'username' => '',
                 'password' => '',
                 'socket'   => '',
                 'port'     => 3306,
-            ));
+            ]);
 
         // Prevent this information from showing up in traces
         unset($this->_config['connection']['username'], $this->_config['connection']['password']);
@@ -279,7 +274,7 @@ class Database
             $this->_connection = NULL;
 
             throw new DatabaseException(':error',
-                array(':error' => $e->getMessage()),
+                [':error' => $e->getMessage()],
                 $e->getCode());
         }
 
@@ -293,7 +288,7 @@ class Database
 
         if (!empty($this->_config['connection']['variables'])) {
             // Set session variables
-            $variables = array();
+            $variables = [];
 
             foreach ($this->_config['connection']['variables'] as $var => $val) {
                 $variables[] = 'SESSION ' . $var . ' = ' . $this->quote($val);
@@ -309,7 +304,7 @@ class Database
      *
      *     $db->set_charset('utf8');
      *
-     * @throws  Database_Exception
+     * @throws  DatabaseException
      * @param   string $charset character set name
      * @return  void
      */
@@ -321,7 +316,7 @@ class Database
         $status = $this->_connection->set_charset($charset);
 
         if ($status === FALSE) {
-            throw new DatabaseException(':error', array(':error' => $this->_connection->error), $this->_connection->errno);
+            throw new DatabaseException(':error', [':error' => $this->_connection->error], $this->_connection->errno);
         }
     }
 
@@ -355,7 +350,7 @@ class Database
             // Convert to non-locale aware float to prevent possible commas
             return sprintf('%F', $value);
         } elseif (is_array($value)) {
-            return '(' . implode(', ', array_map(array($this, __FUNCTION__), $value)) . ')';
+            return '(' . implode(', ', array_map([$this, __FUNCTION__], $value)) . ')';
         } elseif (is_object($value)) {
             if ($value instanceof Query) {
                 // Create a sub-query
@@ -387,9 +382,9 @@ class Database
         $this->_connection or $this->connect();
 
         if (($value = $this->_connection->real_escape_string((string)$value)) === FALSE) {
-            throw new DatabaseException(':error', array(
+            throw new DatabaseException(':error', [
                 ':error' => $this->_connection->error,
-            ), $this->_connection->errno);
+            ], $this->_connection->errno);
         }
 
         // SQL standard is to use single-quotes for all values
@@ -423,9 +418,9 @@ class Database
         $this->_connection or $this->connect();
 
         if ($mode AND !$this->_connection->query("SET TRANSACTION ISOLATION LEVEL $mode")) {
-            throw new Database_Exception(':error', array(
+            throw new DatabaseException(':error', [
                 ':error' => $this->_connection->error
-            ), $this->_connection->errno);
+            ], $this->_connection->errno);
         }
 
         return (bool)$this->_connection->query('START TRANSACTION');
