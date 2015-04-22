@@ -3,13 +3,13 @@
 Основной класс работающий с mysql – Database.
 
 Так код простого запроса к базе данных будет выглядеть примерно так:
-```
+```php
 Database::instance()->query(Database::SELECT, 'SELECT * FROM users WHERE id = ' . $id);
 ```
 
 Но так делать не надо. Есть обертка DB, позволяющая удобно делать прямые запросы:
 
-```
+```php
 $result = DB::select('SELECT * FROM users WHERE id = :id', [':id' => 1]);
 
 $result = DB::update('UPDATE users SET name = :name WHERE id = :id', [':name' => 'John', ':id' => 1]);
@@ -20,7 +20,7 @@ $result = DB::update('UPDATE users SET name = :name WHERE id = :id', [':name' =>
 
 Для еще более удобной работы, есть традиционный query builder:
 
-```
+```php
 (new Query)->select()->from('users')->where('username', '=', 'john')->get();
 
 (new Query)->select(['name', 'surname'])->from('users')->where('id', '=', '1')->one();
@@ -94,43 +94,45 @@ $rows = $result->as_array('id', 'name');
 Наш ORM – один из самых простых (и тупых) в мире ORM, реализующих шаблон ActiveRecord. Работает быстро, памяти потребляет мало.
 
 Первоначально фреймворк использовал ORM Jelly, позже AutoModeler. Но, как показала практика, в реальных (наших) проектах в 99% случаев 
-использовался паразительный минимум возможностей этих систем (1%). Т.к. большинство наших проектов — это простые сайты (пусть и большие по
+использовался паразительный минимум возможностей Jelly (1%). Т.к. большинство наших проектов — это простые сайты (пусть и большие по
 масштабам), логика работа с базой данных в большинстве случаев очень простая: выбрать запись таблицы A, выбрать N записей из 
 таблицы B по ключу из A...  и всё. Усложнять систему ради упрощения кода в 1% случаев выглядело не лучшим решением, так что
 был написан очень примитивный ORM.
 
 Пример модели:
 
-```
+```php
 class User extends ORM {
 
-    public $id = 0;
-    public $name = '';
-    public $surname = '';
+    public $_data = [
+        'id' => 0,
+        'name' => '',
+        'surname' => ''
+    ]
 }
 ```
 
 Создание записи:
-```
+```php
 $user = new User();
 $user->name = 'test';
 $user->create();
 ```
 
 Обновление по аналогии:
-```
+```php
 $user->update();
 ```
 
 Доступ к query builder'у:
 
-```
+```php
 $users = User::find()->where('id', '=', 1)->all();
 ```
 
-выбор записи по PK:
+Выбор записи по primary key (*На самом деле — по полю с именем id*):
 
-```
+```php
 User::find(1);
 ```
 
