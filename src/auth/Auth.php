@@ -39,12 +39,8 @@ class Auth {
 
     protected $_config;
 
-    protected static $_user;
+    protected $_user;
 
-
-    public static function user() {
-        return static::$_user;
-    }
 
     /**
      * Loads Session and configuration options.
@@ -69,22 +65,20 @@ class Auth {
      */
     public function get_user($default = NULL)
     {
-
-        $user = false;
+        if($this->_user)
+            return $this->_user;
 
         if($this->_session->check_cookie()) {
-            $user = $this->_session->get($this->_config['session_key'], $default);
-
+            $this->_user = $this->_session->get($this->_config['session_key'], $default);
         }
 
-
-        if ( ! $user AND Cookie::get($this->_config['token_cookie'], false))
+        if ( ! $this->_user AND Cookie::get($this->_config['token_cookie'], false))
         {
             // check for "remembered" login
-            $user = $this->auto_login();
+            $this->auto_login();
         }
 
-        return ($user AND $user->loaded()) ? $user : $default;
+        return ($this->_user AND $this->_user->loaded()) ? $this->_user : $default;
     }
 
     public function get_user_model() {
@@ -129,6 +123,7 @@ class Auth {
 
             // Finish the login
             $this->complete_login($user);
+            $this->_user = $user;
 
             return true;
         }
@@ -159,13 +154,13 @@ class Auth {
             // Clear the autologin token from the database
             $token = (new Token)->get_token($token);
 
-            if ($token->loaded() AND $logout_all)
+            if ($token AND $token->loaded() AND $logout_all)
             {
-                (new Query)->table($token->get_table())->where('user_id', '=', $token->user_id)->delete();
+                (new Query)->delete($token->get_table())->where('user_id', '=', $token->user_id)->execute();
             }
-            elseif ($token->loaded())
+            elseif ($token AND $token->loaded())
             {
-                $token->remove();
+                $token->delete();
             }
         }
 
@@ -183,6 +178,8 @@ class Auth {
             $this->_session->regenerate();
         }
 
+        $this->_user = null;
+
         // Double check
         return ! $this->logged_in();
     }
@@ -193,18 +190,19 @@ class Auth {
      * specific role.
      *
      * @param   string  $role  role name
-     * @return  mixed
+     * @return  boolean
      */
     public function logged_in($role = NULL)
     {
         // Get the user from the session
         $user = $this->get_user();
 
-        if ( ! $user)
-            return FALSE;
 
-        if (is_object($user) AND $user->id AND $user->has_role('login'))
-            return TRUE;
+        if ($user AND is_object($user) AND $user->id AND $user->has_role('login')) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -264,6 +262,8 @@ class Auth {
 
         // Store user in session
         $this->_session->set($this->_config['session_key'], $user);
+
+        $this->_user = $user;
 
         $user->complete_login();
 
@@ -343,7 +343,6 @@ class Auth {
      */
     public function auto_login()
     {
-
         if ($token = Cookie::get($this->_config['token_cookie']))
         {
             // Load the token and user
@@ -353,7 +352,6 @@ class Auth {
             {
                 if ($token->user_agent === sha1(Mii::$app->request->get_user_agent()))
                 {
-
                     $new_token = (new Token)->create_token([
                         'user_id'    => $token->user_id,
                         'user_agent' => $token->user_agent,
@@ -369,12 +367,17 @@ class Auth {
                     $this->complete_login($user);
 
                     $token->delete();
+
                     // Automatic login was successful
                     return $user;
                 }
 
                 // Token is invalid
                 $token->delete();
+            } else {
+
+                // Token is invalid
+                Cookie::delete($this->_config['token_cookie']);
             }
         }
 

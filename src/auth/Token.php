@@ -46,10 +46,10 @@ class Token extends ORM
     public function delete_expired()
     {
         // Delete all expired tokens
-        (new Query())
+        (new Query)
             ->delete($this->get_table_name())
             ->where('expires', '<', time())
-            ->do();
+            ->execute();
 
         return $this;
     }
@@ -58,7 +58,7 @@ class Token extends ORM
      * Creates a new token.
      *
      * @param	array  $data
-     * @return	Jelly_Model
+     * @return	Token
      */
     public function create_token(array $data)
     {
@@ -84,7 +84,8 @@ class Token extends ORM
      * Loads a token.
      *
      * @param	string	$token
-     * @return	Jelly_Model
+     * @return	Token
+     * @return	null
      */
     public function get_token($token)
     {
