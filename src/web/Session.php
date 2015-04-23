@@ -234,11 +234,11 @@ class Session
      *
      * @return  string
      */
-    public function regenerate()
+    public function regenerate($delete_old = false)
     {
         if($this->is_active()) {
             // Regenerate the session id
-            @session_regenerate_id();
+            @session_regenerate_id($delete_old);
         } else {
             $this->open();
         }
@@ -285,12 +285,13 @@ class Session
         }
 
         // Fire up a new session
-        $status = session_start();
+        //$status = session_start();
+        $this->open();
 
         // Use the $_SESSION global for storing data
-        $this->_data =& $_SESSION;
+    //    $this->_data =& $_SESSION;
 
-        return $status;
+        return ;//$status;
     }
 
     /**
