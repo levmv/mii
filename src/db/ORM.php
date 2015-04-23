@@ -56,6 +56,10 @@ class ORM
         return $this;
     }
 
+    /**
+     * @param null $id
+     * @return Query
+     */
     public static function find($id = null)
     {
         $class = new static();

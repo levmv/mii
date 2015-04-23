@@ -184,7 +184,7 @@ class Database
      * @param   string $sql SQL query
      * @param   mixed $as_object result object class string, TRUE for stdClass, FALSE for assoc array
      * @param   array $params object construct parameters for result class
-     * @return  object   Database_Result for SELECT queries
+     * @return  Result   Result for SELECT queries
      * @return  array    list (insert id, row count) for INSERT queries
      * @return  integer  number of affected rows for all other queries
      */

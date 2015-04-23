@@ -127,19 +127,6 @@ class Query
         return $this;
     }
 
-    /**
-     * Returns results as associative arrays
-     *
-     * @return  $this
-     */
-    public function as_assoc()
-    {
-        $this->_as_object = false;
-
-        $this->_object_params = [];
-
-        return $this;
-    }
 
     /**
      * Returns results as objects
@@ -209,7 +196,7 @@ class Query
 
 
     /**
-     * Sets the initial columns to select from.
+     * Sets the initial columns to select
      *
      * @param   array $columns column list
      * @return  Query
@@ -227,8 +214,6 @@ class Query
     }
 
 
-
-
     /**
      * Enables or disables selecting only unique columns using "SELECT DISTINCT"
      *
@@ -237,7 +222,7 @@ class Query
      */
     public function distinct($value)
     {
-        $this->_distinct = (bool)$value;
+        $this->_distinct = (bool) $value;
 
         return $this;
     }
@@ -451,7 +436,7 @@ class Query
      * Adds an other UNION clause.
      *
      * @param mixed $select if string, it must be the name of a table. Else
-     *  must be an instance of Database_Query_Builder_Select
+     *  must be an instance of Query
      * @param boolean $all decides if it's an UNION or UNION ALL clause
      * @return $this
      */
@@ -459,10 +444,11 @@ class Query
 
         // TODO
         if (is_string($select)) {
-            $select = DB::select()->from($select);
+            $select = (new Query)->select()->from($select);
         }
-        if (!$select instanceof Database_Query_Builder_Select)
-            throw new Kohana_Exception('first parameter must be a string or an instance of Database_Query_Builder_Select');
+        if (!$select instanceof Query)
+            throw new DatabaseException('first parameter must be a string or an instance of Query');
+
         $this->_union [] = ['select' => $select, 'all' => $all];
 
         return $this;
@@ -938,7 +924,7 @@ class Query
     {
         $this->_select =
         $this->_from =
-        $this->_join =
+        $this->_joins =
         $this->_where =
         $this->_group_by =
         $this->_having =
@@ -1278,9 +1264,7 @@ class Query
         }
 
         // Execute the query
-        $result = $db->query($this->_type, $sql, $as_object, $object_params);
-
-        return $result;
+        return $db->query($this->_type, $sql, $as_object, $object_params);
     }
 
 
@@ -1288,7 +1272,7 @@ class Query
      * Set the table and columns for an insert.
      *
      * @param   mixed $table table name or array($table, $alias) or object
-     * @param   array $insert_data "column name" => "value" assoc array
+     * @param   array $insert_data "column name" => "value" assoc list
      * @return  $this
      */
     public function insert($table = NULL, array $insert_data = NULL)
@@ -1314,8 +1298,7 @@ class Query
 
     /**
      *
-     *
-     * @param   array $columns column list
+     * @param   string $table table name
      * @return  Query
      */
     public function update($table = NULL)
@@ -1356,7 +1339,6 @@ class Query
     }
 
 
-
     public function get()
     {
         return $this->execute();
@@ -1373,7 +1355,6 @@ class Query
 
     public function all()
     {
-
         return $this->execute()->all();
     }
 
