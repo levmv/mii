@@ -6,7 +6,7 @@ use mii\db\ORM;
 
 class Role extends ORM {
 
-    protected $table = 'roles';
+    protected $_table = 'roles';
 
     protected $_data = [
         'id' => 0,

@@ -6,15 +6,19 @@ namespace mii\db;
 class ORM
 {
 
-    // The database table name
-    protected $table = '';
+    /**
+     * @var string database table name
+     */
+    protected $_table;
 
     /**
      * @var mixed
      */
     protected $_order_by = false;
 
-    // The database fields
+    /**
+     * @var array The database fields
+     */
     protected $_data = [];
 
     /**
@@ -22,15 +26,20 @@ class ORM
      */
     protected $_changed = [];
 
-    protected $_loaded;
+    /**
+     * @var boolean Is this model loaded from DB
+     */
+    protected $_loaded = false;
+
 
     /**
      * Create a new ORM model instance
      *
      * @param array $values
+     * @param mixed
      * @return void
      */
-    public function __construct($values = [], $loaded = NULL)
+    public function __construct($values = [], $loaded = false)
     {
         if ($values)
             $this->fill_with($values);
@@ -39,16 +48,19 @@ class ORM
     }
 
     /**
+     * @deprecated
+     *
      * Mass sets object properties. Never pass $_POST into this method directly.
      * Always use something like array_key_intersect() to filter the array.
      *
      * @param array $data the data to set
      *
-     * @return null
-     *
+     * @return $this
      */
+
     public function fill_with(array $data)
     {
+
         foreach (array_intersect_key($data, $this->_data) as $key => $value) {
             $this->$key = $value;
         }
@@ -57,7 +69,7 @@ class ORM
     }
 
     /**
-     * @param null $id
+     * @param mixed ID of model to load or set of ids
      * @return Query
      */
     public static function find($id = null)
@@ -116,7 +128,7 @@ class ORM
      */
     public function get_table()
     {
-        return $this->table;
+        return $this->_table;
     }
 
     public static function all()
@@ -138,9 +150,9 @@ class ORM
      *
      * @return Result
      */
-    public static function select_list($key, $display, $first = NULL, Database_Query_Builder_Select $query = NULL)
+    public static function select_list($key, $display, $first = NULL)
     {
-        $instance = new static;
+
         $rows = [];
 
 
@@ -162,16 +174,12 @@ class ORM
             $select_array[] = $display;
         }
 
-        if ($query) // Fetch selected rows
-        {
-            $query = $instance->load($query->select_array($select_array), NULL);
-        } else // Fetch all rows
-        {
-            $query = (new Query)->select($instance->fields())->from($instance->get_table())->as_object(static::class)->all();
-        }
+
+        $class = new static;
+        $result = $class->query(false)->get();
 
 
-        foreach ($query as $row) {
+        foreach ($result as $row) {
             if ($array_display) {
                 $display_str = [];
                 foreach ($display as $text)

@@ -8,7 +8,7 @@ use mii\util\Text;
 
 class Token extends ORM
 {
-    protected $table= 'user_tokens';
+    protected $_table= 'user_tokens';
 
     protected $_order_by = ['expires' => 'asc'];
 
