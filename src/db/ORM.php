@@ -235,7 +235,7 @@ class ORM
     {
         if (array_key_exists($key, $this->_data) AND $value !== $this->_data[$key]) {
             $this->_data[$key] = $value;
-            if ($this->_loaded !== NULL) {
+            if ($this->_loaded !== false) {
                 $this->_changed[$key] = true;
             }
         }
