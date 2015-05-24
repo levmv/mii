@@ -16,6 +16,14 @@ class App extends \mii\core\App
 
     public function run()
     {
+        $loggers = $this->config('log');
+        if($loggers) {
+
+            foreach($loggers as $class_name => $log_params) {
+                Mii::add_logger(new $class_name($log_params));
+            }
+
+        }
 
         $cookie_config = $this->config('cookie');
 

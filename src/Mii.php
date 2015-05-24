@@ -20,7 +20,9 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '1.0';
+    const VERSION = '1.0.0';
+
+    const CODENAME = 'Alnair';
 
     /**
      * @var \mii\web\App|\mii\console\App;
@@ -28,9 +30,9 @@ class Mii {
     public static $app = null;
 
     /**
-    * @var Logger
+    * @var Array of Logger's
     */
-    private static $_logger;
+    public static $_loggers;
 
 
     public static function autoloader($class) {
@@ -76,36 +78,43 @@ class Mii {
     }
 
 
-
     /**
      * Sets the logger object.
      * @param Logger $logger the logger object.
      */
-    public static function set_logger(Logger $logger) {
-        static::$_logger = $logger;
+    public static function add_logger(Logger $logger) {
+        static::$_loggers[] = $logger;
 
     }
 
     public static function error($msg, $category = 'app') {
-        if(static::$_logger !== null)
-            static::$_logger->log(Logger::ERROR, $msg);
+        static::log(Logger::ERROR, $msg, $category);
     }
 
     public static function warning($msg, $category = 'app') {
-        if(static::$_logger !== null)
-            static::$_logger->log(Logger::WARNING, $msg);
+        static::log(Logger::WARNING, $msg, $category);
     }
 
     public static function info($msg, $category = 'app') {
-        if(static::$_logger !== null)
-            static::$_logger->log(Logger::INFO, $msg);
+        static::log(Logger::INFO, $msg, $category);
     }
 
     public static function notice($msg, $category = 'app') {
-        if(static::$_logger !== null)
-            static::$_logger->log(Logger::NOTICE, $msg);
+        static::log(Logger::NOTICE, $msg, $category);
     }
 
+
+    public static function log($level, $msg, $category) {
+        foreach(static::$_loggers as $logger) {
+            $logger->log($level, $msg, $category);
+        }
+    }
+
+    public static function flush_logs() {
+        foreach(static::$_loggers as $logger) {
+            $logger->flush();
+        }
+    }
 
     public static function t($category, $message, $params = [], $language = null)
     {

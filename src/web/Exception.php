@@ -3,6 +3,8 @@
 namespace mii\web;
 
 
+use mii\log\Logger;
+
 class Exception extends \mii\core\Exception {
 
 
@@ -24,17 +26,25 @@ class Exception extends \mii\core\Exception {
         {
             // Generate the response
 
+            \Mii::error(Exception::text($e), 'mii');
+            \Mii::flush_logs();
+
             if(MII_ENV_DEV) {
                 static::response($e)->send();
             } else {
-                $class = \Mii::$app->config('error_controller');
+                $class = config('error_controller');
 
-                \Mii::$app->request->action('index');
+                $code    = $e->getCode();
+                $status = ($e instanceof HTTP_Exception) ? $code : 500;
+
+                \Mii::$app->request->action('error_page');
+                \Mii::$app->request->params(['code' => $status]);
 
                 $response = new Response();
                 $controller = new $class(\Mii::$app->request, $response);
                 $controller->execute();
 
+                $response->status($status);
                 $response->send();
             }
 
@@ -42,6 +52,7 @@ class Exception extends \mii\core\Exception {
         }
         catch (\Exception $e)
         {
+
             /**
              * Things are going *really* badly for us, We now have no choice
              * but to bail. Hard.
@@ -52,8 +63,12 @@ class Exception extends \mii\core\Exception {
             // Set the Status code to 500, and Content-Type to text/plain.
             header('Content-Type: text/plain; charset=utf-8', TRUE, 500);
 
-            print_r($e);
-            //echo Exception::text($e);
+            $text = Exception::text($e);
+
+            //\Mii::log(Logger::CRITICAL, $text, 'mii');
+            //\Mii::flush_logs();
+
+            echo $text;
 
             exit(1);
         }
