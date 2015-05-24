@@ -690,16 +690,22 @@ class Query
         return $this;
     }
 
+
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   mixed $column column name or array($column, $alias) or object
+     * @param   mixed $column column name or array($column, $alias) or array([$column, $direction], [$column, $direction], ...)
      * @param   string $direction direction of sorting
      * @return  $this
      */
-    public function order_by($column, $direction = NULL)
+    public function order_by($column, $direction = null)
     {
-        $this->_order_by[] = [$column, $direction];
+        if(is_array($column) AND $direction === null) {
+            $this->_order_by = $column;
+        } else {
+            $this->_order_by[] = [$column, $direction];
+
+        }
 
         return $this;
     }
@@ -1330,10 +1336,16 @@ class Query
         $old_select = $this->_select;
 
         $this->_select = [DB::expr('COUNT(*)')];
+        $as_object = $this->_as_object;
+        $this->_as_object = null;
 
-        $count =  $this->execute()->count();
+
+        $result = $this->execute();
+
+        $count =  $this->execute()->column('COUNT(*)', 0);
 
         $this->_select = $old_select;
+        $this->_as_object = $as_object;
 
         return $count;
     }
