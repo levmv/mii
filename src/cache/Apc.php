@@ -10,7 +10,7 @@ class Apc extends Cache
      * be instantiated using the `Cache::instance()` method.
      *
      * @param  array $config configuration
-     * @throws Cache_Exception
+     * @throws CacheException
      */
     protected function __construct(array $config)
     {
@@ -33,7 +33,7 @@ class Apc extends Cache
      * @param   string $id id of cache to entry
      * @param   string $default default value to return if cache miss
      * @return  mixed
-     * @throws  Cache_Exception
+     * @throws  CacheException
      */
     public function get($id, $default = NULL)
     {
@@ -61,9 +61,7 @@ class Apc extends Cache
     public function set($id, $data, $lifetime = NULL)
     {
         if ($lifetime === NULL) {
-            $lifetime = $this->_config['default_expire'] ?: Cache::DEFAULT_EXPIRE;
-            //$lifetime = isset($this->_config['default_expire']) ? $this->_config['default_expire'] : Cache::DEFAULT_EXPIRE;
-            //$lifetime = Arr::get($this->_config, 'default_expire', Cache::DEFAULT_EXPIRE);
+            $lifetime = isset($this->_config['default_expire']) ? $this->_config['default_expire'] : Cache::DEFAULT_EXPIRE;
         }
 
         return apc_store($this->_sanitize_id($id), $data, $lifetime);
@@ -130,4 +128,4 @@ class Apc extends Cache
         return apc_dec($id, $step);
     }
 
-} // End Kohana_Cache_Apc
+}

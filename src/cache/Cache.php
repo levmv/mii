@@ -3,6 +3,7 @@
 namespace mii\cache;
 
 use Mii;
+use mii\util\Arr;
 
 abstract class Cache {
 
@@ -14,9 +15,9 @@ abstract class Cache {
     public static $default = 'apc';
 
     /**
-     * @var   Kohana_Cache instances
+     * @var   Cache instances
      */
-    public static $instances = array();
+    public static $instances = [];
 
     /**
      * Creates a singleton of a Kohana Cache group. If no group is supplied
@@ -33,7 +34,7 @@ abstract class Cache {
      *
      * @param   string  $group  the name of the cache group to use [Optional]
      * @return  Cache
-     * @throws  Cache_Exception
+     * @throws  CacheException
      */
     public static function instance($group = NULL)
     {
@@ -50,13 +51,13 @@ abstract class Cache {
             return Cache::$instances[$group];
         }
 
-        $config = Mii::$app->config('cache');
+        $config = config('cache');
 
         if ( ! isset($config[$group]))
         {
             throw new CacheException(
                 'Failed to load Kohana Cache group: :group',
-                array(':group' => $group)
+                [':group' => $group]
             );
         }
 
@@ -73,7 +74,7 @@ abstract class Cache {
     /**
      * @var  Config
      */
-    protected $_config = array();
+    protected $_config = [];
 
     protected $_prefix = '';
 
@@ -139,7 +140,7 @@ abstract class Cache {
      */
     final public function __clone()
     {
-        throw new Cache_Exception('Cloning of Kohana_Cache objects is forbidden');
+        throw new CacheException('Cloning of Cache objects is forbidden');
     }
 
     /**
@@ -157,7 +158,7 @@ abstract class Cache {
      * @param   string  $id       id of cache to entry
      * @param   string  $default  default value to return if cache miss
      * @return  mixed
-     * @throws  Cache_Exception
+     * @throws  CacheException
      */
     abstract public function get($id, $default = NULL);
 
@@ -229,7 +230,7 @@ abstract class Cache {
     protected function _sanitize_id($id)
     {
         // Change slashes and spaces to underscores
-        return $this->_prefix.str_replace(array('/', '\\', ' '), '_', $id);
+        return $this->_prefix.str_replace(['/', '\\', ' '], '_', $id);
     }
 }
 // End Kohana_Cache
