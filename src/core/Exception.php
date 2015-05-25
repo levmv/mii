@@ -2,12 +2,13 @@
 
 namespace mii\core;
 
+
 abstract class Exception extends \Exception {
 
     /**
      * @var  array  PHP error code => human readable name
      */
-    public static $php_errors = array(
+    public static $php_errors = [
         E_ERROR              => 'Fatal Error',
         E_USER_ERROR         => 'User Error',
         E_PARSE              => 'Parse Error',
@@ -17,7 +18,7 @@ abstract class Exception extends \Exception {
         E_NOTICE             => 'Notice',
         E_RECOVERABLE_ERROR  => 'Recoverable Error',
         E_DEPRECATED         => 'Deprecated',
-    );
+    ];
 
 
     /**
@@ -29,7 +30,7 @@ abstract class Exception extends \Exception {
     /**
      * Creates a new translated exception.
      *
-     *     throw new /mii/core/Exception('Something went terrible wrong, :user',
+     *     throw new Exception('Something went terrible wrong, :user',
      *         array(':user' => $user));
      *
      * @param   string          $message    error message
@@ -94,78 +95,14 @@ abstract class Exception extends \Exception {
 
 
     /**
-     * Exception handler, logs the exception and generates a Response object
-     * for display.
-     *
-     * @uses    Kohana_Exception::response
-     * @param   Exception  $e
-     * @return  boolean
-     */
-    public static function _handler(\Exception $e)
-    {
-        try
-        {
-
-            // Log the exception
-            //Kohana_Exception::log($e);
-
-            // Generate the response
-
-            $response = Exception::response($e);
-
-
-            return $response;
-        }
-        catch (Exception $e)
-        {
-            /**
-             * Things are going *really* badly for us, We now have no choice
-             * but to bail. Hard.
-             */
-            // Clean the output buffer if one exists
-            ob_get_level() AND ob_clean();
-
-            // Set the Status code to 500, and Content-Type to text/plain.
-            header('Content-Type: text/plain; charset=utf-8', TRUE, 500);
-
-            echo Mii\Exception::text($e);
-
-            exit(1);
-        }
-    }
-
-    /**
-     * Logs an exception.
-     *
-     * @uses    Kohana_Exception::text
-     * @param   Exception  $e
-     * @param   int        $level
-     * @return  void
-     */
-    public static function log(Exception $e, $level = Log::EMERGENCY)
-    {
-        if (is_object(Kohana::$log))
-        {
-            // Create a text version of the exception
-            $error = Kohana_Exception::text($e);
-
-            // Add this exception to the log
-            Kohana::$log->add($level, $error, NULL, array('exception' => $e));
-
-            // Make sure the logs are written
-            Kohana::$log->write();
-        }
-    }
-
-    /**
      * Get a single line of text representing the exception:
      *
      * Error [ Code ]: Message ~ File [ Line ]
      *
-     * @param   Exception  $e
+     * @param   \Exception  $e
      * @return  string
      */
-    public static function text(Exception $e)
+    public static function text(\Exception $e)
     {
         return sprintf('%s [ %s ]: %s ~ %s [ %d ]',
             get_class($e), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
