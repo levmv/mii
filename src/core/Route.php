@@ -37,6 +37,11 @@
 namespace mii\core;
 
 
+use mii\cache\Cache;
+use mii\cache\CacheException;
+use mii\util\Arr;
+use mii\util\URL;
+
 class Route {
 
 
@@ -59,7 +64,7 @@ class Route {
     /**
      * @var  array   list of valid localhost entries
      */
-    public static $localhosts = array(FALSE, '', 'local', 'localhost');
+    public static $localhosts = [FALSE, '', 'local', 'localhost'];
 
     /**
      * @var  string  default action for all routes
@@ -79,7 +84,7 @@ class Route {
     /**
      * @var  array
      */
-    protected static $_routes = array();
+    protected static $_routes = [];
 
     public static function current_namespace($name = false) {
         if($name === false) {
@@ -122,7 +127,7 @@ class Route {
         if ( ! isset(Route::$_routes[$name]))
         {
             throw new RouteException('The requested route does not exist: :route',
-                array(':route' => $name));
+                [':route' => $name]);
         }
 
         return Route::$_routes[$name];
@@ -168,7 +173,6 @@ class Route {
      * @param   boolean $append append, rather than replace, cached routes when loading
      * @return  void    when saving routes
      * @return  boolean when loading routes
-     * @uses    Kohana::cache
      */
     public static function cache($save = FALSE, $append = FALSE)
     {
@@ -182,9 +186,9 @@ class Route {
             catch (Exception $e)
             {
                 // We most likely have a lambda in a route, which cannot be cached
-                throw new Exception('One or more routes could not be cached (:message)', array(
+                throw new CacheException('One or more routes could not be cached (:message)', [
                     ':message' => $e->getMessage(),
-                ), 0, $e);
+                ], 0, $e);
             }
         }
         else
@@ -262,15 +266,15 @@ class Route {
         if (strpos($expression, '(') !== FALSE)
         {
             // Make optional parts of the URI non-capturing and optional
-            $expression = str_replace(array('(', ')'), array('(?:', ')?'), $expression);
+            $expression = str_replace(['(', ')'], ['(?:', ')?'], $expression);
         }
 
         // Insert default regex for keys
-        $expression = str_replace(array('<', '>'), array('(?P<', '>'.Route::REGEX_SEGMENT.')'), $expression);
+        $expression = str_replace(['<', '>'], ['(?P<', '>'.Route::REGEX_SEGMENT.')'], $expression);
 
         if ($regex)
         {
-            $search = $replace = array();
+            $search = $replace = [];
             foreach ($regex as $key => $value)
             {
                 $search[]  = "<$key>".Route::REGEX_SEGMENT;
@@ -287,7 +291,7 @@ class Route {
     /**
      * @var  array  route filters
      */
-    protected $_filters = array();
+    protected $_filters = [];
 
     /**
      * @var  string  route URI
@@ -297,12 +301,12 @@ class Route {
     /**
      * @var  array
      */
-    protected $_regex = array();
+    protected $_regex = [];
 
     /**
      * @var  array
      */
-    protected $_defaults = array('action' => 'index', 'host' => FALSE);
+    protected $_defaults = ['action' => 'index', 'host' => FALSE];
 
     /**
      * @var  string
@@ -405,7 +409,7 @@ class Route {
      *
      * [!!] Default parameters are added before filters are called!
      *
-     * @throws  Kohana_Exception
+     * @throws  ErrorException
      * @param   array   $callback   callback string, array, or closure
      * @return  $this
      */
@@ -413,7 +417,7 @@ class Route {
     {
         if ( ! is_callable($callback))
         {
-            throw new Kohana_Exception('Invalid Route::callback specified');
+            throw new ErrorException('Invalid Route::callback specified');
         }
 
         $this->_filters[] = $callback;
@@ -449,7 +453,7 @@ class Route {
         if ( ! preg_match($this->_route_regex, $uri, $matches))
             return FALSE;
 
-        $params = array();
+        $params = [];
         foreach ($matches as $key => $value)
         {
             if (is_int($key))
@@ -589,9 +593,9 @@ class Route {
                     else
                     {
                         // Ungrouped parameters are required
-                        throw new Kohana_Exception('Required route parameter not passed: :param', array(
+                        throw new RouteException('Required route parameter not passed: :param', [
                             ':param' => $param,
-                        ));
+                        ]);
                     }
                 }
                 else
@@ -620,9 +624,9 @@ class Route {
                 else
                 {
                     // Ungrouped parameters are required
-                    throw new Kohana_Exception('Required route parameter not passed: :param', array(
+                    throw new RouteException('Required route parameter not passed: :param', [
                         ':param' => $param,
-                    ));
+                    ]);
                 }
             }
 
@@ -650,4 +654,4 @@ class Route {
         return $uri;
     }
 
-} // End Route
+}
