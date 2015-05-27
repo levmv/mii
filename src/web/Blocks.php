@@ -318,7 +318,7 @@ class Blocks
             foreach ($files as $name => $file) {
 
                 if (!$this->frozen_mode) {
-                    if ($this->is_modified_later(PUBPATH . $output, filemtime($file))) {
+                    if ($this->is_modified_later(PUB_PATH . $output, filemtime($file))) {
                         $need_recompile = true;
                         break;
                     }
@@ -333,11 +333,11 @@ class Blocks
                     $tmp .= ' ' . file_get_contents($file);
                 }
                 $tmp = $this->_process($tmp, $type);
-                file_put_contents(PUBPATH . $output, $tmp);
+                file_put_contents(PUB_PATH . $output, $tmp);
                 $has_files = true;
             }
             if ($has_files)
-                $out[] = $this->_gen_html($output . '?' . filemtime(PUBPATH . $output), $type);
+                $out[] = $this->_gen_html($output . '?' . filemtime(PUB_PATH . $output), $type);
 
         } else {
 
@@ -349,18 +349,18 @@ class Blocks
 
                 $mtime = filemtime($file);
 
-                if ($this->is_modified_later(PUBPATH . $output, $mtime)) {
+                if ($this->is_modified_later(PUB_PATH . $output, $mtime)) {
                     try {
-                        copy($file, PUBPATH . $output);
+                        copy($file, PUB_PATH . $output);
                     } catch (Exception $e) {
-                        $dir = pathinfo(PUBPATH . $output);
+                        $dir = pathinfo(PUB_PATH . $output);
                         $dir = $dir['dirname'];
                         try {
                             if (!is_dir($dir)) {
                                 mkdir($dir, 0777, true);
                             } else
                                 chmod($dir, 0777);
-                            copy($file['path'], PUBPATH . $output);
+                            copy($file['path'], PUB_PATH . $output);
                         } catch (Exception $e) {
                         }
                     }
@@ -442,7 +442,7 @@ class Blocks
         $blockname = key($media);
         $path = current($media);
 
-        $output = PUBPATH . '/' .$this->output_dir.'/'. $blockname . '/' ;
+        $output = PUB_PATH . '/' .$this->output_dir.'/'. $blockname . '/' ;
 
 
         $this->_copy_dir($path, $output);
@@ -497,7 +497,11 @@ class Blocks
                     $this->_copy_dir($from . '/' . $file, $to . '/' . $file);
                 }
                 else {
-                    copy($from . '/' . $file, $to . '/' . $file);
+
+                    if ($this->is_modified_later($to . '/' . $file, filemtime($from . '/' . $file))) {
+                        copy($from . '/' . $file, $to . '/' . $file);
+                    }
+
                 }
             }
         }

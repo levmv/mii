@@ -4,10 +4,10 @@ namespace mii\web;
 
 use Mii;
 
-class NotFoundHttpException extends Exception {
+class NotFoundHttpException extends HttpException {
 
     public function __construct() {
-        parent::__construct("Page not found :page", [':page' => Mii::$app->request->uri()], 404);
+        parent::__construct(404, "Page not found :page", [':page' => Mii::$app->request->uri()]);
     }
 
 };

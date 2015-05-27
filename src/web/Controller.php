@@ -101,7 +101,7 @@ class Controller extends \mii\core\Controller
 
         if($this->request->is_ajax() OR $this->response->format == Response::FORMAT_JSON) {
 
-            $this->response->format = Response::FORMAT_JSON;
+            //$this->response->format = Response::FORMAT_JSON;
 
             $content = empty($this->content) ? $content : $this->content;
 
@@ -159,6 +159,7 @@ class Controller extends \mii\core\Controller
         $this->access_rules();
 
         \Mii::$app->user = Mii::$app->auth()->get_user();
+        $this->user = \Mii::$app->user;
 
         $roles = \Mii::$app->user ? \Mii::$app->user->get_roles() : '*';
 

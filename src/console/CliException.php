@@ -21,7 +21,7 @@ class CliException extends \mii\core\Exception {
             \Mii::error(Exception::text($e), 'mii');
             \Mii::flush_logs();
 
-            if(MII_ENV_DEV) {
+            if(MII_DEBUG) {
                 echo Exception::text($e);
             } else {
 

@@ -104,10 +104,4 @@ class Request extends \mii\core\Request {
     }
 
 
-    public function getParams()
-    {
-
-
-
-    }
 }

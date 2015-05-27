@@ -247,9 +247,15 @@ class Debug {
      */
     public static function path($file)
     {
-        if (strpos($file, MIIPATH) === 0)
+        if (strpos($file, MII_PATH) === 0)
         {
-            $file = 'MIIPATH'.DIRECTORY_SEPARATOR.substr($file, strlen(MIIPATH));
+            $file = 'MII_PATH'.DIRECTORY_SEPARATOR.substr($file, strlen(MII_PATH));
+        }
+        $app_path = config('base_path');
+
+        if (strpos($file, $app_path) === 0)
+        {
+            $file = '{app}'.substr($file, strlen($app_path));
         }
 
         return $file;

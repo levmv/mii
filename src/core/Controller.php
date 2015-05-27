@@ -5,9 +5,6 @@ namespace mii\core;
 abstract class Controller
 {
 
-
-
-
     public $auto_render = true;
 
 

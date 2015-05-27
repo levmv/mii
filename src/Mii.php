@@ -2,20 +2,16 @@
 
 use mii\Log\Logger;
 
-defined('MIIPATH') or define('MIIPATH', __DIR__);
+defined('MII_PATH') or define('MII_PATH', __DIR__);
 
-defined('MII_ENV') or define('MII_ENV', 'dev');
+defined('MII_DEBUG') or define('MII_DEBUG', true);
 
-defined('MII_ENV_DEV') or define('MII_ENV_DEV', MII_ENV === 'dev');
+defined('MII_PROF') or define('MII_PROF', MII_DEBUG === true);
 
-/**
- * profiling
- */
-defined('MII_PROF') or define('MII_PROF', MII_ENV === 'dev');
-
-defined('MII_START_TIME') or  define('MII_START_TIME', microtime(TRUE));
-defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
-
+if(MII_PROF) {
+    defined('MII_START_TIME') or define('MII_START_TIME', microtime(true));
+    defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
+}
 
 
 class Mii {
@@ -39,41 +35,30 @@ class Mii {
 
         // what prefixes should be recognized?
         $prefixes = [
-            "app\\" => [
-                __DIR__ . '/../app/',
-            ],
-            "mii\\" => [
-                __DIR__ . '/../../mii/src',
-            ],
+            "app\\" => APP_PATH,
+            "mii\\" => MII_PATH
         ];
 
         // go through the prefixes
-        foreach ($prefixes as $prefix => $dirs) {
+        foreach ($prefixes as $prefix => $path) {
 
-
-            // does the requested class match the namespace prefix?
-            $prefix_len = strlen($prefix);
-            if (substr($class, 0, $prefix_len) !== $prefix) {
+            if (strpos($class, $prefix) !== 0) {
                 continue;
             }
 
             // strip the prefix off the class
-            $class = substr($class, $prefix_len);
+            $class = substr($class, strlen($prefix));
 
             // a partial filename
             $part = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
 
-            // go through the directories to find classes
-            foreach ($dirs as $dir) {
-                $dir = str_replace('/', DIRECTORY_SEPARATOR, $dir);
-                $file = $dir . DIRECTORY_SEPARATOR . $part;
-                //if (is_readable($file)) {
-                require $file;
-                return;
-                //}
-            }
-        }
 
+            if (is_file($path . DIRECTORY_SEPARATOR . $part)) {
+                require $path . DIRECTORY_SEPARATOR . $part;
+                return;
+            }
+
+        }
 
     }
 

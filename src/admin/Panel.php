@@ -10,13 +10,14 @@ class Panel {
     protected $blocks = [];
     protected $hide = false;
 
+
     /**
      * @param $path
      * @return AdminPanel
      */
     public function init($block_name = 'admin_panel')
     {
-        $this->panel_block = block($block_name)
+        $this->panel_block = block($block_name )
             ->depends(['i_jquery','i_admin_button','i_admin_icon'])
             ->bind('blocks', $this->blocks)
             ->bind('user', \Mii::$app->user);
@@ -45,8 +46,8 @@ class Panel {
 
 
     public function render() {
-
         if($this->panel_block AND !$this->hide) {
+
             if(count($this->blocks) OR (\Mii::$app->user AND \Mii::$app->user->has_role('admin')))
                 return $this->panel_block->render(true);
         }

@@ -168,8 +168,6 @@ class Request extends \mii\core\Request
      */
     public function execute()
     {
-
-
         $processed = $this->match_route($this->_routes);
 
         if ($processed) {

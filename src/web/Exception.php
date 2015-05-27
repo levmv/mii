@@ -29,13 +29,22 @@ class Exception extends \mii\core\Exception {
             \Mii::error(Exception::text($e), 'mii');
             \Mii::flush_logs();
 
-            if(MII_ENV_DEV) {
+            if(MII_DEBUG) {
                 static::response($e)->send();
             } else {
+
                 $class = config('error_controller');
 
                 $code    = $e->getCode();
-                $status = ($e instanceof HTTP_Exception) ? $code : 500;
+                $status = ($e instanceof HttpException) ? $code : 500;
+
+                if($status == 500) {
+                    for ($level = ob_get_level(); $level > 0; --$level) {
+                        if (!@ob_end_clean()) {
+                            ob_clean();
+                        }
+                    }
+                }
 
                 \Mii::$app->request->action('error_page');
                 \Mii::$app->request->params(['code' => $status]);
@@ -157,7 +166,7 @@ class Exception extends \mii\core\Exception {
             // Prepare the response object.
             $response = new Response();
 
-            $status = ($e instanceof HTTP_Exception) ? $code : 500;
+            $status = ($e instanceof HttpException) ? $code : 500;
             // Set the response status
             $response->status($status);
 
@@ -186,7 +195,7 @@ class Exception extends \mii\core\Exception {
                 $response->body(B::i(Exception::$error_block)->set(get_defined_vars()));
             }*/
 
-            include MIIPATH.'/web/Exception/error.php';
+            include MII_PATH.'/web/Exception/error.php';
             //$response->body();
 
 
