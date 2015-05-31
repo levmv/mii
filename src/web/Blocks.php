@@ -10,20 +10,21 @@ class Blocks
 
     protected static $_instance = NULL;
 
-    const JAVASCRIPT = 'js';
-    const STYLESHEET = 'css';
-
     protected $_blocks = [];
 
     protected $_used_blocks = [];
 
-    protected $libraries = [];
+    protected $libraries = [
+        APP_PATH.'blocks'
+    ];
 
     protected $merge = false;
 
     protected $frozen_mode = false;
 
-    protected $output_dir = 'media';
+    protected $assets_dir = PUB_PATH.'assets';
+
+    protected $assets_pub_dir = 'assets';
 
 
     /**
@@ -54,8 +55,6 @@ class Blocks
 
     public function get($name, array $values = null)
     {
-
-
         if (isset($this->_blocks[$name]))
             return $this->_blocks[$name];
 
@@ -133,8 +132,8 @@ class Blocks
                 }
             }
 
-            if (is_dir($base_path . $path .  'media')) {
-                $files['media'] = [$block_name => $base_path . $path .  'media'];
+            if (is_dir($base_path . $path .  'assets')) {
+                $files['assets'] = [$block_name => $base_path . $path .  'assets'];
                 $empty_block = false;
             }
 
@@ -275,10 +274,10 @@ class Blocks
             foreach ($group as $type => $files) {
 
                 if (count($files)) {
-                    if ($type == 'media') {
+                    if ($type == 'assets') {
 
                         if (!$this->frozen_mode) {
-                                $this->_build_media($files);
+                                $this->_build_assets_dir($files);
                         }
 
                     } else {
@@ -388,9 +387,9 @@ class Blocks
     function _process($content, $type)
     {
         switch ($type) {
-            case self::STYLESHEET:
+            case 'css':
                 return $this->_process_css($content);
-            case self::JAVASCRIPT:
+            case 'js':
 
         }
 
@@ -432,17 +431,17 @@ class Blocks
         $file = trim($file, '/');
         $file = str_replace('/', '__', $file);
 
-        return '/' . $this->output_dir . '/' . $type . '/' . $file;
+        return $this->assets_pub_dir . '/' . $file;
     }
 
-    private function _build_media($media)
+    private function _build_assets_dir($media)
     {
      //   $dir = trim($dir, "\/");
 
         $blockname = key($media);
         $path = current($media);
 
-        $output = PUB_PATH . '/' .$this->output_dir.'/'. $blockname . '/' ;
+        $output = $this->assets_dir.'/'. $blockname . '/' ;
 
 
         $this->_copy_dir($path, $output);
@@ -452,13 +451,13 @@ class Blocks
         foreach ($files as $dir => $file) {
             if (is_array($file)) {
 
-                $this->_build_media($blockname, $file);
+                $this->_build_assets_dir($blockname, $file);
                 continue;
             };
 
             $dir = trim($dir, "\/");
 
-            $output = $this->_params['output_dir'] . '/' . $blockname . '/' . $dir;
+            $output = $this->_params['assets_dir'] . '/' . $blockname . '/' . $dir;
 
 
             $mtime = filemtime($file);

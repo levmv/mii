@@ -35,5 +35,56 @@ $this->{action}();
 $this->after();
 
 ...
+
+
+### Установка
+
+github то, github сё... бла бла бла... packagist пока не используется, так что клонируем 
+и берем нужную версию по тэгу. Можно использовать и мастер-ветку, но осторожно.
+
+В index.php обычно лежит что-то вроде этого:
+```php
+define('MII_DEBUG', true); // при разработке лучше всегда true, в продакшене очевидно всегда false
+
+define('PUB_PATH',  __DIR__.'/'); // Путь к публичной директории (открытой в nginx'е в мир). 
+define('APP_PATH',  __DIR__ . '/../app/'); // Путь к самому нашему приложению
+
+
+require(__DIR__ . '/../../mii/src/Mii.php'); 
+
+spl_autoload_register(['\Mii', 'autoloader']);
+
+$config = require(APP_PATH.'config.php');
+
+require(APP_PATH.'routes.php');
+
+(new mii\web\App($config))->run();
+```
+
+Но при желании можно использовать любой PSR-4 автолоадер (composer'овский, например).
+
+Структура сайта обычно такова:
+```
+project
+ ..app
+ ....controllers
+ ....models
+ ....blocks
+ ..mii
+ ...src
+ ..public
+ ....assets
+ ....res
+ ....index.php
+```
+
+Но, на самом деле, жестких зависимостей почти нет. Так что все может быть иначе.
+
+
+ 
+
+
+
+
  
   
