@@ -200,7 +200,7 @@ class ORM
 
     public function __set($key, $value)
     {
-        return $this->set_field($key, $value);
+        $this->set_field($key, $value);
     }
 
     /**
@@ -229,18 +229,16 @@ class ORM
      * @param string $key the field name to set
      * @param string $value the value to set to
      *
-     * @return $this
+     * @return void
      */
     public function set_field($key, $value)
     {
-        if (array_key_exists($key, $this->_data) AND $value !== $this->_data[$key]) {
+        if ((isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) AND $value !== $this->_data[$key]) {
             $this->_data[$key] = $value;
             if ($this->_loaded !== false) {
                 $this->_changed[$key] = true;
             }
         }
-
-        return $this;
     }
 
     public function set($values, $value = NULL)
