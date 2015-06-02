@@ -4,7 +4,7 @@ namespace mii\web;
 
 use Mii;
 use mii\web\Exception;
-use mii\util\Profiler;
+
 
 class Block
 {
@@ -28,43 +28,28 @@ class Block
     // Is assigned any values to block ?
     protected $_loaded = false;
 
-    protected $_assets_loaded = false;
 
     /**
      * Sets the block name and local data. Blocks should almost
      * always only be created using [Blocks::factory] or [block].
      *
      *
-     * @param   string $name block filename
+     * @param   string $name block name
+     * @param   string $file path to block php file
      * @param   array $params array of values
      * @return  void
      * @uses    View::set_filename
      */
-    public function __construct($name, array $values = null)
+    public function __construct($name, $file = null, array $values = null)
     {
-        $this->name($name);
+        $this->_name = $name;
+
+        $this->_file = $file;
 
         if ($values !== null)
             $this->set($values);
-
-        // Если указаны зависимости, то подгрузим их assets
-        //if (count($this->_params['depends'])) {
-        //  $this->depends($this->_params['depends']);
-        //}
-
     }
 
-
-    public function depends(array $depends = [])
-    {
-        $this->_depends = array_unique(array_merge($depends));
-
-        foreach ($this->_depends as $depend) {
-            Mii::$app->blocks()->get($depend);
-        }
-
-        return $this;
-    }
 
 
     /**
@@ -159,8 +144,7 @@ class Block
      *     $block->name($block_name);
      *
      * @param   string $name block name
-     * @return  View
-     * @throws  View_Exception
+     * @return  Block
      */
     public function name($name = NULL)
     {
@@ -171,10 +155,24 @@ class Block
 
         $this->_path = implode('/', explode('_', $name)) . '/';
 
-        if (strpos($name, 'i_') === 0) {
-            $this->is_virtual = true;
-        } else {
+        if (strpos($name, 'i_') !== 0) {
+
             $this->_file = Mii::$app->blocks()->find_block_file($this->_path . $name);
+        }
+
+        return $this;
+    }
+
+
+    public function depends(array $depends = null)
+    {
+        if(!$depends)
+            return $this->_depends;
+
+        $this->_depends = array_unique(array_merge($this->_depends, $depends));
+
+        foreach ($this->_depends as $depend) {
+            Mii::$app->blocks()->get($depend);
         }
 
         return $this;
@@ -263,14 +261,10 @@ class Block
      *
      * @param   string $file view filename
      * @return  string
-     * @throws  View_Exception
-     * @uses    View::capture
+     * @uses    Block::capture
      */
     public function render($force = false)
     {
-        $benchmark2 = false;
-
-
         if (!$this->_loaded AND !$force) {
             return '';
         }
@@ -279,140 +273,24 @@ class Block
             return '';
         }
         if (MII_PROF)
-            $benchmark = Profiler::start('Block:render', $this->_file);
+            $benchmark = \mii\util\Profiler::start('Block:render', \mii\util\Debug::path($this->_file));
 
         // Combine local and global data and capture the output
         $c = $this->capture($this->_file);
 
         if (MII_PROF)
-            Profiler::stop($benchmark);
+            \mii\util\Profiler::stop($benchmark);
 
         return $c;
     }
 
 
     /**
-     * @param $link
-     * @param bool $force_remote
-     * @return Minimus_Assets
-     */
-    public function css($link, $force_remote = false)
-    {
-        return $this->asset_add($link, 'css', $force_remote);
-    }
-
-    /**
-     * @param $link
-     * @param bool $force_remote
-     * @return Minimus_Assets
-     */
-    public function js($link, $force_remote = false)
-    {
-        return $this->asset_add($link, 'js', $force_remote);
-    }
-
-    public $added = [];
-    public $remote = [];
-
-
-    public function asset_add($link, $type, $force_remote = false)
-    {
-        if (isset($this->added[$link]))
-            return $this;
-
-        $this->added[$link] = true;
-
-        $this->_assets[$type][] = [
-            'path'   => $link,
-            'name'   => '',
-            'remote' => (Valid::url($link) OR $force_remote) ? true : false
-        ];
-
-
-        return $this;
-    }
-
-    public function get_depends()
-    {
-        return $this->_depends;
-    }
-
-    public function find_assets(&$files, $frozen)
-    {
-
-        foreach ($this->_assets as $type => $list) {
-            foreach ($list as $item)
-                $files[$type][] = $item;
-        }
-
-        $full_name = $this->name();
-        $path = explode('_', $full_name);
-        $path = implode('/', $path);
-        if ($path)
-            $path .= '/';
-
-        $_paths = [
-            APPPATH . 'blocks' . DIRECTORY_SEPARATOR . $path,
-            SYSPATH . 'blocks' . DIRECTORY_SEPARATOR . $path];
-
-        $_files = [];
-
-        $_media = [];
-
-        $used = [];
-
-        foreach ($_paths as $base_path) {
-
-            if (!is_dir($base_path))
-                continue;
-
-            $dir = new \DirectoryIterator($base_path);
-
-            foreach ($dir as $file) {
-                $filename = $file->getFilename();
-
-                if (isset($used[$filename]))
-                    continue;
-
-                $used[$filename] = true;
-
-                if ($filename[0] === '.' OR $filename[strlen($filename) - 1] === '~')
-                    continue;
-                if ($filename == 'media' AND !$frozen) {
-
-                    $_media = Mii::list_files('', [$file->getPathName()]);
-                }
-
-                $_files[$filename] = realpath($file->getPathName());
-
-            }
-        }
-        $need_keys = [
-            ['name' => $full_name . '.css', 'type' => 'css'],
-            ['name' => $full_name . '.js', 'type' => 'js']];
-
-        foreach ($need_keys as $need) {
-            if (isset($_files[$need['name']])) {
-                $files[$need['type']][] = [
-                    'path'   => $_files[$need['name']],
-                    'name'   => $need['name'],
-                    'remote' => false,
-                ];
-            }
-        }
-
-        if (count($_media))
-            if ($this->name)
-                $files['media'][$this->name] = $_media;
-
-    }
-
-    /**
      * Captures the output that is generated when a view is included.
      * The view data will be extracted to make local variables.
      *
      * @param   string $block_filename filename
-     * @param   array $kohana_view_data variables
+     * @throws \Exception
      * @return  string
      */
     protected function capture($block_filename)
@@ -430,7 +308,7 @@ class Block
             // Load the view within the current scope
             require $block_filename;
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
             // Delete the output buffer
             ob_end_clean();
