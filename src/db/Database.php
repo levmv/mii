@@ -2,7 +2,6 @@
 
 namespace mii\db;
 
-use mii\util\Profiler;
 
 /**
  * Database connection/query wrapper/helper.
@@ -193,16 +192,16 @@ class Database
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
-        if ($this->_config['profiling']) {
+        if (MII_PROF) {
             // Benchmark this query for the current instance
-            $benchmark = Profiler::start("Database ({$this->_instance})", $sql);
+            $benchmark = \mii\util\Profiler::start("Database ({$this->_instance})", $sql);
         }
 
         // Execute the query
         if (($result = $this->_connection->query($sql)) === false) {
-            if (isset($benchmark)) {
+            if (MII_PROF) {
                 // This benchmark is worthless
-                Profiler::delete($benchmark);
+                \mii\util\Profiler::delete($benchmark);
             }
 
             throw new DatabaseException(':error [ :query ]', [
@@ -211,8 +210,8 @@ class Database
             ], $this->_connection->errno);
         }
 
-        if (isset($benchmark)) {
-            Profiler::stop($benchmark);
+        if (MII_PROF) {
+            \mii\util\Profiler::stop($benchmark);
         }
 
         // Set the last query

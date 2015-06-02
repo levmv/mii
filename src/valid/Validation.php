@@ -4,7 +4,6 @@ namespace mii\valid;
 
 
 use mii\util\Arr;
-use mii\util\Profiler;
 
 class Validation {
 
@@ -173,7 +172,7 @@ class Validation {
         if (MII_PROF)
         {
             // Start a new benchmark
-            $benchmark = Profiler::start('Validation', __FUNCTION__);
+            $benchmark = \mii\util\Profiler::start('Validation', __FUNCTION__);
         }
 
         $this->_errors = [];
@@ -297,10 +296,10 @@ class Validation {
         }
 
 
-        if (isset($benchmark))
+        if (MII_PROF)
         {
             // Stop benchmarking
-            Profiler::stop($benchmark);
+            \mii\util\Profiler::stop($benchmark);
         }
 
         return empty($this->_errors);

@@ -4,7 +4,6 @@ namespace mii\web;
 
 use mii\core\Route;
 use mii\util\Arr;
-use mii\util\Profiler;
 
 
 class Request extends \mii\core\Request
@@ -203,7 +202,7 @@ class Request extends \mii\core\Request
 
 
             // Start benchmarking
-            $benchmark = Profiler::start('Requests', $benchmark);
+            $benchmark = \mii\util\Profiler::start('Requests', $benchmark);
         }
 
 
@@ -263,10 +262,8 @@ class Request extends \mii\core\Request
 
 
         if (MII_PROF) {
-            Profiler::stop($benchmark);
-
+            \mii\util\Profiler::stop($benchmark);
         }
-
 
         return $response;
     }
