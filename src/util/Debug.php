@@ -249,13 +249,12 @@ class Debug {
     {
         if (strpos($file, MII_PATH) === 0)
         {
-            $file = 'MII_PATH'.DIRECTORY_SEPARATOR.substr($file, strlen(MII_PATH));
+            $file = '{mii}'.DIRECTORY_SEPARATOR.substr($file, strlen(MII_PATH));
         }
-        $app_path = config('base_path');
 
-        if (strpos($file, $app_path) === 0)
+        if (strpos($file, APP_PATH) === 0)
         {
-            $file = '{app}'.substr($file, strlen($app_path));
+            $file = '{app}'.substr($file, strlen(APP_PATH));
         }
 
         return $file;
