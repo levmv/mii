@@ -81,10 +81,10 @@ class User extends ORM{
             if(!empty($list)) {
                 $this->roles_cache = implode(':',$list);
                 (new Query)
-                    ->table($this->get_table())
+                    ->update($this->get_table())
                     ->set(['roles_cache' => $this->roles_cache])
                     ->where('id', '=', $this->id)
-                    ->update();
+                    ->execute();
             }
         }
 
