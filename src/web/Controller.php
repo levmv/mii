@@ -56,12 +56,15 @@ class Controller extends \mii\core\Controller
      */
     public $content = '';
 
+    public $layout_render = true;
 
     public $breadcrumbs = '';
 
     public $_main_menu = '';
 
     public $user;
+
+
 
 
     /**
@@ -99,15 +102,7 @@ class Controller extends \mii\core\Controller
 
     protected function after($content = null) {
 
-        if($this->request->is_ajax() OR $this->response->format == Response::FORMAT_JSON) {
-
-            //$this->response->format = Response::FORMAT_JSON;
-
-            $content = empty($this->content) ? $content : $this->content;
-
-            $this->response->content($content);
-
-        } else {
+        if($this->layout_render AND $this->response->format != Response::FORMAT_JSON AND !$this->request->is_ajax()) {
 
             $this->setup_index();
 
@@ -116,16 +111,12 @@ class Controller extends \mii\core\Controller
             }
             $this->index_block->set('layout', $this->layout->render(true));
 
-/*
-            if ($this->head)
-                $this->index->set('head', $this->head->render(true));
-            else
-                $this->index->set('head', '');*/
-
             $this->response->content($this->index_block->render(true));
 
+        } else {
+            $content = empty($this->content) ? $content : $this->content;
+            $this->response->content($content);
         }
-
 
         return $this->response;
     }
@@ -158,7 +149,7 @@ class Controller extends \mii\core\Controller
 
         $this->access_rules();
 
-        \Mii::$app->user = Mii::$app->auth()->get_user();
+        \Mii::$app->user = \Mii::$app->auth()->get_user();
         $this->user = \Mii::$app->user;
 
         $roles = \Mii::$app->user ? \Mii::$app->user->get_roles() : '*';
@@ -167,9 +158,24 @@ class Controller extends \mii\core\Controller
             throw new HttpException(404, 'Page :page does not exist', [':page' => $this->request->uri()]);
         }
 
+        if (MII_PROF) {
+            $benchmark = \mii\util\Profiler::start('Controller', 'Before');
+        }
+
         $this->before();
 
+        if (MII_PROF) {
+             \mii\util\Profiler::stop($benchmark);
+        }
+
+        if (MII_PROF) {
+            $benchmark = \mii\util\Profiler::start('Controller', $this->request->action());
+        }
         $content = call_user_func_array([$this, $this->request->action()], $args);
+
+        if (MII_PROF) {
+            \mii\util\Profiler::stop($benchmark);
+        }
 
         return $this->after($content);
     }
