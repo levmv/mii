@@ -178,6 +178,7 @@ class Request extends \mii\core\Request
             // Store the controller
             $this->_controller = $params['controller'];
 
+
             // Store the action
             $this->_action = (isset($params['action']))
                 ? $params['action']
@@ -220,7 +221,7 @@ class Request extends \mii\core\Request
                 );
             }
             if (extension_loaded('newrelic')) {
-                newrelic_name_transaction($controller . '/' . $this->_action);
+                newrelic_name_transaction($controller . '::' . $this->_action);
 
             }
             // Load the controller using reflection
