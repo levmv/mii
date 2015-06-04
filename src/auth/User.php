@@ -33,14 +33,19 @@ class User extends ORM{
 
     }
 
-    public function has_role($role_name)
+    public function has_role($role_names)
     {
         $roles = $this->get_roles();
 
+        if(! is_array($role_names)) {
+            $role_names = (array) $role_names;
+        }
 
-        foreach ($roles as $role) {
-            if ($role === $role_name)
-                return true;
+        foreach($role_names as $role_name) {
+            foreach ($roles as $role) {
+                if ($role === $role_name)
+                    return true;
+            }
         }
 
         return false;
