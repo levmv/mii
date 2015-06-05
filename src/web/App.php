@@ -16,8 +16,8 @@ class App extends \mii\core\App
 
     public function run()
     {
-        $loggers = $this->config('log');
-        if($loggers) {
+
+        if($loggers = $this->config('log')) {
 
             foreach($loggers as $class_name => $log_params) {
                 Mii::add_logger(new $class_name($log_params));
@@ -36,7 +36,6 @@ class App extends \mii\core\App
 
         if (isset($cookie_config['domain']))
             Cookie::$salt = $cookie_config['domain'];*/
-
 
         $this->blocks(new Blocks($this->config('blocks')));
 
@@ -64,7 +63,6 @@ class App extends \mii\core\App
         {
             $config = $this->config('auth');
 
-            // Create a new session instance
             $this->_auth = new \mii\auth\Auth($config);
         }
 

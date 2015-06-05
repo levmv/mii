@@ -2,7 +2,6 @@
 
 namespace mii\auth;
 
-use mii\db\Database;
 use mii\db\DB;
 use mii\db\ORM;
 use mii\db\Query;

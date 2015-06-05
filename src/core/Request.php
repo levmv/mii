@@ -20,7 +20,6 @@ abstract class Request {
      */
     public $_params = array();
 
-
     /**
      * @var  string  controller to be executed
      */

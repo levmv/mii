@@ -34,7 +34,6 @@ class Request extends \mii\core\Request
      */
     protected $_referrer;
 
-
     /**
      * @var  string the body
      */
@@ -198,21 +197,15 @@ class Request extends \mii\core\Request
 
 
         if (MII_PROF) {
-            // Set the benchmark name
-            $benchmark = '"' . $this->uri() . '"';
-
-
-            // Start benchmarking
-            $benchmark = \mii\util\Profiler::start('Requests', $benchmark);
+            $benchmark = \mii\util\Profiler::start('Requests', $this->uri());
         }
-
-
-        // Controller
 
         $controller = $this->controller();
 
-
         try {
+            if (extension_loaded('newrelic')) {
+                newrelic_name_transaction($controller . '::' . $this->_action);
+            }
 
             if (!class_exists($controller)) {
 
@@ -220,19 +213,10 @@ class Request extends \mii\core\Request
                     [':uri' => $this->uri()]
                 );
             }
-            if (extension_loaded('newrelic')) {
-                newrelic_name_transaction($controller . '::' . $this->_action);
 
-            }
             // Load the controller using reflection
             $class = new \ReflectionClass($controller);
 
-            if ($class->isAbstract()) {
-                throw new Exception(
-                    'Cannot create instances of abstract :controller',
-                    [':controller' => $controller]
-                );
-            }
             $response = new Response;
 
             // Create a new instance of the controller
@@ -240,7 +224,6 @@ class Request extends \mii\core\Request
 
             // Run the controller's execute() method
             $response = $class->getMethod('execute')->invoke($controller, $params);
-
 
             if (!$response instanceof Response) {
                 // Controller failed to return a Response.
@@ -252,7 +235,6 @@ class Request extends \mii\core\Request
 
         }
         catch (HttpException $e) {
-
             // Get the response via the Exception
             //$response = $e->get_response();
             throw $e;
@@ -260,7 +242,6 @@ class Request extends \mii\core\Request
             // Generate an appropriate Response object
             $response = Exception::handler($e);
         }
-
 
         if (MII_PROF) {
             \mii\util\Profiler::stop($benchmark);
@@ -279,11 +260,9 @@ class Request extends \mii\core\Request
     public function uri($uri = NULL)
     {
         if ($uri === NULL) {
-            // Act as a getter
             return empty($this->_uri) ? '/' : $this->_uri;
         }
 
-        // Act as a setter
         $this->_uri = $uri;
 
         return $this;

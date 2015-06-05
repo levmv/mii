@@ -19,6 +19,9 @@ class Controller extends \mii\core\Controller
     public $response;
 
 
+    public $action_params;
+
+
     /**
      * @var \mii\core\ACL Access Controll List object
      */
@@ -56,7 +59,7 @@ class Controller extends \mii\core\Controller
      */
     public $content = '';
 
-    public $layout_render = true;
+    public $render_layout = true;
 
     public $breadcrumbs = '';
 
@@ -102,7 +105,7 @@ class Controller extends \mii\core\Controller
 
     protected function after($content = null) {
 
-        if($this->layout_render AND $this->response->format != Response::FORMAT_JSON AND !$this->request->is_ajax()) {
+        if($this->render_layout AND $this->response->format != Response::FORMAT_JSON AND !$this->request->is_ajax()) {
 
             $this->setup_index();
 
@@ -134,7 +137,6 @@ class Controller extends \mii\core\Controller
 
     public function setup_layout($block_name = 'layout', $depends = [])
     {
-
         $this->layout = block($block_name)
             ->depends($depends)
             ->bind('content', $this->content);
@@ -149,33 +151,17 @@ class Controller extends \mii\core\Controller
 
         $this->access_rules();
 
-        \Mii::$app->user = \Mii::$app->auth()->get_user();
-        $this->user = \Mii::$app->user;
+        $this->user = Mii::$app->user = Mii::$app->auth()->get_user();
 
-        $roles = \Mii::$app->user ? \Mii::$app->user->get_roles() : '*';
+        $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
 
         if(! $this->acl->check($roles, $this->request->controller(), $this->request->action())) {
             throw new HttpException(404, 'Page :page does not exist', [':page' => $this->request->uri()]);
         }
 
-        if (MII_PROF) {
-            $benchmark = \mii\util\Profiler::start('Controller', 'Before');
-        }
-
         $this->before();
 
-        if (MII_PROF) {
-             \mii\util\Profiler::stop($benchmark);
-        }
-
-        if (MII_PROF) {
-            $benchmark = \mii\util\Profiler::start('Controller', $this->request->action());
-        }
         $content = call_user_func_array([$this, $this->request->action()], $args);
-
-        if (MII_PROF) {
-            \mii\util\Profiler::stop($benchmark);
-        }
 
         return $this->after($content);
     }
@@ -184,14 +170,14 @@ class Controller extends \mii\core\Controller
     {
         $args = [];
         $missing = [];
-        $actionParams = [];
+        $action_params = [];
         foreach ($method->getParameters() as $param) {
             $name = $param->getName();
             if (array_key_exists($name, $params)) {
                 if ($param->isArray()) {
-                    $args[] = $actionParams[$name] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
+                    $args[] = $action_params[$name] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
                 } elseif (!is_array($params[$name])) {
-                    $args[] = $actionParams[$name] = $params[$name];
+                    $args[] = $action_params[$name] = $params[$name];
                 } else {
                     throw new HttpException(500, 'Invalid data received for parameter ":param".', [
                         ':param' => $name,
@@ -199,7 +185,7 @@ class Controller extends \mii\core\Controller
                 }
                 unset($params[$name]);
             } elseif ($param->isDefaultValueAvailable()) {
-                $args[] = $actionParams[$name] = $param->getDefaultValue();
+                $args[] = $action_params[$name] = $param->getDefaultValue();
             } else {
                 $missing[] = $name;
             }
@@ -209,7 +195,7 @@ class Controller extends \mii\core\Controller
                 ':params' => implode(', ', $missing),
             ]);
         }
-        $this->actionParams = $actionParams;
+        $this->action_params = $action_params;
 
         return $args;
     }

@@ -2,7 +2,6 @@
 
 namespace mii\core;
 
-use Mii;
 
 /**
  * ErrorException represents a PHP error.
