@@ -80,17 +80,15 @@ class Session
      * @param   string $id session identifier
      * @return  Session
      */
-    public static function instance($type = NULL, $id = NULL)
+    public static function instance($id = NULL)
     {
         if (!isset(Session::$_instance)) {
-            $config = \Mii::$app->config('session');
 
+            $config = \Mii::$app->config('session');
 
             // Create a new session instance
             Session::$_instance = $session = new self($config, $id);
 
-            // Write the session at shutdown
-            register_shutdown_function([$session, 'close']);
         }
 
         return Session::$_instance;
@@ -163,6 +161,10 @@ class Session
 
         // Use the $_SESSION global for storing data
         $this->_data =& $_SESSION;
+
+
+        // Write the session at shutdown
+        register_shutdown_function([$this, 'close']);
 
         return;
     }
