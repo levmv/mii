@@ -39,6 +39,9 @@ class Database
      */
     protected $_identifier = '`';
 
+    // Identifiers are escaped by repeating them
+    protected $_escaped_identifier = '``';
+
     /**
      * @var string Instance name
      */
@@ -470,12 +473,10 @@ class Database
      */
     public function quote_column($column)
     {
-        // Identifiers are escaped by repeating them
-        $escaped_identifier = $this->_identifier . $this->_identifier;
 
         if (is_array($column)) {
             list($column, $alias) = $column;
-            $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
+            $alias = str_replace($this->_identifier, $this->_escaped_identifier, $alias);
         }
 
         if ($column instanceof Query) {
@@ -488,7 +489,7 @@ class Database
             // Convert to a string
             $column = (string)$column;
 
-            $column = str_replace($this->_identifier, $escaped_identifier, $column);
+            $column = str_replace($this->_identifier, $this->_escaped_identifier, $column);
 
             if ($column === '*') {
                 return $column;
