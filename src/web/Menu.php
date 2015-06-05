@@ -91,8 +91,8 @@ class Menu
             $menu[] = array( 'name'    => $item['name'],
                              'url'     => $item['url'],
                              'children'=> [],
-                             'active'  => ($active == Menu::ACTIVE_ITEM),
-                             'current' => ($active == Menu::CURRENT_ITEM));
+                             'active'  => ($active === Menu::ACTIVE_ITEM),
+                             'current' => ($active === Menu::CURRENT_ITEM));
 
         }
         return $menu;

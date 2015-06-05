@@ -137,8 +137,8 @@ class Blocks
         foreach ($groups as $group_name => $group) {
             foreach ($group as $type => $files) {
 
-                if (count($files)) {
-                    if ($type == 'assets') {
+                if ((bool)$files) {
+                    if ($type === 'assets') {
                         $this->_build_assets_dir($files);
 
                     } else {
@@ -213,7 +213,7 @@ class Blocks
     {
         $out = [];
 
-        if(!count($files))
+        if(! (bool) $files)
             return '';
 
         if ($this->merge) {

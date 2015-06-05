@@ -38,7 +38,7 @@ class Exception extends \mii\core\Exception {
                 $code    = $e->getCode();
                 $status = ($e instanceof HttpException) ? $code : 500;
 
-                if($status == 500) {
+                if($status === 500) {
                     for ($level = ob_get_level(); $level > 0; --$level) {
                         if (!@ob_end_clean()) {
                             ob_clean();

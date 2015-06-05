@@ -313,7 +313,7 @@ class ORM
      */
     public function update($validation = NULL)
     {
-        if (!count($this->_changed))
+        if (! (bool) $this->_changed)
             return 0;
 
         if ($this->on_update() === false)

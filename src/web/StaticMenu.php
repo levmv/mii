@@ -49,8 +49,8 @@ class StaticMenu extends Menu {
             $menu[] = array( 'name'    => $name,
                              'url'     => $url,
                              'children'=> array(),
-                             'active'  => ($active == Mii\Menu::ACTIVE_ITEM),
-                             'current' => ($active == Mii\Menu::CURRENT_ITEM));
+                             'active'  => ($active === Mii\Menu::ACTIVE_ITEM),
+                             'current' => ($active === Mii\Menu::CURRENT_ITEM));
 
         }
 

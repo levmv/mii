@@ -39,7 +39,7 @@ class Request extends \mii\core\Request {
                 $params[$name] = isset($matches[3]) ? $matches[3] : true;
 
             } else {
-                if($c == 0) {
+                if($c === 0) {
                     $this->action($param);
                 } else {
                     $params[] = $param;

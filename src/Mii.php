@@ -57,9 +57,7 @@ class Mii {
                 require $path . DIRECTORY_SEPARATOR . $part;
                 return;
             }
-
         }
-
     }
 
 

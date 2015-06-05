@@ -48,7 +48,7 @@ class Panel {
     public function render() {
         if($this->panel_block AND !$this->hide) {
 
-            if(count($this->blocks) OR (\Mii::$app->user AND \Mii::$app->user->has_role('admin')))
+            if( (bool) $this->blocks OR (\Mii::$app->user AND \Mii::$app->user->has_role('admin')))
                 return $this->panel_block->render(true);
         }
 
