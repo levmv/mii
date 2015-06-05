@@ -2,12 +2,10 @@
 
 namespace mii\cache;
 
-use Mii;
 use mii\util\Arr;
 
 abstract class Cache {
 
-    const DEFAULT_EXPIRE = 3600;
 
     /**
      * @var   string     default driver to use
@@ -56,7 +54,7 @@ abstract class Cache {
         if ( ! isset($config[$group]))
         {
             throw new CacheException(
-                'Failed to load Kohana Cache group: :group',
+                'Failed to load Cache config for :group',
                 [':group' => $group]
             );
         }
@@ -74,9 +72,10 @@ abstract class Cache {
     /**
      * @var  Config
      */
-    protected $_config = [];
 
-    protected $_prefix = '';
+    protected $default_expire = 3600;
+
+    protected $prefix = '';
 
     /**
      * Ensures singleton pattern is observed, loads the default expiry
@@ -85,51 +84,9 @@ abstract class Cache {
      */
     protected function __construct(array $config)
     {
-        $this->config($config);
-    }
-
-    /**
-     * Getter and setter for the configuration. If no argument provided, the
-     * current configuration is returned. Otherwise the configuration is set
-     * to this class.
-     *
-     *     // Overwrite all configuration
-     *     $cache->config(array('driver' => 'memcache', '...'));
-     *
-     *     // Set a new configuration setting
-     *     $cache->config('servers', array(
-     *          'foo' => 'bar',
-     *          '...'
-     *          ));
-     *
-     *     // Get a configuration setting
-     *     $servers = $cache->config('servers);
-     *
-     * @param   mixed    key to set to array, either array or config path
-     * @param   mixed    value to associate with key
-     * @return  mixed
-     */
-    public function config($key = NULL, $value = NULL)
-    {
-        if ($key === NULL)
-            return $this->_config;
-
-        if (is_array($key))
-        {
-            $this->_config = $key;
+        foreach ($config as $name => $value) {
+            $this->$name = $value;
         }
-        else
-        {
-            if ($value === NULL)
-                return Arr::get($this->_config, $key);
-
-            $this->_config[$key] = $value;
-        }
-
-        if(isset($this->_config['prefix']))
-            $this->_prefix = $this->_config['prefix'];
-
-        return $this;
     }
 
     /**
@@ -230,7 +187,6 @@ abstract class Cache {
     protected function _sanitize_id($id)
     {
         // Change slashes and spaces to underscores
-        return $this->_prefix.str_replace(['/', '\\', ' '], '_', $id);
+        return $this->prefix.str_replace(['/', '\\', ' '], '_', $id);
     }
 }
-// End Kohana_Cache

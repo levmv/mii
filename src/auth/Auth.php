@@ -13,45 +13,38 @@ use mii\web\Session;
  * password hashing.
  *
  */
-class Auth {
-
-    // Auth instances
-    protected static $_instance;
-
-    /**
-     * Singleton pattern
-     *
-     * @return Auth
-     */
-    public static function instance()
-    {
-        if ( ! isset(Auth::$_instance))
-        {
-            // Load the configuration for this type
-            $config = Mii::$app->config('auth');
-
-            static::$_instance = new Auth($config);
-        }
-        return static::$_instance;
-    }
-
+class Auth
+{
     protected $_session;
 
-    protected $_config;
-
     protected $_user;
+
+    protected $user_model = 'app\models\User';
+
+    protected $hash_method = 'bcrypt';
+
+    protected $hash_cost = 8;
+
+    protected $lifetime = 2592000;
+
+    protected $session_key = 'miiu';
+
+    protected $token_cookie = 'miia';
+
+    protected $hash_key;
 
 
     /**
      * Loads Session and configuration options.
      *
-     * @param   array  $config  Config Options
+     * @param   array $config Config Options
      * @return  void
      */
     public function __construct($config = [])
     {
-        // Save the config in the object
-        $this->_config = $config;
+        foreach ($config as $name => $value) {
+            $this->$name = $value;
+        }
 
         $this->_session = Session::instance();
     }
@@ -65,15 +58,14 @@ class Auth {
      */
     public function get_user($default = NULL)
     {
-        if($this->_user)
+        if ($this->_user)
             return $this->_user;
 
-        if($this->_session->check_cookie()) {
-            $this->_user = $this->_session->get($this->_config['session_key'], $default);
+        if ($this->_session->check_cookie()) {
+            $this->_user = $this->_session->get($this->session_key, $default);
         }
 
-        if ( ! $this->_user AND Cookie::get($this->_config['token_cookie'], false))
-        {
+        if (!$this->_user AND Cookie::get($this->token_cookie, false)) {
             // check for "remembered" login
             $this->auto_login();
         }
@@ -81,16 +73,17 @@ class Auth {
         return ($this->_user AND $this->_user->loaded()) ? $this->_user : $default;
     }
 
-    public function get_user_model() {
-        return new $this->_config['user_model'];
+    public function get_user_model()
+    {
+        return new $this->user_model;
     }
 
     /**
      * Attempt to log in a user by using an ORM object and plain-text password.
      *
-     * @param   string   $username  Username to log in
-     * @param   string   $password  Password to check against
-     * @param   boolean  $remember  Enable autologin
+     * @param   string $username Username to log in
+     * @param   string $password Password to check against
+     * @param   boolean $remember Enable autologin
      * @return  boolean
      */
     public function login($username, $password, $remember = true)
@@ -98,19 +91,17 @@ class Auth {
         if (empty($password))
             return false;
 
-        $user = (new $this->_config['user_model'])->find_user($username);
+        $user = (new $this->user_model)->find_user($username);
 
-        if(!$user)
+        if (!$user)
             return false;
 
-        if ($user->id AND $user->has_role('login') AND $this->verify_password($password, $user->password))
-        {
-            if ($remember === true)
-            {
+        if ($user->id AND $user->has_role('login') AND $this->verify_password($password, $user->password)) {
+            if ($remember === true) {
                 // Token data
                 $data = [
                     'user_id'    => $user->id,
-                    'expires'    => time() + $this->_config['lifetime'],
+                    'expires'    => time() + $this->lifetime,
                     'user_agent' => sha1(Mii::$app->request->get_user_agent()),
                 ];
 
@@ -118,7 +109,7 @@ class Auth {
                 $token = (new Token)->create_token($data);
 
                 // Set the autologin cookie
-                Cookie::set($this->_config['token_cookie'], $token->token, $this->_config['lifetime']);
+                Cookie::set($this->token_cookie, $token->token, $this->lifetime);
             }
 
             // Finish the login
@@ -136,43 +127,36 @@ class Auth {
     /**
      * Log a user out and remove any autologin cookies.
      *
-     * @param   boolean  $destroy completely destroy the session
-     * @param	boolean  $logout_all remove all tokens for user
+     * @param   boolean $destroy completely destroy the session
+     * @param    boolean $logout_all remove all tokens for user
      * @return  boolean
      */
-    public function logout($destroy = FALSE, $logout_all = FALSE)
+    public function logout($destroy = false, $logout_all = false)
     {
         // Set by force_login()
         $this->_session->delete('auth_forced');
 
 
-        if ($token = Cookie::get($this->_config['token_cookie']))
-        {
+        if ($token = Cookie::get($this->token_cookie)) {
             // Delete the autologin cookie to prevent re-login
-            Cookie::delete($this->_config['token_cookie']);
+            Cookie::delete($this->token_cookie);
 
             // Clear the autologin token from the database
             $token = (new Token)->get_token($token);
 
-            if ($token AND $token->loaded() AND $logout_all)
-            {
+            if ($token AND $token->loaded() AND $logout_all) {
                 (new Query)->delete($token->get_table())->where('user_id', '=', $token->user_id)->execute();
-            }
-            elseif ($token AND $token->loaded())
-            {
+            } elseif ($token AND $token->loaded()) {
                 $token->delete();
             }
         }
 
-        if ($destroy === TRUE)
-        {
+        if ($destroy === true) {
             // Destroy the session completely
             $this->_session->destroy();
-        }
-        else
-        {
+        } else {
             // Remove the user from the session
-            $this->_session->delete($this->_config['session_key']);
+            $this->_session->delete($this->session_key);
 
             // Regenerate session_id
             $this->_session->regenerate();
@@ -181,7 +165,7 @@ class Auth {
         $this->_user = null;
 
         // Double check
-        return ! $this->logged_in();
+        return !$this->logged_in();
     }
 
 
@@ -189,7 +173,7 @@ class Auth {
      * Check if there is an active session. Optionally allows checking for a
      * specific role.
      *
-     * @param   string  $role  role name
+     * @param   string $role role name
      * @return  boolean
      */
     public function logged_in($role = NULL)
@@ -210,7 +194,7 @@ class Auth {
      * method is deprecated, [Auth::hash] should be used instead.
      *
      * @deprecated
-     * @param  string  $password Plaintext password
+     * @param  string $password Plaintext password
      */
     public function hash_password($password)
     {
@@ -222,36 +206,36 @@ class Auth {
      *
      * Uses hash_hmac for legacy projects
      *
-     * @param   string  $str  password to hash
+     * @param   string $str password to hash
      * @return  string
      */
     public function hash($password)
     {
-        if(!isset($this->_config['hash_method']) OR $this->_config['hash_method'] == 'bcrypt') {
+        if ($this->hash_method === 'bcrypt') {
 
-            $cost = isset($this->_config['hash_cost']) ? $this->_config['hash_cost'] : 9;
-
-            $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => $cost]);
+            $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->hash_cost]);
 
         } else {
-            if ( ! $this->_config['hash_key'])
+            if ($this->hash_key === null)
                 throw new Exception('A valid hash key must be set in your auth config.');
 
-            $hash = hash_hmac($this->_config['hash_method'], $password, $this->_config['hash_key']);
+            $hash = hash_hmac($this->hash_method, $password, $this->hash_key);
         }
 
         return $hash;
     }
 
 
-    public function verify_password($password, $hash) {
-        if(!isset($this->_config['hash_method']) OR $this->_config['hash_method'] == 'bcrypt') {
+    public function verify_password($password, $hash)
+    {
+        if ($this->hash_method === 'bcrypt') {
+
             return password_verify($password, $hash);
+
         } else {
 
             return $this->hash($password) === $hash;
         }
-
     }
 
 
@@ -261,7 +245,7 @@ class Auth {
         $this->_session->regenerate();
 
         // Store user in session
-        $this->_session->set($this->_config['session_key'], $user);
+        $this->_session->set($this->session_key, $user);
 
         $this->_user = $user;
 
@@ -269,7 +253,6 @@ class Auth {
 
         return true;
     }
-
 
 
     /**
@@ -280,8 +263,7 @@ class Auth {
      */
     public function password($user)
     {
-        if ( ! is_object($user))
-        {
+        if (!is_object($user)) {
             $username = $user;
 
             // Load the user
@@ -295,15 +277,15 @@ class Auth {
     /**
      * Compare password with original (hashed). Works for current (logged in) user
      *
-     * @param   string  $password
+     * @param   string $password
      * @return  boolean
      */
     public function check_password($password)
     {
         $user = $this->get_user();
 
-        if ( ! $user)
-            return FALSE;
+        if (!$user)
+            return false;
 
         return ($this->hash($password) === $user->password);
     }
@@ -312,24 +294,22 @@ class Auth {
     /**
      * Forces a user to be logged in, without specifying a password.
      *
-     * @param   mixed    $user username string, or user Jelly object
-     * @param   boolean  $mark_session_as_forced mark the session as forced
+     * @param   mixed $user username string, or user Jelly object
+     * @param   boolean $mark_session_as_forced mark the session as forced
      * @return  boolean
      */
-    public function force_login($user, $mark_session_as_forced = FALSE)
+    public function force_login($user, $mark_session_as_forced = false)
     {
-        if ( ! is_object($user))
-        {
+        if (!is_object($user)) {
             $user = ORM::factory('User')->find($user);
 
-            if(!$user)
+            if (!$user)
                 return false;
         }
 
-        if ($mark_session_as_forced === TRUE)
-        {
+        if ($mark_session_as_forced === true) {
             // Mark the session as forced, to prevent users from changing account information
-            $this->_session->set('auth_forced', TRUE);
+            $this->_session->set('auth_forced', true);
         }
 
         // Run the standard completion
@@ -343,26 +323,23 @@ class Auth {
      */
     public function auto_login()
     {
-        if ($token = Cookie::get($this->_config['token_cookie']))
-        {
+        if ($token = Cookie::get($this->token_cookie)) {
             // Load the token and user
             $token = Token::find()->where('token', '=', $token)->one();
 
-            if ($token)
-            {
-                if ($token->user_agent === sha1(Mii::$app->request->get_user_agent()))
-                {
+            if ($token) {
+                if ($token->user_agent === sha1(Mii::$app->request->get_user_agent())) {
                     $new_token = (new Token)->create_token([
                         'user_id'    => $token->user_id,
                         'user_agent' => $token->user_agent,
-                        'expires'    => time() + $this->_config['lifetime']
+                        'expires'    => time() + $this->lifetime
                     ]);
                     // Set the new token
-                    Cookie::set($this->_config['token_cookie'], $new_token->token, $new_token->expires - time());
+                    Cookie::set($this->token_cookie, $new_token->token, $new_token->expires - time());
 
                     // Complete the login with the found data
 
-                    $user = call_user_func([$this->_config['user_model'], 'find'], $new_token->user_id);
+                    $user = call_user_func([$this->user_model, 'find'], $new_token->user_id);
 
                     $this->complete_login($user);
 
@@ -377,7 +354,7 @@ class Auth {
             } else {
 
                 // Token is invalid
-                Cookie::delete($this->_config['token_cookie']);
+                Cookie::delete($this->token_cookie);
             }
         }
 

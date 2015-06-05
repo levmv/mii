@@ -61,7 +61,7 @@ class Apc extends Cache
     public function set($id, $data, $lifetime = NULL)
     {
         if ($lifetime === NULL) {
-            $lifetime = isset($this->_config['default_expire']) ? $this->_config['default_expire'] : Cache::DEFAULT_EXPIRE;
+            $lifetime = $this->default_expire;
         }
 
         return apc_store($this->_sanitize_id($id), $data, $lifetime);
