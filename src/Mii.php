@@ -117,6 +117,10 @@ function redirect($url) {
     throw new \mii\web\RedirectHttpException($url);
 }
 
+/**
+ * @param $name
+ * @return \mii\web\Block
+ */
 function block($name) {
     return Mii::$app->blocks()->get($name);
 }
@@ -140,3 +144,5 @@ function config($group = false, $value = false) {
         return Mii::$app->_config;
     }
 }
+
+

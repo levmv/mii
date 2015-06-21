@@ -410,7 +410,7 @@ class Route {
      * [!!] Default parameters are added before filters are called!
      *
      * @throws  ErrorException
-     * @param   array   $callback   callback string, array, or closure
+     * @param   $callback   callback string, array, or closure
      * @return  $this
      */
     public function filter($callback)

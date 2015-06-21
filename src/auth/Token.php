@@ -92,4 +92,4 @@ class Token extends ORM
         return static::find()->where('token', '=', $token)->one();
     }
 
-} // End Auth User Token Model
+}

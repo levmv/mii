@@ -118,6 +118,10 @@ class Controller extends \mii\core\Controller
 
         } else {
             $content = empty($this->content) ? $content : $this->content;
+
+            if(is_array($content) AND $this->request->is_ajax()) {
+                $this->response->format = Response::FORMAT_JSON;
+            }
             $this->response->content($content);
         }
 
@@ -137,9 +141,9 @@ class Controller extends \mii\core\Controller
 
     public function setup_layout($block_name = 'layout', $depends = [])
     {
-        $this->layout = block($block_name)
-            ->depends($depends)
-            ->bind('content', $this->content);
+        $this->layout = block($block_name);
+        $this->layout->depends($depends);
+        $this->layout->bind('content', $this->content);
     }
 
 

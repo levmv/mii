@@ -108,10 +108,10 @@ class Debug {
             // isn't too much of a hit.
             $var = UTF8::clean($var);
 
-            if (UTF8::strlen($var) > $length)
+            if (mb_strlen($var) > $length)
             {
                 // Encode the truncated string
-                $str = htmlspecialchars(UTF8::substr($var, 0, $length), ENT_NOQUOTES, 'utf-8').'&nbsp;&hellip;';
+                $str = htmlspecialchars(mb_substr($var, 0, $length), ENT_NOQUOTES, 'utf-8').'&nbsp;&hellip;';
             }
             else
             {
