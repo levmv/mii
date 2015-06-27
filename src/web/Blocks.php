@@ -233,7 +233,9 @@ class Blocks
                 }
                 $tmp = $this->_process($tmp, $type);
 
+
                 file_put_contents(PUB_PATH . $output, $tmp);
+                file_put_contents(PUB_PATH . $output.'.gz', gzcompress($tmp, 9, ZLIB_ENCODING_GZIP));
             }
 
             return $this->_gen_html($output . '?' . filemtime(PUB_PATH . $output), $type);
