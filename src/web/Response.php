@@ -240,6 +240,10 @@ class Response {
                 $this->set_header('content-type','application/json; charset=UTF-8');
                 $this->_content = json_encode($this->_content);
                 break;
+            case self::FORMAT_XML:
+                $this->set_header('content-type','application/xml; charset=UTF-8');
+                break;
+
 
         }
 
