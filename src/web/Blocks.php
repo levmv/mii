@@ -233,9 +233,10 @@ class Blocks
                 }
                 $tmp = $this->_process($tmp, $type);
 
+                $gz_output = gzcompress($tmp, 9, ZLIB_ENCODING_GZIP);
 
                 file_put_contents(PUB_PATH . $output, $tmp);
-                file_put_contents(PUB_PATH . $output.'.gz', gzcompress($tmp, 9, ZLIB_ENCODING_GZIP));
+                file_put_contents(PUB_PATH . $output.'.gz', $gz_output);
             }
 
             return $this->_gen_html($output . '?' . filemtime(PUB_PATH . $output), $type);
@@ -271,7 +272,7 @@ class Blocks
             case 'css':
                 return '<link type="text/css" href="' . $link . '" rel="stylesheet" />';
             case 'js':
-                return '<script src="'.$link.'"></script>';
+                return '<script defer src="'.$link.'"></script>';
         }
         return '';
     }
