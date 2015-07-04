@@ -9,7 +9,7 @@ class ORM
     /**
      * @var string database table name
      */
-    protected $_table;
+    protected static $table;
 
     /**
      * @var mixed
@@ -128,7 +128,7 @@ class ORM
      */
     public function get_table()
     {
-        return $this->_table;
+        return static::$table;
     }
 
     public static function all()
