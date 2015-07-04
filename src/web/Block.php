@@ -164,11 +164,8 @@ class Block
     }
 
 
-    public function depends(array $depends = null)
+    public function depends(array $depends)
     {
-        if(!$depends)
-            return $this->_depends;
-
         $this->_depends = array_unique(array_merge($this->_depends, $depends));
 
         foreach ($this->_depends as $depend) {
@@ -176,6 +173,10 @@ class Block
         }
 
         return $this;
+    }
+
+    public function get_depends() {
+        return $this->_depends;
     }
 
 

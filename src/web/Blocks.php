@@ -45,7 +45,6 @@ class Blocks
     }
 
 
-
     /**
      * Create a new block, or get an existing block
      * @static
@@ -134,12 +133,16 @@ class Blocks
 
         $out = ['css' => '', 'js' => ''];
 
+
         foreach ($groups as $group_name => $group) {
             foreach ($group as $type => $files) {
 
                 if ((bool)$files) {
                     if ($type === 'assets') {
-                        $this->_build_assets_dir($files);
+
+                        foreach($files as $key => $value) {
+                            $this->_build_assets_dir($key, $value);
+                        }
 
                     } else {
                         $out[$type] .= $this->_build_group($group_name, $type, $files);
@@ -168,7 +171,7 @@ class Blocks
         if (isset($this->_used_blocks[$block_name]))
             return false;
 
-        $depends = $this->_blocks[$block_name]->depends();
+        $depends = $this->_blocks[$block_name]->get_depends();
 
         $actual_depends = [];
         if (count($depends)) {
@@ -204,8 +207,10 @@ class Blocks
         if (empty($actual_depends) AND $empty_block)
             return false;
 
-        // ok, crc32 is much better, but dumb strlen is much faster
-        return $block_name . count($actual_depends) . mb_strlen(implode('', $actual_depends));
+        if(count($actual_depends))
+            $block_name .= crc32(implode('', $actual_depends));
+
+        return $block_name;
     }
 
 
@@ -272,7 +277,7 @@ class Blocks
             case 'css':
                 return '<link type="text/css" href="' . $link . '" rel="stylesheet" />';
             case 'js':
-                return '<script defer src="'.$link.'"></script>';
+                return '<script src="'.$link.'"></script>';
         }
         return '';
     }
@@ -331,13 +336,10 @@ class Blocks
     }
 
 
-    private function _build_assets_dir($media)
+    private function _build_assets_dir($blockname, $path)
     {
-        $blockname = key($media);
-        $path = current($media);
 
         $output = $this->assets_dir.'/'. $blockname ;
-
 
         if($this->use_symlink) {
             if(!is_link($output)) {
