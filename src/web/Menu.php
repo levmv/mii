@@ -88,9 +88,14 @@ class Menu
 
             $active = $this->active($item['url']);
 
+            $children = isset($item['children'])
+                ? $children = (new Menu($item['children']))->as_array()
+                : [];
+
+
             $menu[] = array( 'name'    => $item['name'],
                              'url'     => $item['url'],
-                             'children'=> [],
+                             'children'=> $children,
                              'active'  => ($active === Menu::ACTIVE_ITEM),
                              'current' => ($active === Menu::CURRENT_ITEM));
 
