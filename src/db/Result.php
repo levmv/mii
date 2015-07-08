@@ -27,6 +27,8 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     protected $_internal_row = 0;
 
+    protected $_index_by;
+
     /**
      * Sets the total number of rows and stores the result locally.
      *
@@ -109,10 +111,46 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     public function all()
     {
         if ($this->_as_object) {
-            return $this;
+            return $this->populate($this);
         } else {
-            return $this->_result->fetch_all(MYSQLI_ASSOC);
+            return $this->populate($this->_result->fetch_all(MYSQLI_ASSOC));
         }
+    }
+
+
+    public function populate($rows)
+    {
+
+        if ($this->_index_by === null) {
+            return $rows;
+        }
+        $result = [];
+
+        if (!is_string($this->_index_by)) {
+
+            foreach ($rows as $row) {
+                $result[call_user_func($this->_index_by, $row)] = $row;
+            }
+
+            return $result;
+
+        }
+
+        if($this->_as_object) {
+            foreach ($rows as $row) {
+                $key = $row->{$this->_index_by};
+                $result[$key] = $row;
+            }
+
+            return $result;
+        }
+
+        foreach ($rows as $row) {
+
+            $result[$row[$this->_index_by]] = $row;
+        }
+
+        return $result;
     }
 
 
@@ -183,6 +221,10 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         $this->rewind();
 
         return $results;
+    }
+
+    public function index_by($column) {
+        $this->_index_by = $column;
     }
 
     /**

@@ -78,6 +78,8 @@ class Query
     // LIMIT ...
     protected $_limit;
 
+    protected $_index_by;
+
 
     /**
      * Creates a new SQL query of the specified type.
@@ -1270,7 +1272,12 @@ class Query
         }
 
         // Execute the query
-        return $db->query($this->_type, $sql, $as_object, $object_params);
+        $result =  $db->query($this->_type, $sql, $as_object, $object_params);
+
+        if($this->_index_by)
+            $result->index_by($this->_index_by);
+
+        return $result;
     }
 
 
@@ -1326,6 +1333,12 @@ class Query
         if ($table !== NULL) {
             $this->table($table);
         }
+
+        return $this;
+    }
+
+    public function index_by($column) {
+        $this->_index_by = $column;
 
         return $this;
     }
