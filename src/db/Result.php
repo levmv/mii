@@ -157,68 +157,14 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     /**
      * Return all of the rows in the result as an array.
      *
-     *     // Indexed array of all rows
-     *     $rows = $result->as_array();
-     *
-     *     // Associative array of rows by "id"
-     *     $rows = $result->as_array('id');
-     *
-     *     // Associative array of rows, "id" => "name"
-     *     $rows = $result->as_array('id', 'name');
-     *
-     * @param   string $key column for associative keys
-     * @param   string $value column for values
-     * @return  array
      */
-    public function as_array($key = NULL, $value = NULL)
+    public function to_array()
     {
         $results = [];
 
-        if ($key === NULL AND $value === NULL) {
-            // Indexed rows
-
-            foreach ($this as $row) {
-                $results[] = $row;
-            }
-        } elseif ($key === NULL) {
-            // Indexed columns
-
-            if ($this->_as_object) {
-                foreach ($this as $row) {
-                    $results[] = $row->$value;
-                }
-            } else {
-                foreach ($this as $row) {
-                    $results[] = $row[$value];
-                }
-            }
-        } elseif ($value === NULL) {
-            // Associative rows
-
-            if ($this->_as_object) {
-                foreach ($this as $row) {
-                    $results[$row->$key] = $row;
-                }
-            } else {
-                foreach ($this as $row) {
-                    $results[$row[$key]] = $row;
-                }
-            }
-        } else {
-            // Associative columns
-
-            if ($this->_as_object) {
-                foreach ($this as $row) {
-                    $results[$row->$key] = $row->$value;
-                }
-            } else {
-                foreach ($this as $row) {
-                    $results[$row[$key]] = $row[$value];
-                }
-            }
+        foreach ($this as $row) {
+            $results[] = $row;
         }
-
-        $this->rewind();
 
         return $results;
     }
