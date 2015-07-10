@@ -101,8 +101,10 @@ class User extends ORM{
         if(!$all_roles) {
             $roles = Role::all();
 
-            foreach($roles as $item)
+            foreach($roles as $item) {
+
                 $all_roles[$item->name] = $item->title;
+            }
         }
 
 
@@ -110,8 +112,10 @@ class User extends ORM{
 
 
         $list = [];
-        foreach($roles as $role_name)
-            $list[] = $all_roles[$role_name];
+        foreach($roles as $role_name) {
+            if(isset($all_roles[$role_name]))
+                $list[] = $all_roles[$role_name];
+        }
 
         return $list;
     }

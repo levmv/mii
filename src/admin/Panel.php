@@ -6,9 +6,11 @@ use mii\web\Block;
 
 class Panel {
 
+    public $hide = false;
+
     protected $panel_block;
     protected $blocks = [];
-    protected $hide = false;
+
 
 
     /**

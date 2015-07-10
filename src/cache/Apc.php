@@ -14,6 +14,7 @@ class Apc extends Cache
      */
     protected function __construct(array $config)
     {
+
         if (!extension_loaded('apc')) {
             throw new CacheException('PHP APC extension is not available.');
         }

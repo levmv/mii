@@ -51,6 +51,7 @@ abstract class Cache {
 
         $config = config('cache');
 
+
         if ( ! isset($config[$group]))
         {
             throw new CacheException(

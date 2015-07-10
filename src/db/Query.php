@@ -869,8 +869,15 @@ class Query
         // Start an update query
         $query = 'UPDATE ' . $db->quote_table($this->_table);
 
+        if (!empty($this->_joins)) {
+            // Add tables to join
+            $query .= ' ' . $this->_compile_join($db, $this->_joins);
+        }
+
+
         // Add the columns to update
         $query .= ' SET ' . $this->_compile_set($db, $this->_set);
+
 
         if (!empty($this->_where)) {
             // Add selection conditions
