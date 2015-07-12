@@ -30,17 +30,16 @@ class Mii {
     */
     public static $_loggers;
 
+    public static $autoload_prefixes = [
+        "app\\" => APP_PATH,
+        "mii\\" => MII_PATH
+    ];
 
     public static function autoloader($class) {
 
-        // what prefixes should be recognized?
-        $prefixes = [
-            "app\\" => APP_PATH,
-            "mii\\" => MII_PATH
-        ];
 
         // go through the prefixes
-        foreach ($prefixes as $prefix => $path) {
+        foreach (static::$autoload_prefixes as $prefix => $path) {
 
             if (strpos($class, $prefix) !== 0) {
                 continue;
