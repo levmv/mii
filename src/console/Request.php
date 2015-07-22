@@ -20,12 +20,11 @@ class Request extends \mii\core\Request {
             $argv = [];
         }
 
-
         if (isset($argv[0])) {
-            $controller = $argv[0];
+            $controller = ucfirst($argv[0]);
             array_shift($argv);
         } else {
-            $controller = '';
+            $controller = 'Help';
         }
 
         $this->controller($controller);
