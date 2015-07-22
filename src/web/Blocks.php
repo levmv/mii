@@ -175,12 +175,16 @@ class Blocks
 
         $actual_depends = [];
         if (count($depends)) {
-            foreach ($depends as $depend) {
-                if (isset($this->_used_blocks[$depend]))
-                    continue;
-                $actual_depends[] = $depend;
-                $this->process_block_assets($depend, $files);
-                $this->_used_blocks[$depend] = true;
+            foreach ($this->libraries as $base_path) {
+                foreach ($depends as $depend) {
+                    if (!is_dir($base_path . '/' . $this->_block_paths[$depend]))
+                        continue;
+                    if (isset($this->_used_blocks[$depend]))
+                        continue;
+                    $actual_depends[] = $depend;
+                    $this->process_block_assets($depend, $files);
+                    $this->_used_blocks[$depend] = true;
+                }
             }
         }
         $path = '/'.$this->_block_paths[$block_name];
