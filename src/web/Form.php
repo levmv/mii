@@ -99,6 +99,9 @@ class Form {
         return $this->field('checkbox', $name, $attributes);
     }
 
+    public function hidden($name, $attributes = null) {
+        return $this->field('hidden', $name, $attributes);
+    }
 
     public function file($name, $attributes = null) {
         return $this->field('file', $name, $attributes);
@@ -122,6 +125,8 @@ class Form {
         switch($type) {
             case 'input':
                 return HTML::input($name, $this->fields[$name], $attributes);
+            case 'hidden':
+                return HTML::hidden($name, $this->fields[$name], $attributes);
             case 'textarea':
                 return HTML::textarea($name, $this->fields[$name], $attributes);
             case 'checkbox':
