@@ -444,7 +444,7 @@ class HTML {
     {
         $attributes['type'] = 'hidden';
 
-        return Form::input($name, $value, $attributes);
+        return HTML::input($name, $value, $attributes);
     }
 
     /**
