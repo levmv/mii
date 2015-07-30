@@ -160,7 +160,7 @@ class Controller extends \mii\core\Controller
         $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
 
         if(! $this->acl->check($roles, $this->request->controller(), $this->request->action())) {
-            throw new HttpException(404, 'Page :page does not exist', [':page' => $this->request->uri()]);
+            throw new HttpException(404, 'User has no rights to access :page', [':page' => $this->request->uri()]);
         }
 
         $this->before();
