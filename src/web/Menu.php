@@ -55,11 +55,9 @@ class Menu
         if($block_name) {
             $this->_block_name = $block_name;
         }
-
-        $this->process();
     }
 
-    public function process() {
+    public function on_render() {
 
     }
 
@@ -140,6 +138,9 @@ class Menu
 
     public function render($block_name = null)
     {
+        $this->on_render();
+
+
         if ($block_name) {
             $this->_block_name = $block_name;
         }
