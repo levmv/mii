@@ -8,6 +8,7 @@ class Menu
 {
 
     const CURRENT_ITEM = 1;
+    const ACTIVE_ITEM = 2;
 
     /**
      * @var array Array of list items
@@ -24,8 +25,9 @@ class Menu
 
     protected $_current_item;
 
-    // Current URI
-    protected $current_uri;
+    protected $_current_uri;
+
+    protected $_block_name;
 
     /**
      * Current element may be:
@@ -40,19 +42,22 @@ class Menu
 
     public function __construct($items = null, $block_name = null, $current = null)
     {
-        $this->current_uri = trim(URL::site(\Mii::$app->request->uri()), '/');
+        $this->_current_uri = trim(URL::site(\Mii::$app->request->uri()), '/');
 
         if ($items) {
             $this->items = $items;
         }
 
-        if ($block_name) {
-            $this->block_name = $block_name;
+        if($block_name) {
+            $this->_block_name = $block_name;
         }
+
+        $this->process();
     }
 
-    const ACTIVE_ITEM = 2;
+    public function process() {
 
+    }
 
     public function current_item($current = null)
     {
@@ -92,33 +97,48 @@ class Menu
                 ? $children = (new Menu($item['children']))->as_array()
                 : [];
 
-
             $menu[] = array( 'name'    => $item['name'],
                              'url'     => $item['url'],
                              'children'=> $children,
                              'active'  => ($active === Menu::ACTIVE_ITEM),
                              'current' => ($active === Menu::CURRENT_ITEM));
-
         }
         return $menu;
-
     }
 
 
     public function render($block_name = null)
     {
         if ($block_name) {
-            $this->block_name = $block_name;
+            $this->_block_name = $block_name;
         }
 
-        return block($this->block_name)->set('list', $this->as_array());
+        return block($this->_block_name)->set('list', $this->as_array())->render();
     }
 
 
-    public function get_start_id()
+    public function __toString()
     {
-        return 1;//return (Minimus::$lang == 'ru') ? 1 : 2;
+        try {
+            return $this->render();
+        } catch (\Exception $e) {
+
+            /**
+             * Display the exception message.
+             *
+             * We use this method here because it's impossible to throw and
+             * exception from __toString().
+             */
+
+            for ($level = ob_get_level(); $level > 0; --$level) {
+                if (!@ob_end_clean()) {
+                    ob_clean();
+                }
+            }
+            return Exception::handler($e)->body();
+        }
     }
+
 
 
     /**
@@ -131,11 +151,11 @@ class Menu
     {
         $link = trim(URL::site($url), '/');
         // Exact match (removes default 'index' action)
-        if ($this->current_uri === $link OR preg_replace('~/?index/?$~', '', $this->current_uri) === $link) {
+        if ($this->_current_uri === $link OR preg_replace('~/?index/?$~', '', $this->_current_uri) === $link) {
             return Menu::CURRENT_ITEM;
         } // Checks if it is part of the active path
         else {
-            $current_pieces = explode('/', $this->current_uri);
+            $current_pieces = explode('/', $this->_current_uri);
             array_shift($current_pieces);
             $link_pieces = explode('/', $link);
             array_shift($link_pieces);
@@ -145,9 +165,10 @@ class Menu
                     return 0;
                 }
             }
-
             return Menu::ACTIVE_ITEM;
         }
+
+        return 0;
     }
 
 
