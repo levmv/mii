@@ -23,11 +23,15 @@ class Menu
      */
     public $items = [];
 
+
+    protected $_data = [];
+
     protected $_current_item;
 
     protected $_current_uri;
 
     protected $_block_name;
+
 
     /**
      * Current element may be:
@@ -106,6 +110,33 @@ class Menu
         return $menu;
     }
 
+    public function get($key, $default = NULL)
+    {
+
+        if (array_key_exists($key, $this->_data)) {
+            return $this->_data[$key];
+        } else {
+            if ($default !== NULL)
+                return $default;
+
+            throw new Exception('Menu variable is not set: :var',
+                [':var' => $key]);
+        }
+    }
+
+    public function set($key, $value = NULL)
+    {
+        if (is_array($key)) {
+            foreach ($key as $name => $value) {
+                $this->_data[$name] = $value;
+            }
+        } else {
+            $this->_data[$key] = $value;
+        }
+
+        return $this;
+    }
+
 
     public function render($block_name = null)
     {
@@ -113,7 +144,9 @@ class Menu
             $this->_block_name = $block_name;
         }
 
-        return block($this->_block_name)->set('list', $this->as_array())->render();
+        return block($this->_block_name)
+                ->set('list', $this->as_array())
+                ->render();
     }
 
 
