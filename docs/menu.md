@@ -36,13 +36,14 @@ $list = $menu->as_array();
 ```php
 $menu = new Menu(
 [
+    [
          'name' => 'Пункт меню',
          'url' => '/menu_item_url'
-     ],
-     [
+    ],
+    [
          'name' => 'Пункт меню',
          'url' => '/menu_item_url2'
-     ]
+    ]
 ], 'layout_menu');
 
 echo $menu->render();
