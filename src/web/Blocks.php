@@ -130,6 +130,7 @@ class Blocks
             }
 
         }
+        print_r($groups);
 
         $out = ['css' => '', 'js' => ''];
 
@@ -138,14 +139,21 @@ class Blocks
             foreach ($group as $type => $files) {
 
                 if ((bool)$files) {
-                    if ($type === 'assets') {
+                    switch($type) {
+                        case 'assets':
+                            foreach($files as $key => $value) {
+                                $this->_build_assets_dir($key, $value);
+                            }
+                            break;
 
-                        foreach($files as $key => $value) {
-                            $this->_build_assets_dir($key, $value);
-                        }
+                        case 'remote':
+                            foreach($files as $type => $rem) {
+                                $out[$type] .= $this->_build_remote_group($group_name, $type, $rem);
+                            }
 
-                    } else {
-                        $out[$type] .= $this->_build_group($group_name, $type, $files);
+                            break;
+                        default:
+                            $out[$type] .= $this->_build_group($group_name, $type, $files);
                     }
                 }
             }
@@ -171,6 +179,24 @@ class Blocks
         if (isset($this->_used_blocks[$block_name]))
             return false;
 
+        $remote = $this->_blocks[$block_name]->get_remote_assets();
+
+        $empty_block = true;
+        if($remote) {
+            $files['remote'] = ['css' => [], 'js' => []];
+
+            if(is_array($remote[0])) {
+                foreach ($remote[0] as $remote_css => $v)
+                    $files['remote']['css'][$remote_css] = true;
+            }
+
+            if(is_array($remote[1])) {
+                foreach($remote[1] as $remote_js => $v)
+                    $files['remote']['js'][$remote_js] = true;
+            }
+            $empty_block = false;
+        }
+
         $depends = $this->_blocks[$block_name]->get_depends();
 
         $actual_depends = [];
@@ -189,7 +215,7 @@ class Blocks
         }
         $path = '/'.$this->_block_paths[$block_name];
         $types = ['css', 'js'];
-        $empty_block = true;
+
 
         foreach ($this->libraries as $base_path) {
 
@@ -220,16 +246,20 @@ class Blocks
 
     private function _build_group($group_name, $type, $files)
     {
-        $out = [];
-
         if(! (bool) $files)
             return '';
+
+        $out = [];
 
         if ($this->merge) {
             $output = $this->assets_pub_dir . '/' . $group_name . '.' . $type;
             $need_recompile = false;
             foreach ($files as $name => $file) {
-                if ($this->is_modified_later(PUB_PATH . $output, filemtime($file))) {
+
+                if($file === true) {
+
+
+                } elseif ($this->is_modified_later(PUB_PATH . $output, filemtime($file))) {
                     $need_recompile = true;
                     break;
                 }
@@ -252,6 +282,7 @@ class Blocks
 
         }
 
+
         foreach ($files as $name => $file) {
 
             $output = $this->assets_pub_dir . '/' . $name;
@@ -271,6 +302,14 @@ class Blocks
             $out[] = $this->_gen_html($output . '?' . $mtime, $type);
         }
 
+        return implode("\n", $out);
+    }
+
+    function _build_remote_group($group_name, $type, $files) {
+        $out = [];
+        foreach ($files as $name => $file) {
+            $out[] = $this->_gen_html($name, $type);
+        }
         return implode("\n", $out);
     }
 

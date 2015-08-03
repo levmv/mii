@@ -21,7 +21,10 @@ class Block
     // Array of local variables
     protected $_data = [];
 
-    protected $_assets = [];
+    // List of remote assets
+    protected $_remote_css = false;
+
+    protected $_remote_js = false;
 
     protected $_depends = [];
 
@@ -138,32 +141,6 @@ class Block
         }
     }
 
-    /**
-     * Sets the block name.
-     *
-     *     $block->name($block_name);
-     *
-     * @param   string $name block name
-     * @return  Block
-     */
-    public function name($name = NULL)
-    {
-        if ($name === NULL)
-            return $this->_name;
-
-        $this->_name = $name;
-
-        $this->_path = implode('/', explode('_', $name)) . '/';
-
-        if (strpos($name, 'i_') !== 0) {
-
-            $this->_file = Mii::$app->blocks()->find_block_file($this->_path . $name);
-        }
-
-        return $this;
-    }
-
-
     public function depends(array $depends)
     {
         $this->_depends = array_unique(array_merge($this->_depends, $depends));
@@ -175,8 +152,32 @@ class Block
         return $this;
     }
 
+
     public function get_depends() {
         return $this->_depends;
+    }
+
+    public function css($link) {
+        if(!$this->_remote_css)
+            $this->_remote_css = [];
+
+        $this->_remote_css[$link] = true;
+        return $this;
+    }
+
+    public function js($link) {
+        if(!$this->_remote_js)
+            $this->_remote_js = [];
+
+        $this->_remote_js[$link] = true;
+        return $this;
+    }
+
+    public function get_remote_assets() {
+        if(!$this->_remote_css AND !$this->_remote_js)
+            return false;
+
+        return [$this->_remote_css, $this->_remote_js];
     }
 
 
