@@ -152,45 +152,7 @@ class ORM
      */
     public static function select_list($key, $display, $first = NULL)
     {
-
-        $rows = [];
-
-
-        if ($first) {
-            if (is_array($first)) {
-                $rows = $first;
-            } else {
-                $rows[0] = $first;
-            }
-
-        }
-
-        $array_display = false;
-        $select_array = [$key];
-        if (is_array($display)) {
-            $array_display = true;
-            $select_array = array_merge($select_array, $display);
-        } else {
-            $select_array[] = $display;
-        }
-
-
-        $class = new static;
-        $result = $class->query(false)->get();
-
-
-        foreach ($result as $row) {
-            if ($array_display) {
-                $display_str = [];
-                foreach ($display as $text)
-                    $display_str[] = $row->$text;
-                $rows[$row->$key] = implode(' - ', $display_str);
-            } else {
-                $rows[$row->$key] = $row->$display;
-            }
-        }
-
-        return $rows;
+        return (new static)->query(false)->get()->to_list($key, $display, $first);
     }
 
     public function __get($key)

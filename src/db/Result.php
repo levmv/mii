@@ -154,6 +154,48 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
+    public function to_list($key, $display, $first = NULL) {
+        $rows = [];
+
+        if ($first) {
+            if (is_array($first)) {
+                $rows = $first;
+            } else {
+                $rows[0] = $first;
+            }
+
+        }
+
+        $array_display = false;
+        $select_array = [$key];
+        if (is_array($display)) {
+            $array_display = true;
+            $select_array = array_merge($select_array, $display);
+        } else {
+            $select_array[] = $display;
+        }
+
+        $as_object = $this->_as_object;
+        $this->_as_object = false;
+
+        $all = $this->all();
+
+        foreach ($all as $row) {
+            if ($array_display) {
+                $display_str = [];
+                foreach ($display as $text)
+                    $display_str[] = $row[$text];
+                $rows[$row[$key]] = implode(' - ', $display_str);
+            } else {
+                $rows[$row[$key]] = $row[$display];
+            }
+        }
+
+        $this->_as_object = $as_object;
+        return $rows;
+    }
+
+
     /**
      * Return all of the rows in the result as an array.
      *
