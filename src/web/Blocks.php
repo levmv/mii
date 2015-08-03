@@ -130,7 +130,6 @@ class Blocks
             }
 
         }
-        print_r($groups);
 
         $out = ['css' => '', 'js' => ''];
 
@@ -249,17 +248,11 @@ class Blocks
         if(! (bool) $files)
             return '';
 
-        $out = [];
-
         if ($this->merge) {
             $output = $this->assets_pub_dir . '/' . $group_name . '.' . $type;
             $need_recompile = false;
             foreach ($files as $name => $file) {
-
-                if($file === true) {
-
-
-                } elseif ($this->is_modified_later(PUB_PATH . $output, filemtime($file))) {
+                if ($this->is_modified_later(PUB_PATH . $output, filemtime($file))) {
                     $need_recompile = true;
                     break;
                 }
@@ -282,6 +275,7 @@ class Blocks
 
         }
 
+        $out = [];
 
         foreach ($files as $name => $file) {
 
