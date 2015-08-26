@@ -201,6 +201,10 @@ class URL {
     }
 
 
+    static public function current($params = null) {
+        return static::site(\Mii::$app->request->uri()).static::query($params);
+    }
+
 
 
     static public function back_url($default = '') {
