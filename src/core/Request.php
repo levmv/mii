@@ -61,10 +61,10 @@ abstract class Request {
             // We found something suitable
             if ($params = $route->matches($this))
             {
-                return array(
+                return [
                     'params' => $params,
                     'route' => $route,
-                );
+                ];
             }
         }
 

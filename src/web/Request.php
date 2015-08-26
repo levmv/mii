@@ -188,6 +188,7 @@ class Request extends \mii\core\Request
 
             // Params cannot be changed once matched
             $this->_params = $params;
+
         }
 
         if (!$this->_route instanceof Route) {
@@ -344,6 +345,51 @@ class Request extends \mii\core\Request
 
         return $this;
     }
+
+    public function param($key, $default = null) {
+        if(isset($this->_params[$key]))
+            return $this->_params[$key];
+
+        return $default;
+    }
+
+    public function route() {
+        return $this->_route;
+    }
+
+    public function check_csrf_token($token = false) {
+        if(!$token) {
+            if(isset($_POST['csrf_token'])) {
+                $token = $_POST['csrf_token'];
+            } elseif(isset($_GET['csrf_token'])) {
+                $token = $_GET['csrf_token'];
+            } else {
+                \Mii::error('crsf_token not found', 'mii');
+            }
+        }
+
+        return $this->csrf_token() === $token;
+    }
+
+
+    public function csrf_token($new = false) {
+        $session = \mii\web\Session::instance();
+
+        // Get the current token
+        $token = $session->get('csrf_request_token');
+
+        if ($new === TRUE OR ! $token)
+        {
+            // Generate a new unique token
+            $token = sha1(uniqid(NULL, TRUE));
+
+            // Store the new token
+            $session->set('csrf_request_token', $token);
+        }
+
+        return $token;
+    }
+
 
     /**
      * Gets HTTP POST parameters of the request.

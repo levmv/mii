@@ -18,12 +18,11 @@ class Controller extends \mii\core\Controller
      */
     public $response;
 
-
     public $action_params;
 
 
     /**
-     * @var \mii\core\ACL Access Controll List object
+     * @var \mii\core\ACL Access Control List object
      */
     public $acl;
 
@@ -50,6 +49,11 @@ class Controller extends \mii\core\Controller
     public $title = '';
 
     /**
+     * @var string Site description
+     */
+    public $description = '';
+
+    /**
      * @var array OpenGraph parameters
      */
     public $og = [];
@@ -63,11 +67,7 @@ class Controller extends \mii\core\Controller
 
     public $breadcrumbs = '';
 
-    public $_main_menu = '';
-
     public $user;
-
-
 
 
     /**
@@ -76,7 +76,6 @@ class Controller extends \mii\core\Controller
      *
      * @param   Request $request Request that created the controller
      * @param   Response $response The request's response
-     * @return  void
      */
     public function __construct(Request $request, Response $response)
     {
@@ -89,12 +88,17 @@ class Controller extends \mii\core\Controller
         $this->acl = new ACL();
     }
 
-    protected function access_rules() {}
+    protected function access_rules()
+    {
+    }
 
-    public function index() {}
+    public function index()
+    {
+    }
 
 
-    protected function before() {
+    protected function before()
+    {
         if (!$this->request->is_ajax()) {
             $this->setup_layout();
         }
@@ -103,9 +107,10 @@ class Controller extends \mii\core\Controller
     }
 
 
-    protected function after($content = null) {
+    protected function after($content = null)
+    {
 
-        if($this->render_layout AND $this->response->format != Response::FORMAT_JSON AND !$this->request->is_ajax()) {
+        if ($this->render_layout AND $this->response->format != Response::FORMAT_JSON AND !$this->request->is_ajax()) {
 
             $this->setup_index();
 
@@ -119,7 +124,7 @@ class Controller extends \mii\core\Controller
         } else {
             $content = empty($this->content) ? $content : $this->content;
 
-            if(is_array($content) AND $this->request->is_ajax()) {
+            if (is_array($content) AND $this->request->is_ajax()) {
                 $this->response->format = Response::FORMAT_JSON;
             }
             $this->response->content($content);
@@ -141,9 +146,9 @@ class Controller extends \mii\core\Controller
 
     public function setup_layout($block_name = 'layout', $depends = [])
     {
-        $this->layout = block($block_name);
-        $this->layout->depends($depends);
-        $this->layout->bind('content', $this->content);
+        $this->layout = block($block_name)
+            ->depends($depends)
+            ->bind('content', $this->content);
     }
 
 
@@ -159,7 +164,7 @@ class Controller extends \mii\core\Controller
 
         $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
 
-        if(! $this->acl->check($roles, $this->request->controller(), $this->request->action())) {
+        if (!$this->acl->check($roles, $this->request->controller(), $this->request->action())) {
             throw new HttpException(404, 'User has no rights to access :page', [':page' => $this->request->uri()]);
         }
 
