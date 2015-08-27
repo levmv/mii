@@ -271,7 +271,7 @@ class ORM
      *
      * @param mixed $validation a manual validation object to combine the model properties with
      *
-     * @return int
+     * @return int Affected rows
      */
     public function update($validation = NULL)
     {
@@ -279,7 +279,7 @@ class ORM
             return 0;
 
         if ($this->on_update() === false)
-            return $this;
+            return 0;
 
         return (new Query)
             ->update($this->get_table())
@@ -299,12 +299,12 @@ class ORM
      *
      * @param mixed $validation a manual validation object to combine the model properties with
      *
-     * @return int
+     * @return int Inserted row id
      */
     public function create($validation = NULL)
     {
         if ($this->on_create() === false) {
-            return $this;
+            return 0;
         }
 
         $columns = array_keys($this->_data);
@@ -318,8 +318,7 @@ class ORM
 
         $this->_data['id'] = $id[0];
 
-        return $this;
-
+        return $id;
     }
 
     public function on_create()
