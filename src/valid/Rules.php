@@ -5,6 +5,24 @@ namespace mii\valid;
 class Rules {
 
     /**
+     * Checks if a value is unique in database.
+     *
+     * @param $value
+     * @param $key
+     * @param $model
+     * @param $id
+     * @return bool
+     */
+    public static function unique($value, $key, $model, $id)
+    {
+        if ($id) {
+            $res = (new $model)->query()->where($key, '=', $value)->one();
+            return (null === $res) or ($res->id == $id);
+        }
+        return null === (new $model)->query()->where($key, '=', $value)->one();
+    }
+
+    /**
      * Checks if a field is not empty.
      *
      * @return  boolean
