@@ -705,6 +705,7 @@ class Text {
         // Transliterate value to ASCII
         $value = UTF8::transliterate_to_ascii($value);
 
+
         // Set preserved characters
         $preserved_characters = preg_quote($separator);
 
@@ -715,8 +716,7 @@ class Text {
         $value = preg_replace('!['.preg_quote($separator).'\s]+!u', $separator, $value);
 
         // Trim separators from the beginning and end
-        $value = trim($value, $separator);
-
+        return trim($value, $separator);
     }
 
 
