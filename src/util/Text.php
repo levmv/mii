@@ -686,4 +686,38 @@ class Text {
         return FALSE;
     }
 
-} // End text
+    /**
+     * Convert a phrase to a URL-safe title.
+     *
+     *     echo URL::title('Мой блог пост'); // "moi-blog-post"
+     *
+     * @param   string   $title       Phrase to convert
+     * @param   string   $separator   Word separator (any single character)
+     * @return  string
+     * @uses    UTF8::ru_translit
+     * @uses    UTF8::transliterate_to_ascii
+     */
+
+    public static function to_slug($text, $separator = '-') {
+
+        $value = UTF8::ru_translit($text);
+
+        // Transliterate value to ASCII
+        $value = UTF8::transliterate_to_ascii($value);
+
+        // Set preserved characters
+        $preserved_characters = preg_quote($separator);
+
+        // Remove all characters that are not in preserved characters, a-z, 0-9, point or whitespace
+        $value = preg_replace('![^'.$preserved_characters.'a-z0-9.\s]+!', '', strtolower($value));
+
+        // Replace all separator characters and whitespace by a single separator
+        $value = preg_replace('!['.preg_quote($separator).'\s]+!u', $separator, $value);
+
+        // Trim separators from the beginning and end
+        $value = trim($value, $separator);
+
+    }
+
+
+}
