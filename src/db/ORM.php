@@ -318,7 +318,7 @@ class ORM
 
         $this->_data['id'] = $id[0];
 
-        return $id;
+        return $id[0];
     }
 
     public function on_create()
