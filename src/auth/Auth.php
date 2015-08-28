@@ -40,8 +40,7 @@ class Auth
      * @param   array $config Config Options
      * @return  void
      */
-    public function __construct($config = [])
-    {
+    public function __construct($config = []) {
         foreach ($config as $name => $value) {
             $this->$name = $value;
         }
@@ -56,8 +55,7 @@ class Auth
      *
      * @return  mixed
      */
-    public function get_user($default = NULL)
-    {
+    public function get_user($default = NULL) {
         if ($this->_user)
             return $this->_user;
 
@@ -73,8 +71,7 @@ class Auth
         return ($this->_user AND $this->_user->loaded()) ? $this->_user : $default;
     }
 
-    public function get_user_model()
-    {
+    public function get_user_model() {
         return new $this->user_model;
     }
 
@@ -86,8 +83,7 @@ class Auth
      * @param   boolean $remember Enable autologin
      * @return  boolean
      */
-    public function login($username, $password, $remember = true)
-    {
+    public function login($username, $password, $remember = true) {
         if (empty($password))
             return false;
 
@@ -100,13 +96,14 @@ class Auth
             if ($remember === true) {
                 // Token data
                 $data = [
-                    'user_id'    => $user->id,
-                    'expires'    => time() + $this->lifetime,
+                    'user_id' => $user->id,
+                    'expires' => time() + $this->lifetime,
                     'user_agent' => sha1(Mii::$app->request->get_user_agent()),
                 ];
 
                 // Create a new autologin token
-                $token = (new Token)->create_token($data);
+                $token = (new Token)->set($data);
+                $token->create();
 
                 // Set the autologin cookie
                 Cookie::set($this->token_cookie, $token->token, $this->lifetime);
@@ -131,8 +128,7 @@ class Auth
      * @param    boolean $logout_all remove all tokens for user
      * @return  boolean
      */
-    public function logout($destroy = false, $logout_all = false)
-    {
+    public function logout($destroy = false, $logout_all = false) {
         // Set by force_login()
         $this->_session->delete('auth_forced');
 
@@ -176,8 +172,7 @@ class Auth
      * @param   string $role role name
      * @return  boolean
      */
-    public function logged_in($role = NULL)
-    {
+    public function logged_in($role = NULL) {
         // Get the user from the session
         $user = $this->get_user();
 
@@ -196,8 +191,7 @@ class Auth
      * @deprecated
      * @param  string $password Plaintext password
      */
-    public function hash_password($password)
-    {
+    public function hash_password($password) {
         return $this->hash($password);
     }
 
@@ -209,8 +203,7 @@ class Auth
      * @param   string $str password to hash
      * @return  string
      */
-    public function hash($password)
-    {
+    public function hash($password) {
         if ($this->hash_method === 'bcrypt') {
 
             $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->hash_cost]);
@@ -226,8 +219,7 @@ class Auth
     }
 
 
-    public function verify_password($password, $hash)
-    {
+    public function verify_password($password, $hash) {
         if ($this->hash_method === 'bcrypt') {
 
             return password_verify($password, $hash);
@@ -239,8 +231,7 @@ class Auth
     }
 
 
-    protected function complete_login($user)
-    {
+    protected function complete_login($user) {
         // Regenerate session_id
         $this->_session->regenerate();
 
@@ -261,8 +252,7 @@ class Auth
      * @param   mixed   username string, or user Jelly object
      * @return  string
      */
-    public function password($user)
-    {
+    public function password($user) {
         if (!is_object($user)) {
             $username = $user;
 
@@ -280,8 +270,7 @@ class Auth
      * @param   string $password
      * @return  boolean
      */
-    public function check_password($password)
-    {
+    public function check_password($password) {
         $user = $this->get_user();
 
         if (!$user)
@@ -298,8 +287,7 @@ class Auth
      * @param   boolean $mark_session_as_forced mark the session as forced
      * @return  boolean
      */
-    public function force_login($user, $mark_session_as_forced = false)
-    {
+    public function force_login($user, $mark_session_as_forced = false) {
         if (!is_object($user)) {
             $user = ORM::factory('User')->find($user);
 
@@ -321,19 +309,20 @@ class Auth
      *
      * @return  mixed
      */
-    public function auto_login()
-    {
+    public function auto_login() {
         if ($token = Cookie::get($this->token_cookie)) {
             // Load the token and user
             $token = Token::find()->where('token', '=', $token)->one();
 
             if ($token) {
                 if ($token->user_agent === sha1(Mii::$app->request->get_user_agent())) {
-                    $new_token = (new Token)->create_token([
-                        'user_id'    => $token->user_id,
+                    $new_token = (new Token)->set([
+                        'user_id' => $token->user_id,
                         'user_agent' => $token->user_agent,
-                        'expires'    => time() + $this->lifetime
+                        'expires' => time() + $this->lifetime
                     ]);
+                    $new_token->create();
+
                     // Set the new token
                     Cookie::set($this->token_cookie, $new_token->token, $new_token->expires - time());
 
