@@ -123,9 +123,7 @@ class Pagination {
                 case 'query_string':
                 case 'mixed':
 
-                    $this->current_page = ($this->request->query($query_key) !== NULL)
-                        ? (int) $this->request->query($query_key)
-                        : 1;
+                    $this->current_page = (int) $this->request->get($query_key, 1);
                     break;
 
                 case 'route':
@@ -299,12 +297,12 @@ class Pagination {
         if ($params === NULL)
         {
             // Use only the current parameters
-            $params = $this->request->query();
+            $params = $this->request->get();
         }
         else
         {
             // Merge the current and new parameters
-            $params = array_merge($this->request->query(), $params);
+            $params = array_merge($this->request->get(), $params);
         }
 
         if (empty($params))
