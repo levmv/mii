@@ -316,34 +316,20 @@ class Request extends \mii\core\Request
 
 
     /**
-     * Gets or sets HTTP query string.
+     *  Returns GET parameter with a given name. If name isn't specified, returns an array of all GET parameters.
      *
-     * @param   mixed $key Key or key value pairs to set
-     * @param   string $value Value to set to a key
+     * @param   string $name the parameter name
+     * @param   string $value the default parameter value if the parameter does not exist.
      * @return  mixed
-     * @uses    Arr::path
      */
-    public function query($key = NULL, $value = NULL)
+    public function get($key = null, $default = null)
     {
-        if (is_array($key)) {
-            // Act as a setter, replace all query strings
-            $this->_get = $key;
+        if($key) {
+            return isset($this->_get[$key]) ? $this->_get[$key] : $default;
 
-            return $this;
         }
 
-        if ($key === NULL) {
-            // Act as a getter, all query strings
-            return $this->_get;
-        } elseif ($value === NULL) {
-            // Act as a getter, single query string
-            return Arr::path($this->_get, $key);
-        }
-
-        // Act as a setter, single query string
-        $this->_get[$key] = $value;
-
-        return $this;
+        return $this->_get;
     }
 
     public function param($key, $default = null) {
