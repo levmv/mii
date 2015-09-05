@@ -131,6 +131,9 @@ class ORM
         return static::$table;
     }
 
+    /**
+     * @return \mii\db\Result
+     */
     public static function all()
     {
         $class = new static();
@@ -288,7 +291,7 @@ class ORM
             ->execute();
     }
 
-    public function on_update()
+    protected function on_update()
     {
         return true;
     }
@@ -321,7 +324,7 @@ class ORM
         return $id[0];
     }
 
-    public function on_create()
+    protected function on_create()
     {
         return true;
 
