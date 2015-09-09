@@ -70,7 +70,7 @@ class ORM
 
     /**
      * @param mixed ID of model to load or set of ids
-     * @return Query
+     * @return Query|static
      */
     public static function find($id = null)
     {

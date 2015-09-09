@@ -3,7 +3,6 @@
 namespace mii\web;
 
 
-use mii\util\Arr;
 use mii\util\HTML;
 use mii\util\Upload;
 use mii\valid\Validation;
@@ -40,7 +39,7 @@ class Form {
         $data = !empty($data) ? $data : \Mii::$app->request->post();
 
         if(count($data)) {
-            $this->fields = Arr::overwrite($this->fields, $data);
+            $this->fields = array_replace_recursive($this->fields, $data);
 
         }
 
