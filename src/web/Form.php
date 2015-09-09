@@ -44,6 +44,10 @@ class Form {
 
         }
 
+        return $this->posted();
+    }
+
+    public function posted() {
         return \Mii::$app->request->method() === Request::POST;
     }
 
@@ -134,7 +138,7 @@ class Form {
             case 'password':
                 return HTML::password($name, $this->fields[$name], $attributes);
             case 'select':
-                if($attributes AND isset($attributes['multiple']) AND $attributes['multiple']) {
+                if($attributes AND isset($attributes['multiple']) AND $attributes['multiple'] !== false) {
                     return HTML::select($name.'[]', $this->select_data[$name], $this->fields[$name], $attributes);
                 }
                 return HTML::select($name, $this->select_data[$name], $this->fields[$name], $attributes);
