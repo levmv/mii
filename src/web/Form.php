@@ -21,6 +21,12 @@ class Form {
 
     public $labels = [];
 
+    public $enable_csrf_validation = true;
+
+    protected $_csrf_token = '';
+
+    protected $_data = [];
+
     /**
      * @param null $data Initial data for form. If null then request->post() will be used
      */
@@ -30,17 +36,19 @@ class Form {
     }
 
     /**
+     * Load form from _POST values or $data values
      * Return true if request method is post
      * @return bool
      */
     public function load($data = null) {
 
-
-        $data = !empty($data) ? $data : \Mii::$app->request->post();
+        if($this->posted()) {
+            $data = \Mii::$app->request->post();
+        }
 
         if(count($data)) {
             $this->fields = array_replace_recursive($this->fields, $data);
-
+            $this->_data = $data;
         }
 
         return $this->posted();
@@ -50,13 +58,16 @@ class Form {
         return \Mii::$app->request->method() === Request::POST;
     }
 
-
     public function rules() {
         return [];
     }
 
     public function fields() {
         return $this->fields;
+    }
+
+    public function data() {
+        return $this->_data;
     }
 
     public function get($name) {
@@ -69,6 +80,19 @@ class Form {
 
 
     public function validate() {
+
+        if($this->enable_csrf_validation) {
+
+            $this->validation->rule('csrf_token', function(Validation $v, $field, $value) {
+
+                if(! \Mii::$app->request->check_csrf_token($value)) {
+                    $v->error('csrf_token', 'Crsf token validation failed');
+                    return false;
+                }
+
+                return true;
+            });
+        }
 
         $this->validation->rules($this->rules());
 
@@ -83,7 +107,14 @@ class Form {
 
 
     public function open($action = NULL, $attributes = NULL) {
-        return HTML::open($action, $attributes);
+        $out = HTML::open($action, $attributes);
+
+        if($this->enable_csrf_validation) {
+
+            $out .= HTML::hidden('csrf_token', \Mii::$app->request->csrf_token());
+        }
+
+        return $out;
     }
 
     public function close() {
