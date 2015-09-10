@@ -208,8 +208,12 @@ class ORM
 
     public function set($values, $value = NULL)
     {
-
-        if (!is_array($values)) {
+        if(is_object($values) AND $values instanceof \mii\web\Form) {
+            $values = $values->data();
+            foreach ($values as $key => $value) {
+                $this->set_field($key, $value);
+            }
+        } elseif (!is_array($values)) {
             $this->set_field($values, $value);
         } else {
             foreach ($values as $key => $value) {
