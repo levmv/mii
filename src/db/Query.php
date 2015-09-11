@@ -1354,10 +1354,13 @@ class Query
         $this->_type = Database::SELECT;
 
         $old_select = $this->_select;
+        $old_order = $this->_order_by;
 
         $this->_select = [DB::expr('COUNT(*)')];
         $as_object = $this->_as_object;
         $this->_as_object = null;
+
+        $this->_order_by = [];
 
 
         $result = $this->execute();
@@ -1365,6 +1368,7 @@ class Query
         $count =  $this->execute()->column('COUNT(*)', 0);
 
         $this->_select = $old_select;
+        $this->_order_by = $old_order;
         $this->_as_object = $as_object;
 
         return $count;
