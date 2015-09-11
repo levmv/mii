@@ -576,6 +576,7 @@ class HTML {
         // Set the input name
         $attributes['name'] = $name;
 
+
         if (is_array($selected))
         {
             // This is a multi-select, god save us!
@@ -615,49 +616,48 @@ class HTML {
 
                     foreach ($name as $_value => $_name)
                     {
-                        // Force value to be string
-                        $_value = (string) $_value;
-
-                        // Create a new attribute set for this option
-                        $option = array('value' => $_value);
+                        $_value = HTML::chars($_value);
 
                         if (in_array($_value, $selected))
                         {
                             // This option is selected
-                            $option[] = 'selected';
+                            $_value = '"'.$_value.'" selected';
+                        } else {
+                            $_value = '"'.$_value.'"';
                         }
 
                         // Change the option to the HTML string
-                        $_options[] = '<option'.HTML::attributes($option).'>'.HTML::chars($_name, FALSE).'</option>';
+                        $_options[] = '<option value='.$_value.'>'.HTML::chars($_name, FALSE).'</option>';
                     }
 
                     // Compile the options into a string
                     $_options = "\n".implode("\n", $_options)."\n";
 
-                    $options[$value] = '<optgroup'.HTML::attributes($group).'>'.$_options.'</optgroup>';
+                    $r_options[] = '<optgroup'.HTML::attributes($group).'>'.$_options.'</optgroup>';
                 }
                 else
                 {
                     // Force value to be string
-                    $value = (string) $value;
-
-                    // Create a new attribute set for this option
-                    $option = array('value' => $value);
+                    $value = HTML::chars($value);
 
                     if (in_array($value, $selected))
                     {
                         // This option is selected
-                        $option[] = 'selected';
+                        $value = '"'.$value.'" selected';
+                    } else {
+                        $value = '"'.$value.'"';
                     }
 
                     // Change the option to the HTML string
-                    $options[$value] = '<option'.HTML::attributes($option).'>'.HTML::chars($name, FALSE).'</option>';
+                    $r_options[] = '<option value='.$value.'>'.HTML::chars($name, FALSE).'</option>';
                 }
             }
 
+
             // Compile the options into a single string
-            $options = "\n".implode("\n", $options)."\n";
+            $options = "\n".implode("\n", $r_options)."\n";
         }
+
 
         return '<select'.HTML::attributes($attributes).'>'.$options.'</select>';
     }
