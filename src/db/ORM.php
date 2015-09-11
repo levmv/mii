@@ -288,6 +288,8 @@ class ORM
         if ($this->on_update() === false)
             return 0;
 
+        $this->on_change();
+
         return (new Query)
             ->update($this->get_table())
             ->set(array_intersect_key($this->_data, $this->_changed))
@@ -314,6 +316,8 @@ class ORM
             return 0;
         }
 
+        $this->on_change();
+
         $columns = array_keys($this->_data);
         $id = (new Query())
             ->insert($this->get_table())
@@ -332,6 +336,10 @@ class ORM
     {
         return true;
 
+    }
+
+    protected function on_change() {
+        return true;
     }
 
     /**
