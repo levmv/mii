@@ -1,34 +1,18 @@
 <?php
 
 namespace mii\util;
+
 use mii\web\Exception;
 use mii\core\ErrorException;
 
 /**
  * Upload helper class for working with uploaded files and [Validation].
  *
- *     $array = Validation::factory($_FILES);
- *
- * [!!] Remember to define your form with "enctype=multipart/form-data" or file
- * uploading will not work!
- *
- * The following configuration properties can be set:
- *
- * - [Upload::$remove_spaces]
- * - [Upload::$default_directory]
- *
- * @package    Kohana
- * @category   Helpers
- * @author     Kohana Team
+ * @copyright  (c) 2015 Morozov Lev
  * @copyright  (c) 2007-2012 Kohana Team
  * @license    http://kohanaframework.org/license
  */
 class Upload {
-
-    /**
-     * @var  boolean  remove spaces in uploaded files
-     */
-    public static $remove_spaces = TRUE;
 
     /**
      * @var  string  default upload directory
@@ -68,11 +52,9 @@ class Upload {
             $filename = uniqid().$file['name'];
         }
 
-        if (Upload::$remove_spaces === TRUE)
-        {
-            // Remove spaces from the filename
-            $filename = preg_replace('/\s+/u', '_', $filename);
-        }
+        // Remove spaces from the filename
+        $filename = preg_replace('/\s+/u', '_', $filename);
+
 
         if ($directory === NULL)
         {
@@ -106,51 +88,50 @@ class Upload {
 
     public static function process() {
         // Settings
-        $targetDir = '/tmp/upload';
+        $target_dir = '/tmp/upload';
 
-        $cleanupTargetDir = true; // Remove old files
-        $maxFileAge = 5 * 3600; // Temp file age in seconds
+        $cleanup_target_dir = true; // Remove old files
+        $max_file_age = 5 * 3600; // Temp file age in seconds
 
         @set_time_limit(5 * 60);
 
         // Get a file name
         if (isset($_REQUEST["name"])) {
-            $fileName = $_REQUEST["name"];
+            $file_name = $_REQUEST["name"];
         } elseif (!empty($_FILES)) {
-            $fileName = $_FILES["file"]["name"];
+            $file_name = $_FILES["file"]["name"];
         } else {
-            $fileName = uniqid("file_");
+            $file_name = uniqid("file_");
         }
 
-        $fileName = preg_replace('/[^\w\._]+/', '_', $fileName);
-
-        $filePath = $targetDir . DIRECTORY_SEPARATOR . $fileName;
+        $file_name = preg_replace('/[^\w\._]+/u', '_', $file_name);
+        $file_path = $target_dir . DIRECTORY_SEPARATOR . $file_name;
 
         // Chunking might be enabled
         $chunk = isset($_REQUEST["chunk"]) ? intval($_REQUEST["chunk"]) : 0;
         $chunks = isset($_REQUEST["chunks"]) ? intval($_REQUEST["chunks"]) : 0;
 
         // Create target dir
-        if (!file_exists($targetDir))
-            @mkdir($targetDir);
+        if (!file_exists($target_dir))
+            @mkdir($target_dir);
 
         // Remove old temp files
-        if ($cleanupTargetDir) {
-            if (!is_dir($targetDir) || !$dir = opendir($targetDir)) {
+        if ($cleanup_target_dir) {
+            if (!is_dir($target_dir) || !$dir = opendir($target_dir)) {
                 throw new Exception('{"jsonrpc" : "2.0", "error" : {"code": 100, "message": "Failed to open temp directory."}, "id" : "id"}');
             }
 
             while (($file = readdir($dir)) !== false) {
-                $tmpfilePath = $targetDir . DIRECTORY_SEPARATOR . $file;
+                $tmp_file_path = $target_dir . DIRECTORY_SEPARATOR . $file;
 
                 // If temp file is current file proceed to the next
-                if ($tmpfilePath == "{$filePath}.part") {
+                if ($tmp_file_path == "{$file_path}.part") {
                     continue;
                 }
 
                 // Remove temp file if it is older than the max age and is not the current file
-                if (preg_match('/\.part$/', $file) && (filemtime($tmpfilePath) < time() - $maxFileAge)) {
-                    @unlink($tmpfilePath);
+                if (preg_match('/\.part$/u', $file) && (filemtime($tmp_file_path) < time() - $max_file_age)) {
+                    @unlink($tmp_file_path);
                 }
             }
             closedir($dir);
@@ -158,7 +139,7 @@ class Upload {
 
 
         // Open temp file
-        if (!$out = @fopen("{$filePath}.part", $chunks ? "ab" : "wb")) {
+        if (!$out = @fopen("{$file_path}.part", $chunks ? "ab" : "wb")) {
             throw new Exception('{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Failed to open output stream."}, "id" : "id"}');
         }
         if (!empty($_FILES)) {
@@ -187,10 +168,10 @@ class Upload {
         // Check if file has been uploaded
         if (!$chunks || $chunk == $chunks - 1) {
             // Strip the temp .part suffix off
-            rename("{$filePath}.part", $filePath);
+            rename("{$file_path}.part", $file_path);
         }
 
-        return $filePath;
+        return $file_path;
     }
 
 
