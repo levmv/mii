@@ -3,6 +3,7 @@
 namespace mii\web;
 
 
+use mii\db\ORM;
 use mii\util\HTML;
 use mii\util\Upload;
 use mii\valid\Validation;
@@ -27,6 +28,8 @@ class Form {
 
     protected $_data = [];
 
+    protected $_model;
+
     /**
      * @param null $data Initial data for form. If null then request->post() will be used
      */
@@ -44,6 +47,11 @@ class Form {
 
         if($this->posted()) {
             $data = \Mii::$app->request->post();
+        }
+
+        if(is_object($data) AND $data instanceof ORM) {
+            $this->_model = $data;
+            $data = $data->as_array();
         }
 
         if(count($data)) {
@@ -64,6 +72,10 @@ class Form {
 
     public function fields() {
         return $this->fields;
+    }
+
+    public function model() {
+        return $this->_model;
     }
 
     public function data() {
