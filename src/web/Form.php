@@ -90,7 +90,7 @@ class Form {
     }
 
     public function set($name, $value) {
-        return $this->fields[$name] =  $value;
+        return $this->_data[$name] = $this->fields[$name] =  $value;
     }
 
 
