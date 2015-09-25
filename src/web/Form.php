@@ -26,7 +26,7 @@ class Form {
 
     protected $_csrf_token = '';
 
-    protected $_data = [];
+    protected $_changed = [];
 
     protected $_model;
 
@@ -57,9 +57,8 @@ class Form {
 
         if(count($data)) {
             foreach (array_intersect_key($data, $this->fields) as $key => $value) {
-                $this->fields[$key] = $value;
+                $this->set($key, $value);
             }
-            $this->_data = $data;
         }
 
         return $this->posted();
@@ -81,8 +80,18 @@ class Form {
         return $this->_model;
     }
 
-    public function data() {
-        return $this->_data;
+    public function changed_fields()
+    {
+        return array_intersect_key($this->fields, $this->_changed);
+    }
+
+    public function changed($field_name = null)
+    {
+        if ($field_name === null) {
+            return count($this->_changed) > 0;
+        }
+
+        return isset($this->_changed[$field_name]);
     }
 
     public function get($name) {
@@ -90,7 +99,8 @@ class Form {
     }
 
     public function set($name, $value) {
-        return $this->_data[$name] = $this->fields[$name] =  $value;
+        $this->_changed[$name] = true;
+        return $this->fields[$name] =  $value;
     }
 
 

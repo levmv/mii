@@ -209,7 +209,7 @@ class ORM
     public function set($values, $value = NULL)
     {
         if(is_object($values) AND $values instanceof \mii\web\Form) {
-            $values = $values->data();
+            $values = $values->changed_fields();
             foreach ($values as $key => $value) {
                 $this->set_field($key, $value);
             }
