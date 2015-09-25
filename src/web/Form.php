@@ -43,6 +43,7 @@ class Form {
      * Return true if request method is post
      * @return bool
      */
+
     public function load($data = null) {
 
         if($this->posted()) {
@@ -55,7 +56,9 @@ class Form {
         }
 
         if(count($data)) {
-            $this->fields = array_replace_recursive($this->fields, $data);
+            foreach (array_intersect_key($data, $this->fields) as $key => $value) {
+                $this->fields[$key] = $value;
+            }
             $this->_data = $data;
         }
 
@@ -196,7 +199,7 @@ class Form {
     }
 
     public function uploaded($name) {
-        
+
         return isset($_FILES[$name]) AND Upload::not_empty($_FILES[$name]) AND Upload::valid($_FILES[$name]);
 
     }
