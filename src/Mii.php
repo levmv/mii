@@ -16,7 +16,7 @@ if(MII_PROF) {
 
 class Mii {
 
-    const VERSION = '1.0.0';
+    const VERSION = '1.0.1';
 
     const CODENAME = 'Alnair';
 
