@@ -41,36 +41,19 @@ class ORM
      */
     public function __construct($values = [], $loaded = false)
     {
-        if ($values)
-            $this->fill_with($values);
+        if ($values) {
+            foreach (array_intersect_key($values, $this->_data) as $key => $value) {
+                $this->$key = $value;
+            }
+        }
 
         $this->_loaded = $loaded;
     }
 
-    /**
-     * @deprecated
-     *
-     * Mass sets object properties. Never pass $_POST into this method directly.
-     * Always use something like array_key_intersect() to filter the array.
-     *
-     * @param array $data the data to set
-     *
-     * @return $this
-     */
-
-    public function fill_with(array $data)
-    {
-
-        foreach (array_intersect_key($data, $this->_data) as $key => $value) {
-            $this->$key = $value;
-        }
-
-        return $this;
-    }
 
     /**
      * @param mixed ID of model to load or set of ids
-     * @return Query|static
+     * @return Query|Result
      */
     public static function find($id = null)
     {
@@ -79,21 +62,30 @@ class ORM
         if ($id) {
             if(is_array($id)) {
 
-                return $class->query()->where('id', 'IN', DB::expr('('.implode(',', $id).')'))->get();
+                return $class->select_query()->where('id', 'IN', DB::expr('('.implode(',', $id).')'))->get();
 
             } else {
-                return $class->query(false)->where('id', '=', $id)->one();
+                return $class->select_query(false)->where('id', '=', $id)->one();
             }
         }
 
-        return $class->query();
+        return $class->select_query();
+    }
+
+    /**
+     *
+     * @return Query
+     */
+    public static function query()
+    {
+        return (new Query)->table(static::$table)->as_object(static::class);
     }
 
     /**
      * @param bool $with_order
      * @return Query
      */
-    public function query($with_order = true)
+    public function select_query($with_order = true)
     {
         $query = (new Query)->select($this->fields())->from($this->get_table())->as_object(static::class);
 
@@ -106,30 +98,6 @@ class ORM
         return $query;
     }
 
-    /**
-     * Returns an array of the columns in this object.
-     *
-     * @return array
-     */
-    public function fields()
-    {
-        $fields = [];
-
-        foreach ($this->_data as $key => $value)
-            $fields[] = $this->get_table() . '.' . $key;
-
-        return $fields;
-    }
-
-    /**
-     * Gets the table name for this object
-     *
-     * @return string
-     */
-    public function get_table()
-    {
-        return static::$table;
-    }
 
     /**
      * @return \mii\db\Result
@@ -155,8 +123,23 @@ class ORM
      */
     public static function select_list($key, $display, $first = NULL)
     {
-        return (new static)->query(false)->get()->to_list($key, $display, $first);
+        $class = new static();
+
+        $query = (new Query)
+            ->select($class->fields())
+            ->from($class->get_table())
+            ->as_array();
+
+        if ($class->_order_by) {
+            foreach ($class->_order_by as $column => $direction) {
+                $query->order_by($column, $direction);
+            }
+        }
+
+        return $query->get()->to_list($key, $display, $first);
     }
+
+
 
     public function __get($key)
     {
@@ -225,17 +208,6 @@ class ORM
     }
 
     /**
-     * sleep method for serialization
-     *
-     * @return array
-     */
-    public function __sleep()
-    {
-        // Store only information about the object without db property
-        return array_diff(array_keys(get_object_vars($this)), ['_db']);
-    }
-
-    /**
      * Magic isset method to test _data
      *
      * @param string $name the property to test
@@ -256,6 +228,33 @@ class ORM
     {
         return $this->_data;
     }
+
+
+    /**
+     * Returns an array of the columns in this object.
+     *
+     * @return array
+     */
+    public function fields()
+    {
+        $fields = [];
+
+        foreach ($this->_data as $key => $value)
+            $fields[] = $this->get_table() . '.' . $key;
+
+        return $fields;
+    }
+
+    /**
+     * Gets the table name for this object
+     *
+     * @return string
+     */
+    public function get_table()
+    {
+        return static::$table;
+    }
+
 
     /**
      * Checks if the field (or any) was changed
