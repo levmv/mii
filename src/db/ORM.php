@@ -104,9 +104,7 @@ class ORM
      */
     public static function all()
     {
-        $class = new static();
-
-        return $class->query()->get();
+        return static::find()->get();
     }
 
     /**
