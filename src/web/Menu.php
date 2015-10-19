@@ -27,6 +27,7 @@ class Menu
     protected $_data = [];
 
     protected $_current_item;
+    protected $_current_item_url;
 
     protected $_current_uri;
 
@@ -70,11 +71,13 @@ class Menu
 
         } elseif (is_object($current)) {
 
-            $this->_current_item = $current->url();
+            $this->_current_item = $current;
+            $this->_current_item_url = $current->url();
 
         } elseif (is_array($current)) {
 
-            $this->_current_item = $current['url'];
+            $this->_current_item = $current;
+            $this->_current_item_url = $current['url'];
 
         } else {
 
