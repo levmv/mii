@@ -27,9 +27,10 @@ class Menu
     protected $_data = [];
 
     protected $_current_item;
-    protected $_current_item_url;
+    protected $_current_url;
+    protected $_current_id;
 
-    protected $_current_uri;
+    protected $_uri;
 
     protected $_block_name;
 
@@ -45,9 +46,9 @@ class Menu
      * @param array $params
      */
 
-    public function __construct($items = null, $block_name = null, $current = null)
+    public function __construct($items = null, $block_name = null, $current_id = null, $current_url = null)
     {
-        $this->_current_uri = trim(URL::site(\Mii::$app->request->uri()), '/');
+        $this->_uri = trim(URL::site(\Mii::$app->request->uri()), '/');
 
         if ($items) {
             $this->items = $items;
@@ -56,32 +57,72 @@ class Menu
         if($block_name) {
             $this->_block_name = $block_name;
         }
+
+        if($current_id !== null) {
+            $this->current_id($current_id);
+        }
+
+        if($current_url !== null) {
+            $this->current_url($current_url);
+        }
     }
 
     public function on_render() {
 
     }
 
+    /**
+     * @deprecated
+     *
+     *
+     */
     public function current_item($current = null)
     {
+        return $this->current_url($current);
+    }
 
-        if ($current === null) {
+    public function current_url($current_url = null) {
+
+        if ($current_url === null) {
 
             return $this->_current_item;
 
-        } elseif (is_object($current)) {
+        } elseif (is_object($current_url)) {
 
-            $this->_current_item = $current;
-            $this->_current_item_url = $current->url();
+            $this->_current_item = $current_url;
+            $this->_current_item_url = $current_url->url();
 
-        } elseif (is_array($current)) {
+        } elseif (is_array($current_url)) {
 
-            $this->_current_item = $current;
-            $this->_current_item_url = $current['url'];
+            $this->_current_item = $current_url;
+            $this->_current_item_url = $current_url['url'];
 
         } else {
 
-            $this->_current_item = $current;
+            $this->_current_item = $current_url;
+        }
+    }
+
+
+
+    public function current_id($current_id = null) {
+        if ($current_id === null) {
+
+            return $this->_current_id;
+
+        } elseif (is_object($current_id)) {
+
+            $this->_current_item = $current_id;
+            $this->_current_id = $current_id->id;
+
+        } elseif (is_array($current_id)) {
+
+            $this->_current_item = $current_id;
+            $this->_current_id = $current_id['id'];
+
+        } else {
+
+            $this->_current_id = $current_id;
         }
     }
 
@@ -96,7 +137,8 @@ class Menu
         $menu = [];
         foreach($this->items as $item) {
 
-            $active = $this->active($item['url']);
+            $active = $this->active($item);
+
 
             $children = isset($item['children'])
                 ? $children = (new Menu($item['children']))->as_array()
@@ -177,6 +219,14 @@ class Menu
     }
 
 
+    protected function active($value) {
+
+        if($this->_current_id !== null)
+            return $this->is_active_id($value['id']);
+
+        return $this->is_active_url($value['url']);
+    }
+
 
     /**
      * Determines if the menu item is part of the current URI
@@ -184,15 +234,18 @@ class Menu
      * @param   string  Url of item to check against
      * @return  mixed   Returns Menu::CURRENT_ITEM for current, Menu::ACTIVE_ITEM for active, or 0
      */
-    protected function active($url)
+    protected function is_active_url($url)
     {
+        $uri = ($this->_current_url !== null) ? $this->_current_url : $this->_uri;
+
         $link = trim(URL::site($url), '/');
-        // Exact match (removes default 'index' action)
-        if ($this->_current_uri === $link OR preg_replace('~/?index/?$~', '', $this->_current_uri) === $link) {
+
+        // Exact match
+        if ($uri === $link) {
             return Menu::CURRENT_ITEM;
         } // Checks if it is part of the active path
         else {
-            $current_pieces = explode('/', $this->_current_uri);
+            $current_pieces = explode('/', $uri);
             array_shift($current_pieces);
             $link_pieces = explode('/', $link);
             array_shift($link_pieces);
@@ -207,6 +260,13 @@ class Menu
 
         return 0;
     }
+
+    protected function is_active_id($id)
+    {
+        return ($this->_current_id == $id) ? Menu::CURRENT_ITEM : 0;
+
+    }
+
 
 
 }
