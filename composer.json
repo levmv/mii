@@ -1,13 +1,13 @@
 {
-  "name": "levmorozov/package",
+  "name": "levmorozov/mii",
   "type": "library",
   "description": "Tiny php framework",
+  "homepage": "https://github.com/levmorozov/mii",
   "license": "MIT",
   "require": {
     "swiftmailer/swiftmailer": "@stable",
     "php": ">=5.6.0"
-  },
-  "autoload": {
+  },  "autoload": {
     "psr-4": {
       "mii\\": "src/"
     }
