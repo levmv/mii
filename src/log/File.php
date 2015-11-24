@@ -9,6 +9,7 @@ use mii\util\Debug;
 class File extends Logger {
 
 
+    protected $base_path;
     protected $file = '';
     protected $levels = Logger::ALL;
     protected $category;
@@ -22,13 +23,15 @@ class File extends Logger {
         $this->file = $params['file'];
         $this->levels = isset($params['levels']) ? $params['levels'] : Logger::ALL;
         $this->category = isset($params['category']) ? $params['category'] : '' ;
+        $this->base_path = isset($params['base_path']) ? $params['base_path'] : path('app');
+
     }
 
 
     public function init() {
         $this->is_init = true;
 
-        $path = dirname($this->file);
+        $path = dirname($this->base_path.$this->file);
         if (!is_dir($path)) {
             mkdir($path, 0777, true);
         }
@@ -64,7 +67,7 @@ class File extends Logger {
         $this->messages = [];
 
 
-        if (($fp = @fopen($this->file, 'a')) === false) {
+        if (($fp = @fopen($this->base_path.$this->file, 'a')) === false) {
             // TODO: throw new Exception("Unable to append to log file: {$this->file}");
         }
         @flock($fp, LOCK_EX);
