@@ -1353,10 +1353,17 @@ class Query
     public function count() {
         $this->_type = Database::SELECT;
 
+        $db = Database::instance();
+
+
         $old_select = $this->_select;
         $old_order = $this->_order_by;
 
-        $this->_select = [DB::expr('COUNT(*)')];
+        if($this->_distinct) {
+            $this->_select = [DB::expr('COUNT(DISTINCT '.$db->quote_column($this->_select[0]).') AS `count`')];
+        } else {
+            $this->_select = [DB::expr('COUNT(*) AS `count`')];
+        }
         $as_object = $this->_as_object;
         $this->_as_object = null;
 
@@ -1365,7 +1372,7 @@ class Query
 
         $result = $this->execute();
 
-        $count =  $this->execute()->column('COUNT(*)', 0);
+        $count =  $this->execute()->column('count', 0);
 
         $this->_select = $old_select;
         $this->_order_by = $old_order;

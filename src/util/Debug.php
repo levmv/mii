@@ -247,14 +247,14 @@ class Debug {
      */
     public static function path($file)
     {
-        if (strpos($file, MII_PATH) === 0)
+        if (strpos($file, \Mii::path('mii')) === 0)
         {
-            $file = '{mii}'.DIRECTORY_SEPARATOR.substr($file, strlen(MII_PATH));
+            $file = '{mii}'.DIRECTORY_SEPARATOR.substr($file, strlen(\Mii::path('mii')));
         }
 
-        if (strpos($file, APP_PATH) === 0)
+        if (strpos($file, \Mii::path('app')) === 0)
         {
-            $file = '{app}'.substr($file, strlen(APP_PATH));
+            $file = '{app}'.substr($file, strlen(\Mii::path('app')));
         }
 
         return $file;

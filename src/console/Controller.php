@@ -9,6 +9,7 @@ class Controller extends \mii\core\Controller
 
     public $color;
 
+    public $interactive = true;
 
     public function __construct(Request $request, Response $response)
     {
@@ -19,7 +20,6 @@ class Controller extends \mii\core\Controller
         $this->response = $response;
 
     }
-
 
 
     /**
@@ -38,9 +38,13 @@ class Controller extends \mii\core\Controller
      */
     public function execute($params = [])
     {
-        $method = new \ReflectionMethod($this, $this->request->action());
+        //$method = new \ReflectionMethod($this, $this->request->action());
+
+        $this->before();
 
         $code = call_user_func([$this, $this->request->action()], $this->request->params());
+
+        $this->after();
 
         return $this->response;
 
@@ -69,6 +73,31 @@ class Controller extends \mii\core\Controller
             $string = Console::ansi_format($string, $args);
         }
         return Console::stdout($string);
+    }
+
+    public function stdin() {
+        return Console::stdin();
+    }
+
+    public function confirm($message, $default = false) {
+        if ($this->interactive) {
+            return Console::confirm($message, $default);
+        } else {
+            return true;
+        }
+    }
+
+
+    protected function info($msg, $options = []) {
+        \Mii::info(strtr($msg, $options), 'console');
+    }
+
+    protected function warning($msg, $options = []) {
+        \Mii::warning(strtr($msg, $options), 'console');
+    }
+
+    protected function error($msg, $options = []) {
+        \Mii::error(strtr($msg, $options), 'console');
     }
 
 }

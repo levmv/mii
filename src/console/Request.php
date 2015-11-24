@@ -58,20 +58,26 @@ class Request extends \mii\core\Request {
 
         $config = config('console');
 
-        if(isset($config['namespace'])) {
-            $controller = $config['namespace'].'\\'.$controller;
-        }
+        $controller_class = isset($config['namespace']) ? $config['namespace'].'\\'.$controller : $controller;
+
 
         try {
 
-            if (!class_exists($controller)) {
+            if (!class_exists($controller_class)) {
 
-                throw new CliException('Unknown command :com',
-                    [':com' => $controller]
-                );
+                // Try mii controllers
+
+                $controller_class = 'mii\\console\\controllers\\'.$controller;
+
+                if (!class_exists($controller_class)) {
+                    throw new CliException('Unknown command :com',
+                        [':com' => $controller]
+                    );
+                }
+
             }
             // Load the controller using reflection
-            $class = new \ReflectionClass($controller);
+            $class = new \ReflectionClass($controller_class);
 
             if ($class->isAbstract()) {
                 throw new CliException(

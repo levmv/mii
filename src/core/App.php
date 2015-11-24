@@ -17,8 +17,6 @@ abstract class App {
     protected $_auth;
 
 
-
-
     public function __construct(array $config = []) {
 
         Mii::$app = $this;

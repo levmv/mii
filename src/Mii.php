@@ -2,21 +2,14 @@
 
 use mii\Log\Logger;
 
-defined('MII_PATH') or define('MII_PATH', __DIR__);
+defined('MII_START_TIME') or define('MII_START_TIME', microtime(true));
+defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
-defined('MII_DEBUG') or define('MII_DEBUG', true);
-
-defined('MII_PROF') or define('MII_PROF', MII_DEBUG === true);
-
-if(MII_PROF) {
-    defined('MII_START_TIME') or define('MII_START_TIME', microtime(true));
-    defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
-}
 
 
 class Mii {
 
-    const VERSION = '1.0.1';
+    const VERSION = '0.9.1';
 
     const CODENAME = 'Alnair';
 
@@ -25,28 +18,34 @@ class Mii {
      */
     public static $app = null;
 
+    public static $paths = [
+        'mii' => __DIR__
+    ];
+
     /**
     * @var Array of Logger's
     */
     public static $_loggers;
 
-    public static $autoload_prefixes = [
-        "app\\" => APP_PATH,
-        "mii\\" => MII_PATH
-    ];
+
+    public static function path($name) {
+        return static::$paths[$name];
+    }
+
 
     public static function autoloader($class) {
 
 
         // go through the prefixes
-        foreach (static::$autoload_prefixes as $prefix => $path) {
+        foreach (static::$paths as $prefix => $path) {
 
             if (strpos($class, $prefix) !== 0) {
                 continue;
             }
 
             // strip the prefix off the class
-            $class = substr($class, strlen($prefix));
+            $class = substr($class, strlen($prefix)+1);
+
 
             // a partial filename
             $part = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
@@ -98,6 +97,29 @@ class Mii {
         }
     }
 
+    public static function message($file, $path = NULL, $default = NULL)
+    {
+        static $messages;
+        if ( ! isset($messages[$file]))
+        {
+            // Create a new message list
+            $messages[$file] = array();
+            $messages[$file] = include(\Mii::path('app').'/messages/'.$file.'.php');
+
+        }
+        if ($path === NULL)
+        {
+            // Return all of the messages
+            return $messages[$file];
+        }
+        else
+        {
+            // Get a message using the path
+            return \mii\util\Arr::path($messages[$file], $path, $default);
+        }
+    }
+
+
     public static function t($category, $message, $params = [], $language = null)
     {
         if (static::$app !== null) {
@@ -112,6 +134,7 @@ class Mii {
     }
 }
 
+
 function redirect($url) {
     throw new \mii\web\RedirectHttpException($url);
 }
@@ -125,16 +148,16 @@ function block($name) {
 }
 
 
-function config($group = false, $value = false) {
-    if($value) {
-        if($group)
+function config($group = null, $value = null) {
+    if($value !== null) {
+        if($group !== null)
             Mii::$app->_config[$group] = $value;
         else
             Mii::$app->_config = $value;
 
     } else {
 
-        if ($group) {
+        if ($group !== null) {
             if(isset(Mii::$app->_config[$group]))
                 return Mii::$app->_config[$group];
             return [];

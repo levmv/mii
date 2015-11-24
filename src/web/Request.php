@@ -196,8 +196,8 @@ class Request extends \mii\core\Request
                 ':uri' => $this->_uri]);
         }
 
-
-        if (MII_PROF) {
+        $benchmark = false;
+        if (config('profiling')) {
             $benchmark = \mii\util\Profiler::start('Requests', $this->uri());
         }
 
@@ -244,7 +244,7 @@ class Request extends \mii\core\Request
             $response = Exception::handler($e);
         }
 
-        if (MII_PROF) {
+        if ($benchmark) {
             \mii\util\Profiler::stop($benchmark);
         }
 

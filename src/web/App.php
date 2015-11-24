@@ -63,7 +63,9 @@ class App extends \mii\core\App
         {
             $config = $this->config('auth');
 
-            $this->_auth = new \mii\auth\Auth($config);
+            $class = isset($config['class']) ? $config['class'] : '\mii\auth\Auth';
+
+            $this->_auth = new $class($config);
         }
 
         return $this->_auth;

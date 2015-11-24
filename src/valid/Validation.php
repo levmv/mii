@@ -4,6 +4,7 @@ namespace mii\valid;
 
 
 use mii\util\Arr;
+use Mii;
 
 class Validation {
 
@@ -18,6 +19,9 @@ class Validation {
 
     // Error list, field => rule
     protected $_errors = [];
+
+    // Error messages list field => rule => message
+    protected $_error_messages = [];
 
     // Array to validate
     protected $_data = [];
@@ -320,6 +324,11 @@ class Validation {
         return $this;
     }
 
+    public function add_error_message($field, $error, $message) {
+        $this->_error_messages[$field][$error] = $message;
+    }
+
+
     /**
      * Returns the error messages. If no file is specified, the error message
      * will be the name of the rule that failed. When a file is specified, the
@@ -338,7 +347,7 @@ class Validation {
      * @param   mixed   $translate  translate the message
      * @return  array
      */
-    public function errors($file = NULL, $translate = TRUE)
+    public function errors($file = null, $translate = false)
     {
         if ($file === NULL)
         {
@@ -424,7 +433,10 @@ class Validation {
             }
 
 
-            if ($message = Mii::message($file, "{$field}.{$error}") AND is_string($message))
+            if($message = Arr::path($this->_error_messages, "{$field}.{$error}") AND is_string($message)) {
+
+            }
+            elseif ($message = Mii::message($file, "{$field}.{$error}") AND is_string($message))
             {
 
                 // Found a message for this field and error

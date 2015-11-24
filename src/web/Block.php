@@ -274,13 +274,15 @@ class Block
         if (empty($this->_file)) {
             return '';
         }
-        if (MII_PROF)
+
+        $benchmark = false;
+        if (config('profiling'))
             $benchmark = \mii\util\Profiler::start('Block:render', \mii\util\Debug::path($this->_file));
 
         // Combine local and global data and capture the output
         $c = $this->capture($this->_file);
 
-        if (MII_PROF)
+        if ($benchmark)
             \mii\util\Profiler::stop($benchmark);
 
         return $c;

@@ -174,10 +174,14 @@ class Num {
 
     public static $words = array('комментарий', 'комментария', 'комментариев');
 
-    public static function decl($number , $array = FALSE)
+    /**
+     * Declination of number
+     * @param $number
+     * @param bool|FALSE $array
+     * @return mixed
+     */
+    public static function decl($number , $array)
     {
-        if($array == FALSE)
-            $array = self::$words;
 
         $cases = array (2, 0, 1, 1, 1, 2);
 
@@ -191,4 +195,4 @@ class Num {
         }
     }
 
-} // End num
+}

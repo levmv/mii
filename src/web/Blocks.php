@@ -12,16 +12,14 @@ class Blocks
 
     protected $_used_blocks = [];
 
-    protected $libraries = [
-        APP_PATH.'/blocks'
-    ];
+    protected $libraries;
 
     protected $merge = true;
 
     protected $use_symlink = true;
     protected $freeze_mode = false;
 
-    protected $assets_dir = PUB_PATH.'/assets';
+    protected $assets_dir;
 
     protected $assets_pub_dir = '/assets';
 
@@ -29,19 +27,17 @@ class Blocks
     protected $js_blocks = [];
 
 
-
     public function __construct(array $config = [])
     {
+        $this->libraries = [
+            \Mii::path('app').'/blocks'
+        ];
+
+        $this->assets_dir = \Mii::path('pub').'/assets';
+
+
         foreach ($config as $key => $value)
             $this->$key = $value;
-
-
-        if(MII_DEBUG) {
-            foreach($this->libraries as $library) {
-
-            }
-
-        }
     }
 
 
@@ -109,8 +105,8 @@ class Blocks
             return $this->fm_render();
         }
 
-        if (MII_PROF) {
-            $benchmark = \mii\util\Profiler::start('Mii', __FUNCTION__);
+        if (config('profiling')) {
+            $benchmark = \mii\util\Profiler::start('Assets', __FUNCTION__);
         }
 
         $this->_used_blocks = [];
@@ -159,7 +155,7 @@ class Blocks
 
         }
 
-        if (MII_PROF) {
+        if (config('profiling')) {
             \mii\util\Profiler::stop($benchmark);
         }
 
@@ -252,7 +248,7 @@ class Blocks
             $output = $this->assets_pub_dir . '/' . $group_name . '.' . $type;
             $need_recompile = false;
             foreach ($files as $name => $file) {
-                if ($this->is_modified_later(PUB_PATH . $output, filemtime($file))) {
+                if ($this->is_modified_later(\Mii::path('pub') . $output, filemtime($file))) {
                     $need_recompile = true;
                     break;
                 }
@@ -267,11 +263,11 @@ class Blocks
 
                 $gz_output = gzcompress($tmp, 9, ZLIB_ENCODING_GZIP);
 
-                file_put_contents(PUB_PATH . $output, $tmp);
-                file_put_contents(PUB_PATH . $output.'.gz', $gz_output);
+                file_put_contents(\Mii::path('pub') . $output, $tmp);
+                file_put_contents(\Mii::path('pub') . $output.'.gz', $gz_output);
             }
 
-            return $this->_gen_html($output . '?' . filemtime(PUB_PATH . $output), $type);
+            return $this->_gen_html($output . '?' . filemtime(\Mii::path('pub') . $output), $type);
 
         }
 
@@ -279,21 +275,21 @@ class Blocks
 
         foreach ($files as $name => $file) {
 
-            $output = $this->assets_pub_dir . '/' . $name;
+            $output = \Mii::path('pub').'/'.$this->assets_pub_dir . '/' . $name;
 
             $mtime = filemtime($file);
 
-            if ($this->is_modified_later(PUB_PATH . ' / '. $output, $mtime)) {
+            if ($this->is_modified_later($output, $mtime)) {
                 try {
-                    copy($file, PUB_PATH . '/'. $output);
+                    copy($file, $output);
                 } catch (\Exception $e) {
-                    Mii::error('Cant copy file '.PUB_PATH . '/'. $output, 'mii');
-                    $dir = dirname(PUB_PATH . '/' . $output);
+                    Mii::error('Cant copy file '.$output, 'mii');
+                    $dir = dirname($output);
                     mkdir($dir, 0777, true);
-                    copy($file['path'], PUB_PATH . $output);
+                    copy($file['path'], $output);
                 }
             }
-            $out[] = $this->_gen_html($output . '?' . $mtime, $type);
+            $out[] = $this->_gen_html($this->assets_pub_dir . '/' . $name . '?' . $mtime, $type);
         }
 
         return implode("\n", $out);
@@ -411,7 +407,7 @@ class Blocks
 
     public function fm_render() {
 
-        if (MII_PROF) {
+        if (config('profiling')) {
             $benchmark = \mii\util\Profiler::start('Mii', __FUNCTION__);
         }
 
@@ -429,7 +425,7 @@ class Blocks
             }
         }
 
-        if (MII_PROF) {
+        if (config('profiling')) {
             \mii\util\Profiler::stop($benchmark);
         }
 

@@ -5,6 +5,11 @@ namespace mii\db;
 class DB
 {
 
+
+    static function raw($q, array $params = []) {
+        return static::query(null, $q, $params);
+    }
+
     /**
      * @param string $q
      * @return Result
@@ -66,5 +71,19 @@ class DB
     static function expr($value, array $params = []) {
         return new Expression($value, $params);
     }
+
+
+    static function begin() {
+        Database::instance()->begin();
+    }
+
+    static function commit() {
+        Database::instance()->commit();
+    }
+
+    static function rollback() {
+        Database::instance()->rollback();
+    }
+
 
 }

@@ -35,14 +35,6 @@ class Database
     public $last_query;
 
     /**
-     * @var string Character that is used to quote identifiers
-     */
-    protected $_identifier = '`';
-
-    // Identifiers are escaped by repeating them
-    protected $_escaped_identifier = '``';
-
-    /**
      * @var string Instance name
      */
     protected $_instance;
@@ -195,14 +187,15 @@ class Database
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
-        if (MII_PROF) {
+        $benchmark = false;
+        if (config('profiling')) {
             // Benchmark this query for the current instance
             $benchmark = \mii\util\Profiler::start("Database ({$this->_instance})", $sql);
         }
 
         // Execute the query
         if (($result = $this->_connection->query($sql)) === false) {
-            if (MII_PROF) {
+            if ($benchmark) {
                 // This benchmark is worthless
                 \mii\util\Profiler::delete($benchmark);
             }
@@ -213,7 +206,7 @@ class Database
             ], $this->_connection->errno);
         }
 
-        if (MII_PROF) {
+        if ($benchmark) {
             \mii\util\Profiler::stop($benchmark);
         }
 
@@ -234,6 +227,10 @@ class Database
             // Return the number of rows affected
             return $this->_connection->affected_rows;
         }
+    }
+
+    public function inserted_id() {
+        return $this->_connection->insert_id;
     }
 
     /**
@@ -476,7 +473,7 @@ class Database
 
         if (is_array($column)) {
             list($column, $alias) = $column;
-            $alias = str_replace($this->_identifier, $this->_escaped_identifier, $alias);
+            $alias = str_replace('`', '``', $alias);
         }
 
         if ($column instanceof Query) {
@@ -489,7 +486,7 @@ class Database
             // Convert to a string
             $column = (string)$column;
 
-            $column = str_replace($this->_identifier, $this->_escaped_identifier, $column);
+            $column = str_replace('`', '``', $column);
 
             if ($column === '*') {
                 return $column;
@@ -507,18 +504,18 @@ class Database
                 foreach ($parts as & $part) {
                     if ($part !== '*') {
                         // Quote each of the parts
-                        $part = $this->_identifier . $part . $this->_identifier;
+                        $part = '`' . $part . '`';
                     }
                 }
 
                 $column = implode('.', $parts);
             } else {
-                $column = $this->_identifier . $column . $this->_identifier;
+                $column = '`' . $column . '`';
             }
         }
 
         if (isset($alias)) {
-            $column .= ' AS ' . $this->_identifier . $alias . $this->_identifier;
+            $column .= ' AS ' . '`' . $alias . '`';
         }
 
         return $column;
@@ -553,12 +550,9 @@ class Database
      */
     public function quote_table($table)
     {
-        // Identifiers are escaped by repeating them
-        $escaped_identifier = $this->_identifier . $this->_identifier;
-
         if (is_array($table)) {
             list($table, $alias) = $table;
-            $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
+            $alias = str_replace('`', '``', $alias);
         }
 
         if ($table instanceof Query) {
@@ -571,7 +565,7 @@ class Database
             // Convert to a string
             $table = (string)$table;
 
-            $table = str_replace($this->_identifier, $escaped_identifier, $table);
+            $table = str_replace('`', '``', $table);
 
             if (strpos($table, '.') !== false) {
                 $parts = explode('.', $table);
@@ -586,19 +580,19 @@ class Database
 
                 foreach ($parts as & $part) {
                     // Quote each of the parts
-                    $part = $this->_identifier . $part . $this->_identifier;
+                    $part = '`' . $part . '`';
                 }
 
                 $table = implode('.', $parts);
             } else {
                 // Add the table prefix
-                $table = $this->_identifier . $this->table_prefix() . $table . $this->_identifier;
+                $table = '`' . $this->table_prefix() . $table . '`';
             }
         }
 
         if (isset($alias)) {
             // Attach table prefix to alias
-            $table .= ' AS ' . $this->_identifier . $this->table_prefix() . $alias . $this->_identifier;
+            $table .= ' AS ' . '`' . $this->table_prefix() . $alias . '`';
         }
 
         return $table;
@@ -617,12 +611,10 @@ class Database
      */
     public function quote_identifier($value)
     {
-        // Identifiers are escaped by repeating them
-        $escaped_identifier = $this->_identifier . $this->_identifier;
 
         if (is_array($value)) {
             list($value, $alias) = $value;
-            $alias = str_replace($this->_identifier, $escaped_identifier, $alias);
+            $alias = str_replace('`', '``', $alias);
         }
 
         if ($value instanceof Query) {
@@ -635,24 +627,24 @@ class Database
             // Convert to a string
             $value = (string)$value;
 
-            $value = str_replace($this->_identifier, $escaped_identifier, $value);
+            $value = str_replace('`', '``', $value);
 
             if (strpos($value, '.') !== false) {
                 $parts = explode('.', $value);
 
                 foreach ($parts as & $part) {
                     // Quote each of the parts
-                    $part = $this->_identifier . $part . $this->_identifier;
+                    $part = '`' . $part . '`';
                 }
 
                 $value = implode('.', $parts);
             } else {
-                $value = $this->_identifier . $value . $this->_identifier;
+                $value = '`' . $value . '`';
             }
         }
 
         if (isset($alias)) {
-            $value .= ' AS ' . $this->_identifier . $alias . $this->_identifier;
+            $value .= ' AS ' . '`' . $alias . '`';
         }
 
         return $value;

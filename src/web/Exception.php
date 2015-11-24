@@ -29,7 +29,7 @@ class Exception extends \mii\core\Exception {
             \Mii::error(Exception::text($e), 'mii');
             \Mii::flush_logs();
 
-            if(MII_DEBUG) {
+            if(config('debug')) {
                 static::response($e)->send();
             } else {
 
@@ -195,7 +195,7 @@ class Exception extends \mii\core\Exception {
                 $response->body(B::i(Exception::$error_block)->set(get_defined_vars()));
             }*/
 
-            include MII_PATH.'/web/Exception/error.php';
+            include \Mii::path('mii').'/web/Exception/error.php';
             //$response->body();
 
 

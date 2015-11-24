@@ -456,6 +456,6 @@ if( ! defined('SWIFT_INIT_LOADED')) {
 
     // if we are not using composer autoloader
 
-    require MII_PATH.'../vendor/swiftmailer/swiftmailer/lib/swift_required.php';
+    require \Mii::path('mii').'../vendor/swiftmailer/swiftmailer/lib/swift_required.php';
 
 }

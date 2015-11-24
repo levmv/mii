@@ -213,6 +213,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     public function index_by($column) {
         $this->_index_by = $column;
+        return $this;
     }
 
     /**

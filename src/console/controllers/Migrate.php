@@ -19,7 +19,7 @@ class Migrate extends Base {
 
         $config = config('migrate');
 
-        $this->migrations_path = APP_PATH.'/migrations';
+        $this->migrations_path = \Mii::path('app').'/migrations';
 
         foreach($config as $name => $value)
             $this->$name = $value;
@@ -71,7 +71,8 @@ class Migrate extends Base {
         $custom_name = false;
 
         if(count($argv)) {
-            $custom_name = str_replace(' ', '_', mb_strtolower($argv[0], 'utf-8'));
+
+            $custom_name = mb_strtolower($argv[0], 'utf-8');
         }
 
         DB::begin();
@@ -86,6 +87,7 @@ class Migrate extends Base {
 // '.strftime('%F %T').'
 
 use mii\db\Migration;
+use mii\db\DB;
 
 class '.$name.' extends Migration {
 
