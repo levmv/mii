@@ -52,6 +52,19 @@ class Mii {
         }
     }
 
+    public static function get_path($name) {
+        return static::$paths[$name];
+    }
+
+
+    public static function set_path($name, $value) {
+        if(is_array($name)) {
+            static::$paths = $name;
+        } else {
+            static::$paths[$name] = $value;
+        }
+    }
+
 
     /**
      * Sets the logger object.
@@ -143,7 +156,7 @@ function block($name) {
 
 
 function path($name) {
-    return Mii::$app->path($name);
+    return Mii::$paths[$name];
 }
 
 
