@@ -25,7 +25,7 @@ class Mii {
     /**
     * @var Array of Logger's
     */
-    public static $_loggers;
+    public static $_loggers = [];
 
     public static function autoloader($class) {
 
@@ -57,7 +57,7 @@ class Mii {
     }
 
 
-    public static function set_path($name, $value) {
+    public static function set_path($name, $value = null) {
         if(is_array($name)) {
             static::$paths = $name;
         } else {
