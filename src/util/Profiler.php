@@ -389,7 +389,7 @@ class Profiler {
 
 
     public static function show() {
-        include \Mii::path('mii').'/util/Profiler/view.php';
+        include realpath(__DIR__.'/../util/Profiler/view.php');
     }
 
 } // End Profiler

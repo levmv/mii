@@ -27,12 +27,6 @@ class Mii {
     */
     public static $_loggers;
 
-
-    public static function path($name) {
-        return static::$paths[$name];
-    }
-
-
     public static function autoloader($class) {
 
 
@@ -104,7 +98,7 @@ class Mii {
         {
             // Create a new message list
             $messages[$file] = array();
-            $messages[$file] = include(\Mii::path('app').'/messages/'.$file.'.php');
+            $messages[$file] = include(path('app').'/messages/'.$file.'.php');
 
         }
         if ($path === NULL)
@@ -145,6 +139,11 @@ function redirect($url) {
  */
 function block($name) {
     return Mii::$app->blocks()->get($name);
+}
+
+
+function path($name) {
+    return Mii::$app->path($name);
 }
 
 

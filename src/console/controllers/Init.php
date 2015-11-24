@@ -16,7 +16,7 @@ class Init extends Base {
 
         $this->config = [
             'development' => [
-                'path' => \Mii::path('app').'/environments/development/',
+                'path' => path('app').'/environments/development/',
 
                 'rights' => [
                     'public/assets' => 0775,

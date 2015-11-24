@@ -195,7 +195,7 @@ class Exception extends \mii\core\Exception {
                 $response->body(B::i(Exception::$error_block)->set(get_defined_vars()));
             }*/
 
-            include \Mii::path('mii').'/web/Exception/error.php';
+            include realpath(__DIR__.'/../web/Exception/error.php');
             //$response->body();
 
 

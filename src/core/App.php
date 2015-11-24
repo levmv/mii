@@ -7,6 +7,9 @@ use Mii;
 
 abstract class App {
 
+
+    public $paths = [];
+
     /**
      * @var \mii\web\Request|\mii\console\Request;
      */
@@ -22,6 +25,10 @@ abstract class App {
         Mii::$app = $this;
 
         $this->_config = $config;
+
+        if(isset($this->_config['paths'])) {
+            $this->paths = $this->_config['paths'];
+        }
 
         if(isset($this->_config['log'])) {
             foreach($this->_config['log'] as $log_class => $log_config) {
@@ -100,6 +107,10 @@ abstract class App {
         }
     }
 
+
+    public function path($name) {
+        return $this->paths[$name];
+    }
 
     public function get_user_class() {
 

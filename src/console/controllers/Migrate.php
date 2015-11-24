@@ -19,7 +19,7 @@ class Migrate extends Base {
 
         $config = config('migrate');
 
-        $this->migrations_path = \Mii::path('app').'/migrations';
+        $this->migrations_path = path('app').'/migrations';
 
         foreach($config as $name => $value)
             $this->$name = $value;

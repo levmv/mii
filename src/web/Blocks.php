@@ -29,15 +29,19 @@ class Blocks
 
     public function __construct(array $config = [])
     {
-        $this->libraries = [
-            \Mii::path('app').'/blocks'
-        ];
-
-        $this->assets_dir = \Mii::path('pub').'/assets';
-
 
         foreach ($config as $key => $value)
             $this->$key = $value;
+
+        if(!$this->libraries) {
+            $this->libraries = [
+                path('app').'/blocks'
+            ];
+        }
+
+        if(!$this->assets_dir) {
+            $this->assets_dir = path('pub').'/assets';
+        }
     }
 
 
@@ -248,7 +252,7 @@ class Blocks
             $output = $this->assets_pub_dir . '/' . $group_name . '.' . $type;
             $need_recompile = false;
             foreach ($files as $name => $file) {
-                if ($this->is_modified_later(\Mii::path('pub') . $output, filemtime($file))) {
+                if ($this->is_modified_later(path('pub') . $output, filemtime($file))) {
                     $need_recompile = true;
                     break;
                 }
@@ -263,11 +267,11 @@ class Blocks
 
                 $gz_output = gzcompress($tmp, 9, ZLIB_ENCODING_GZIP);
 
-                file_put_contents(\Mii::path('pub') . $output, $tmp);
-                file_put_contents(\Mii::path('pub') . $output.'.gz', $gz_output);
+                file_put_contents(path('pub') . $output, $tmp);
+                file_put_contents(path('pub') . $output.'.gz', $gz_output);
             }
 
-            return $this->_gen_html($output . '?' . filemtime(\Mii::path('pub') . $output), $type);
+            return $this->_gen_html($output . '?' . filemtime(path('pub') . $output), $type);
 
         }
 
@@ -275,7 +279,7 @@ class Blocks
 
         foreach ($files as $name => $file) {
 
-            $output = \Mii::path('pub').'/'.$this->assets_pub_dir . '/' . $name;
+            $output = path('pub').'/'.$this->assets_pub_dir . '/' . $name;
 
             $mtime = filemtime($file);
 
