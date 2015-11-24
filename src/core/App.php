@@ -24,6 +24,11 @@ abstract class App {
 
         Mii::$app = $this;
 
+        $this->init($config);
+    }
+
+    public function init(array $config) {
+
         $this->_config = $config;
 
         if(isset($this->_config['paths'])) {
@@ -55,36 +60,6 @@ abstract class App {
                 exit(1);
             }
         });
-
-       /* set_error_handler(function($code, $error, $file = NULL, $line = NULL)
-        {
-            if (error_reporting() & $code)
-            {
-                // This error is not suppressed by current error reporting settings
-                // Convert the error into an ErrorException
-                throw new \ErrorException($error, $code, 0, $file, $line);
-            }
-            // Do not execute the PHP error handler
-            return TRUE;
-        });*/
-
-/*
-        register_shutdown_function(function() {
-            if ($error = error_get_last() AND in_array($error['type'], [E_PARSE, E_ERROR, E_USER_ERROR]))
-            {
-                // Clean the output buffer
-                ob_get_level() AND ob_clean();
-
-                // Fake an exception for nice debugging
-                throw new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']);
-                //Exception::handler(new \ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']));
-
-                // Shutdown now to avoid a "death loop"
-                exit(1);
-            }
-        });*/
-
-
     }
 
 
