@@ -247,7 +247,7 @@ class Debug {
      */
     public static function path($file)
     {
-        foreach(\Mii::$app->paths as $name => $path) {
+        foreach(\Mii::$paths as $name => $path) {
             if (strpos($file, $path) === 0)
             {
                 $file = '{$name}'.DIRECTORY_SEPARATOR.substr($file, strlen($path));
