@@ -15,7 +15,7 @@ class Log extends File {
         if(! ($this->levels & $level))
             return;
 
-        if($this->category AND $this->category !== $category)
+        if($this->category AND !in_array($category, $this->category))
             return;
 
         if(! $this->is_init)

@@ -22,7 +22,7 @@ class File extends Logger {
     public function __construct($params) {
         $this->file = $params['file'];
         $this->levels = isset($params['levels']) ? $params['levels'] : Logger::ALL;
-        $this->category = isset($params['category']) ? $params['category'] : '' ;
+        $this->category = isset($params['category']) ? $params['category'] : [] ;
         $this->base_path = isset($params['base_path']) ? $params['base_path'] : path('app');
 
     }
@@ -47,7 +47,7 @@ class File extends Logger {
         if(! ($this->levels & $level))
             return;
 
-        if($this->category AND $this->category !== $category)
+        if($this->category AND !in_array($category, $this->category))
             return;
 
         if(! $this->is_init)

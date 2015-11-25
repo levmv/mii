@@ -53,23 +53,30 @@ class ORM
 
     /**
      * @param mixed ID of model to load or set of ids
-     * @return Query|Result
+     * @return Query|$this
      */
     public static function find($id = null)
     {
+        if ($id)
+            return static::find_by_id($id);
+
+        return (new static)->select_query();
+    }
+
+
+    /**
+     * @param $id
+     * @return $this
+     */
+    public static function find_by_id($id)
+    {
         $class = new static();
 
-        if ($id) {
-            if(is_array($id)) {
-
-                return $class->select_query()->where('id', 'IN', DB::expr('('.implode(',', $id).')'))->get();
-
-            } else {
-                return $class->select_query(false)->where('id', '=', $id)->one();
-            }
+        if(is_array($id)) {
+            return $class->select_query()->where('id', 'IN', DB::expr('('.implode(',', $id).')'))->get();
+        } else {
+            return $class->select_query(false)->where('id', '=', $id)->one();
         }
-
-        return $class->select_query();
     }
 
     /**
