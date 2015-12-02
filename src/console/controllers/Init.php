@@ -3,10 +3,12 @@
 namespace mii\console\controllers;
 
 
+use mii\console\Controller;
 use mii\db\DB;
 
-class Init extends Base {
+class Init extends Controller {
 
+    public $description = 'Initialize application environments';
 
     protected $environments;
 

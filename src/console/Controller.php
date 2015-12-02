@@ -7,6 +7,10 @@ use mii\util\Console;
 class Controller extends \mii\core\Controller
 {
 
+    public $name;
+
+    public $description;
+
     public $color;
 
     public $interactive = true;

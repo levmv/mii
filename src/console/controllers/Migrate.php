@@ -3,9 +3,12 @@
 namespace mii\console\controllers;
 
 
+use mii\console\Controller;
 use mii\db\DB;
 
-class Migrate extends Base {
+class Migrate extends Controller {
+
+    public $description = 'DB migrations';
 
     protected $migrate_table = 'migrations';
 
