@@ -173,7 +173,8 @@ class Validation {
      */
     public function check()
     {
-        if (MII_PROF)
+        $benchmark = false;
+        if (config('profiling'))
         {
             // Start a new benchmark
             $benchmark = \mii\util\Profiler::start('Validation', __FUNCTION__);
@@ -300,7 +301,7 @@ class Validation {
         }
 
 
-        if (MII_PROF)
+        if ($benchmark)
         {
             // Stop benchmarking
             \mii\util\Profiler::stop($benchmark);
