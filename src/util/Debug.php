@@ -250,7 +250,7 @@ class Debug {
         foreach(\Mii::$paths as $name => $path) {
             if (strpos($file, $path) === 0)
             {
-                $file = '{$name}'.DIRECTORY_SEPARATOR.substr($file, strlen($path));
+                $file = "{$name}".DIRECTORY_SEPARATOR.substr($file, strlen($path));
             }
         }
 

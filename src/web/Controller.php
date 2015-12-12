@@ -20,7 +20,6 @@ class Controller extends \mii\core\Controller
 
     public $action_params;
 
-
     /**
      * @var \mii\core\ACL Access Control List object
      */
@@ -42,6 +41,10 @@ class Controller extends \mii\core\Controller
      * @var Block
      */
     public $layout = false;
+
+    public $layout_block_name = 'layout';
+
+    public $layout_depends = [];
 
     /**
      * @var string Site title
@@ -144,8 +147,14 @@ class Controller extends \mii\core\Controller
     }
 
 
-    public function setup_layout($block_name = 'layout', $depends = [])
+    public function setup_layout($block_name = null, $depends = null)
     {
+        if($block_name === null)
+            $block_name = $this->layout_block_name;
+
+        if($depends === null)
+            $depends = $this->layout_depends;
+
         $this->layout = block($block_name)
             ->depends($depends)
             ->bind('content', $this->content);
