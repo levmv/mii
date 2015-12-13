@@ -261,7 +261,7 @@ class Blocks
             if ($need_recompile) {
                 $tmp = '';
                 foreach ($files as $file) {
-                    $tmp .= ' ' . file_get_contents($file);
+                    $tmp .=  file_get_contents($file)."\n";
                 }
                 $tmp = $this->_process($tmp, $type);
 

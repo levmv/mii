@@ -21,10 +21,17 @@ class Log extends File {
         if(! $this->is_init)
             $this->init();
 
-        $this->messages[] = $message = [$message, $level, $category, time()];
+        $this->messages[] = [$message, $level, $category, time()];
 
 
-        $message = $this->format_message($message);
+
+        if (!is_string($message)) {
+
+            if ($message instanceof \Exception) {
+                $message = (string) $message;
+            }
+        }
+
 
         $params = [];
 

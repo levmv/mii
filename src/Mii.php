@@ -159,6 +159,10 @@ function path($name) {
     return Mii::$paths[$name];
 }
 
+function e($text) {
+    return mii\util\Html::entities($text, false);
+}
+
 
 function config($group = null, $value = null) {
     if($value !== null) {
