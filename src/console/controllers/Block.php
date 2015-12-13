@@ -24,7 +24,7 @@ class Block extends Controller {
 
     public function before() {
 
-        $this->input_path = path('vendor').'/bower/bower-asset';
+        $this->input_path = path('vendor').'/bower/';
         $this->output_path = path('app').'/blocks';
 
     }
