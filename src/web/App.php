@@ -22,7 +22,6 @@ class App extends \mii\core\App
             foreach($loggers as $class_name => $log_params) {
                 Mii::add_logger(new $class_name($log_params));
             }
-
         }
 
         $cookie_config = $this->config('cookie');
@@ -59,16 +58,8 @@ class App extends \mii\core\App
 
 
     public function auth() {
-        if ($this->_auth === null)
-        {
-            $config = $this->config('auth');
-
-            $class = isset($config['class']) ? $config['class'] : '\mii\auth\Auth';
-
-            $this->_auth = new $class($config);
-        }
-
-        return $this->_auth;
+        $this->get('auth');
+        return $this->get('auth');
     }
 
     public function register_exception_handler()

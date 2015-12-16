@@ -5,7 +5,7 @@ namespace mii\core;
 use Mii;
 
 
-abstract class App {
+class App extends ServiceLocator{
 
     /**
      * @var \mii\web\Request|\mii\console\Request;
@@ -20,7 +20,6 @@ abstract class App {
     public function __construct(array $config = []) {
 
         Mii::$app = $this;
-
         $this->init($config);
     }
 
@@ -36,6 +35,15 @@ abstract class App {
             }
         }
 
+        $components = $this->default_components();
+
+        if(isset($config['components'])) {
+            $components = array_merge($components, $config['components']);
+        }
+
+        foreach($components as $name => $config) {
+            $this->set($name, $config);
+        }
 
         $this->register_exception_handler();
         $this->register_error_handler();
@@ -77,11 +85,11 @@ abstract class App {
     }
 
 
-    public function get_user_class() {
-
-        $config = $this->config('auth');
-        return (isset($config['user_model'])) ? $config['user_model'] : 'app\models\User';
+    public function default_components() {
+        return [
+            'user' => 'app\models\User',
+            'auth' => '\mii\auth\Auth',
+        ];
     }
-
 
 }

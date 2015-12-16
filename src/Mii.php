@@ -16,7 +16,9 @@ class Mii {
     /**
      * @var \mii\web\App|\mii\console\App;
      */
-    public static $app = null;
+    public static $app;
+
+    public static $container;
 
     public static $paths = [
         'mii' => __DIR__
@@ -49,6 +51,22 @@ class Mii {
                 require $path . DIRECTORY_SEPARATOR . $part;
                 return;
             }
+        }
+    }
+
+    public static function create($type, $params = []) {
+        if (is_string($type)) {
+            return static::$container->get($type, $params);
+        } elseif (is_array($type) && isset($type['class'])) {
+            $class = $type['class'];
+            unset($type['class']);
+            return static::$container->get($class, $params, $type);
+        } elseif (is_callable($type, true)) {
+            return call_user_func($type, $params);
+        } elseif (is_array($type)) {
+            throw new InvalidConfigException('Object configuration must be an array containing a "class" element.');
+        } else {
+            throw new InvalidConfigException('Unsupported configuration type: ' . gettype($type));
         }
     }
 
@@ -140,6 +158,9 @@ class Mii {
         }
     }
 }
+
+
+Mii::$container = new \mii\core\Container();
 
 
 function redirect($url) {
