@@ -11,9 +11,6 @@ class App extends \mii\core\App
 
     protected $_blocks;
 
-    protected $_session;
-
-
     public function run()
     {
 
@@ -29,12 +26,6 @@ class App extends \mii\core\App
         foreach($cookie_config as $key => $value) {
             Cookie::$$key = $value;
         }
-
-        /*if (isset($cookie_config['salt']))
-            Cookie::$salt = $cookie_config['salt'];
-
-        if (isset($cookie_config['domain']))
-            Cookie::$salt = $cookie_config['domain'];*/
 
         $this->blocks(new Blocks($this->config('blocks')));
 
@@ -56,9 +47,7 @@ class App extends \mii\core\App
         $this->_blocks = $blocks;
     }
 
-
     public function auth() {
-        $this->get('auth');
         return $this->get('auth');
     }
 

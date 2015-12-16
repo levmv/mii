@@ -5,7 +5,12 @@ namespace mii\core;
 use Mii;
 
 
-class App extends ServiceLocator{
+abstract class App extends ServiceLocator {
+
+
+    public $charset = 'UTF-8';
+
+    public $controller;
 
     /**
      * @var \mii\web\Request|\mii\console\Request;
@@ -26,7 +31,6 @@ class App extends ServiceLocator{
     public function init(array $config) {
 
         $this->_config = $config;
-
 
         if(isset($this->_config['log'])) {
             foreach($this->_config['log'] as $log_class => $log_config) {
@@ -64,6 +68,9 @@ class App extends ServiceLocator{
         });
     }
 
+    public function register_exception_handler() {}
+    public function register_error_handler() {}
+
 
     public function config($group = false, $value = false) {
         if($value) {
@@ -87,8 +94,9 @@ class App extends ServiceLocator{
 
     public function default_components() {
         return [
-            'user' => 'app\models\User',
+            'user' => '\mii\auth\User',
             'auth' => '\mii\auth\Auth',
+            'db' => '\mii\db\Database'
         ];
     }
 

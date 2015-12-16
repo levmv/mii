@@ -2,40 +2,28 @@
 
 namespace mii\core;
 
-use Mii;
 use Closure;
+use Mii;
 
-class ServiceLocator {
+class ServiceLocator
+{
 
     private $_components = [];
 
     private $_definitions = [];
 
 
-    public function __get($name)
-    {
+    public function __get($name) {
         if ($this->has($name)) {
             return $this->get($name);
         }
     }
 
-
-    public function __isset($name)
-    {
-        if ($this->has($name, true)) {
-            return true;
-        }
-        return false;
-    }
-
-
-    public function has($id, $instantiated = false)
-    {
+    public function has($id, $instantiated = false) {
         return $instantiated ? isset($this->_components[$id]) : isset($this->_definitions[$id]);
     }
 
-    public function get($id, $throwException = true)
-    {
+    public function get($id, $throwException = true) {
         if (isset($this->_components[$id])) {
             return $this->_components[$id];
         }
@@ -44,17 +32,23 @@ class ServiceLocator {
             if (is_object($definition) && !$definition instanceof Closure) {
                 return $this->_components[$id] = $definition;
             } else {
-                return $this->_components[$id] = Mii::create( $definition);
+                return $this->_components[$id] = Mii::create($definition);
             }
         } elseif ($throwException) {
-            throw new InvalidConfigException("Unknown component ID: $id");
+            throw new \Exception("Unknown component ID: $id");
         } else {
             return null;
         }
     }
 
-    public function set($id, $definition)
-    {
+    public function __isset($name) {
+        if ($this->has($name, true)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function set($id, $definition) {
         if ($definition === null) {
             unset($this->_components[$id], $this->_definitions[$id]);
             return;
@@ -76,10 +70,4 @@ class ServiceLocator {
         }
     }
 
-    public function setComponents($components)
-    {
-        foreach ($components as $id => $component) {
-            $this->set($id, $component);
-        }
-    }
 }
