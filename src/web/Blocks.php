@@ -265,7 +265,7 @@ class Blocks
                 }
                 $tmp = $this->_process($tmp, $type);
 
-                $gz_output = gzcompress($tmp, 9, ZLIB_ENCODING_GZIP);
+                $gz_output = gzencode($tmp, 6);
 
                 file_put_contents(path('pub') . $output, $tmp);
                 file_put_contents(path('pub') . $output.'.gz', $gz_output);
