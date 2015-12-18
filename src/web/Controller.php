@@ -209,7 +209,7 @@ class Controller extends \mii\core\Controller
             }
         }
         if (!empty($missing)) {
-            throw new HttpException(500, 'Missing required parameters: :param}', [
+            throw new HttpException(500, 'Missing required parameters: ":params"', [
                 ':params' => implode(', ', $missing),
             ]);
         }

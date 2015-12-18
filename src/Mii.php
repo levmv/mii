@@ -182,10 +182,3 @@ function config($group = null, $value = null) {
         return Mii::$app->_config;
     }
 }
-
-
-
-$route = new \mii\core\Route('auth/<slug>', 'admin/news');
-
-print_r($route->match('auth/sdfasdf#1'));
-exit;

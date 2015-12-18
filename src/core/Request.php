@@ -48,6 +48,11 @@ abstract class Request {
      */
     public function match_route($routes = NULL)
     {
+        $router = new Router(config('components')['router']);
+
+        $router->init_routes();
+
+        return ['route' => '', 'params' => $router->match($this->uri())];
 
         // Load routes
         $routes = (empty($routes)) ? Route::all() : $routes;

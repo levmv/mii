@@ -191,10 +191,11 @@ class Request extends \mii\core\Request
 
         }
 
-        if (!$this->_route instanceof Route) {
+   /*     if (!$this->_route instanceof Route) {
             throw new HttpException(404, 'Unable to find a route to match the URI: :uri', [
                 ':uri' => $this->_uri]);
-        }
+        }*/
+
 
         $benchmark = false;
         if (config('profiling')) {
