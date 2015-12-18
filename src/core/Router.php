@@ -21,7 +21,7 @@ class Router {
 
     protected $routes;
 
-    protected $group_order;
+    protected $order;
 
     protected $_routes_list;
 
@@ -34,8 +34,8 @@ class Router {
     public function init_routes() {
 
         // Sort groups
-        if(count($this->routes) && $this->group_order) {
-            $this->routes = array_merge(array_flip($this->group_order), $this->routes);
+        if(count($this->routes) && $this->order) {
+            $this->routes = array_merge(array_flip($this->order), $this->routes);
         }
 
         foreach($this->routes as $namespace => $group) {
