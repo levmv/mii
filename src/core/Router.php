@@ -19,16 +19,33 @@ class Router {
         'slug' => '[a-zA-Z0-9-_.]+'
     ];
 
+    protected $_defaults = ['action' => 'index'];
+
+    protected $cache = false;
+
     protected $routes;
 
     protected $order;
 
     protected $_routes_list;
 
+    protected $_named_routes;
+
 
     public function __construct($config = []) {
         foreach($config as $key => $value)
             $this->$key = $value;
+
+        $this->init();
+    }
+
+    public function init() {
+
+        if($this->cache) {
+
+        } else {
+            $this->init_routes();
+        }
     }
 
     public function init_routes() {
@@ -59,18 +76,28 @@ class Router {
 
                 $is_closure = ($value instanceof \Closure) ;
 
-                $compiled = $this->compile_route($pattern, $params);
+                if((strpos($pattern, '<') === false AND strpos($pattern, '(') === false)) {
+                    // static route
+                    $compiled = $pattern;
+                    $is_static = true;
+                } else {
+                    $compiled = $this->compile_route($pattern, $params);
+                    $is_static = false;
+                }
 
-                $this->_routes_list[$pattern] = [
+                $this->_routes_list[$compiled] = [
                     'name' => $name,
                     'pattern' => $pattern,
                     'path' => $is_closure ? false : $path,
                     'compiled' => $compiled,
                     'namespace' => $namespace,
                     'is_closure' => $is_closure,
-                    'is_static' =>  (strpos($pattern, '<') === false AND strpos($pattern, '(') === false)
+                    'is_static' => $is_static
                 ];
 
+                if($name) {
+                    $this->_named_routes[$name] = $this->_routes_list[$pattern];
+                }
             }
         }
     }
@@ -176,30 +203,116 @@ class Router {
 
     public function url($name, $params = []) {
 
-
-        if (strpos($uri, '<') === FALSE AND strpos($uri, '(') === FALSE)
-        {
-            // This is a static route, no need to replace anything
-
-            if ( ! $this->is_external())
-                return $uri;
-
-            // If the localhost setting does not have a protocol
-            if (strpos($this->_defaults['host'], '://') === FALSE)
-            {
-                // Use the default defined protocol
-                $params['host'] = Route::$default_protocol.$this->_defaults['host'];
-            }
-            else
-            {
-                // Use the supplied host with protocol
-                $params['host'] = $this->_defaults['host'];
-            }
-
-            // Compile the final uri and return it
-            return rtrim($params['host'], '/').'/'.$uri;
+        if(!isset($this->_routes_list[$name])) {
+            throw new RouteException('Route :name doesnt exist', [':name' => $name]);
         }
 
+        $route = $this->_routes_list[$name];
+
+
+        if ($route['is_static'])
+        {
+            // This is a static route, no need to replace anything
+            // TODO: host?
+            return '/'.$route['pattern'];
+        }
+
+
+        // TODO:
+
+        // Keep track of whether an optional param was replaced
+        $provided_optional = FALSE;
+
+        while (preg_match('#\([^()]++\)#', $route['compiled'], $match))
+        {
+
+            // Search for the matched value
+            $search = $match[0];
+
+            // Remove the parenthesis from the match as the replace
+            $replace = substr($match[0], 1, -1);
+
+            while (preg_match('#'.Route::REGEX_KEY.'#', $replace, $match))
+            {
+                list($key, $param) = $match;
+
+                if (isset($params[$param]) AND $params[$param] !== Arr::get($this->_defaults, $param))
+                {
+                    // Future optional params should be required
+                    $provided_optional = TRUE;
+
+                    // Replace the key with the parameter value
+                    $replace = str_replace($key, $params[$param], $replace);
+                }
+                elseif ($provided_optional)
+                {
+                    // Look for a default
+                    if (isset($this->_defaults[$param]))
+                    {
+                        $replace = str_replace($key, $this->_defaults[$param], $replace);
+                    }
+                    else
+                    {
+                        // Ungrouped parameters are required
+                        throw new RouteException('Required route parameter not passed: :param', [
+                            ':param' => $param,
+                        ]);
+                    }
+                }
+                else
+                {
+                    // This group has missing parameters
+                    $replace = '';
+                    break;
+                }
+            }
+
+            // Replace the group in the URI
+            $uri = str_replace($search, $replace, $uri);
+        }
+
+        while (preg_match('#'.Route::REGEX_KEY.'#', $uri, $match))
+        {
+            list($key, $param) = $match;
+
+            if ( ! isset($params[$param]))
+            {
+                // Look for a default
+                if (isset($this->_defaults[$param]))
+                {
+                    $params[$param] = $this->_defaults[$param];
+                }
+                else
+                {
+                    // Ungrouped parameters are required
+                    throw new RouteException('Required route parameter not passed: :param', [
+                        ':param' => $param,
+                    ]);
+                }
+            }
+
+            $uri = str_replace($key, $params[$param], $uri);
+        }
+
+        // Trim all extra slashes from the URI
+        $uri = preg_replace('#//+#', '/', rtrim($uri, '/'));
+
+        if ($this->is_external())
+        {
+            // Need to add the host to the URI
+            $host = $this->_defaults['host'];
+
+            if (strpos($host, '://') === FALSE)
+            {
+                // Use the default defined protocol
+                $host = Route::$default_protocol.$host;
+            }
+
+            // Clean up the host and prepend it to the URI
+            $uri = rtrim($host, '/').'/'.$uri;
+        }
+
+        return $uri;
     }
 
 }
