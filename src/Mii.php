@@ -203,5 +203,3 @@ function config($group = null, $value = null) {
         return Mii::$app->_config;
     }
 }
-
-
