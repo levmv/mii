@@ -46,7 +46,7 @@ class Controller extends \mii\core\Controller
 
         $this->before();
 
-        $code = call_user_func([$this, $this->request->action()], $this->request->params());
+        $code = call_user_func([$this, $this->request->action], $this->request->params);
 
         $this->after();
 

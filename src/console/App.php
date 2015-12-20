@@ -14,15 +14,6 @@ class App extends \mii\core\App
 
     public function run()
     {
-        $loggers = $this->config('log');
-        if($loggers) {
-
-            foreach($loggers as $class_name => $log_params) {
-                Mii::add_logger(new $class_name($log_params));
-            }
-
-        }
-
         try {
             $this->request = new Request();
 
@@ -54,7 +45,6 @@ class App extends \mii\core\App
             return true;
         });
     }
-
 
     public function default_components() {
         return array_merge(parent::default_components(), [

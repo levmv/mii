@@ -27,8 +27,8 @@ class Request extends \mii\core\Request {
             $controller = 'Help';
         }
 
-        $this->controller($controller);
-        $this->action('index');
+        $this->controller = $controller;
+        $this->action = 'index';
 
         $params = [];
         $c = 0;
@@ -39,7 +39,7 @@ class Request extends \mii\core\Request {
 
             } else {
                 if($c === 0) {
-                    $this->action($param);
+                    $this->action = $param;
                 } else {
                     $params[] = $param;
                 }
@@ -47,14 +47,14 @@ class Request extends \mii\core\Request {
             $c++;
         }
 
-        $this->_params = $params;
+        $this->params = $params;
 
     }
 
     function execute() {
         // Controller
 
-        $controller = $this->controller();
+        $controller = $this->controller;
 
         $config = config('console');
 
@@ -91,7 +91,7 @@ class Request extends \mii\core\Request {
             $controller = $class->newInstance($this, $response);
 
             // Run the controller's execute() method
-            $response = $class->getMethod('execute')->invoke($controller, $this->_params);
+            $response = $class->getMethod('execute')->invoke($controller, $this->params);
 
 
             if (!$response instanceof Response) {
