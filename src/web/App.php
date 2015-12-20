@@ -13,24 +13,14 @@ class App extends \mii\core\App
 
     public function run()
     {
-
-        if($loggers = $this->config('log')) {
-
-            foreach($loggers as $class_name => $log_params) {
-                Mii::add_logger(new $class_name($log_params));
-            }
-        }
-
         $cookie_config = $this->config('cookie');
 
         foreach($cookie_config as $key => $value) {
             Cookie::$$key = $value;
         }
 
-        $this->blocks(new Blocks($this->config('blocks')));
-
         try {
-            $this->request = new Request();
+            $this->request = $this->get('request');
 
             $this->request->execute()->send();
 
@@ -39,16 +29,13 @@ class App extends \mii\core\App
         }
     }
 
-    public function blocks(Blocks $blocks = null)
+    /**
+     * @return Blocks
+     * @throws \Exception
+     */
+    public function blocks()
     {
-        if ($blocks === null)
-            return $this->_blocks;
-
-        $this->_blocks = $blocks;
-    }
-
-    public function auth() {
-        return $this->get('auth');
+        return $this->get('blocks');
     }
 
     public function register_exception_handler()
@@ -70,6 +57,18 @@ class App extends \mii\core\App
             return true;
         });
     }
+
+
+    public function default_components() {
+        return array_merge(parent::default_components(), [
+            'session' => ['class' => \mii\web\Session::class],
+            'blocks' => ['class' => \mii\web\Blocks::class],
+            'router' => ['class' => \mii\web\Router::class ],
+            'request' => ['class' => \mii\web\Request::class],
+            'response' => ['class' => \mii\web\Response::class]
+        ]);
+    }
+
 
 
 }

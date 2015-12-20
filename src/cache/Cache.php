@@ -7,73 +7,6 @@ use mii\util\Arr;
 abstract class Cache {
 
 
-    /**
-     * @var   string     default driver to use
-     */
-    public static $default = 'apc';
-
-    /**
-     * @var   Cache instances
-     */
-    public static $instances = [];
-
-    /**
-     * Creates a singleton of a Kohana Cache group. If no group is supplied
-     * the __default__ cache group is used.
-     *
-     *     // Create an instance of the default group
-     *     $default_group = Cache::instance();
-     *
-     *     // Create an instance of a group
-     *     $foo_group = Cache::instance('foo');
-     *
-     *     // Access an instantiated group directly
-     *     $foo_group = Cache::$instances['default'];
-     *
-     * @param   string  $group  the name of the cache group to use [Optional]
-     * @return  Cache
-     * @throws  CacheException
-     */
-    public static function instance($group = NULL)
-    {
-        // If there is no group supplied
-        if ($group === NULL)
-        {
-            // Use the default setting
-            $group = Cache::$default;
-        }
-
-        if (isset(Cache::$instances[$group]))
-        {
-            // Return the current group if initiated already
-            return Cache::$instances[$group];
-        }
-
-        $config = config('cache');
-
-
-        if ( ! isset($config[$group]))
-        {
-            throw new CacheException(
-                'Failed to load Cache config for :group',
-                [':group' => $group]
-            );
-        }
-
-        $config = $config[$group];
-
-        // Create a new cache type instance
-        $cache_class = $config['class'];
-        Cache::$instances[$group] = new $cache_class($config);
-
-        // Return the instance
-        return Cache::$instances[$group];
-    }
-
-    /**
-     * @var  Config
-     */
-
     protected $default_expire = 3600;
 
     protected $prefix = '';
@@ -83,7 +16,7 @@ abstract class Cache {
      *
      * @param  array  $config  configuration
      */
-    protected function __construct(array $config)
+    public function __construct(array $config)
     {
         foreach ($config as $name => $value) {
             $this->$name = $value;

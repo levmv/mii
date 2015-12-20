@@ -2,6 +2,7 @@
 
 namespace mii\web;
 
+use Mii;
 use mii\core\Route;
 use mii\util\Arr;
 
@@ -57,14 +58,11 @@ class Request extends \mii\core\Request
     protected $_post = [];
 
 
-    public function init($uri = null)
+    public function init()
     {
 
-        if ($uri !== null) {
-            $this->uri(uri);
-        } else {
-            // Attempt to guess the proper URI
-            $this->uri(Request::detect_uri());
+        if ($this->_uri === null) {
+            $this->uri($this->detect_uri());
         }
 
         if (isset($_SERVER['REQUEST_METHOD'])) {
@@ -76,7 +74,6 @@ class Request extends \mii\core\Request
             // This request is secure
             $this->secure(true);
         }
-
 
         // Store global GET and POST data in the initial request only
         $this->_get = &$_GET;
@@ -166,35 +163,23 @@ class Request extends \mii\core\Request
      */
     public function execute()
     {
-        $processed = $this->match_route($this->_routes);
+        $route = \Mii::$app->router->match($this->uri());
 
-        if ($processed) {
-
-            // Store the matching route
-            $this->_route = $processed['route'];
-            $params = $processed['params'];
-
-            // Store the controller
-            $this->_controller = $params['controller'];
-
-
-            // Store the action
-            $this->_action = (isset($params['action']))
-                ? $params['action']
-                : Route::$default_action;
-
-            // These are accessible as public vars and can be overloaded
-            unset($params['controller'], $params['action']);
-
-            // Params cannot be changed once matched
-            $this->_params = $params;
-
+        if($route === false) {
+            throw new HttpException(404, 'Unable to find a route to match the URI: :uri', [
+                ':uri' => $this->uri()]);
         }
 
-   /*     if (!$this->_route instanceof Route) {
-            throw new HttpException(404, 'Unable to find a route to match the URI: :uri', [
-                ':uri' => $this->_uri]);
-        }*/
+        $this->controller = $route['controller'];
+
+        $this->action = $route['action'];
+
+        // These are accessible as public vars and can be overloaded
+        unset($route['controller'], $route['action']);
+
+        // Params cannot be changed once matched
+        $this->params = $route;
+
 
 
         $benchmark = false;
@@ -202,30 +187,29 @@ class Request extends \mii\core\Request
             $benchmark = \mii\util\Profiler::start('Requests', $this->uri());
         }
 
-        $controller = $this->controller();
+        //$controller = $this->controller();
 
         try {
             if (extension_loaded('newrelic')) {
-                newrelic_name_transaction($controller . '::' . $this->_action);
+                newrelic_name_transaction($this->controller . '::' . $this->action);
             }
 
-            if (!class_exists($controller)) {
+            if (!class_exists($this->controller)) {
 
                 throw new HttpException(404, 'The requested URL :uri was not found on this server.',
                     [':uri' => $this->uri()]
                 );
             }
 
-            // Load the controller using reflection
-            $class = new \ReflectionClass($controller);
-
             $response = new Response;
 
             // Create a new instance of the controller
-            $controller = $class->newInstance($this, $response);
+            $controller = \Mii::$container->get($this->controller, [$this, $response]);
+
+            \Mii::$app->controller = $controller;
 
             // Run the controller's execute() method
-            $response = $class->getMethod('execute')->invoke($controller, $params);
+            $response = $controller->execute($route);
 
             if (!$response instanceof Response) {
                 // Controller failed to return a Response.

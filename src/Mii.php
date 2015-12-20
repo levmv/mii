@@ -18,7 +18,11 @@ class Mii {
      */
     public static $app;
 
+    /**
+     * @var \mii\core\Container
+     */
     public static $container;
+
 
     public static $paths = [
         'mii' => __DIR__
@@ -54,21 +58,6 @@ class Mii {
         }
     }
 
-    public static function create($type, $params = []) {
-        if (is_string($type)) {
-            return static::$container->get($type, $params);
-        } elseif (is_array($type) && isset($type['class'])) {
-            $class = $type['class'];
-            unset($type['class']);
-            return static::$container->get($class, $params, $type);
-        } elseif (is_callable($type, true)) {
-            return call_user_func($type, $params);
-        } elseif (is_array($type)) {
-            throw new InvalidConfigException('Object configuration must be an array containing a "class" element.');
-        } else {
-            throw new InvalidConfigException('Unsupported configuration type: ' . gettype($type));
-        }
-    }
 
     public static function get_path($name) {
         return static::$paths[$name];
@@ -90,10 +79,10 @@ class Mii {
      */
     public static function add_logger(Logger $logger) {
         static::$_loggers[] = $logger;
-
     }
 
     public static function error($msg, $category = 'app') {
+
         static::log(Logger::ERROR, $msg, $category);
     }
 
@@ -109,11 +98,8 @@ class Mii {
         static::log(Logger::NOTICE, $msg, $category);
     }
 
-
     public static function log($level, $msg, $category) {
-        foreach(static::$_loggers as $logger) {
-            $logger->log($level, $msg, $category);
-        }
+        static::$app->get('log')->log($level, $msg, $category);
     }
 
     public static function flush_logs() {
@@ -148,7 +134,7 @@ class Mii {
     public static function t($category, $message, $params = [], $language = null)
     {
         if (static::$app !== null) {
-            return static::$app->getI18n()->translate($category, $message, $params, $language ?: static::$app->language);
+            return static::$app->I18n->translate($category, $message, $params, $language ?: static::$app->language);
         } else {
             $p = [];
             foreach ((array) $params as $name => $value) {
@@ -160,9 +146,6 @@ class Mii {
 }
 
 
-Mii::$container = new \mii\core\Container();
-
-
 function redirect($url) {
     throw new \mii\web\RedirectHttpException($url);
 }
@@ -172,7 +155,7 @@ function redirect($url) {
  * @return \mii\web\Block
  */
 function block($name) {
-    return Mii::$app->blocks()->get($name);
+    return Mii::$app->blocks->get($name);
 }
 
 

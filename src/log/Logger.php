@@ -2,8 +2,9 @@
 
 namespace mii\log;
 
-
 class Logger {
+
+    public $targets = [];
 
     /**
      * Detailed debug information
@@ -52,7 +53,7 @@ class Logger {
      *
      * @var array $levels Logging levels
      */
-    protected static $level_names = [
+    public static $level_names = [
         1 => 'DEBUG',
         2 => 'INFO',
         4 => 'NOTICE',
@@ -63,20 +64,34 @@ class Logger {
     ];
 
 
-    protected $messages = [];
+
+    public function __construct($config = []) {
+        foreach($config as $key => $value)
+            $this->$key = $value;
 
 
-    /**
-     * Adds a log record at an arbitrary level.
-     *
-     * This method allows for compatibility with common interfaces.
-     *
-     * @param  mixed   $level   The log level
-     * @param  string  $message The log message
-     * @param  array   $context The log context
-     * @return Boolean Whether the record has been processed
-     */
-    //abstract public function log($level, $message, array $context = array());
+        foreach($this->targets as $name => $logger) {
+            $this->targets[$name] = \Mii::$container->get($logger['class'], [$logger]);
+        }
+
+        register_shutdown_function(function () {
+            $this->flush();
+        });
+    }
+
+    public function log($level, $message, $category) {
+        foreach($this->targets as $target) {
+            $target->log($level, $message, $category);
+        }
+
+    }
+
+    public function flush() {
+
+        foreach($this->targets as $target) {
+            $target->flush();
+        }
+    }
 
 
 }

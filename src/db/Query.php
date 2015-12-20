@@ -479,7 +479,7 @@ class Query
     {
         if (!is_object($db)) {
             // Get the database instance
-            $db = Database::instance($db);
+            $db = \Mii::$app->get('db');
         }
 
         // Callback to quote columns
@@ -1247,7 +1247,7 @@ class Query
 
         if (!is_object($db)) {
             // Get the database instance
-            $db = Database::instance($db);
+            $db = \Mii::$app->get('db');
         }
 
         if ($as_object === NULL) {

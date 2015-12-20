@@ -12,7 +12,7 @@ class Apc extends Cache
      * @param  array $config configuration
      * @throws CacheException
      */
-    protected function __construct(array $config)
+    public function __construct(array $config)
     {
 
         if (!extension_loaded('apc')) {

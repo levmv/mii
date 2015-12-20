@@ -41,8 +41,9 @@ class Session
      * @return  void
      * @uses    Session::read
      */
-    public function __construct(array $config = NULL, $id = NULL)
+    public function __construct(array $config = [])
     {
+
         if (isset($config['name'])) {
             // Cookie name to store the session id in
             $this->_name = (string)$config['name'];
@@ -67,32 +68,6 @@ class Session
         //$this->read($id);
     }
 
-    /**
-     * Creates a singleton session of the given type. Some session types
-     * (native, database) also support restarting a session by passing a
-     * session id as the second parameter.
-     *
-     *     $session = Session::instance();
-     *
-     * [!!] [Session::write] will automatically be called when the request ends.
-     *
-     * @param   string $type type of session (native, cookie, etc)
-     * @param   string $id session identifier
-     * @return  Session
-     */
-    public static function instance($id = NULL)
-    {
-        if (!isset(Session::$_instance)) {
-
-            $config = \Mii::$app->config('session');
-
-            // Create a new session instance
-            Session::$_instance = $session = new self($config, $id);
-
-        }
-
-        return Session::$_instance;
-    }
 
     /**
      *
@@ -101,11 +76,10 @@ class Session
      * @return bool
      */
 
-    public static function check_cookie()
+    public function check_cookie()
     {
-        $config = \Mii::$app->config('session');
 
-        return isset($_COOKIE[$config['name']]);
+        return isset($_COOKIE[$this->_name]);
     }
 
     /**

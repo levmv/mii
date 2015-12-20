@@ -57,10 +57,10 @@ class Database
      *
      * @return  void
      */
-    public function __construct($name, array $config)
+    public function __construct(array $config)
     {
         // Set the instance name
-        $this->_instance = $name;
+        //$this->_instance = $name;
 
         // Store the config locally
         $this->_config = $config;
@@ -70,41 +70,6 @@ class Database
         }
     }
 
-    /**
-     * Get a singleton Database instance. If configuration is not specified,
-     * it will be loaded from the database configuration file using the same
-     * group as the name.
-     *
-     *     // Load the default database
-     *     $db = Database::instance();
-     *
-     *     // Create a custom configured instance
-     *     $db = Database::instance('custom', $config);
-     *
-     * @param   string $name instance name
-     * @param   array $config configuration parameters
-     * @return  Database
-     */
-    public static function instance($name = NULL, array $config = NULL)
-    {
-
-        if ($name === NULL) {
-            // Use the default instance name
-            $name = Database::$default;
-        }
-
-        if (!isset(Database::$instances[$name])) {
-            if ($config === NULL) {
-                // Load the configuration for this database
-                $config = config('database')[$name];
-            }
-
-            // Store the database instance
-            Database::$instances[$name] = new Database($name, $config);
-        }
-
-        return Database::$instances[$name];
-    }
 
     /**
      * Disconnect from the database when the object is destroyed.

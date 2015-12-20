@@ -2,6 +2,7 @@
 
 namespace mii\util;
 
+use Mii;
 use mii\cache\Cache;
 
 /**
@@ -313,7 +314,7 @@ class Profiler {
     public static function application() {
 
         // Load the stats from cache, which is valid for 1 day
-        $stats = Cache::instance()->get('profiler_app_stats', NULL);
+        $stats = Mii::$app->cache->get('profiler_app_stats', NULL);
 
         if ( ! is_array($stats) OR $stats['count'] > Profiler::$rollover)
         {
@@ -376,7 +377,7 @@ class Profiler {
             'memory' => $stats['total']['memory'] / $stats['count']);
 
         // Cache the new stats
-        Cache::instance()->set('profiler_app_stats', $stats,  3600 * 12);
+        Mii::$app->cache->set('profiler_app_stats', $stats,  3600 * 12);
 
         // Set the current application execution time and memory
         // Do NOT cache these, they are specific to the current request only

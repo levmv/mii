@@ -3,7 +3,7 @@
 namespace mii\db;
 
 
-class ORM
+class ORM implements ORMInterface
 {
 
     /**

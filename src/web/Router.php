@@ -1,6 +1,6 @@
 <?php
 
-namespace mii\core;
+namespace mii\web;
 
 
 class Router {
@@ -46,6 +46,8 @@ class Router {
         } else {
             $this->init_routes();
         }
+
+
     }
 
     public function init_routes() {

@@ -44,8 +44,7 @@ class Auth
         foreach ($config as $name => $value) {
             $this->$name = $value;
         }
-
-        $this->_session = Session::instance();
+        $this->_session = \Mii::$app->session;
     }
 
 

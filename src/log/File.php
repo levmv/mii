@@ -6,7 +6,7 @@ namespace mii\log;
 use mii\core\Exception;
 use mii\util\Debug;
 
-class File extends Logger {
+class File extends Target {
 
 
     protected $base_path;
@@ -28,20 +28,6 @@ class File extends Logger {
     }
 
 
-    public function init() {
-        $this->is_init = true;
-
-        $path = dirname($this->base_path.$this->file);
-        if (!is_dir($path)) {
-            mkdir($path, 0777, true);
-        }
-
-
-        register_shutdown_function(function () {
-            $this->flush();
-        });
-    }
-
     public function log($level, $message, $category) {
 
         if(! ($this->levels & $level))
@@ -50,8 +36,6 @@ class File extends Logger {
         if($this->category AND !in_array($category, $this->category))
             return;
 
-        if(! $this->is_init)
-            $this->init();
 
         $this->messages[] = [$message, $level, $category, time()];
 
@@ -63,9 +47,13 @@ class File extends Logger {
         if(!count($this->messages))
             return;
 
+        $path = dirname($this->base_path.$this->file);
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
+
         $text = implode("\n", array_map([$this, 'format_message'], $this->messages)) . "\n";
         $this->messages = [];
-
 
         if (($fp = @fopen($this->base_path.$this->file, 'a')) === false) {
             // TODO: throw new Exception("Unable to append to log file: {$this->file}");

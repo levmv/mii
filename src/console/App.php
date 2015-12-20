@@ -56,4 +56,12 @@ class App extends \mii\core\App
     }
 
 
+    public function default_components() {
+        return array_merge(parent::default_components(), [
+            'request' => ['class' => 'mii\console\Request'],
+            'response' => ['class' => 'mii\console\Response']
+        ]);
+    }
+
+
 }

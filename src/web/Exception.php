@@ -29,6 +29,7 @@ class Exception extends \mii\core\Exception {
             \Mii::error(Exception::text($e), 'mii');
             \Mii::flush_logs();
 
+
             if(config('debug')) {
                 static::response($e)->send();
             } else {
@@ -49,8 +50,9 @@ class Exception extends \mii\core\Exception {
                 \Mii::$app->request->action('error_page');
                 \Mii::$app->request->params(['code' => $status]);
 
+                print_r($e);exit;
                 $response = new Response();
-                $controller = new $class(\Mii::$app->request, $response);
+                $controller = new $class(\Mii::$app->get('request'), $response, \Mii::$app);
                 $controller->execute();
 
                 $response->status($status);

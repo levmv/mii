@@ -18,6 +18,8 @@ class Controller extends \mii\core\Controller
      */
     public $response;
 
+    public $app;
+
     public $action_params;
 
     /**
@@ -79,6 +81,7 @@ class Controller extends \mii\core\Controller
      *
      * @param   Request $request Request that created the controller
      * @param   Response $response The request's response
+     * @param   App $app
      */
     public function __construct(Request $request, Response $response)
     {
@@ -88,7 +91,7 @@ class Controller extends \mii\core\Controller
         // Assign a response to the controller
         $this->response = $response;
 
-        $this->acl = new ACL();
+        $this->acl = new ACL;
     }
 
     protected function access_rules()
@@ -163,23 +166,23 @@ class Controller extends \mii\core\Controller
 
     public function execute($params = [])
     {
-        $method = new \ReflectionMethod($this, $this->request->action());
+        $method = new \ReflectionMethod($this, $this->request->action);
 
-        $args = $this->process_action_params($method, $this->request->params());
+        $args = $this->process_action_params($method, $this->request->params);
 
         $this->access_rules();
 
-        $this->user = Mii::$app->user = Mii::$app->auth()->get_user();
+        $this->user = Mii::$app->user = Mii::$app->auth->get_user();
 
         $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
 
-        if (!$this->acl->check($roles, $this->request->controller(), $this->request->action())) {
+        if (!$this->acl->check($roles, $this->request->controller, $this->request->action)) {
             throw new HttpException(404, 'User has no rights to access :page', [':page' => $this->request->uri()]);
         }
 
         $this->before();
 
-        $content = call_user_func_array([$this, $this->request->action()], $args);
+        $content = call_user_func_array([$this, $this->request->action], $args);
 
         return $this->after($content);
     }
