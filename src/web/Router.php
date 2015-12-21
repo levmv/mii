@@ -5,14 +5,14 @@ namespace mii\web;
 
 class Router {
 
-    // Defines the pattern of a <segment>
-    const REGEX_KEY     = '<([a-zA-Z0-9_]++)>';
+    // Defines the pattern of a {segment}
+    const REGEX_KEY     = '{([a-zA-Z0-9_]++)}';
 
-    // What can be part of a <segment> value
+    // What can be part of a {segment} value
     const REGEX_SEGMENT = '[^/.,;?\n]++';
 
     // What must be escaped in the route regex
-    const REGEX_ESCAPE  = '[.\\+*?[^\\]${}=!|]';
+    const REGEX_ESCAPE  = '[.\\+*?[^\\]$<>=!|]';
 
     protected $default_parameters = [
         'id' => '[0-9]+',
@@ -78,7 +78,7 @@ class Router {
 
                 $is_closure = ($value instanceof \Closure) ;
 
-                if((strpos($pattern, '<') === false AND strpos($pattern, '(') === false)) {
+                if((strpos($pattern, '{') === false AND strpos($pattern, '(') === false)) {
                     // static route
                     $compiled = $pattern;
                     $is_static = true;
@@ -109,7 +109,7 @@ class Router {
     public function compile_route($pattern, $parameters) {
 
         // The URI should be considered literal except for keys and optional parts
-        // Escape everything preg_quote would escape except for : ( ) < >
+        // Escape everything preg_quote would escape except for : ( ) { }
         $expression = preg_replace('#'. static::REGEX_ESCAPE.'#', '\\\\$0', $pattern);
 
         if (strpos($expression, '(') !== FALSE)
@@ -119,14 +119,15 @@ class Router {
         }
 
         // Insert default regex for keys
-        $expression = str_replace(['<', '>'], ['(?P<', '>'. static::REGEX_SEGMENT.')'], $expression);
+        $expression = str_replace(['{', '}'], ['(?\'', '\''. static::REGEX_SEGMENT.')'], $expression);
 
         $search = $replace = [];
         foreach ($parameters as $key => $value)
         {
-            $search[]  = "<$key>". static::REGEX_SEGMENT;
-            $replace[] = "<$key>$value";
+            $search[]  = "'".$key."'". static::REGEX_SEGMENT;
+            $replace[] = "'".$key."'".$value;
         }
+
 
         // Replace the default regex with the user-specified regex
         $expression = str_replace($search, $replace, $expression);
@@ -188,7 +189,7 @@ class Router {
         $path = $route['path'];
 
         foreach($params as $key => $value) {
-            $path = str_replace('<'.$key.'>', $value, $path);
+            $path = str_replace('{'.$key.'}', $value, $path);
         }
 
         if(strpos($path, ':') !== false) {
