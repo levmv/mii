@@ -16,7 +16,8 @@ class Router {
 
     protected $default_parameters = [
         'id' => '[0-9]+',
-        'slug' => '[a-zA-Z0-9-_.]+'
+        'slug' => '[a-zA-Z0-9-_.]+',
+        'path' => '[a-zA-Z0-9-_./]+'
     ];
 
     protected $_defaults = ['action' => 'index'];
@@ -193,18 +194,21 @@ class Router {
         }
 
         if(strpos($path, ':') !== false) {
-            list($params['controller'], $params['action']) = explode(':', $path);
-        } else {
-            $params['controller'] = $path;
+            list($path, $params['action']) = explode(':', $path);
         }
 
-        $path = explode('/', $params['controller']);
-        $filename = ucfirst(array_pop($path));
+        $path = explode('/', $path);
+
+        $filename = array_pop($path);
+
+        if(isset($params['controller'])) {
+            $filename = $params['controller'];
+        }
 
         $params['controller'] = $route['namespace'];
         if(count($path))
             $params['controller'] .= implode("\\", $path)."\\";
-        $params['controller'] .= $filename;
+        $params['controller'] .= ucfirst($filename);
 
         return $params;
     }
