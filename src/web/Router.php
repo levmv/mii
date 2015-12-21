@@ -87,6 +87,8 @@ class Router {
                     $is_static = false;
                 }
 
+                $namespace = rtrim($namespace, "\\")."\\";
+
                 $this->_routes_list[$compiled] = [
                     'name' => $name,
                     'pattern' => $pattern,
@@ -195,9 +197,13 @@ class Router {
             $params['controller'] = $path;
         }
 
-        $params['controller'] = explode('/', $params['controller']);
-        $filename = ucfirst(array_pop($params['controller']));
-        $params['controller'] = $route['namespace'].implode('\\', $params['controller']).'\\'.$filename;
+        $path = explode('/', $params['controller']);
+        $filename = ucfirst(array_pop($path));
+
+        $params['controller'] = $route['namespace'];
+        if(count($path))
+            $params['controller'] .= implode("\\", $path)."\\";
+        $params['controller'] .= $filename;
 
         return $params;
     }
