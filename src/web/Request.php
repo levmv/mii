@@ -194,6 +194,7 @@ class Request extends \mii\core\Request
                 newrelic_name_transaction($this->controller . '::' . $this->action);
             }
 
+
             if (!class_exists($this->controller)) {
 
                 throw new HttpException(404, 'The requested URL :uri was not found on this server.',
@@ -344,10 +345,9 @@ class Request extends \mii\core\Request
 
 
     public function csrf_token($new = false) {
-        $session = \mii\web\Session::instance();
 
         // Get the current token
-        $token = $session->get('csrf_request_token');
+        $token = \Mii::$app->session->get('csrf_request_token');
 
         if ($new === TRUE OR ! $token)
         {
@@ -355,7 +355,7 @@ class Request extends \mii\core\Request
             $token = sha1(uniqid(NULL, TRUE));
 
             // Store the new token
-            $session->set('csrf_request_token', $token);
+            \Mii::$app->session->set('csrf_request_token', $token);
         }
 
         return $token;
