@@ -91,16 +91,21 @@ class Controller extends \mii\core\Controller
         }
     }
 
-
     protected function info($msg, $options = []) {
-        \Mii::info(strtr($msg, $options), 'console');
+        $msg = strtr($msg, $options);
+        $this->stdout($msg."\n", Console::FG_GREEN);
+        \Mii::info($msg, 'console');
     }
 
     protected function warning($msg, $options = []) {
+        $msg = strtr($msg, $options);
+        $this->stdout($msg."\n", Console::FG_PURPLE);
         \Mii::warning(strtr($msg, $options), 'console');
     }
 
     protected function error($msg, $options = []) {
+        $msg = strtr($msg, $options);
+        $this->stdout($msg."\n", Console::FG_RED);
         \Mii::error(strtr($msg, $options), 'console');
     }
 

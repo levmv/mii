@@ -69,7 +69,6 @@ class Logger {
         foreach($config as $key => $value)
             $this->$key = $value;
 
-
         foreach($this->targets as $name => $logger) {
             $this->targets[$name] = \Mii::$container->get($logger['class'], [$logger]);
         }

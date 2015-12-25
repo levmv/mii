@@ -12,12 +12,6 @@ class Block extends Controller {
 
     public $description = 'Blocks builder';
 
-    protected $blocks = [
-        'i_jquery' => 'do_jquery',
-        'i_chosen' => 'do_chosen',
-        'i_fancybox' => 'do_fancybox'
-    ];
-
     protected $input_path;
 
     protected $output_path;
@@ -27,6 +21,16 @@ class Block extends Controller {
         $this->input_path = path('vendor').'/bower/';
         $this->output_path = path('app').'/blocks';
 
+        $this->blocks = $this->block_rules();
+
+    }
+
+    public function block_rules() {
+        return [
+            'i_jquery' => 'do_jquery',
+            'i_chosen' => 'do_chosen',
+            'i_fancybox' => 'do_fancybox'
+        ];
     }
 
 
@@ -91,6 +95,14 @@ class Block extends Controller {
         $this->to_assets('fancybox/source/fancybox_sprite@2x.png', $block);
 
         //$this->to_assets('fancybox/source/fotorama@2x.png', $block);
+    }
+
+
+    protected function do_plupload($block) {
+        $this->to_block('plupload/js/plupload.js', $block, 'js');
+        $this->to_assets('plupload/js/plupload.flash.swf', $block);
+        $this->to_assets('plupload/js/plupload.silverlight.xap', $block);
+
     }
 
 

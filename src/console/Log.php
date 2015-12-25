@@ -18,12 +18,7 @@ class Log extends File {
         if($this->category AND !in_array($category, $this->category))
             return;
 
-        if(! $this->is_init)
-            $this->init();
-
         $this->messages[] = [$message, $level, $category, time()];
-
-
 
         if (!is_string($message)) {
 
@@ -31,7 +26,6 @@ class Log extends File {
                 $message = (string) $message;
             }
         }
-
 
         $params = [];
 
