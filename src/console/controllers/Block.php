@@ -119,6 +119,10 @@ class Block extends Controller {
 
     }
 
+    protected function do_spinjs($block) {
+        $this->to_block('spin.js/spin.min.js', $block, 'js');
+    }
+
     protected function to_block($from, $block_name, $ext, $callback = null) {
 
         if(! file_exists($this->input_path . '/'. $from))
