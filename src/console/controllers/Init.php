@@ -94,6 +94,9 @@ class Init extends Controller {
 
         $base_path = path('root');
         foreach($paths as $path => $rights) {
+            if(!is_dir($path)) {
+                mkdir($path, $rights, true);
+            }
             $this->stdout("chmod ".decoct($rights)." ".$path."\n");
             chmod($base_path.'/'.$path, $rights);
         }

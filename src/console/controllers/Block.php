@@ -126,7 +126,12 @@ class Block extends Controller {
 
         $dir = $this->output_path.'/'.implode('/', explode('_', $block_name));
         if(!is_dir($dir)) {
-            mkdir($dir);
+            try {
+                mkdir($dir, 0777, true);
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
+                $this->error($dir);
+            }
         }
 
         if($callback) {
