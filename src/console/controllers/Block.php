@@ -123,6 +123,18 @@ class Block extends Controller {
         $this->to_block('spin.js/spin.min.js', $block, 'js');
     }
 
+
+    protected function do_fontawesome($block) {
+        $this->to_block('font-awesome/css/font-awesome.min.css', $block, 'css',
+            function($text) use ($block) {
+                return str_replace('../fonts', '/assets/'.$block, $text);
+            });
+        $this->iterate_dir('font-awesome/fonts/', function($file) use ($block) {
+            $this->to_assets('font-awesome/fonts/'.$file, $block);
+        });
+    }
+
+
     protected function to_block($from, $block_name, $ext, $callback = null) {
 
         if(! file_exists($this->input_path . '/'. $from))
