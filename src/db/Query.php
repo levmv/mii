@@ -1353,8 +1353,7 @@ class Query
     public function count() {
         $this->_type = Database::SELECT;
 
-        $db = Database::instance();
-
+        $db = \Mii::$app->get('db');
 
         $old_select = $this->_select;
         $old_order = $this->_order_by;
