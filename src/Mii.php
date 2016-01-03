@@ -158,6 +158,45 @@ function block($name) {
     return Mii::$app->blocks->get($name);
 }
 
+/**
+ * Retrieve a cached value entry by id.
+ *
+ *     // Retrieve cache entry with id foo
+ *     $data = get_cached('foo');
+ *
+ *     // Retrieve cache entry and return 'bar' if miss
+ *     $data = get_cached('foo', 'bar');
+ *
+ * @param   string $id id of cache to entry
+ * @param   string $default default value to return if cache miss
+ * @return  mixed
+ * @throws  \mii\cache\CacheException
+ */
+function get_cached($name, $default = null) {
+    return Mii::$app->cache->get($name, $default);
+}
+
+/**
+ * Set a value to cache with id and lifetime
+ *
+ *     $data = 'bar';
+ *
+ *     // Set 'bar' to 'foo', using default expiry
+ *     cache('foo', $data);
+ *
+ *     // Set 'bar' to 'foo' for 30 seconds
+ *     cache('foo', $data, 30);
+ *
+ * @param   string $id id of cache entry
+ * @param   string $data data to set to cache
+ * @param   integer $lifetime lifetime in seconds
+ * @return  boolean
+ */
+
+function cache($id, $data, $lifetime = null) {
+    return Mii::$app->cache->set($id, $data, $lifetime);
+}
+
 
 function path($name) {
     return Mii::$paths[$name];
