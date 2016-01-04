@@ -145,7 +145,7 @@ class Router {
             if($result === false)
                 continue;
 
-            return $result;
+            return [$route, $result];
         }
     }
 

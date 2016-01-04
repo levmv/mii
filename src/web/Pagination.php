@@ -88,7 +88,7 @@ class Pagination {
         }
 
         $this->request 	= $request;
-        $this->route 	= $request->route();
+        //$this->route 	= $request->route();
 
 
         // Assign default route params

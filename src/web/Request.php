@@ -163,22 +163,26 @@ class Request extends \mii\core\Request
      */
     public function execute()
     {
-        $route = \Mii::$app->router->match($this->uri());
+        $route_result = \Mii::$app->router->match($this->uri());
 
-        if($route === false) {
+        if($route_result === false) {
             throw new HttpException(404, 'Unable to find a route to match the URI: :uri', [
                 ':uri' => $this->uri()]);
         }
 
-        $this->controller = $route['controller'];
+        $this->_route = $route_result[0]['name'];
 
-        $this->action = $route['action'];
+        $params = $route_result[1];
+
+        $this->controller = $params['controller'];
+
+        $this->action = $params['action'];
 
         // These are accessible as public vars and can be overloaded
-        unset($route['controller'], $route['action']);
+        unset($params['controller'], $params['action']);
 
         // Params cannot be changed once matched
-        $this->params = $route;
+        $this->params = $params;
 
 
 
@@ -210,7 +214,7 @@ class Request extends \mii\core\Request
             \Mii::$app->controller = $controller;
 
             // Run the controller's execute() method
-            $response = $controller->execute($route);
+            $response = $controller->execute($params);
 
             if (!$response instanceof Response) {
                 // Controller failed to return a Response.
