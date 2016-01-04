@@ -94,8 +94,8 @@ class Pagination {
         // Assign default route params
         $this->route_params = array(
               //  'directory'		=> $request->directory(),
-                'controller' 	=> $request->controller(),
-                'action'		=> $request->action(),
+                'controller' 	=> $request->controller,
+                'action'		=> $request->action,
             ) ;//+ $request->param();
 
 
