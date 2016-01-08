@@ -4,7 +4,6 @@ namespace mii\auth;
 
 use Mii;
 use mii\db\Query;
-use mii\web\Cookie;
 use mii\web\Exception;
 use mii\web\Session;
 
@@ -62,7 +61,7 @@ class Auth
             $this->_user = $this->_session->get($this->session_key, $default);
         }
 
-        if (!$this->_user AND Cookie::get($this->token_cookie, false)) {
+        if (!$this->_user AND Mii::$app->request->get_cookie($this->token_cookie, false)) {
             // check for "remembered" login
             $this->auto_login();
         }
@@ -105,7 +104,7 @@ class Auth
                 $token->create();
 
                 // Set the autologin cookie
-                Cookie::set($this->token_cookie, $token->token, $this->lifetime);
+                Mii::$app->request->set_cookie($this->token_cookie, $token->token, $this->lifetime);
             }
 
             // Finish the login
@@ -132,9 +131,9 @@ class Auth
         $this->_session->delete('auth_forced');
 
 
-        if ($token = Cookie::get($this->token_cookie)) {
+        if ($token = Mii::$app->request->get_cookie($this->token_cookie)) {
             // Delete the autologin cookie to prevent re-login
-            Cookie::delete($this->token_cookie);
+            Mii::$app->request->delete_cookie($this->token_cookie);
 
             // Clear the autologin token from the database
             $token = (new Token)->get_token($token);
@@ -309,7 +308,7 @@ class Auth
      * @return  mixed
      */
     public function auto_login() {
-        if ($token = Cookie::get($this->token_cookie)) {
+        if ($token = Mii::$app->request->get_cookie($this->token_cookie)) {
             // Load the token and user
             $token = Token::find()->where('token', '=', $token)->one();
 
@@ -323,7 +322,7 @@ class Auth
                     $new_token->create();
 
                     // Set the new token
-                    Cookie::set($this->token_cookie, $new_token->token, $new_token->expires - time());
+                    Mii::$app->request->set_cookie($this->token_cookie, $new_token->token, $new_token->expires - time());
 
                     // Complete the login with the found data
 
@@ -342,7 +341,7 @@ class Auth
             } else {
 
                 // Token is invalid
-                Cookie::delete($this->token_cookie);
+                Mii::$app->request->delete_cookie($this->token_cookie);
             }
         }
 

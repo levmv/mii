@@ -57,6 +57,38 @@ class Request extends \mii\core\Request
      */
     protected $_post = [];
 
+    /**
+     * @var  string  Magic salt to add to the cookie
+     */
+    protected $cookie_salt = null;
+
+    /**
+     * @var  integer  Number of seconds before the cookie expires
+     */
+    protected $cookie_expiration = 0;
+
+    /**
+     * @var  string  Restrict the path that the cookie is available to
+     */
+    protected $cookie_path = '/';
+
+    /**
+     * @var  string  Restrict the domain that the cookie is available to
+     */
+    protected $cookie_domain = null;
+
+    /**
+     * @var  boolean  Only transmit cookies over secure connections
+     */
+    protected $cookie_secure = false;
+
+    /**
+     * @var  boolean  Only transmit cookies over HTTP, disabling Javascript access
+     */
+    protected $cookie_httponly = false;
+
+
+
 
     public function init()
     {
@@ -198,7 +230,6 @@ class Request extends \mii\core\Request
                 newrelic_name_transaction($this->controller . '::' . $this->action);
             }
 
-
             if (!class_exists($this->controller)) {
 
                 throw new HttpException(404, 'The requested URL :uri was not found on this server.',
@@ -323,8 +354,8 @@ class Request extends \mii\core\Request
     }
 
     public function param($key, $default = null) {
-        if(isset($this->_params[$key]))
-            return $this->_params[$key];
+        if(isset($this->params[$key]))
+            return $this->params[$key];
 
         return $default;
     }
@@ -415,4 +446,113 @@ class Request extends \mii\core\Request
         return $this->_raw_body;
     }
 
+
+
+    /**
+     * Gets the value of a signed cookie. Cookies without signatures will not
+     * be returned. If the cookie signature is present, but invalid, the cookie
+     * will be deleted.
+     *
+     * @param   string $key cookie name
+     * @param   mixed $default default value to return
+     * @return  string
+     */
+    public function get_cookie($key, $default = null)
+    {
+        if (!isset($_COOKIE[$key])) {
+            // The cookie does not exist
+            return $default;
+        }
+
+        // Get the cookie value
+        $cookie = $_COOKIE[$key];
+
+        // Find the position of the split between salt and contents
+        $split = strlen($this->salt($key, null));
+
+        if (isset($cookie[$split]) && $cookie[$split] === '~') {
+            // Separate the salt and the value
+            list ($hash, $value) = explode('~', $cookie, 2);
+
+            if ($this->salt($key, $value) === $hash) {
+                // Cookie signature is valid
+                return $value;
+            }
+
+            // The cookie signature is invalid, delete it
+            $this->delete_cookie($key);
+        }
+
+        return $default;
+    }
+
+
+    /**
+     * Sets a signed cookie. Note that all cookie values must be strings and no
+     * automatic serialization will be performed!
+     *
+     * @param   string $name name of cookie
+     * @param   string $value value of cookie
+     * @param   integer $expiration lifetime in seconds
+     * @return  boolean
+     */
+    public function set_cookie($name, $value, $expiration = null)
+    {
+        if ($expiration === null) {
+            // Use the default expiration
+            $expiration = $this->cookie_expiration;
+        }
+
+        if ($expiration !== 0) {
+            // The expiration is expected to be a UNIX timestamp
+            $expiration += time();
+        }
+
+        // Add the salt to the cookie value
+        $value = $this->salt($name, $value) . '~' . $value;
+
+        return setcookie($name, $value, $expiration, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
+    }
+
+
+    /**
+     * Deletes a cookie by making the value null and expiring it.
+     *
+     *     Cookie::delete('theme');
+     *
+     * @param   string $name cookie name
+     * @return  boolean
+     */
+    public function delete_cookie($name)
+    {
+        // Remove the cookie
+        unset($_COOKIE[$name]);
+
+        // Nullify the cookie and make it expire
+        return setcookie($name, null, -86400, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
+    }
+
+
+    /**
+     * Generates a salt string for a cookie based on the name and value.
+     *
+     * @param   string $name name of cookie
+     * @param   string $value value of cookie
+     * @return  string
+     */
+    public function salt($name, $value)
+    {
+        // Require a valid salt
+        if (!$this->cookie_salt) {
+            throw new InvalidArgumentException(
+                'A valid cookie salt is required. Please set Cookie::$salt before calling this method.' .
+                'For more information check the documentation'
+            );
+        }
+
+        // Determine the user agent
+        $agent = isset($_SERVER['HTTP_USER_AGENT']) ? strtolower($_SERVER['HTTP_USER_AGENT']) : 'unknown';
+
+        return sha1($agent . $name . $value . $this->cookie_salt);
+    }
 }

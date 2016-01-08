@@ -78,7 +78,6 @@ class Session
 
     public function check_cookie()
     {
-
         return isset($_COOKIE[$this->_name]);
     }
 
@@ -117,7 +116,11 @@ class Session
             return;
 
         // Sync up the session cookie with Cookie parameters
-        session_set_cookie_params($this->_lifetime, Cookie::$path, Cookie::$domain, Cookie::$secure, Cookie::$httponly);
+        session_set_cookie_params($this->_lifetime,
+            \Mii::$app->request->cookie_path,
+            \Mii::$app->request->cookie_domain,
+            \Mii::$app->request->cookie_secure,
+            \Mii::$app->request->cookie_httponly);
 
         // Do not allow PHP to send Cache-Control headers
         session_cache_limiter(false);
