@@ -197,6 +197,23 @@ function cache($id, $data, $lifetime = null) {
     return Mii::$app->cache->set($id, $data, $lifetime);
 }
 
+/**
+ * Delete a cache entry based on id, or delete all cache entries.
+ *
+ *     // Delete 'foo' entry from the apc group
+ *     Cache::instance('apc')->delete('foo');
+ *
+ * @param   string $id id to remove from cache
+ * @return  boolean
+ */
+
+function clear_cache($id = null) {
+    if($id === null)
+        return Mii::$app->cache->delete_all();
+
+    return Mii::$app->cache->delete($id);
+}
+
 
 function path($name) {
     return Mii::$paths[$name];
