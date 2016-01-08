@@ -373,7 +373,7 @@ class Container
                 } elseif ($reflection !== null) {
                     $name = $reflection->getConstructor()->getParameters()[$index]->getName();
                     $class = $reflection->getName();
-                    throw new InvalidConfigException("Missing required parameter \"$name\" when instantiating \"$class\".");
+                    throw new \Exception("Missing required parameter \"$name\" when instantiating \"$class\".");
                 }
             }
         }

@@ -70,24 +70,22 @@ class Request extends \mii\core\Request
     /**
      * @var  string  Restrict the path that the cookie is available to
      */
-    protected $cookie_path = '/';
+    public $cookie_path = '/';
 
     /**
      * @var  string  Restrict the domain that the cookie is available to
      */
-    protected $cookie_domain = null;
+    public $cookie_domain = null;
 
     /**
      * @var  boolean  Only transmit cookies over secure connections
      */
-    protected $cookie_secure = false;
+    public $cookie_secure = false;
 
     /**
      * @var  boolean  Only transmit cookies over HTTP, disabling Javascript access
      */
-    protected $cookie_httponly = false;
-
-
+    public $cookie_httponly = false;
 
 
     public function init()

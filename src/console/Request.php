@@ -58,23 +58,34 @@ class Request extends \mii\core\Request {
 
         $config = config('console');
 
-        $controller_class = isset($config['namespace']) ? $config['namespace'].'\\'.$controller : $controller;
+        if(isset($config['namespaces']) AND count($config['namespaces'])) {
+            $namespaces = $config['namespaces'];
+            $controller_class = array_shift($namespaces).'\\'.$controller;
 
+        } else {
+            $namespaces = [];
+            $controller_class = $controller;
+        }
 
         try {
+            while (!class_exists($controller_class)) {
 
-            if (!class_exists($controller_class)) {
+                // Try next controller
 
-                // Try mii controllers
+                if(count($namespaces)) {
+                    $controller_class = array_shift($namespaces).'\\'.$controller;
+                    continue;
+                } else {
 
-                $controller_class = 'mii\\console\\controllers\\'.$controller;
+                    // try mii controller
+                    $controller_class = 'mii\\console\\controllers\\'.$controller;
 
-                if (!class_exists($controller_class)) {
-                    throw new CliException('Unknown command :com',
-                        [':com' => $controller]
-                    );
+                    if (!class_exists($controller_class)) {
+                        throw new CliException('Unknown command :com',
+                            [':com' => $controller]
+                        );
+                    }
                 }
-
             }
             // Load the controller using reflection
             $class = new \ReflectionClass($controller_class);

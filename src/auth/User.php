@@ -9,17 +9,10 @@ use Mii;
 
 class User extends ORM{
 
-
-
-    public function on_create() {
-        $this->password = Mii::$app->auth()->hash($this->password);
-
-    }
-
-
-    public function on_update() {
-        if(isset($this->_changed['password']))
-            $this->password = Mii::$app->auth()->hash($this->password);
+    public function on_change() {
+        if($this->changed('password')) {
+            $this->password = Mii::$app->auth->hash($this->password);
+        }
     }
 
 
