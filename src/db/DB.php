@@ -26,7 +26,7 @@ class DB
      */
     static function query($type, $q, array $params = []) {
 
-        $db = Database::instance();
+        $db = \Mii::$app->db;
 
         if (!empty($params)) {
             // Quote all of the values
@@ -74,15 +74,15 @@ class DB
 
 
     static function begin() {
-        Database::instance()->begin();
+        \Mii::$app->db->begin();
     }
 
     static function commit() {
-        Database::instance()->commit();
+        \Mii::$app->db->commit();
     }
 
     static function rollback() {
-        Database::instance()->rollback();
+        \Mii::$app->db->rollback();
     }
 
 
