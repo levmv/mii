@@ -352,12 +352,19 @@ class Validation {
             return $this->_errors;
         }
 
+
         // Create a new message list
         $messages = [];
 
         foreach ($this->_errors as $field => $set)
         {
-            list($error, $params) = $set;
+            if(is_array($set)) {
+                list($error, $params) = $set;
+            } else {
+                $error = $set;
+                $params = [];
+            }
+
 
             // Get the label for this field
             $label = $this->_labels[$field];
@@ -379,7 +386,7 @@ class Validation {
             // Start the translation values list
             $values = [
                 ':field' => $label,
-                ':value' => Arr::get($this, $field),
+                ':value' => $this->field($field),
             ];
 
             if (is_array($values[':value']))
