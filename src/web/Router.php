@@ -101,7 +101,7 @@ class Router {
                 ];
 
                 if($name) {
-                    $this->_named_routes[$name] = $this->_routes_list[$pattern];
+                    $this->_named_routes[$name] = $this->_routes_list[$compiled];
                 }
             }
         }
@@ -138,6 +138,9 @@ class Router {
 
 
     public function match($uri) {
+
+        if($uri !== '/')
+            $uri = rtrim($uri, '//');
 
         foreach($this->_routes_list as $route) {
             $result = $this->match_route($uri, $route);
@@ -222,14 +225,12 @@ class Router {
 
         $route = $this->_routes_list[$name];
 
-
         if ($route['is_static'])
         {
             // This is a static route, no need to replace anything
             // TODO: host?
             return '/'.$route['pattern'];
         }
-
 
         // TODO:
 
@@ -284,7 +285,7 @@ class Router {
             $uri = str_replace($search, $replace, $uri);
         }
 
-        while (preg_match('#'.Route::REGEX_KEY.'#', $uri, $match))
+        while (preg_match('#'.static::REGEX_KEY.'#', $uri, $match))
         {
             list($key, $param) = $match;
 

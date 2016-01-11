@@ -24,6 +24,8 @@ class Form {
 
     public $enable_csrf_validation = true;
 
+    public $message_file;
+
     protected $_csrf_token = '';
 
     protected $_changed = [];
@@ -128,7 +130,7 @@ class Form {
     }
 
     public function errors() {
-        return $this->validation->errors();
+        return $this->validation->errors($this->message_file);
     }
 
 
