@@ -96,14 +96,14 @@ class Text {
 
         $limit = (int) $limit;
 
-        if (trim($str) === '' OR UTF8::strlen($str) <= $limit)
+        if (trim($str) === '' OR mb_strlen($str, 'utf-8') <= $limit)
             return $str;
 
         if ($limit <= 0)
             return $end_char;
 
         if ($preserve_words === FALSE)
-            return rtrim(UTF8::substr($str, 0, $limit)).$end_char;
+            return rtrim(mb_substr($str, 0, $limit, 'utf-8')).$end_char;
 
         // Don't preserve words. The limit is considered the top limit.
         // No strings with a length longer than $limit should be returned.
