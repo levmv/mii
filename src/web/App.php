@@ -2,40 +2,32 @@
 
 namespace mii\web;
 
-use Mii;
+use mii\captcha\Captcha;
 
+/**
+ * Class App
+ *
+ * @property Session $session The session component.
+ * @property \mii\auth\User $user The user component.
+ * @property Request $request
+ * @property Blocks $blocks
+ * @property Router $router
+ * @property Response $response
+ * @property Captcha $captcha
+ *
+ */
 class App extends \mii\core\App
 {
-
     public $user;
-
-    protected $_blocks;
 
     public function run()
     {
-        $cookie_config = $this->config('cookie');
-
-        foreach($cookie_config as $key => $value) {
-            Cookie::$$key = $value;
-        }
-
         try {
-            $this->request = $this->get('request');
-
             $this->request->execute()->send();
 
         } catch (\Exception $e) {
             throw $e;
         }
-    }
-
-    /**
-     * @return Blocks
-     * @throws \Exception
-     */
-    public function blocks()
-    {
-        return $this->get('blocks');
     }
 
     public function register_exception_handler()
@@ -65,7 +57,8 @@ class App extends \mii\core\App
             'blocks' => ['class' => \mii\web\Blocks::class],
             'router' => ['class' => \mii\web\Router::class ],
             'request' => ['class' => \mii\web\Request::class],
-            'response' => ['class' => \mii\web\Response::class]
+            'response' => ['class' => \mii\web\Response::class],
+            'captcha' => ['class' => '\mii\captcha\Captcha']
         ]);
     }
 

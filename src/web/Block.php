@@ -146,7 +146,7 @@ class Block
         $this->_depends = array_unique(array_merge($this->_depends, $depends));
 
         foreach ($this->_depends as $depend) {
-            Mii::$app->blocks()->get($depend);
+            Mii::$app->blocks->get($depend);
         }
 
         return $this;

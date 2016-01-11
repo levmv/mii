@@ -4,6 +4,11 @@ namespace mii\valid;
 
 class Rules {
 
+
+    public static function valid_captcha($value) {
+        return \Mii::$app->captcha->valid($value);
+    }
+
     /**
      * Checks if a value is unique in database.
      *

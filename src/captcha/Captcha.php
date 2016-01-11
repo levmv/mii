@@ -1,7 +1,11 @@
 <?php
 
 namespace mii\captcha;
+
+use Mii;
 use mii\core\ErrorException;
+use mii\util\Text;
+use mii\util\URL;
 use mii\web\Session;
 
 /**
@@ -13,7 +17,7 @@ use mii\web\Session;
 
 class Captcha
 {
-
+    protected $id = '';
 
     protected $width = 150;
 
@@ -52,19 +56,13 @@ class Captcha
      * @param string Config group name
      * @return void
      */
-    public function __construct($config = NULL)
+    public function __construct($config = [])
     {
-        if ( $config === false)
-        {
-            $config = config('captcha');
+        $this->fontpath = __DIR__;
 
-            if($config) {
-                foreach($config as $key => $value) {
-                    $this->$key = $value;
-                }
-            }
+        foreach($config as $key => $value) {
+            $this->$key = $value;
         }
-
 
         // If using a background image, check if it exists
         if ( $this->background)
@@ -101,8 +99,10 @@ class Captcha
     public function update_response_session()
     {
         // Store the correct Captcha response in a session
-        Session::instance()->set('captcha_response', sha1(mb_strtoupper($this->response, 'utf-8')));
+        Mii::$app->session->set('captcha_response', sha1(mb_strtoupper($this->response, 'utf-8')));
     }
+
+
 
     /**
      * Validates user's Captcha response and updates response counter.
@@ -117,11 +117,11 @@ class Captcha
         static $counted;
 
         // User has been promoted, always TRUE and don't count anymore
-        if (Captcha::instance()->promoted())
+        if (Mii::$app->captcha->promoted())
             return TRUE;
 
         // Challenge result
-        $result = (bool) (sha1(mb_strtoupper($response, 'utf-8')) === Session::instance()->get('captcha_response'));
+        $result = (bool) (sha1(mb_strtoupper($response, 'utf-8')) === Mii::$app->session->get('captcha_response'));
 
         // Increment response counter
         if ($counted !== TRUE)
@@ -131,12 +131,12 @@ class Captcha
             // Valid response
             if ($result === TRUE)
             {
-                Captcha::instance()->valid_count(Session::instance()->get('captcha_valid_count') + 1);
+                Mii::$app->captcha->valid_count(Mii::$app->session->get('captcha_valid_count') + 1);
             }
             // Invalid response
             else
             {
-                Captcha::instance()->invalid_count(Session::instance()->get('captcha_invalid_count') + 1);
+                Mii::$app->captcha->invalid_count(Mii::$app->session->get('captcha_invalid_count') + 1);
             }
         }
 
@@ -163,12 +163,12 @@ class Captcha
             // Reset counter = delete session
             if ($new_count < 1)
             {
-                Session::instance()->delete($session);
+                Mii::$app->session->delete($session);
             }
             // Set counter to new value
             else
             {
-                Session::instance()->set($session, (int) $new_count);
+                Mii::$app->session->set($session, (int) $new_count);
             }
 
             // Return new count
@@ -176,7 +176,7 @@ class Captcha
         }
 
         // Return current count
-        return (int) Session::instance()->get($session);
+        return (int) Mii::$app->session->get($session);
     }
 
     /**
@@ -207,16 +207,16 @@ class Captcha
      * @param integer $threshold Valid response count threshold
      * @return boolean
      */
-    public function promoted($threshold = NULL)
+    public function promoted($threshold = null)
     {
         // Promotion has been disabled
-        if (Captcha::$config['promote'] === FALSE)
-            return FALSE;
+        if ($this->promote === false)
+            return false;
 
         // Use the config threshold
-        if ($threshold === NULL)
+        if ($threshold === null)
         {
-            $threshold = Captcha::$config['promote'];
+            $threshold = $this->promote;
         }
 
         // Compare the valid response count to the threshold
@@ -230,7 +230,7 @@ class Captcha
      */
     public function __toString()
     {
-        return $this->render(TRUE);
+        return $this->render(true);
     }
 
     /**
@@ -263,7 +263,7 @@ class Captcha
      * Creates an image resource with the dimensions specified in config.
      * If a background image is supplied, the image dimensions are used.
      *
-     * @throws Exception If no GD2 support
+     * @throws \Exception If no GD2 support
      * @param string $background Path to the background image file
      * @return void
      */
@@ -271,10 +271,10 @@ class Captcha
     {
         // Check for GD2 support
         if ( ! function_exists('imagegd2'))
-            throw new Exception('captcha.requires_GD2');
+            throw new \Exception('captcha.requires_GD2');
 
         // Create a new image (black)
-        $this->image = imagecreatetruecolor(Captcha::$config['width'], Captcha::$config['height']);
+        $this->image = imagecreatetruecolor($this->width, $this->height);
 
         // Use a background image
         if ( ! empty($background))
@@ -284,13 +284,13 @@ class Captcha
             $this->background_image = $function($background);
 
             // Resize the image if needed
-            if (imagesx($this->background_image) !== Captcha::$config['width']
-                or imagesy($this->background_image) !== Captcha::$config['height'])
+            if (imagesx($this->background_image) !== $this->width
+                or imagesy($this->background_image) !== $this->height)
             {
                 imagecopyresampled
                 (
                     $this->image, $this->background_image, 0, 0, 0, 0,
-                    Captcha::$config['width'], Captcha::$config['height'],
+                    $this->width, $this->height,
                     imagesx($this->background_image), imagesy($this->background_image)
                 );
             }
@@ -331,7 +331,7 @@ class Captcha
         $color2 = imagecolorsforindex($this->image, $color2);
 
         // Preparations for the gradient loop
-        $steps = ($direction === 'horizontal') ? Captcha::$config['width'] : Captcha::$config['height'];
+        $steps = ($direction === 'horizontal') ? $this->width : $this->height;
 
         $r1 = ($color1['red'] - $color2['red']) / $steps;
         $g1 = ($color1['green'] - $color2['green']) / $steps;
@@ -342,13 +342,13 @@ class Captcha
             $x1 =& $i;
             $y1 = 0;
             $x2 =& $i;
-            $y2 = Captcha::$config['height'];
+            $y2 = $this->height;
         }
         else
         {
             $x1 = 0;
             $y1 =& $i;
-            $x2 = Captcha::$config['width'];
+            $x2 = $this->width;
             $y2 =& $i;
         }
 
@@ -374,13 +374,13 @@ class Captcha
     {
         // Output html element
         if ($html === TRUE)
-            return '<img src="'.URL::site('captcha/'.Captcha::$config['group']).'" width="'.Captcha::$config['width'].'" height="'.Captcha::$config['height'].'" alt="Captcha" class="captcha" />';
+            return '<img src="'.URL::site('captcha/'.$this->id).'" width="'.$this->width.'" height="'.$this->height.'" alt="Captcha" class="captcha" />';
 
         // Send the correct HTTP header
-        Request::instance()->headers['Content-Type'] = 'image/'.$this->image_type;
-        Request::instance()->headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
-        Request::instance()->headers['Pragma'] = 'no-cache';
-        Request::instance()->headers['Connection'] = 'close';
+        Mii::$app->response->set_header('Content-Type', 'image/'.$this->image_type);
+        Mii::$app->response->set_header('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+        Mii::$app->response->set_header('Pragma', 'no-cache');
+        Mii::$app->response->set_header('Connection', 'close');
 
         // Pick the correct output function
         $function = 'image'.$this->image_type;
@@ -399,7 +399,7 @@ class Captcha
     public function generate_challenge()
     {
         // Complexity setting is used as character count
-        $text = Text::random('distinct', max(1, Captcha::$config['complexity']));
+        $text = Text::random('distinct', max(1, $this->complexity));
 
         // Complexity setting is used as character count
         return $text;
@@ -425,16 +425,16 @@ class Captcha
         }
 
         // Add a few random circles
-        for ($i = 0, $count = mt_rand(10, Captcha::$config['complexity'] * 3); $i < $count; $i++)
+        for ($i = 0, $count = mt_rand(10, $this->complexity * 3); $i < $count; $i++)
         {
             $color = imagecolorallocatealpha($this->image, mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255), mt_rand(80, 120));
-            $size = mt_rand(5, Captcha::$config['height'] / 3);
-            imagefilledellipse($this->image, mt_rand(0, Captcha::$config['width']), mt_rand(0, Captcha::$config['height']), $size, $size, $color);
+            $size = mt_rand(5, $this->height / 3);
+            imagefilledellipse($this->image, mt_rand(0, $this->width), mt_rand(0, $this->height), $size, $size, $color);
         }
 
         // Calculate character font-size and spacing
-        $default_size = min(Captcha::$config['width'], Captcha::$config['height'] * 2) / strlen($this->response);
-        $spacing = (int) (Captcha::$config['width'] * 0.9 / strlen($this->response));
+        $default_size = min($this->width, $this->height * 2) / strlen($this->response);
+        $spacing = (int) ($this->width * 0.9 / strlen($this->response));
 
         // Background alphabetic character attributes
         $color_limit = mt_rand(96, 160);
@@ -444,7 +444,7 @@ class Captcha
         for ($i = 0, $strlen = strlen($this->response); $i < $strlen; $i++)
         {
             // Use different fonts if available
-            $font = Captcha::$config['fontpath'].Captcha::$config['fonts'][array_rand(Captcha::$config['fonts'])];
+            $font = $this->fontpath.$this->fonts[array_rand($this->fonts)];
 
             $angle = mt_rand(-40, 20);
             // Scale the character size on image height
@@ -453,7 +453,7 @@ class Captcha
 
             // Calculate character starting coordinates
             $x = $spacing / 4 + $i * $spacing;
-            $y = Captcha::$config['height'] / 2 + ($box[2] - $box[5]) / 4;
+            $y = $this->height / 2 + ($box[2] - $box[5]) / 4;
 
             // Draw captcha text character
             // Allocate random color, size and rotation attributes to text

@@ -4,6 +4,11 @@ namespace mii\core;
 
 use Mii;
 
+/**
+ * Class App
+ * @property \mii\cache\Cache $cache The cache application component.
+ * @property \mii\db\Database $db The database connection.
+ */
 
 abstract class App {
 
@@ -18,9 +23,6 @@ abstract class App {
     public $controller;
 
     public $_config = [];
-
-    protected $_auth;
-
 
 
     public function __construct(array $config = []) {
