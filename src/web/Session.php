@@ -31,6 +31,8 @@ class Session
      */
     protected $_destroyed = false;
 
+    protected $_flash = '__flash';
+
     /**
      * Overloads the name, lifetime, and encrypted session settings.
      *
@@ -102,12 +104,21 @@ class Session
      * @param   mixed $default default value to return
      * @return  mixed
      */
-    public function get($key, $default = NULL)
+    public function get($key, $default = null)
     {
         $this->open();
 
         return array_key_exists($key, $this->_data) ? $this->_data[$key] : $default;
     }
+
+
+    public function has($key)
+    {
+        $this->open();
+
+        return array_key_exists($key, $this->_data);
+    }
+
 
     public function open($id = null)
     {
@@ -139,9 +150,10 @@ class Session
         // Use the $_SESSION global for storing data
         $this->_data =& $_SESSION;
 
-
         // Write the session at shutdown
         register_shutdown_function([$this, 'close']);
+
+        $this->update_flash_counters();
 
         return;
     }
@@ -301,4 +313,30 @@ class Session
     }
 
 
-} // End Session
+    public function flash($key, $value = true)
+    {
+        $counters = $this->get($this->_flash, []);
+        $counters[$key] = 0;
+        $this->_data[$key] = $value;
+        $this->_data[$this->_flash] = $counters;
+    }
+
+
+    private function update_flash_counters() {
+        $counters = $this->get($this->_flash, []);
+        if (is_array($counters)) {
+            foreach ($counters as $key => $count) {
+                if ($count > 0) {
+                    unset($counters[$key], $_SESSION[$key]);
+                } elseif ($count == 0) {
+                    $counters[$key]++;
+                }
+            }
+            $this->_data[$this->_flash] = $counters;
+        } else {
+            unset($this->_data[$this->_flash]);
+        }
+    }
+
+
+}

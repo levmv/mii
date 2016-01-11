@@ -34,10 +34,6 @@ class UTF8 {
      */
     public static $server_utf8 = true;
 
-    /**
-     * @var  array  List of called methods that have had their required file included.
-     */
-    public static $called = array();
 
     /**
      * Recursively cleans arrays, objects, and strings. Removes ASCII control
@@ -59,7 +55,7 @@ class UTF8 {
         if ( ! $charset)
         {
             // Use the application character set
-            $charset = 'utf-8';
+            $charset = \Mii::$app->charset;
         }
 
         if (is_array($var) OR is_object($var))
@@ -232,7 +228,7 @@ class UTF8 {
             return ucfirst($str);
 
         preg_match('/^(.?)(.*)$/us', $str, $matches);
-        return UTF8::strtoupper($matches[1]).$matches[2];
+        return mb_strtoupper($matches[1], \Mii::$app->charset).$matches[2];
     }
 
 
@@ -323,11 +319,11 @@ class UTF8 {
 
     public static function ru_translit($str)
     {
-        static $trans_table = NULL;
+        static $trans_table = null;
 
-        if ($trans_table === NULL)
+        if ($trans_table === null)
         {
-            $trans_table = array(
+            $trans_table = [
                 'а' => 'a',   'б' => 'b',   'в' => 'v',
                 'г' => 'g',   'д' => 'd',   'е' => 'e',
                 'ё' => 'e',   'ж' => 'zh',  'з' => 'z',
@@ -351,7 +347,7 @@ class UTF8 {
                 'Ч' => 'Ch',  'Ш' => 'Sh',  'Щ' => 'Sch',
                 'Ь' => "'",   'Ы' => 'Y',   'Ъ' => "'",
                 'Э' => 'E',   'Ю' => 'Yu',  'Я' => 'Ya',
-            );
+            ];
         }
 
         $str = str_replace(

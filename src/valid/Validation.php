@@ -216,10 +216,7 @@ class Validation {
                 // Rules are defined as array($rule, $params)
                 list($rule, $params) = $array;
 
-
                 array_unshift($params, $value);
-
-
 
                 // Default the error name to be the rule (except array and lambda rules)
                 $error_name = $rule;
@@ -247,7 +244,6 @@ class Validation {
                 }
                 elseif (method_exists('mii\valid\Rules', $rule))
                 {
-
                     // Use a method in this object
                     $method = new \ReflectionMethod('mii\valid\Rules', $rule);
 

@@ -123,6 +123,7 @@ class Form {
 
         $this->validation->data(\Mii::$app->request->post());
 
+
         return $this->validation->check();
     }
 

@@ -94,7 +94,7 @@ class ORM implements ORMInterface
      */
     public function select_query($with_order = true)
     {
-        $query = (new Query)->select($this->fields())->from($this->get_table())->as_object(static::class);
+        $query = $this->query_object()->select($this->fields())->from($this->get_table())->as_object(static::class);
 
         if ($this->_order_by AND $with_order) {
             foreach ($this->_order_by as $column => $direction) {
@@ -103,6 +103,11 @@ class ORM implements ORMInterface
         }
 
         return $query;
+    }
+
+
+    public function query_object() {
+        return new Query;
     }
 
 
@@ -130,7 +135,7 @@ class ORM implements ORMInterface
     {
         $class = new static();
 
-        $query = (new Query)
+        $query = $class->query_object()
             ->select($class->fields())
             ->from($class->get_table())
             ->as_array();
@@ -294,7 +299,7 @@ class ORM implements ORMInterface
 
         $this->on_change();
 
-        return (new Query)
+        return $this->query_object()
             ->update($this->get_table())
             ->set(array_intersect_key($this->_data, $this->_changed))
             ->where('id', '=', $this->_data['id'])
@@ -323,7 +328,7 @@ class ORM implements ORMInterface
         $this->on_change();
 
         $columns = array_keys($this->_data);
-        $id = (new Query())
+        $id = $this->query_object()
             ->insert($this->get_table())
             ->columns($columns)
             ->values($this->_data)
@@ -357,7 +362,7 @@ class ORM implements ORMInterface
         if ($this->loaded()) {
             $this->_loaded = false;
 
-            return (new Query)
+            return $this->query_object()
                 ->delete($this->get_table())
                 ->where('id', '=', $this->_data['id'])
                 ->execute();
