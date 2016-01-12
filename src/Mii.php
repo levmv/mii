@@ -99,7 +99,8 @@ class Mii {
     }
 
     public static function log($level, $msg, $category) {
-        static::$app->get('log')->log($level, $msg, $category);
+        if(static::$app->has('log'))
+            static::$app->log->log($level, $msg, $category);
     }
 
     public static function flush_logs() {
@@ -113,8 +114,11 @@ class Mii {
         static $messages;
         if ( ! isset($messages[$file]))
         {
+            if(!file_exists(path('app').'/messages/'.$file.'.php'))
+                return;
+
             // Create a new message list
-            $messages[$file] = array();
+            $messages[$file] = [];
             $messages[$file] = include(path('app').'/messages/'.$file.'.php');
 
         }
@@ -172,8 +176,8 @@ function block($name) {
  * @return  mixed
  * @throws  \mii\cache\CacheException
  */
-function get_cached($name, $default = null) {
-    return Mii::$app->cache->get($name, $default);
+function get_cached($id, $default = null) {
+    return Mii::$app->cache->get($id, $default);
 }
 
 /**

@@ -15,7 +15,7 @@ namespace mii\image;
 class Gmagick extends Image {
 
     /**
-     * @var  Imagick  image magick object
+     * @var  \Gmagick  image magick object
      */
     protected $im;
 
@@ -79,9 +79,13 @@ class Gmagick extends Image {
         $this->im->destroy();
     }
 
+    public function get_raw_image() {
+        return $this->im;
+    }
+
     protected function _do_resize($width, $height)
     {
-        if ($this->im->resizeimage($width, $height, \Gmagick::FILTER_LANCZOS, 1.02))
+        if ($this->im->resizeimage($width, $height, \Gmagick::FILTER_LANCZOS, 1.01))
         {
             // Reset the width and height
             $this->width = $this->im->getimagewidth();
@@ -213,71 +217,12 @@ class Gmagick extends Image {
     {
 
         return $this->im->compositeimage(
-            $image,
+            $image->get_raw_image(),
             \Gmagick::COMPOSITE_DEFAULT,
             $offset_x, $offset_y
         );
-
-        /***/
-
-        // Convert the Image intance into an Imagick instance
-        $watermark = new Imagick;
-        $watermark->readImageBlob($image->render(), $image->file);
-
-        if ($watermark->getImageAlphaChannel() !== Imagick::ALPHACHANNEL_ACTIVATE)
-        {
-            // Force the image to have an alpha channel
-            $watermark->setImageAlphaChannel(Imagick::ALPHACHANNEL_OPAQUE);
-        }
-
-        if ($opacity < 100)
-        {
-            // NOTE: Using setImageOpacity will destroy current alpha channels!
-            $watermark->evaluateImage(Imagick::EVALUATE_MULTIPLY, $opacity / 100, Imagick::CHANNEL_ALPHA);
-        }
-
-        // Match the colorspace between the two images before compositing
-        // $watermark->setColorspace($this->im->getColorspace());
-
-        // Apply the watermark to the image
-        return $this->im->compositeImage($watermark, Imagick::COMPOSITE_DISSOLVE, $offset_x, $offset_y);
     }
 
-
-
-    public function _raw_watermark($image, $offset_x, $offset_y, $opacity)
-    {
-
-        $this->im->compositeimage(
-            new \Gmagick($image),
-            \Gmagick::COMPOSITE_DEFAULT,
-            $offset_x, $offset_y
-        );
-        return $this;
-        /***/
-
-        // Convert the Image intance into an Imagick instance
-        $watermark = new Imagick;
-        $watermark->readImageBlob($image->render(), $image->file);
-
-        if ($watermark->getImageAlphaChannel() !== Imagick::ALPHACHANNEL_ACTIVATE)
-        {
-            // Force the image to have an alpha channel
-            $watermark->setImageAlphaChannel(Imagick::ALPHACHANNEL_OPAQUE);
-        }
-
-        if ($opacity < 100)
-        {
-            // NOTE: Using setImageOpacity will destroy current alpha channels!
-            $watermark->evaluateImage(Imagick::EVALUATE_MULTIPLY, $opacity / 100, Imagick::CHANNEL_ALPHA);
-        }
-
-        // Match the colorspace between the two images before compositing
-        // $watermark->setColorspace($this->im->getColorspace());
-
-        // Apply the watermark to the image
-        return $this->im->compositeImage($watermark, Imagick::COMPOSITE_DISSOLVE, $offset_x, $offset_y);
-    }
 
     protected function _do_background($r, $g, $b, $opacity)
     {

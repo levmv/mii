@@ -1,6 +1,8 @@
 <?php
 
 namespace mii\image;
+use mii\core\Exception;
+use mii\util\Debug;
 
 /**
  * Image manipulation support. Allows images to be resized, cropped, etc.
@@ -87,7 +89,7 @@ abstract class Image {
      *
      * @param   string  $file  image file path
      * @return  void
-     * @throws  Kohana_Exception
+     * @throws  \Exception
      */
     public function __construct($file)
     {
@@ -99,14 +101,14 @@ abstract class Image {
             // Get the image information
             $info = getimagesize($file);
         }
-        catch (Exception $e)
+        catch (\Exception $e)
         {
             // Ignore all errors while reading the image
         }
 
         if (empty($file) OR empty($info))
         {
-            throw new Kohana_Exception('Not an image or invalid image: :file',
+            throw new \Exception('Not an image or invalid image: :file',
                 array(':file' => Debug::path($file)));
         }
 
@@ -135,16 +137,12 @@ abstract class Image {
             // Render the current image
             return $this->render();
         }
-        catch (Exception $e)
+        catch (\Exception $e)
         {
-            if (is_object(Kohana::$log))
-            {
-                // Get the text of the exception
-                $error = Kohana_Exception::text($e);
+            // Get the text of the exception
+            $error = Exception::text($e);
 
-                // Add this exception to the log
-                Kohana::$log->add(Log::ERROR, $error);
-            }
+            \Mii::error($error);
 
             // Showing any kind of error will be "inside" image data
             return '';
@@ -673,6 +671,8 @@ abstract class Image {
 
         return $this->_do_render($type, $quality);
     }
+
+
 
     /**
      * Execute a resize.
