@@ -150,7 +150,12 @@ class Mii {
 }
 
 
-function redirect($url) {
+function redirect($url, $use_back_url = false) {
+
+    if($use_back_url) {
+        $url = \mii\util\URL::back_url($url);
+    }
+
     throw new \mii\web\RedirectHttpException($url);
 }
 
