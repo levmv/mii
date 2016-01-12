@@ -32,12 +32,26 @@ class Form {
 
     protected $_model;
 
+    protected $is_prepared = false;
+
     /**
      * @param null $data Initial data for form. If null then request->post() will be used
      */
     public function __construct($data = null) {
 
         $this->validation = new Validation();
+
+
+        if(is_object($data) AND $data instanceof ORM) {
+            $this->_model = $data;
+            $data = $data->as_array();
+        }
+
+        if(count($data)) {
+            foreach (array_intersect_key($data, $this->fields) as $key => $value) {
+                $this->set($key, $value);
+            }
+        }
     }
 
     /**
@@ -50,9 +64,7 @@ class Form {
 
         if($this->posted()) {
             $data = \Mii::$app->request->post();
-        }
-
-        if(is_object($data) AND $data instanceof ORM) {
+        } elseif(is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
             $data = $data->as_array();
         }
@@ -61,6 +73,11 @@ class Form {
             foreach (array_intersect_key($data, $this->fields) as $key => $value) {
                 $this->set($key, $value);
             }
+        }
+
+        if(!$this->posted() AND !$this->is_prepared) {
+            $this->prepare();
+            $this->is_prepared = true;
         }
 
         return $this->posted();
@@ -125,8 +142,13 @@ class Form {
 
         $this->validation->data(\Mii::$app->request->post());
 
+        $passed = $this->validation->check();
 
-        return $this->validation->check();
+        if($passed === false) {
+            $this->check_prepared();
+        }
+
+        return $passed;
     }
 
     public function errors() {
@@ -135,6 +157,9 @@ class Form {
 
 
     public function open($action = NULL, $attributes = NULL) {
+
+        $this->check_prepared();
+
         $out = HTML::open($action, $attributes);
 
         if($this->enable_csrf_validation) {
@@ -214,6 +239,18 @@ class Form {
     public function uploaded($name) {
 
         return isset($_FILES[$name]) AND Upload::not_empty($_FILES[$name]) AND Upload::valid($_FILES[$name]);
+
+    }
+
+    protected function check_prepared() {
+        if(!$this->is_prepared) {
+            $this->prepare();
+            $this->is_prepared = true;
+        }
+    }
+
+
+    public function prepare() {
 
     }
 
