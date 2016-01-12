@@ -21,10 +21,10 @@ class Rules {
     public static function unique($value, $key, $model, $id)
     {
         if ($id) {
-            $res = (new $model)->query()->where($key, '=', $value)->one();
+            $res = (new $model)->select_query()->where($key, '=', $value)->one();
             return (null === $res) or ($res->id == $id);
         }
-        return null === (new $model)->query()->where($key, '=', $value)->one();
+        return null === (new $model)->select_query()->where($key, '=', $value)->one();
     }
 
     /**
