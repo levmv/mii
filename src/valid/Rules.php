@@ -18,7 +18,7 @@ class Rules {
      * @param $id
      * @return bool
      */
-    public static function unique($value, $key, $model, $id)
+    public static function unique($value, $key, $model, $id = null)
     {
         if ($id) {
             $res = (new $model)->select_query()->where($key, '=', $value)->one();
