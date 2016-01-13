@@ -29,9 +29,7 @@ class Blocks
 
     public function __construct(array $config = [])
     {
-
-        foreach ($config as $key => $value)
-            $this->$key = $value;
+        $this->configure($config);
 
         if(!$this->libraries) {
             $this->libraries = [
@@ -42,6 +40,12 @@ class Blocks
         if(!$this->assets_dir) {
             $this->assets_dir = path('pub').'/assets';
         }
+    }
+
+    public function configure($config) {
+
+        foreach ($config as $key => $value)
+            $this->$key = $value;
     }
 
 
