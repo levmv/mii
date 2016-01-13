@@ -27,24 +27,32 @@ class Block extends Controller {
 
     public function block_rules() {
         return [
-            'i_jquery' => 'do_jquery',
-            'i_chosen' => 'do_chosen',
-            'i_fancybox' => 'do_fancybox'
+            path('app').'/blocks' => [
+                'i_jquery' => 'do_jquery',
+                'i_chosen' => 'do_chosen',
+                'i_fancybox' => 'do_fancybox'
+            ],
         ];
     }
 
 
     public function index($argv) {
 
-        foreach($this->blocks as $block => $func) {
+        foreach($this->blocks as $output_path => $blocks) {
+            foreach($blocks as $block => $func) {
 
-            try {
-                $this->{$func}($block);
-                $this->info(':block compiled.', [':block' => $block]);
-            } catch (CliException $e) {
-                $this->error($e->getMessage());
+                $this->output_path = $output_path;
+
+                try {
+                    $this->{$func}($block);
+                    $this->info(':block compiled.', [':block' => $block]);
+                } catch (CliException $e) {
+                    $this->error($e->getMessage());
+                }
             }
+
         }
+
     }
 
 
