@@ -530,7 +530,7 @@ class HTML {
             $attributes[] = 'checked';
         }
 
-        return Form::input($name, $value, $attributes);
+        return HTML::input($name, $value, $attributes);
     }
 
     /**
