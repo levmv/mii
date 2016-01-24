@@ -193,7 +193,9 @@ class ORM implements ORMInterface
     {
         if ((isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) AND $value !== $this->_data[$key]) {
             $this->_data[$key] = $value;
-            $this->_changed[$key] = true;
+            if ($this->_loaded !== false) {
+                $this->_changed[$key] = true;
+            }
         }
     }
 
