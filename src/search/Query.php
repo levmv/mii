@@ -286,7 +286,7 @@ class Query
     {
         if (!is_object($db)) {
             // Get the database instance
-            $db = Database::instance($db);
+            $db = \Mii::$app->sphinx;
         }
 
         // Callback to quote columns
@@ -300,7 +300,22 @@ class Query
             $query .= '*';
         } else {
             // Select all columns
-            $query .= implode(', ', array_unique(array_map($quote_column, $this->_select)));
+            $columns = [];
+
+            foreach ($this->_select as $column) {
+                if (is_array($column)) {
+                    // Use the column alias
+                    $column = $db->quote_identifier($column);
+                } else {
+                    // Apply proper quoting to the column
+                    $column = $db->quote_column($column);
+                }
+
+                $columns[] = $column;
+            }
+
+            // Select all columns
+            $query .= implode(', ', array_unique($columns));
         }
 
         if (!empty($this->_from)) {
@@ -334,13 +349,22 @@ class Query
         }
 
         if ($this->_limit !== NULL) {
+
+            $query .= ' LIMIT ';
+            if ($this->_offset !== NULL) {
+                // Add offsets
+                $query .= $this->_offset.', ';
+            }
+
             // Add limiting
-            $query .= ' LIMIT ' . $this->_limit;
+            $query .=  $this->_limit;
         }
 
-        if ($this->_offset !== NULL) {
-            // Add offsets
-            $query .= ' OFFSET ' . $this->_offset;
+
+
+        if($this->_option) {
+
+            $query .= ' OPTION '.implode(', ', $this->_option);
         }
 
         $this->_sql = $query;
@@ -477,6 +501,12 @@ class Query
     public function or_where_close()
     {
         $this->_where[] = ['OR' => ')'];
+
+        return $this;
+    }
+
+    public function option($option) {
+        $this->_option[] = $option;
 
         return $this;
     }
@@ -859,7 +889,7 @@ class Query
             list ($column, $value) = $group;
 
             // Quote the column name
-            $column = $db->quote_column($column);
+            //$column = $db->quote_column($column);
 
             if (is_string($value)) {
                 // Quote the value
@@ -869,7 +899,7 @@ class Query
             $set[$column] = $column . ' ' . $value;
         }
 
-        return implode(' ', $set);
+        return "'".implode(' ', $set)."'";
 
     }
 
@@ -1004,7 +1034,7 @@ class Query
 
         if (!is_object($db)) {
             // Get the database instance
-            $db = Database::instance($db);
+            $db = \Mii::$app->sphinx;
         }
 
         // Compile the SQL query

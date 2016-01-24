@@ -28,38 +28,20 @@ class Database extends \mii\db\Database
         '<' => '\<',
     );
 
-    public static function instance($name = NULL, array $config = NULL) {
-
-        if ($name === NULL) {
-            $name = 'sphinxql';
-        }
-
-        if (!isset(Database::$instances[$name])) {
-            if ($config === NULL) {
-                // Load the configuration for this database
-                $config = config('database')[$name];
-            }
-
-            // Store the database instance
-            Database::$instances[$name] = new Database($name, $config);
-        }
-
-        return Database::$instances[$name];
-    }
-
 
     public function query($type, $sql, $as_object = false, array $params = NULL) {
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
-        if (MII_PROF) {
+        $benchmark = false;
+        if (config('profiling')) {
             // Benchmark this query for the current instance
             $benchmark = \mii\util\Profiler::start("Sphinx ({$this->_instance})", $sql);
         }
 
         // Execute the query
         if (($result = $this->_connection->query($sql)) === false) {
-            if (MII_PROF) {
+            if ($benchmark) {
                 // This benchmark is worthless
                 \mii\util\Profiler::delete($benchmark);
             }
@@ -70,7 +52,7 @@ class Database extends \mii\db\Database
             ], $this->_connection->errno);
         }
 
-        if (MII_PROF) {
+        if ($benchmark) {
             \mii\util\Profiler::stop($benchmark);
         }
 

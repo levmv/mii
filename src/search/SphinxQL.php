@@ -24,7 +24,7 @@ class SphinxQL
     static function query($type, $q, array $params = [], $db = null) {
 
         if($db === null) {
-            $db = Database::instance('sphinxql');
+            $db = \Mii::$app->sphinx;
         }
 
 
@@ -81,7 +81,13 @@ class SphinxQL
             $sql .= ' LIKE '.$like;
         }
 
-        return static::query(Database::SELECT, $sql);
+        $db_result =  static::query(Database::SELECT, $sql);
+
+        $result = [];
+        foreach($db_result as $value) {
+            $result[$value['Variable_name']] = $value['Value'];
+        }
+        return $result;
     }
 
 }
