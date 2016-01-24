@@ -500,8 +500,23 @@ class Query
             // Select all columns
             $query .= '*';
         } else {
+
+            $columns = [];
+
+            foreach ($this->_select as $column) {
+                if (is_array($column)) {
+                    // Use the column alias
+                    $column = $db->quote_identifier(end($column));
+                } else {
+                    // Apply proper quoting to the column
+                    $column = $db->quote_column($column);
+                }
+
+                $columns[] = $column;
+            }
+
             // Select all columns
-            $query .= implode(', ', array_unique(array_map($quote_column, $this->_select)));
+            $query .= implode(', ', array_unique($columns));
         }
 
         if (!empty($this->_from)) {
@@ -1380,6 +1395,9 @@ class Query
         return $count;
     }
 
+    /**
+     * @return Result|Array
+     */
 
     public function get()
     {
