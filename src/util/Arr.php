@@ -532,4 +532,54 @@ class Arr
         }
         return $flat;
     }
+
+
+    public static function to_array($object, $properties = [], $recursive = true)
+    {
+        if (is_array($object)) {
+            if ($recursive) {
+                foreach ($object as $key => $value) {
+                    if (is_array($value) || is_object($value)) {
+                        $object[$key] = static::to_array($value, $properties, true);
+                    }
+                }
+            }
+            return $object;
+        } elseif ($object instanceof \Traversable) {
+
+            $result = [];
+            foreach($object as $obj) {
+                $result[] = static::to_array($obj, $properties, $recursive);
+            }
+            return $result;
+
+        } elseif (is_object($object)) {
+            if (!empty($properties)) {
+                $result = [];
+                foreach ($properties as $key => $name) {
+                    if (is_int($key)) {
+                        $result[$name] = $object->$name;
+                    } else {
+                        if (is_string($name)) {
+                            $result[$key] = $object->$name;
+                        } elseif ($name instanceof \Closure) {
+                            $result[$key] = $name($object);
+                        }
+                    }
+                }
+
+                return $recursive ? static::to_array($result, $properties) : $result;
+            }
+
+            $result = [];
+            foreach ($object as $key => $value) {
+                $result[$key] = $value;
+            }
+
+            return $recursive ? static::to_array($result) : $result;
+        } else {
+            return [$object];
+        }
+    }
+
 }
