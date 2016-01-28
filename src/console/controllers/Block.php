@@ -87,20 +87,19 @@ class Block extends Controller {
 
     protected function do_fancybox($block) {
 
-        $this->to_block('fancybox/source/jquery.fancybox.pack.js', $block, 'js');
+        $this->to_block('fancyBox/source/jquery.fancybox.pack.js', $block, 'js');
 
-        $this->to_block('fancybox/source/jquery.fancybox.css', 'i_fancybox', 'css', function($text) use ($block) {
+        $this->to_block('fancyBox/source/jquery.fancybox.css', 'i_fancybox', 'css', function($text) use ($block) {
             return str_replace("url('", "url('/assets/".$block."/", $text);
         });
 
+        $this->to_assets('fancyBox/source/fancybox_loading.gif', $block);
+        $this->to_assets('fancyBox/source/fancybox_loading@2x.gif', $block);
 
-        $this->to_assets('fancybox/source/fancybox_loading.gif', $block);
-        $this->to_assets('fancybox/source/fancybox_loading@2x.gif', $block);
-
-        $this->to_assets('fancybox/source/blank.gif', $block);
-        $this->to_assets('fancybox/source/fancybox_overlay.png', $block);
-        $this->to_assets('fancybox/source/fancybox_sprite.png', $block);
-        $this->to_assets('fancybox/source/fancybox_sprite@2x.png', $block);
+        $this->to_assets('fancyBox/source/blank.gif', $block);
+        $this->to_assets('fancyBox/source/fancybox_overlay.png', $block);
+        $this->to_assets('fancyBox/source/fancybox_sprite.png', $block);
+        $this->to_assets('fancyBox/source/fancybox_sprite@2x.png', $block);
 
         //$this->to_assets('fancybox/source/fotorama@2x.png', $block);
     }
