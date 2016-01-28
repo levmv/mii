@@ -6,6 +6,8 @@ use Mii;
 
 class Blocks
 {
+    public $assets_dir;
+
     protected $_blocks = [];
 
     protected $_block_paths = [];
@@ -18,8 +20,6 @@ class Blocks
 
     protected $use_symlink = true;
     protected $freeze_mode = false;
-
-    protected $assets_dir;
 
     protected $assets_pub_dir = '/assets';
 

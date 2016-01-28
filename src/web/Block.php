@@ -152,6 +152,10 @@ class Block
         return $this;
     }
 
+    public function name() {
+        return $this->_name;
+    }
+
 
     public function get_depends() {
         return $this->_depends;
