@@ -106,9 +106,9 @@ class Block extends Controller {
 
 
     protected function do_plupload($block) {
-        $this->to_block('plupload/js/plupload.js', $block, 'js');
-        $this->to_assets('plupload/js/plupload.flash.swf', $block);
-        $this->to_assets('plupload/js/plupload.silverlight.xap', $block);
+        $this->to_block('plupload/js/plupload.full.min.js', $block, 'js');
+        $this->to_assets('plupload/js/Moxie.swf', $block);
+        $this->to_assets('plupload/js/Moxie.xap', $block);
 
     }
 
