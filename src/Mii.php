@@ -233,21 +233,16 @@ function e($text) {
 }
 
 
-function config($group = null, $value = null) {
-    if($value !== null) {
-        if($group !== null)
-            Mii::$app->_config[$group] = $value;
-        else
-            Mii::$app->_config = $value;
+function config($key = null, $default = null) {
 
-    } else {
-
-        if ($group !== null) {
-            if(isset(Mii::$app->_config[$group]))
-                return Mii::$app->_config[$group];
-            return [];
-        }
-
+    if($key === null)
         return Mii::$app->_config;
-    }
+
+    if(array_key_exists($key, Mii::$app->_config))
+        return Mii::$app->_config[$key];
+
+    if(strpos($key, '.') !== false)
+        return \mii\util\Arr::path(Mii::$app->_config, $key, $default);
+
+    return $default;
 }
