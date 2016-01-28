@@ -36,26 +36,18 @@ class Arr
     /**
      * Test if a value is an array with an additional check for array-like objects.
      *
-     *     // Returns true
-     *     Arr::isArray(array());
-     *     Arr::isArray(new ArrayObject);
-     *
-     *     // Returns false
-     *     Arr::isArray(false);
-     *     Arr::isArray('not an array!');
-     *     Arr::isArray(Database::instance());
      *
      * @param   mixed   $value  value to check
      * @return  boolean
      */
-    public static function isArray($value)
+    public static function is_array($value)
     {
         if (is_array($value)) {
             return true;
         }
         // Traversable is the interface that makes an object foreach'able,
         // it is implemented by the SPL Iterator and IteratorAggregate classes.
-        return (is_object($value) && $value instanceof Traversable);
+        return (is_object($value) && $value instanceof \Traversable);
     }
 
     /**
@@ -63,14 +55,6 @@ class Arr
      *
      *     // Get the value of $array['foo']['bar']
      *     $value = Arr::path($array, 'foo.bar');
-     *
-     * Using a wildcard "*" will search intermediate arrays and return an array.
-     *
-     *     // Get the values of "color" in theme
-     *     $colors = Arr::path($array, 'theme.*.color');
-     *
-     *     // Using an array of keys
-     *     $colors = Arr::path($array, array('theme', '*', 'color'));
      *
      * @param   array   $array      array to search
      * @param   mixed   $path       key path string (delimiter separated) or array of keys
@@ -80,7 +64,7 @@ class Arr
      */
     public static function path($array, $path, $default = null, $delimiter = null)
     {
-        if (!static::isArray($array)) {
+        if (!static::is_array($array)) {
             // This is not an array!
             return $default;
         }
@@ -99,11 +83,8 @@ class Arr
                 $delimiter = static::$delimiter;
             }
 
-            // Remove starting delimiters and spaces
-            $path = ltrim($path, "{$delimiter} ");
-
-            // Remove ending delimiters, spaces, and wildcards
-            $path = rtrim($path, "{$delimiter} *");
+            // Remove  delimiters and spaces
+            $path = trim($path, "{$delimiter} ");
 
             // Split the keys by delimiter
             $keys = explode($delimiter, $path);
@@ -122,27 +103,12 @@ class Arr
                     // Found the path requested
                     return $array[$key];
                 }
-                if (!static::isArray($array[$key])) {
+                if (!static::is_array($array[$key])) {
                     // Unable to dig deeper
                     break;
                 }
                 // Dig down into the next part of the path
                 $array = $array[$key];
-            } elseif ($key === '*') {
-                // Handle wildcards
-                $values = array();
-                foreach ($array as $arr) {
-                    if ($value = static::path($arr, implode('.', $keys))) {
-                        $values[] = $value;
-                    }
-                }
-
-                if ($values) {
-                    // Found the values requested
-                    return $values;
-                }
-                // Unable to dig deeper
-                break;
             } else {
                 // Unable to dig deeper
                 break;
