@@ -20,7 +20,7 @@ class Migrate extends Controller {
 
     public function before() {
 
-        $config = config('migrate');
+        $config = config('migrate', []);
 
         $this->migrations_path = path('app').'/migrations';
 
