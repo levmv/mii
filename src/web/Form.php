@@ -156,6 +156,10 @@ class Form {
     }
 
 
+    public function has_errors() {
+        return $this->validation->has_errors();
+    }
+
     public function open($action = NULL, $attributes = NULL) {
 
         $this->check_prepared();

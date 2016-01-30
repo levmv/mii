@@ -326,6 +326,10 @@ class Validation {
     }
 
 
+    public function has_errors() {
+        return count($this->_errors);
+    }
+
     /**
      * Returns the error messages. If no file is specified, the error message
      * will be the name of the rule that failed. When a file is specified, the
@@ -352,7 +356,6 @@ class Validation {
             return $this->_errors;
         }
 
-
         // Create a new message list
         $messages = [];
 
@@ -364,7 +367,6 @@ class Validation {
                 $error = $set;
                 $params = [];
             }
-
 
             // Get the label for this field
             $label = $this->_labels[$field];
@@ -379,7 +381,7 @@ class Validation {
                 else
                 {
                     // Translate the label
-                    $label = $label;
+                    $label = __($label);
                 }
             }
 
@@ -473,7 +475,7 @@ class Validation {
                 else
                 {
                     // Translate the message using the default language
-                    $message = $message;
+                    $message = __($message);
                 }
             }
             else
