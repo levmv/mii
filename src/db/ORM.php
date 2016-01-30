@@ -275,6 +275,10 @@ class ORM implements ORMInterface
 
     public function changed($field_name = null)
     {
+        // For not loaded models there is no way to detect changes.
+        if(!$this->loaded())
+            return true;
+
         if ($field_name === null) {
             return count($this->_changed) > 0;
         }
