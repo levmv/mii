@@ -2,7 +2,6 @@
 
 namespace mii\console\controllers;
 
-
 use mii\console\Controller;
 
 class Help extends Controller {
@@ -12,7 +11,7 @@ class Help extends Controller {
         $dirs = [
             'app' => [
                 'path' => path('app').'/console',
-                'namespace' => config('console')['namespace']
+                'namespace' => config('console.namespace', 'app\\controllers')
             ],
             'mii' => [
                 'path' => __DIR__,
