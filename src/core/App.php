@@ -8,6 +8,8 @@ use Mii;
  * Class App
  * @property \mii\cache\Cache $cache The cache application component.
  * @property \mii\db\Database $db The database connection.
+ * @property \mii\email\PHPMailer $mailer
+ * @property \mii\auth\Auth $auth;
  */
 
 abstract class App {
