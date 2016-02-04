@@ -506,7 +506,7 @@ class Query
             foreach ($this->_select as $column) {
                 if (is_array($column)) {
                     // Use the column alias
-                    $column = $db->quote_identifier(end($column));
+                    $column = $db->quote_identifier($column);
                 } else {
                     // Apply proper quoting to the column
                     $column = $db->quote_column($column);
