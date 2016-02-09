@@ -232,6 +232,17 @@ function e($text) {
     return mii\util\Html::entities($text, false);
 }
 
+if( ! function_exists('dd')) {
+    function dd()
+    {
+        array_map(function($a) {
+            var_dump($a);
+        }, func_get_args());
+        die;
+    }
+}
+
+
 
 function config($key = null, $default = null) {
 
