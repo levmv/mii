@@ -1368,25 +1368,26 @@ class Query
     public function count() {
         $this->_type = Database::SELECT;
 
-        $db = \Mii::$app->get('db');
+        $db = \Mii::$app->db;
 
         $old_select = $this->_select;
         $old_order = $this->_order_by;
 
         if($this->_distinct) {
-            $this->_select = [DB::expr('COUNT(DISTINCT '.$db->quote_column($this->_select[0]).') AS `count`')];
+            $this->select([
+                [DB::expr('COUNT(DISTINCT '.$db->quote_column($this->_select[0]).')') ,'count']
+            ]);
         } else {
-            $this->_select = [DB::expr('COUNT(*) AS `count`')];
+            $this->select([
+                DB::expr('COUNT(*) AS `count`')
+            ]);
         }
         $as_object = $this->_as_object;
         $this->_as_object = null;
 
         $this->_order_by = [];
 
-
-        $result = $this->execute();
-
-        $count =  $this->execute()->column('count', 0);
+        $count = $this->execute()->column('count', 0);
 
         $this->_select = $old_select;
         $this->_order_by = $old_order;
