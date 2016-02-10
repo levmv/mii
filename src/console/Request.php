@@ -54,20 +54,13 @@ class Request extends \mii\core\Request {
     function execute() {
         // Controller
 
-        $controller = $this->controller;
+        $controller_class = $controller = $this->controller;
 
-        $config = config('console');
-
-        if(isset($config['namespaces']) AND count($config['namespaces'])) {
-            $namespaces = $config['namespaces'];
+        $namespaces = config('console.namespaces', []);
+        if(count($namespaces)) {
             $controller_class = array_shift($namespaces).'\\'.$controller;
-
-        } else {
-            $namespaces = [];
-            $controller_class = $controller;
         }
 
-        try {
             while (!class_exists($controller_class)) {
 
                 // Try next controller
@@ -109,10 +102,6 @@ class Request extends \mii\core\Request {
                 // Controller failed to return a Response.
                 throw new CliException('Controller failed to return a Response');
             }
-        } catch (Exception $e) {
-            // Generate an appropriate Response object
-            $response = CliException::handler($e);
-        }
 
 
         return $response;

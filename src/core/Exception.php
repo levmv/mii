@@ -6,22 +6,6 @@ namespace mii\core;
 abstract class Exception extends \Exception {
 
     /**
-     * @var  array  PHP error code => human readable name
-     */
-    public static $php_errors = [
-        E_ERROR              => 'Fatal Error',
-        E_USER_ERROR         => 'User Error',
-        E_PARSE              => 'Parse Error',
-        E_WARNING            => 'Warning',
-        E_USER_WARNING       => 'User Warning',
-        E_STRICT             => 'Strict',
-        E_NOTICE             => 'Notice',
-        E_RECOVERABLE_ERROR  => 'Recoverable Error',
-        E_DEPRECATED         => 'Deprecated',
-    ];
-
-
-    /**
      * @var  Request    Request instance that triggered this exception.
      */
     protected $_request;
@@ -67,17 +51,8 @@ abstract class Exception extends \Exception {
     }
 
 
-    /**
-     * Removes all output echoed before calling this method.
-     */
-    public function clear_output()
-    {
-        // the following manual level counting is to deal with zlib.output_compression set to On
-        for ($level = ob_get_level(); $level > 0; --$level) {
-            if (!@ob_end_clean()) {
-                ob_clean();
-            }
-        }
+    public function get_name() {
+        return 'Exception';
     }
 
     /**
@@ -93,7 +68,6 @@ abstract class Exception extends \Exception {
     }
 
 
-
     /**
      * Get a single line of text representing the exception:
      *
@@ -107,6 +81,8 @@ abstract class Exception extends \Exception {
         return sprintf('%s [ %s ]: %s ~ %s [ %d ]',
             get_class($e), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
     }
+
+
 
 
 

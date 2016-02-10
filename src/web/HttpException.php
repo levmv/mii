@@ -4,8 +4,25 @@ namespace mii\web;
 
 class HttpException extends Exception {
 
-    public function __construct($code = 0, $message = "", array $variables = NULL) {
-        parent::__construct($message, $variables, $code);
+    public $status_code = 500;
+
+    public function __construct($status = 0, $message = "", array $variables = NULL, $code = 0, \Exception $previous = null) {
+
+        $this->status_code = $status;
+
+        parent::__construct($message, $variables, $code, $previous);
+    }
+
+    /**
+     * @return string the user-friendly name of this exception
+     */
+    public function get_name()
+    {
+        if (isset(Response::$messages[$this->status_code])) {
+            return Response::$messages[$this->status_code];
+        } else {
+            return 'Error';
+        }
     }
 
 };

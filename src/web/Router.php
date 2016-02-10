@@ -150,6 +150,8 @@ class Router {
 
             return [$route, $result];
         }
+
+        return false;
     }
 
     protected function match_route($uri, $route) {

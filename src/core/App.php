@@ -57,50 +57,13 @@ abstract class App {
             $this->set($name, $config);
         }
 
-        $this->register_exception_handler();
-        $this->register_error_handler();
-
-        register_shutdown_function(function() {
-            if ($error = error_get_last() AND in_array($error['type'], [E_PARSE, E_ERROR, E_USER_ERROR]))
-            {
-                // Clean the output buffer
-                ob_get_level() AND ob_clean();
-
-                // Fake an exception for nice debugging
-                //throw new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']);
-                \mii\web\Exception::handler(new \ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']));
-
-                // Shutdown now to avoid a "death loop"
-                exit(1);
-            }
-        });
-    }
-
-    abstract function run();
-
-    public function register_exception_handler() {}
-    public function register_error_handler() {}
-
-
-    public function config($group = false, $value = false) {
-        if($value) {
-            if($group)
-                $this->_config[$group] = $value;
-            else
-                $this->_config = $value;
-
-        } else {
-
-            if ($group) {
-                if(isset($this->_config[$group]))
-                    return $this->_config[$group];
-                return [];
-            }
-
-            return $this->_config;
+        // register Error handler
+        if($this->has('error')) {
+            $this->error->register();
         }
     }
 
+    abstract function run();
 
     public function default_components() {
         return [

@@ -222,6 +222,23 @@ class Response {
     }
 
 
+    public function redirect($url, $code = 302) {
+
+        // todo: process url
+
+        if(\Mii::$app->request->is_ajax()) {
+            $this->set_header('X-Redirect', $url);
+        } else {
+            $this->set_header('Location', $url);
+        }
+
+        $this->status($code);
+
+        return $this;
+    }
+
+
+
     public function content($content = null) {
         if($content === null)
             return $this->_content;

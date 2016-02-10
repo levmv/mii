@@ -16,7 +16,6 @@ class App extends \mii\core\App
     {
         try {
             $this->request = new Request();
-
             $this->request->execute()->send();
 
         } catch (\Exception $e) {
@@ -24,32 +23,11 @@ class App extends \mii\core\App
         }
     }
 
-
-    public function register_exception_handler()
-    {
-        set_exception_handler(['\mii\console\CliException', 'handler']);
-    }
-
-
-    public function register_error_handler()
-    {
-
-        set_error_handler(function ($code, $error, $file = NULL, $line = NULL) {
-            if (error_reporting() & $code) {
-                // This error is not suppressed by current error reporting settings
-                // Convert the error into an ErrorException
-                throw new \ErrorException($error, $code, 0, $file, $line);
-            }
-
-            // Do not execute the PHP error handler
-            return true;
-        });
-    }
-
     public function default_components() {
         return array_merge(parent::default_components(), [
             'request' => ['class' => 'mii\console\Request'],
-            'response' => ['class' => 'mii\console\Response']
+            'response' => ['class' => 'mii\console\Response'],
+            'error' => ['class' => 'mii\console\ErrorHandler']
         ]);
     }
 

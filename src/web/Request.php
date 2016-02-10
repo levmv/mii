@@ -3,6 +3,7 @@
 namespace mii\web;
 
 use Mii;
+use mii\core\InvalidRouteException;
 use mii\core\Route;
 use mii\util\Arr;
 
@@ -196,7 +197,7 @@ class Request extends \mii\core\Request
         $route_result = \Mii::$app->router->match($this->uri());
 
         if($route_result === false) {
-            throw new HttpException(404, 'Unable to find a route to match the URI: :uri', [
+            throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
                 ':uri' => $this->uri()]);
         }
 
@@ -215,23 +216,20 @@ class Request extends \mii\core\Request
         $this->params = $params;
 
 
-
         $benchmark = false;
         if (config('profiling')) {
             $benchmark = \mii\util\Profiler::start('Requests', $this->uri());
         }
-
-        //$controller = $this->controller();
 
         try {
             if (extension_loaded('newrelic')) {
                 newrelic_name_transaction($this->controller . '::' . $this->action);
             }
 
-            if (!class_exists($this->controller)) {
+            if (!$this->controller || !class_exists($this->controller)) {
 
-                throw new HttpException(404, 'The requested URL :uri was not found on this server.',
-                    [':uri' => $this->uri()]
+                throw new InvalidRouteException("Controller class (:class) doesn't exist.",
+                    [':class' => $this->controller]
                 );
             }
 
@@ -251,16 +249,16 @@ class Request extends \mii\core\Request
             }
         } catch (RedirectHttpException $e) {
 
-            $response->add_header('location', $e->url);
+            $response->redirect($e->url);
 
         }
-        catch (HttpException $e) {
-            // Get the response via the Exception
-            //$response = $e->get_response();
-            throw $e;
-        } catch (Exception $e) {
-            // Generate an appropriate Response object
-            $response = Exception::handler($e);
+        catch (InvalidRouteException $e) {
+            if(config('debug')) {
+                throw $e;
+            } else {
+                throw new NotFoundHttpException('Page not found.', $e->getCode(), $e);
+            }
+
         }
 
         if ($benchmark) {
