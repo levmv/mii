@@ -1,6 +1,6 @@
 <?php
 
-namespace mii\web;
+namespace mii\core;
 
 
 class Router {
