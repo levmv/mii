@@ -9,7 +9,7 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '0.9.1';
+    const VERSION = '0.9.2';
 
     const CODENAME = 'Alnair';
 
