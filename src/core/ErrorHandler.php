@@ -46,7 +46,7 @@ class ErrorHandler {
 
 
     public function report($exception) {
-
+        // todo: write to log
     }
 
 

@@ -44,13 +44,14 @@ class Role extends ORM {
 
     public function users() {
 
-        //$user = \Mii::$app->auth()->get_user_model();
+        $class = \Mii::$app->auth->get_user_model();
 
 
-        return User::find()
-                    ->join('roles_users')
-                    ->on('roles_users.user_id', '=', 'users.id')
-                    ->where('roles_users.role_id', '=', $this->id);
+        return (new $class)
+            ->select_query()
+            ->join('roles_users')
+            ->on('roles_users.user_id', '=', 'users.id')
+            ->where('roles_users.role_id', '=', $this->id);
 
     }
 

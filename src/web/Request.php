@@ -4,8 +4,6 @@ namespace mii\web;
 
 use Mii;
 use mii\core\InvalidRouteException;
-use mii\core\Route;
-use mii\util\Arr;
 
 
 class Request extends \mii\core\Request

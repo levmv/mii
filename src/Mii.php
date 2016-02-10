@@ -243,7 +243,6 @@ if( ! function_exists('dd')) {
 }
 
 
-
 function config($key = null, $default = null) {
 
     if($key === null)

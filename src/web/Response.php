@@ -247,7 +247,6 @@ class Response {
     }
 
 
-
     public function send() {
         switch($this->format) {
             case self::FORMAT_HTML:

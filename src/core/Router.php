@@ -222,7 +222,7 @@ class Router {
     public function url($name, $params = []) {
 
         if(!isset($this->_routes_list[$name])) {
-            throw new RouteException('Route :name doesnt exist', [':name' => $name]);
+            throw new InvalidRouteException('Route :name doesnt exist', [':name' => $name]);
         }
 
         $route = $this->_routes_list[$name];
@@ -270,7 +270,7 @@ class Router {
                     else
                     {
                         // Ungrouped parameters are required
-                        throw new RouteException('Required route parameter not passed: :param', [
+                        throw new InvalidRouteException('Required route parameter not passed: :param', [
                             ':param' => $param,
                         ]);
                     }
@@ -301,7 +301,7 @@ class Router {
                 else
                 {
                     // Ungrouped parameters are required
-                    throw new RouteException('Required route parameter not passed: :param', [
+                    throw new InvalidRouteException('Required route parameter not passed: :param', [
                         ':param' => $param,
                     ]);
                 }

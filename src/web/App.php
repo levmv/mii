@@ -30,7 +30,7 @@ class App extends \mii\core\App
         return array_merge(parent::default_components(), [
             'session' => ['class' => 'mii\web\Session'],
             'blocks' => ['class' => 'mii\web\Blocks'],
-            'router' => ['class' => 'mii\web\Router'],
+            'router' => ['class' => 'mii\core\Router'],
             'request' => ['class' => 'mii\web\Request'],
             'response' => ['class' => 'mii\web\Response'],
             'captcha' => ['class' => 'mii\captcha\Captcha'],

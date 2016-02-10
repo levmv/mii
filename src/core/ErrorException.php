@@ -45,6 +45,7 @@ class ErrorException extends \ErrorException
                 }
             }
 
+
             $ref = new \ReflectionProperty('Exception', 'trace');
             $ref->setAccessible(true);
             $ref->setValue($this, $trace);
