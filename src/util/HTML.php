@@ -39,6 +39,25 @@ class HTML {
         'disabled',
     );
 
+    public static $void_elements = [
+        'area' => 1,
+        'base' => 1,
+        'br' => 1,
+        'col' => 1,
+        'command' => 1,
+        'embed' => 1,
+        'hr' => 1,
+        'img' => 1,
+        'input' => 1,
+        'keygen' => 1,
+        'link' => 1,
+        'meta' => 1,
+        'param' => 1,
+        'source' => 1,
+        'track' => 1,
+        'wbr' => 1,
+    ];
+
     /**
      * @var  boolean  use strict XHTML mode?
      */
@@ -48,6 +67,8 @@ class HTML {
      * @var  boolean  automatically target external URLs to a new window?
      */
     public static $windowed_urls = FALSE;
+
+
 
     /**
      * Convert special characters to HTML entities. All untrusted content
@@ -79,6 +100,12 @@ class HTML {
     {
         return htmlentities( (string) $value, ENT_QUOTES, 'utf-8', $double_encode);
     }
+
+    public static function tag($name, $content = '', array $attributes = null) {
+        $html = "<$name" . static::attributes($attributes) . '>';
+        return isset(static::$void_elements[strtolower($name)]) ? $html : "$html$content</$name>";
+    }
+
 
     /**
      * Create HTML link anchors. Note that the title is not escaped, to allow
@@ -753,5 +780,17 @@ class HTML {
         return '<label'.HTML::attributes($attributes).'>'.$text.'</label>';
     }
 
+
+    public static function crsf_meta() {
+
+        $request = \Mii::$app->request;
+        if ($request->сsrf_validation) {
+            return static::tag('meta', '', ['name' => 'csrf-token-name', 'content' => $request->csrf_token_name]) . "\n    "
+            . static::tag('meta', '', ['name' => 'csrf-token', 'content' => $request->csrf_token()]) . "\n";
+        } else {
+            return '';
+        }
+
+    }
 
 } // End html

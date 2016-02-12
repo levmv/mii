@@ -74,6 +74,8 @@ class Controller extends \mii\core\Controller
 
     public $user;
 
+    public $сsrf_validation = true;
+
 
     /**
      * Creates a new controller instance. Each controller must be constructed
@@ -178,6 +180,10 @@ class Controller extends \mii\core\Controller
 
         if (!$this->acl->check($roles, $this->request->controller, $this->request->action)) {
             throw new HttpException(404, 'User has no rights to access :page', [':page' => $this->request->uri()]);
+        }
+
+        if ($this->сsrf_validation && !$this->request->validate_csrf_token()) {
+            throw new BadRequestHttpException('Token mistmatch error');
         }
 
         $this->before();

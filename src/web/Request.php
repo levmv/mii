@@ -25,6 +25,11 @@ class Request extends \mii\core\Request
     protected $_method = 'GET';
 
     /**
+     * The name of the HTTP header for sending CSRF token.
+     */
+    const CSRF_HEADER = 'X-CSRF-Token';
+
+    /**
      * @var  boolean
      */
     protected $_secure = false;
@@ -55,6 +60,15 @@ class Request extends \mii\core\Request
      * @var array    post parameters
      */
     protected $_post = [];
+
+
+    public $сsrf_validation = true;
+
+
+    public $enable_csrf_cookie = true;
+
+
+    public $csrf_token_name = 'csrf_token';
 
     /**
      * @var  string  Magic salt to add to the cookie
@@ -358,12 +372,22 @@ class Request extends \mii\core\Request
         return $this->_route;
     }
 
+    public function get_csrf_from_header()
+    {
+        $key = 'HTTP_' . str_replace('-', '_', strtoupper(static::CSRF_HEADER));
+        return isset($_SERVER[$key]) ? $_SERVER[$key] : null;
+    }
+
     public function check_csrf_token($token = false) {
+
         if(!$token) {
-            if(isset($_POST['csrf_token'])) {
-                $token = $_POST['csrf_token'];
-            } elseif(isset($_GET['csrf_token'])) {
-                $token = $_GET['csrf_token'];
+
+            if(isset($_POST[$this->csrf_token_name])) {
+
+                $token = $_POST[$this->csrf_token_name];
+
+            } elseif(null !== ($token = $this->get_csrf_from_header())) {
+
             } else {
                 \Mii::error('crsf_token not found', 'mii');
             }
@@ -373,10 +397,24 @@ class Request extends \mii\core\Request
     }
 
 
+    public function validate_csrf_token() {
+
+        if (!$this->сsrf_validation || in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+            return true;
+        }
+
+        return $this->check_csrf_token();
+    }
+
+
     public function csrf_token($new = false) {
 
         // Get the current token
-        $token = \Mii::$app->session->get('csrf_request_token');
+        if($this->enable_csrf_cookie) {
+            $token = $this->get_cookie($this->csrf_token_name);
+        } else {
+            $token = \Mii::$app->session->get($this->csrf_token_name);
+        }
 
         if ($new === TRUE OR ! $token)
         {
@@ -384,7 +422,11 @@ class Request extends \mii\core\Request
             $token = sha1(uniqid(NULL, TRUE));
 
             // Store the new token
-            \Mii::$app->session->set('csrf_request_token', $token);
+            if($this->enable_csrf_cookie) {
+                $this->set_cookie($this->csrf_token_name, $token);
+            } else {
+                \Mii::$app->session->set($this->csrf_token_name, $token);
+            }
         }
 
         return $token;
