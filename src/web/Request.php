@@ -425,6 +425,11 @@ class Request extends \mii\core\Request
         return $this->is_ajax() && !empty($_SERVER['HTTP_X_PJAX']);
     }
 
+    public function is_post() {
+        return $this->method() === 'POST';
+    }
+
+
     private $_raw_body;
 
     /**
