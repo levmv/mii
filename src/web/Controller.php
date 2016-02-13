@@ -117,8 +117,7 @@ class Controller extends \mii\core\Controller
 
     protected function after($content = null)
     {
-
-        if ($this->render_layout AND $this->response->format != Response::FORMAT_JSON AND !$this->request->is_ajax()) {
+        if ($this->render_layout AND $this->response->format === Response::FORMAT_HTML AND !$this->request->is_ajax()) {
 
             $this->setup_index();
 
@@ -179,7 +178,7 @@ class Controller extends \mii\core\Controller
         $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
 
         if (!$this->acl->check($roles, $this->request->controller, $this->request->action)) {
-            throw new HttpException(404, 'User has no rights to access :page', [':page' => $this->request->uri()]);
+            throw new ForbiddenHttpException('User has no rights to access :page', [':page' => $this->request->uri()]);
         }
 
         if ($this->сsrf_validation && !$this->request->validate_csrf_token()) {

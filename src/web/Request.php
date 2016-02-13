@@ -270,7 +270,13 @@ class Request extends \mii\core\Request
             } else {
                 throw new NotFoundHttpException('Page not found.', $e->getCode(), $e);
             }
-
+        }
+        catch (ForbiddenHttpException $e) {
+            if(config('debug')) {
+                throw $e;
+            } else {
+                throw new NotFoundHttpException('Page not found.', $e->getCode(), $e);
+            }
         }
 
         if ($benchmark) {
