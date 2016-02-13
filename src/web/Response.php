@@ -254,7 +254,7 @@ class Response {
                 break;
             case self::FORMAT_JSON:
                 $this->set_header('content-type','application/json; charset=UTF-8');
-                $this->_content = json_encode($this->_content);
+                $this->_content = json_encode($this->_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 break;
             case self::FORMAT_XML:
                 $this->set_header('content-type','application/xml; charset=UTF-8');
