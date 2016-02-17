@@ -49,9 +49,7 @@ abstract class Image {
     {
         if ($class === NULL)
         {
-            $config = \Mii::$app->config('image');
-
-            $class = isset($config['class']) ? $config['class'] : Image::$default_class;
+            $class = config('image.class', Image::$default_class);
         }
 
 
