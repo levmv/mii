@@ -20,7 +20,10 @@ class ErrorHandler extends \mii\core\ErrorHandler {
 
         if($this->route && $response->format === Response::FORMAT_HTML && !config('debug')) {
 
-            // todo
+            \Mii::$app->request->execute($this->route)->send();
+            return;
+
+
 
         } elseif( $response->format === Response::FORMAT_HTML) {
 

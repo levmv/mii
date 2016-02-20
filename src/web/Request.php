@@ -104,9 +104,7 @@ class Request extends \mii\core\Request
     public function init()
     {
 
-        if ($this->_uri === null) {
-            $this->uri($this->detect_uri());
-        }
+        $this->uri($this->detect_uri());
 
         if (isset($_SERVER['REQUEST_METHOD'])) {
             // Use the server request method
@@ -130,7 +128,6 @@ class Request extends \mii\core\Request
      *
      *
      * @return  string  URI of the main request
-     * @throws  Mii\Exception
      */
     public function detect_uri()
     {
@@ -164,8 +161,6 @@ class Request extends \mii\core\Request
             } elseif (isset($_SERVER['REDIRECT_URL'])) {
                 $uri = $_SERVER['REDIRECT_URL'];
             } else {
-                // If you ever see this error, please report an issue at http://dev.kohanaphp.com/projects/kohana3/issues
-                // along with any relevant information about your web server setup. Thanks!
                 throw new Exception('Unable to detect the URI using PATH_INFO, REQUEST_URI, PHP_SELF or REDIRECT_URL');
             }
 
@@ -187,26 +182,13 @@ class Request extends \mii\core\Request
      * Processes the request, executing the controller action that handles this
      * request, determined by the [Route].
      *
-     * 1. Before the controller action is called, the [Controller::before] method
-     * will be called.
-     * 2. Next the controller action will be called.
-     * 3. After the controller action is called, the [Controller::after] method
-     * will be called.
-     *
-     * By default, the output from the controller is captured and returned, and
-     * no headers are sent.
-     *
-     *     $request->execute();
-     *
      * @return  Response
-     * @throws  Request_Exception
-     * @throws  HTTP_Exception_404
-     * @uses    [Kohana::$profiling]
-     * @uses    [Profiler]
      */
-    public function execute()
+    public function execute($uri = null)
     {
-        $route_result = \Mii::$app->router->match($this->uri());
+        $uri = $this->uri($uri);
+
+        $route_result = \Mii::$app->router->match($uri);
 
         if($route_result === false) {
             throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
@@ -398,7 +380,6 @@ class Request extends \mii\core\Request
                 \Mii::error('crsf_token not found', 'mii');
             }
         }
-
         return $this->csrf_token() === $token;
     }
 

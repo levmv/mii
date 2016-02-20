@@ -113,6 +113,8 @@ class ErrorHandler {
 
     public function handle_fatal_error() {
 
+        unset($this->_memory_reserve);
+
         if ($error = error_get_last() AND in_array($error['type'], [E_PARSE, E_ERROR, E_USER_ERROR]))
         {
             $this->clear_output();

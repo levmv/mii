@@ -85,6 +85,8 @@ class Auth
         if (empty($password))
             return false;
 
+        $username = mb_strtolower($username, Mii::$app->charset);
+
         $user = (new $this->user_model)->find_user($username);
 
         if (!$user)

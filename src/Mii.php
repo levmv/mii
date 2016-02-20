@@ -66,7 +66,7 @@ class Mii {
 
     public static function set_path($name, $value = null) {
         if(is_array($name)) {
-            static::$paths = $name;
+            static::$paths = array_replace(static::$paths, $name);
         } else {
             static::$paths[$name] = $value;
         }

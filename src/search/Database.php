@@ -9,7 +9,6 @@ use mii\db\Expression;
 class Database extends \mii\db\Database
 {
 
-
     protected $escape_chars = array(
         '\\' => '\\\\',
         '(' => '\(',
