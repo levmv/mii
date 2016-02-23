@@ -26,6 +26,9 @@ class ORM implements ORMInterface
      */
     protected $_changed = [];
 
+
+    protected $_exclude_fields = [];
+
     /**
      * @var boolean Is this model loaded from DB
      */
@@ -249,8 +252,11 @@ class ORM implements ORMInterface
     {
         $fields = [];
 
-        foreach ($this->_data as $key => $value)
-            $fields[] = $this->get_table() . '.' . $key;
+        foreach ($this->_data as $key => $value) {
+            if(! in_array($key, $this->_exclude_fields)) {
+                $fields[] = $this->get_table() . '.' . $key;
+            }
+        }
 
         return $fields;
     }
