@@ -7,7 +7,7 @@ use mii\util\Console;
 
 class ErrorHandler extends \mii\core\ErrorHandler {
 
-    protected $memory_reserve_size = 262144;
+    public $memory_reserve_size = 262144;
 
     public function render($exception) {
 

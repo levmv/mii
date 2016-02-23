@@ -3,7 +3,7 @@
 namespace mii\web;
 
 use Mii;
-use mii\web\Exception;
+use mii\core\ErrorHandler;
 
 
 class Block
@@ -121,7 +121,13 @@ class Block
      */
     public function __toString()
     {
-        return $this->render();
+        try {
+
+            return $this->render();
+
+        } catch (\Exception $e) {
+            ErrorHandler::convert_to_error($e);
+        }
     }
 
     public function depends(array $depends)

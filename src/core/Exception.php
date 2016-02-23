@@ -55,18 +55,6 @@ abstract class Exception extends \Exception {
         return 'Exception';
     }
 
-    /**
-     * Converts an exception into a PHP error.
-     *
-     * This method can be used to convert exceptions inside of methods like `__toString()`
-     * to PHP errors because exceptions cannot be thrown inside of them.
-     * @param \Exception $exception the exception to convert to a PHP error.
-     */
-    public static function convert_to_error($exception)
-    {
-        trigger_error(static::text($exception), E_USER_ERROR);
-    }
-
 
     /**
      * Get a single line of text representing the exception:
