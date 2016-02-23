@@ -54,7 +54,7 @@ class Router {
     public function init_routes() {
 
         // Sort groups
-        if(count($this->routes) && $this->order) {
+        if($this->order !== null && count($this->routes)) {
             $this->routes = array_merge(array_flip($this->order), $this->routes);
         }
 
@@ -145,10 +145,9 @@ class Router {
         foreach($this->_routes_list as $route) {
             $result = $this->match_route($uri, $route);
 
-            if($result === false)
-                continue;
-
-            return [$route, $result];
+            if($result !== false) {
+                return [$route, $result];
+            }
         }
 
         return false;
@@ -166,7 +165,6 @@ class Router {
             if ( ! preg_match($route['compiled'], $uri, $matches))
                 return false;
         }
-
         $params = [];
         foreach ($matches as $key => $value)
         {
@@ -332,3 +330,4 @@ class Router {
     }
 
 }
+
