@@ -186,9 +186,7 @@ class Request extends \mii\core\Request
      */
     public function execute($uri = null)
     {
-        $this->uri($uri);
-
-        $route_result = \Mii::$app->router->match($uri);
+        $route_result = \Mii::$app->router->match($this->uri($uri));
 
         if($route_result === false) {
             throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
@@ -281,9 +279,7 @@ class Request extends \mii\core\Request
             return empty($this->_uri) ? '/' : $this->_uri;
         }
 
-        $this->_uri = $uri;
-
-        return $this;
+        return $this->_uri = $uri;
     }
 
 
