@@ -186,7 +186,7 @@ class Request extends \mii\core\Request
      */
     public function execute($uri = null)
     {
-        $uri = $this->uri($uri);
+        $this->uri($uri);
 
         $route_result = \Mii::$app->router->match($uri);
 
