@@ -22,11 +22,7 @@ class Form {
 
     public $labels = [];
 
-    public $enable_csrf_validation = true;
-
     public $message_file;
-
-    protected $_csrf_token = '';
 
     protected $_changed = [];
 
@@ -125,19 +121,6 @@ class Form {
 
     public function validate() {
 
-        if($this->enable_csrf_validation) {
-
-            $this->validation->rule('csrf_token', function(Validation $v, $field, $value) {
-
-                if(! \Mii::$app->request->check_csrf_token($value)) {
-                    $v->error('csrf_token', 'Crsf token validation failed');
-                    return false;
-                }
-
-                return true;
-            });
-        }
-
         $this->validation->rules($this->rules());
 
         $this->validation->data(\Mii::$app->request->post());
@@ -166,9 +149,13 @@ class Form {
 
         $out = HTML::open($action, $attributes);
 
-        if($this->enable_csrf_validation) {
+        $is_post = $attributes === null ||
+                   ! isset($attributes['method']) ||
+                   strcasecmp($attributes['method'], 'post') === 0;
 
-            $out .= HTML::hidden('csrf_token', \Mii::$app->request->csrf_token());
+        if(\Mii::$app->request->сsrf_validation && $is_post) {
+
+            $out .= HTML::hidden(\Mii::$app->request->csrf_token_name, \Mii::$app->request->csrf_token());
         }
 
         return $out;

@@ -70,6 +70,8 @@ class Request extends \mii\core\Request
 
     public $csrf_token_name = 'csrf_token';
 
+    protected $_csrf_token;
+
     /**
      * @var  string  Magic salt to add to the cookie
      */
@@ -392,27 +394,29 @@ class Request extends \mii\core\Request
 
     public function csrf_token($new = false) {
 
-        // Get the current token
-        if($this->enable_csrf_cookie) {
-            $token = $this->get_cookie($this->csrf_token_name);
-        } else {
-            $token = \Mii::$app->session->get($this->csrf_token_name);
-        }
+        if($this->_csrf_token === null || $new) {
+            if($new || ($this->_csrf_token = $this->load_csrf_token()) === null) {
+                // Generate a new unique token
+                $token = sha1(uniqid(NULL, TRUE));
 
-        if ($new === TRUE OR ! $token)
-        {
-            // Generate a new unique token
-            $token = sha1(uniqid(NULL, TRUE));
-
-            // Store the new token
-            if($this->enable_csrf_cookie) {
-                $this->set_cookie($this->csrf_token_name, $token);
-            } else {
-                \Mii::$app->session->set($this->csrf_token_name, $token);
+                // Store the new token
+                if($this->enable_csrf_cookie) {
+                    $this->set_cookie($this->csrf_token_name, $token);
+                } else {
+                    \Mii::$app->session->set($this->csrf_token_name, $token);
+                }
             }
         }
 
-        return $token;
+        return $this->_csrf_token;
+    }
+
+    public function load_csrf_token() {
+        if($this->enable_csrf_cookie) {
+            return $this->get_cookie($this->csrf_token_name);
+        } else {
+            return \Mii::$app->session->get($this->csrf_token_name);
+        }
     }
 
 

@@ -23,7 +23,6 @@ class App extends \mii\core\App
     public function run()
     {
         $this->request->execute()->send();
-
     }
 
     public function default_components() {
