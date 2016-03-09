@@ -229,7 +229,7 @@ function path($name) {
 }
 
 function e($text) {
-    return mii\util\Html::entities($text, false);
+    return mii\util\HTML::entities($text, false);
 }
 
 if( ! function_exists('dd')) {
