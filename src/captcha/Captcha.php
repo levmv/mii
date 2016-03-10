@@ -117,7 +117,7 @@ class Captcha
         static $counted;
 
         // User has been promoted, always TRUE and don't count anymore
-        if (Mii::$app->captcha->promoted())
+        if ($this->promoted())
             return TRUE;
 
         // Challenge result
@@ -373,21 +373,7 @@ class Captcha
     public function image_render($html)
     {
         // Output html element
-        if ($html === TRUE)
-            return '<img src="'.URL::site('captcha/'.$this->id).'" width="'.$this->width.'" height="'.$this->height.'" alt="Captcha" class="captcha" />';
 
-        // Send the correct HTTP header
-        Mii::$app->response->set_header('Content-Type', 'image/'.$this->image_type);
-        Mii::$app->response->set_header('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-        Mii::$app->response->set_header('Pragma', 'no-cache');
-        Mii::$app->response->set_header('Connection', 'close');
-
-        // Pick the correct output function
-        $function = 'image'.$this->image_type;
-        $function($this->image);
-
-        // Free up resources
-        imagedestroy($this->image);
     }
 
 
@@ -411,8 +397,12 @@ class Captcha
      * @param boolean $html Html output
      * @return mixed
      */
-    public function render($html = TRUE)
+    public function render($html = true)
     {
+        if($html === true) {
+            return '<img src="'.URL::site('captcha/'.$this->id).'" width="'.$this->width.'" height="'.$this->height.'" alt="Captcha" class="captcha" />';
+        }
+
         // Creates $this->image
         $this->image_create($this->background);
 
@@ -468,8 +458,19 @@ class Captcha
             imagettftext($this->image, $size * 2, mt_rand(-45, 45), ($x - (mt_rand(5, 10))), ($y + (mt_rand(5, 10))), $text_color, $font, $char);
         }
 
-        // Output
-        return $this->image_render($html);
+
+        // Send the correct HTTP header
+        Mii::$app->response->set_header('Content-Type', 'image/'.$this->image_type);
+        Mii::$app->response->set_header('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+        Mii::$app->response->set_header('Pragma', 'no-cache');
+        Mii::$app->response->set_header('Connection', 'close');
+
+        // Pick the correct output function
+        $function = 'image'.$this->image_type;
+        $function($this->image);
+
+        // Free up resources
+        imagedestroy($this->image);
     }
 
 }
