@@ -315,6 +315,8 @@ class Session
 
     public function flash($key, $value = true)
     {
+        $this->open();
+
         $counters = $this->get($this->_flash, []);
         $counters[$key] = 0;
         $this->_data[$key] = $value;
