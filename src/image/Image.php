@@ -30,7 +30,7 @@ abstract class Image {
     /**
      * @var  string  default driver: GD, ImageMagick, etc
      */
-    public static $default_class = 'GD';
+    public static $default_class = '\mii\image\Gmagick';
 
     // Status of the driver check
     protected static $_checked = FALSE;
@@ -94,24 +94,25 @@ abstract class Image {
         try
         {
             // Get the real path to the file
-            $file = realpath($file);
+            $realfile = realpath($file);
 
             // Get the image information
-            $info = getimagesize($file);
+            $info = getimagesize($realfile);
+
         }
         catch (\Exception $e)
         {
             // Ignore all errors while reading the image
         }
 
-        if (empty($file) OR empty($info))
+        if (empty($realfile) OR empty($info))
         {
-            throw new \Exception('Not an image or invalid image: :file',
-                array(':file' => Debug::path($file)));
+            throw new ImageException('Not an image or invalid image: :file',
+                [':file' => Debug::path($file)]);
         }
 
         // Store the image information
-        $this->file   = $file;
+        $this->file   = $realfile;
         $this->width  = $info[0];
         $this->height = $info[1];
         $this->type   = $info[2];
