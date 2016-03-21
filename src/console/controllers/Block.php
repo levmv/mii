@@ -72,6 +72,15 @@ class Block extends Controller {
         $this->to_assets('chosen/chosen-sprite@2x.png', $block);
     }
 
+
+    protected function do_select2($block) {
+        $this->to_block('select2/dist/js/select2.full.min.js', $block, 'js');
+        $this->to_block('select2/dist/js/i18n/ru.js', $block . '_ru', 'js');
+
+        $this->to_block('select2/dist/css/select2.min.css', $block, 'css');
+    }
+
+
     protected function do_fotorama($block) {
 
         $this->to_block('fotorama/fotorama.js', $block, 'js');
