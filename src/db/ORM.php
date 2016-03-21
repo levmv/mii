@@ -56,7 +56,7 @@ class ORM implements ORMInterface
 
     /**
      * @param mixed ID of model to load or set of ids
-     * @return Query|$this
+     * @return Query
      */
     public static function find($id = null)
     {
