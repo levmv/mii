@@ -160,7 +160,7 @@ function redirect($url, $use_back_url = false) {
 }
 
 /**
- * @param $name
+ * @param $name string
  * @return \mii\web\Block
  */
 function block($name) {

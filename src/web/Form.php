@@ -233,7 +233,7 @@ class Form {
 
     }
 
-    protected function check_prepared() {
+    public function check_prepared() {
         if(!$this->is_prepared) {
             $this->prepare();
             $this->is_prepared = true;

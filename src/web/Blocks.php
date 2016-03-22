@@ -52,7 +52,7 @@ class Blocks
     /**
      * Create a new block, or get an existing block
      * @static
-     * @param $name Block name
+     * @param $name string Block name
      * @param bool $values Block params
      * @param bool $id Block id
      * @return \mii\web\Block

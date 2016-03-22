@@ -74,7 +74,7 @@ class Controller extends \mii\core\Controller
 
     public $user;
 
-    public $сsrf_validation = true;
+    public $csrf_validation = true;
 
 
     /**
@@ -181,7 +181,7 @@ class Controller extends \mii\core\Controller
             throw new ForbiddenHttpException('User has no rights to access :page', [':page' => $this->request->uri()]);
         }
 
-        if ($this->сsrf_validation && !$this->request->validate_csrf_token()) {
+        if ($this->csrf_validation && !$this->request->validate_csrf_token()) {
             throw new BadRequestHttpException('Token mistmatch error');
         }
 
