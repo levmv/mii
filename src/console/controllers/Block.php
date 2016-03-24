@@ -52,7 +52,6 @@ class Block extends Controller {
             }
 
         }
-
     }
 
 
@@ -91,6 +90,12 @@ class Block extends Controller {
 
         $this->to_assets('fotorama/fotorama.png', $block);
         $this->to_assets('fotorama/fotorama@2x.png', $block);
+    }
+
+
+    protected function do_magnific($block) {
+        $this->to_block('magnific-popup/dist/jquery.magnific-popup.min.js', $block, 'js');
+        $this->to_block('magnific-popup/dist/magnific-popup.css', $block, 'css');
     }
 
 
