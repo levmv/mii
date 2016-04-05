@@ -233,11 +233,17 @@ function e($text) {
 }
 
 if( ! function_exists('dd')) {
-    function dd()
+    function dd($fine_print = true)
     {
+        if($fine_print) echo "<pre>\n";
+
         array_map(function($a) {
             var_dump($a);
         }, func_get_args());
+
+
+        if($fine_print) echo "<pre>\n";
+        
         die;
     }
 }
