@@ -242,8 +242,8 @@ if( ! function_exists('dd')) {
         }, func_get_args());
 
 
-        if($fine_print) echo "<pre>\n";
-        
+        if($fine_print) echo "</pre>\n";
+
         die;
     }
 }
