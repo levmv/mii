@@ -235,15 +235,23 @@ function e($text) {
 if( ! function_exists('dd')) {
     function dd($fine_print = true)
     {
-        if($fine_print) echo "<pre>\n";
+        if($fine_print) {
 
-        array_map(function($a) {
-            var_dump($a);
-        }, func_get_args());
+            echo "<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }";
+            echo "pre small { font-size: 1em; color: #000080;font-weight:bold}";
+            echo "</style><pre>\n";
 
+            array_map(function($a) {
+                echo \mii\util\Debug::dump($a);
+            }, func_get_args());
 
-        if($fine_print) echo "</pre>\n";
+            echo "</pre>\n";
+        } else {
 
+            array_map(function($a) {
+                var_dump($a);
+            }, func_get_args());
+        }
         die;
     }
 }
