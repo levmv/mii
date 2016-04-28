@@ -9,7 +9,7 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '0.9.2';
+    const VERSION = '0.9.4';
 
     const CODENAME = 'Alnair';
 
@@ -72,6 +72,20 @@ class Mii {
         }
     }
 
+
+    public static function resolve($path) {
+        if (strncmp($path, '@', 1)) {
+            return $path;
+        }
+
+        $pos = strpos($path, '/');
+        $alias = $pos === false ? $path : substr($path, 1, $pos-1);
+
+        if (isset(static::$paths[$alias])) {
+            return $pos === false ? static::$paths[$alias] : static::$paths[$alias] . substr($path, $pos);
+        }
+        return $path;
+    }
 
     /**
      * Sets the logger object.

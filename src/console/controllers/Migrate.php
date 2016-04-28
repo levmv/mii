@@ -12,20 +12,21 @@ class Migrate extends Controller {
 
     protected $migrate_table = 'migrations';
 
-    protected $migrations_list;
+    protected $migrations_list = [];
 
     protected $applied_migrations;
 
-    protected $migrations_path;
+    protected $migrations_paths;
 
     public function before() {
 
         $config = config('migrate', []);
 
-        $this->migrations_path = path('app').'/migrations';
-
         foreach($config as $name => $value)
             $this->$name = $value;
+
+        if($this->migrations_paths === null)
+            $this->migrations_paths = [path('app').'/migrations'];
 
         try {
             $this->applied_migrations = DB::select('SELECT `name`, `date` FROM `'.$this->migrate_table.'`')->index_by('name')->all();
@@ -41,31 +42,46 @@ class Migrate extends Controller {
 
             $this->applied_migrations = [];
         }
-        if(! is_dir($this->migrations_path)) {
-            $this->warning('Directory :dir does not exist', [':dir' => $this->migrations_path]);
-            mkdir($this->migrations_path, 0775);
+
+
+        $files = [];
+
+        for($i=0;$i<count($this->migrations_paths);$i++)
+            $this->migrations_paths[$i] = \Mii::resolve($this->migrations_paths[$i]);
+
+
+        foreach($this->migrations_paths as $migrations_path) {
+
+            if(! is_dir($migrations_path)) {
+                $this->warning('Directory :dir does not exist', [':dir' => $migrations_path]);
+                mkdir($migrations_path, 0775);
+            }
+
+            $scan = scandir($migrations_path);
+            foreach($scan as $file) {
+                if ($file[0] == '.')
+                    continue;
+
+                $info = pathinfo($file);
+
+                if($info['extension'] !== 'php')
+                    continue;
+
+                $name = $info['filename'];
+
+                $this->migrations_list[$name] = [
+                    'name' => $name,
+                    'file' => $migrations_path.'/'.$file,
+                    'applied' => isset($this->applied_migrations[$name]),
+                    'date' => 0
+                ];
+            }
+
         }
 
-        $files = scandir($this->migrations_path);
-        natsort($files);
+        uksort($this->migrations_list, 'strnatcmp');
 
-        foreach($files as $file) {
-            if ($file[0] == '.')
-                continue;
 
-            $info = pathinfo($file);
-
-            if($info['extension'] !== 'php')
-                continue;
-
-            $name = $info['filename'];
-
-            $this->migrations_list[] = [
-                'name' => $name,
-                'applied' => isset($this->applied_migrations[$name]),
-                'date' => 0
-            ];
-        }
     }
 
 
@@ -104,7 +120,8 @@ class '.$name.' extends Migration {
 
 }
 ';
-            file_put_contents($this->migrations_path.'/'.$name.'.php', $file);
+
+            file_put_contents(current($this->migrations_paths).'/'.$name.'.php', $file);
 
             DB::commit();
 
@@ -174,7 +191,7 @@ class '.$name.' extends Migration {
 
     public function load_migration($class) {
 
-        require_once($this->migrations_path.'/'.$class.'.php');
+        require_once(current($this->migrations_paths).'/'.$class.'.php');
 
         return new $class;
     }

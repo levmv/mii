@@ -3,46 +3,46 @@
 namespace mii\console\controllers;
 
 use mii\console\Controller;
+use mii\util\Console;
 
 class Help extends Controller {
 
     public function index($argv) {
 
-        $dirs = [
+        $dirs = config('console.dirs', [
             'app' => [
                 'path' => path('app').'/console',
-                'namespace' => config('console.namespace', 'app\\controllers')
+                'namespace' => config('console.namespace', 'app\\console')
             ],
             'mii' => [
                 'path' => __DIR__,
                 'namespace' => 'mii\\console\\controllers'
             ]
-        ];
+        ]);
 
         $list = [];
         foreach($dirs as $name => $dir) {
-            $list[] = $this->find_controllers($dir['namespace'], $dir['path']);
+            $this->find_controllers($dir['namespace'], $dir['path'], $list);
         }
 
         $help = [];
 
-        foreach($list as $controllers) {
-            foreach($controllers as $controller) {
+        $this->stdout("\n");
+        foreach($list as $controller) {
 
-                if($controller['class'] == __CLASS__)
-                    continue;
+            if($controller['class'] == static::class)
+                continue;
 
-                $class = new $controller['class']($this->request, $this->response);
+            $class = new $controller['class']($this->request, $this->response);
 
-                $desc = ($class->description) ? " [".$class->description."]" : '';
-                $this->stdout($controller['command'].$desc."\n\n");
+            $desc = ($class->description) ? " [".$class->description."]" : '';
+            $this->stdout($controller['command'], Console::FG_GREEN);
+            $this->stdout($desc."\n\n", Console::FG_GREY);
 
-            }
         }
     }
 
-    protected function find_controllers($namespace, $path) {
-        $files = [];
+    protected function find_controllers($namespace, $path, &$files) {
 
         $dir = dir($path);
         while (false !== $entry = $dir->read()) {
@@ -57,16 +57,15 @@ class Help extends Controller {
                 continue;
             }
 
-            $files[] = [
-                'class' => $namespace.'\\'.$info['filename'],
-                'command' => mb_strtolower($info['filename'], 'utf-8')
-            ];
+            if(!isset($files[$info['filename']]))
+                $files[$info['filename']] = [
+                    'class' => $namespace.'\\'.$info['filename'],
+                    'command' => mb_strtolower($info['filename'], 'utf-8')
+                ];
         }
 
         // Clean up
         $dir->close();
-
-        return $files;
     }
 
 }

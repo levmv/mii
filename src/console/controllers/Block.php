@@ -3,6 +3,7 @@
 namespace mii\console\controllers;
 
 
+use Mii;
 use mii\console\CliException;
 use mii\console\Controller;
 use mii\core\Exception;
@@ -41,7 +42,7 @@ class Block extends Controller {
         foreach($this->blocks as $output_path => $blocks) {
             foreach($blocks as $block => $func) {
 
-                $this->output_path = $output_path;
+                $this->output_path = Mii::resolve($output_path);
 
                 try {
                     $this->{$func}($block);

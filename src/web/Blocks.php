@@ -8,6 +8,8 @@ class Blocks
 {
     public $assets_dir;
 
+    protected $block_class = 'mii\web\Block';
+
     protected $_blocks = [];
 
     protected $_block_paths = [];
@@ -35,6 +37,9 @@ class Blocks
             $this->libraries = [
                 path('app').'/blocks'
             ];
+        } else {
+            for($i=0;$i<count($this->libraries);$i++)
+                $this->libraries[$i] = Mii::resolve($this->libraries[$i]); 
         }
 
         if(!$this->assets_dir) {
@@ -78,7 +83,7 @@ class Blocks
             }
         }
 
-        $this->_blocks[$name] = new Block($name, $block_file, $values);
+        $this->_blocks[$name] = new $this->block_class($name, $block_file, $values);
         return $this->_blocks[$name];
     }
 
