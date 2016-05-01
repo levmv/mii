@@ -46,14 +46,15 @@ class Help extends Controller {
 
         $dir = dir($path);
         while (false !== $entry = $dir->read()) {
-
-            if ($entry == '.' || $entry == '..' || $entry == '.git') {
+            if ($entry == '.' || $entry == '..' || $entry == '.git' || is_dir($dir->path."/".$entry)) {
                 continue;
             }
 
+
             $info = pathinfo($path.'/'.$entry);
 
-            if($info['extension'] !== 'php') {
+
+            if(!isset($info['extension']) || $info['extension'] !== 'php') {
                 continue;
             }
 
