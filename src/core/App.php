@@ -67,7 +67,7 @@ abstract class App {
 
     public function default_components() {
         return [
-            'log' => ['class' => 'mii\log\Logger'],
+            'log' => ['class' => \mii\log\Logger::class],
             'user' => ['class' => 'mii\auth\User'],
             'auth' => ['class' => 'mii\auth\Auth'],
             'db' => ['class' => 'mii\db\Database'],
