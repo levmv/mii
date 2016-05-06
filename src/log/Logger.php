@@ -82,7 +82,6 @@ class Logger {
         foreach($this->targets as $target) {
             $target->log($level, $message, $category);
         }
-
     }
 
     public function flush() {

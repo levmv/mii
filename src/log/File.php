@@ -2,7 +2,7 @@
 
 namespace mii\log;
 
-
+use Mii;
 use mii\core\Exception;
 use mii\util\Debug;
 
@@ -20,20 +20,18 @@ class File extends Target {
 
 
     public function __construct($params) {
-        $this->file = $params['file'];
+        $this->file = Mii::resolve($params['file']);
         $this->levels = isset($params['levels']) ? $params['levels'] : Logger::ALL;
         $this->category = isset($params['category']) ? $params['category'] : [] ;
-        $this->base_path = isset($params['base_path']) ? $params['base_path'] : path('app');
-
     }
 
 
-    public function log($level, $message, $category) {
+    public function log($level, $message, array $category = []) {
 
         if(! ($this->levels & $level))
             return;
 
-        if($this->category AND !in_array($category, $this->category))
+        if(count($category) AND $this->category AND !in_array($category, $this->category))
             return;
 
 
@@ -47,7 +45,7 @@ class File extends Target {
         if(!count($this->messages))
             return;
 
-        $path = dirname($this->base_path.$this->file);
+        $path = dirname($this->file);
         if (!is_dir($path)) {
             mkdir($path, 0777, true);
         }
@@ -55,7 +53,7 @@ class File extends Target {
         $text = implode("\n", array_map([$this, 'format_message'], $this->messages)) . "\n";
         $this->messages = [];
 
-        if (($fp = @fopen($this->base_path.$this->file, 'a')) === false) {
+        if (($fp = @fopen($this->file, 'a')) === false) {
             // TODO: throw new Exception("Unable to append to log file: {$this->file}");
         }
         @flock($fp, LOCK_EX);
@@ -80,7 +78,7 @@ class File extends Target {
             }
         }
         //$prefix = $this->getMessagePrefix($message);
-        return date('Y-m-d H:i:s', $timestamp) . " [$level][$category] $text";
+        return date('Y-m-d H:i:s', $timestamp) . " [$level][".implode(',',$category)."] $text";
 
     }
 }

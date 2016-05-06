@@ -19,8 +19,7 @@ abstract class Target {
      * @param  array   $context The log context
      * @return Boolean Whether the record has been processed
      */
-    //abstract public function log($level, $message, array $context = array());
-
+    abstract public function log($level, $message, array $context = []);
 
 
     public function flush() {
