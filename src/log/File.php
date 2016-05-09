@@ -81,7 +81,7 @@ class File extends Target {
             }
         }
         //$prefix = $this->getMessagePrefix($message);
-        return date('Y-m-d H:i:s', $timestamp) . " [$level][".implode(',',$category)."] $text";
+        return date('Y-m-d H:i:s', $timestamp) . " [$level][".$category."] $text";
 
     }
 }
