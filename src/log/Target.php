@@ -16,10 +16,10 @@ abstract class Target {
      *
      * @param  mixed   $level   The log level
      * @param  string  $message The log message
-     * @param  array   $context The log context
+     * @param  array   $category The log category (context)
      * @return Boolean Whether the record has been processed
      */
-    abstract public function log($level, $message, array $context = []);
+    abstract public function log($level, $message, $category);
 
 
     public function flush() {

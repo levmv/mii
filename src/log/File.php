@@ -3,6 +3,7 @@
 namespace mii\log;
 
 use Mii;
+use mii\core\ErrorException;
 use mii\core\Exception;
 use mii\util\Debug;
 
@@ -26,7 +27,7 @@ class File extends Target {
     }
 
 
-    public function log($level, $message, array $category = []) {
+    public function log($level, $message, $category) {
 
         if(! ($this->levels & $level))
             return;
@@ -54,6 +55,8 @@ class File extends Target {
         $this->messages = [];
 
         if (($fp = @fopen($this->file, 'a')) === false) {
+
+            throw new ErrorException;exit;
             // TODO: throw new Exception("Unable to append to log file: {$this->file}");
         }
         @flock($fp, LOCK_EX);
