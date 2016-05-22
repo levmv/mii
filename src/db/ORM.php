@@ -275,7 +275,7 @@ class ORM implements ORMInterface
     /**
      * Checks if the field (or any) was changed
      *
-     * @param string $field_name
+     * @param string|array $field_name
      * @return bool
      */
 
@@ -289,8 +289,13 @@ class ORM implements ORMInterface
             return count($this->_changed) > 0;
         }
 
+        if(is_array($field_name)) {
+            return count(array_intersect($field_name, array_keys($this->_changed)));
+        }
+
         return isset($this->_changed[$field_name]);
     }
+
 
     /**
      * Saves the model to your database.
