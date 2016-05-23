@@ -102,7 +102,21 @@ class Database extends \mii\db\Database
         if ($string instanceof Expression) {
             return $string->value();
         }
-        return mb_strtolower(str_replace(array_keys($this->escape_chars), array_values($this->escape_chars), $string), 'utf8');
+
+        // Make sure the database is connected
+        $this->_connection or $this->connect();
+
+        $string = mb_strtolower(str_replace(array_keys($this->escape_chars), array_values($this->escape_chars), $string), 'utf8');
+
+
+        if (($string = $this->_connection->real_escape_string((string)$string)) === false) {
+            throw new DatabaseException(':error', [
+                ':error' => $this->_connection->error,
+            ], $this->_connection->errno);
+        }
+
+        return $string;
+
     }
 
 }

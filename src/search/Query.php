@@ -3,6 +3,7 @@
 namespace mii\search;
 
 use mii\db\DatabaseException;
+use mii\db\Expression;
 
 /**
  * SphinxQL Query Builder
@@ -545,7 +546,7 @@ class Query
     }
 
 
-    public function match($column, $value)
+    public function match($column, $value = null)
     {
         $this->_match[] = [$column, $value];
 
@@ -891,12 +892,16 @@ class Query
             // Quote the column name
             //$column = $db->quote_column($column);
 
-            if (is_string($value)) {
+            if (! ($value instanceof Expression) ) {
                 // Quote the value
-                $value = '"'.$db->escape_match($value).'"';
+                $value = $db->escape_match($value);
             }
 
-            $set[$column] = $column . ' ' . $value;
+            if($value === null) {
+                $set[$column] = $column;
+            } else {
+                $set[$column] = $column . ' ' . $value;
+            }
         }
 
         return "'".implode(' ', $set)."'";
