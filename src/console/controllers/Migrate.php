@@ -81,7 +81,6 @@ class Migrate extends Controller {
 
         uksort($this->migrations_list, 'strnatcmp');
 
-
     }
 
 
@@ -166,7 +165,7 @@ class '.$name.' extends Migration {
 
             $this->info('Loading migration #:name', [':name' => $name]);
 
-            $obj = $this->load_migration($name);
+            $obj = $this->load_migration($migration);
             $obj->init();
             if($obj->up() === false) {
                 $this->error('Migration #:name failed. Stop.', [':name' => $name]);
@@ -189,11 +188,10 @@ class '.$name.' extends Migration {
     }
 
 
-    public function load_migration($class) {
+    public function load_migration($migration) {
 
-        require_once(current($this->migrations_paths).'/'.$class.'.php');
-
-        return new $class;
+        require_once($migration['file']);
+        return new $migration['name'];
     }
 
 }
