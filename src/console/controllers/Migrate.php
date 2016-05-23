@@ -28,6 +28,7 @@ class Migrate extends Controller {
         if($this->migrations_paths === null)
             $this->migrations_paths = [path('app').'/migrations'];
 
+
         try {
             $this->applied_migrations = DB::select('SELECT `name`, `date` FROM `'.$this->migrate_table.'`')->index_by('name')->all();
 
@@ -48,7 +49,6 @@ class Migrate extends Controller {
 
         for($i=0;$i<count($this->migrations_paths);$i++)
             $this->migrations_paths[$i] = \Mii::resolve($this->migrations_paths[$i]);
-
 
         foreach($this->migrations_paths as $migrations_path) {
 
@@ -120,7 +120,7 @@ class '.$name.' extends Migration {
 
 }
 ';
-
+            reset($this->migrations_paths);
             file_put_contents(current($this->migrations_paths).'/'.$name.'.php', $file);
 
             DB::commit();
