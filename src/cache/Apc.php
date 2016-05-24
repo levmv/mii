@@ -15,7 +15,7 @@ class Apc extends Cache
     public function __construct(array $config)
     {
 
-        if (!extension_loaded('apc')) {
+        if (!extension_loaded('apcu')) {
             throw new CacheException('PHP APC extension is not available.');
         }
 
@@ -38,7 +38,7 @@ class Apc extends Cache
      */
     public function get($id, $default = NULL)
     {
-        $data = apc_fetch($this->_sanitize_id($id), $success);
+        $data = \apcu_fetch($this->_sanitize_id($id), $success);
 
         return $success ? $data : $default;
     }
@@ -65,7 +65,7 @@ class Apc extends Cache
             $lifetime = $this->default_expire;
         }
 
-        return apc_store($this->_sanitize_id($id), $data, $lifetime);
+        return \apcu_store($this->_sanitize_id($id), $data, $lifetime);
     }
 
     /**
@@ -79,7 +79,7 @@ class Apc extends Cache
      */
     public function delete($id)
     {
-        return apc_delete($this->_sanitize_id($id));
+        return \apcu_delete($this->_sanitize_id($id));
     }
 
     /**
@@ -96,7 +96,7 @@ class Apc extends Cache
      */
     public function delete_all()
     {
-        return apc_clear_cache('user');
+        return \apcu_clear_cache('user');
     }
 
     /**
@@ -111,7 +111,7 @@ class Apc extends Cache
      */
     public function increment($id, $step = 1)
     {
-        return apc_inc($id, $step);
+        return \apcu_inc($id, $step);
     }
 
     /**
@@ -126,7 +126,7 @@ class Apc extends Cache
      */
     public function decrement($id, $step = 1)
     {
-        return apc_dec($id, $step);
+        return \apcu_dec($id, $step);
     }
 
 }
