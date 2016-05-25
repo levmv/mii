@@ -71,7 +71,7 @@ abstract class App {
             'user' => ['class' => 'mii\auth\User'],
             'auth' => ['class' => 'mii\auth\Auth'],
             'db' => ['class' => 'mii\db\Database'],
-            'cache' => ['class' => 'mii\cache\Apc'],
+            'cache' => ['class' => 'mii\cache\Apcu'],
             'mailer' => ['class' => 'mii\email\PHPMailer']
         ];
     }

@@ -2,7 +2,7 @@
 
 namespace mii\cache;
 
-class Apc extends Cache
+class Apcu extends Cache
 {
 
     /**
