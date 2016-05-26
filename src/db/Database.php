@@ -179,7 +179,6 @@ class Database
         $this->last_query = $sql;
 
         if ($type === Database::SELECT) {
-
             // Return an iterator of results
             return new Result($result, $sql, $as_object, $params);
         } elseif ($type === Database::INSERT) {

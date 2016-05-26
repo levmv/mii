@@ -101,7 +101,14 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             return $this->_result->fetch_object();
         } elseif ($this->_as_object AND is_string($this->_as_object)) {
             // Return an object of given class name
-            return $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
+            
+            $object = $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
+
+            if($object instanceof ORM)
+                $object->loaded(true);
+
+            return $object;
+
         } else {
             // Return an array of the row
             return $this->_result->fetch_assoc();

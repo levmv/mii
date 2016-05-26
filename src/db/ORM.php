@@ -49,7 +49,6 @@ class ORM implements ORMInterface
                 $this->$key = $value;
             }
         }
-
         $this->_loaded = $loaded;
     }
 
@@ -391,8 +390,11 @@ class ORM implements ORMInterface
      *
      * @return bool
      */
-    public function loaded()
+    public function loaded($value = null)
     {
+        if($value !== null)
+            $this->_loaded = (bool)$value;
+
         return (bool)$this->_loaded;
     }
 

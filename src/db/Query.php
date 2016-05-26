@@ -1289,9 +1289,9 @@ class Query
                 break;
         }
 
-        if ($as_object) {
-            $object_params = [NULL, true];
-        }
+        //if ($as_object) {
+          //  $object_params = [NULL, true];
+        //}
 
         // Execute the query
         $result =  $db->query($this->_type, $sql, $as_object, $object_params);
