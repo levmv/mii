@@ -674,13 +674,21 @@ class Date
         }
     }
 
-    public static function day_of_week($date = null) {
+    public static function day_of_week($date = null, $ucfirst = true) {
         $days = [
+            'воскресенье' , 'понедельник' ,
+            'вторник' , 'среда' ,
+            'четверг' , 'пятница' , 'суббота'
+        ];
+
+        $uf_days = [
             'Воскресенье' , 'Понедельник' ,
             'Вторник' , 'Среда' ,
             'Четверг' , 'Пятница' , 'Суббота'
         ];
-        return $days[date('w', $date)];
+
+
+        return ($ucfirst) ? $uf_days[date('w', $date)] : $days[date('w', $date)];
     }
 
     public static function month($date = null) {
