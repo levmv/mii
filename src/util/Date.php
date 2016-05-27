@@ -673,4 +673,22 @@ class Date
             return 'в '.$span;
         }
     }
+
+    public static function day_of_week($date = null) {
+        $days = [
+            'Воскресенье' , 'Понедельник' ,
+            'Вторник' , 'Среда' ,
+            'Четверг' , 'Пятница' , 'Суббота'
+        ];
+        return $days[date('w', $date)];
+    }
+
+    public static function month($date = null) {
+        static $trans_table = ['September' => 'сентября','November' => 'ноября','October' => 'октября','December' => 'декабря',
+            'January' => 'января','February' => 'февраля','March' => 'марта','April' => 'апреля',
+            'May' => 'мая','June' => 'июня','July' => 'июля','August' => 'августа'];
+
+        $name = date('F', $date);
+        return isset($trans_table[$name]) ? $trans_table[$name] : $name;
+    }
 }

@@ -17,6 +17,8 @@ abstract class App {
 
     public $charset = 'UTF-8';
 
+    public $locale; //'ru_RU.UTF-8';
+
     /**
      * @var \mii\core\Container
      */
@@ -36,6 +38,9 @@ abstract class App {
     public function init(array $config) {
 
         $this->_config = $config;
+
+        if($this->locale)
+            setlocale(LC_ALL, $this->locale);
 
         Mii::$container = new Container();
 
