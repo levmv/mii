@@ -72,9 +72,11 @@ class Router {
                     $params = isset($value['params'])
                                 ? array_merge($this->default_parameters, $value['params'])
                                 : $this->default_parameters;
+                    $values = isset($value['values']) ? $value['values'] : false;
                 } else {
                     $path = $value;
                     $params = $this->default_parameters;
+                    $values = false;
                 }
 
                 $is_closure = ($value instanceof \Closure) ;
@@ -97,7 +99,8 @@ class Router {
                     'compiled' => $compiled,
                     'namespace' => $namespace,
                     'is_closure' => $is_closure,
-                    'is_static' => $is_static
+                    'is_static' => $is_static,
+                    'values' => $values,
                 ];
 
                 if($name) {
@@ -165,7 +168,13 @@ class Router {
             if ( ! preg_match($route['compiled'], $uri, $matches))
                 return false;
         }
+
         $params = [];
+
+        if($route['values']) {
+            $params = $route['values'];
+        }
+
         foreach ($matches as $key => $value)
         {
             if (is_int($key))
