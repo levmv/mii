@@ -38,7 +38,7 @@ class Blocks
                 path('app').'/blocks'
             ];
         } else {
-            for($i=0;$i<count($this->libraries);$i++)
+            for($i=0; $i<count($this->libraries); $i++)
                 $this->libraries[$i] = Mii::resolve($this->libraries[$i]); 
         }
 
@@ -60,7 +60,7 @@ class Blocks
      * @param $name string Block name
      * @param bool $values Block params
      * @param bool $id Block id
-     * @return \mii\web\Block
+     * @return Block
      */
 
 
@@ -155,8 +155,8 @@ class Blocks
                             break;
 
                         case 'remote':
-                            foreach($files as $type => $rem) {
-                                $out[$type] .= $this->_build_remote_group($group_name, $type, $rem);
+                            foreach($files as $rtype => $rem) {
+                                $out[$rtype] .= $this->_build_remote_group($group_name, $rtype, $rem);
                             }
 
                             break;
@@ -182,10 +182,11 @@ class Blocks
      * @param $files link to assets files array
      * @return bool|string
      */
-    public function process_block_assets($block_name, &$files)
+    public function process_block_assets($block_name, array &$files)
     {
-        if (isset($this->_used_blocks[$block_name]))
+        if (isset($this->_used_blocks[$block_name])) {
             return false;
+        }
 
         $remote = $this->_blocks[$block_name]->get_remote_assets();
 
@@ -242,11 +243,13 @@ class Blocks
             }
         }
 
-        if (empty($actual_depends) AND $empty_block)
+        if (count($actual_depends) === 0 AND $empty_block) {
             return false;
+        }
 
-        if(count($actual_depends))
+        if(count($actual_depends)) {
             $block_name .= crc32(implode('', $actual_depends));
+        }
 
         return $block_name;
     }
@@ -261,7 +264,7 @@ class Blocks
             $output = $this->assets_pub_dir . '/' . $group_name . '.' . $type;
             $need_recompile = false;
             foreach ($files as $name => $file) {
-                if ($this->is_modified_later(path('pub') . $output, filemtime($file))) {
+                if (static::is_modified_later(path('pub') . $output, filemtime($file))) {
                     $need_recompile = true;
                     break;
                 }
@@ -292,7 +295,7 @@ class Blocks
 
             $mtime = filemtime($file);
 
-            if ($this->is_modified_later($output, $mtime)) {
+            if (static::is_modified_later($output, $mtime)) {
                 try {
                     copy($file, $output);
                 } catch (\Exception $e) {
@@ -308,7 +311,7 @@ class Blocks
         return implode("\n", $out);
     }
 
-    function _build_remote_group($group_name, $type, $files) {
+    private function _build_remote_group($group_name, $type, $files) {
         $out = [];
         foreach ($files as $name => $file) {
             $out[] = $this->_gen_html($name, $type);
@@ -317,7 +320,7 @@ class Blocks
     }
 
 
-    function _gen_html($link, $type)
+    private function _gen_html($link, $type)
     {
         switch ($type) {
             case 'css':
@@ -328,7 +331,7 @@ class Blocks
         return '';
     }
 
-    function _process($content, $type)
+    private function _process($content, $type)
     {
         switch ($type) {
             case 'css':
@@ -402,13 +405,13 @@ class Blocks
         $dir = opendir($from);
         @mkdir($to);
         while(false !== ( $file = readdir($dir)) ) {
-            if (( $file != '.' ) && ( $file != '..' )) {
+            if (( $file !== '.' ) && ( $file !== '..' )) {
                 if ( is_dir($from . '/' . $file) ) {
                     $this->_copy_dir($from . '/' . $file, $to . '/' . $file);
                 }
                 else {
 
-                    if ($this->is_modified_later($to . '/' . $file, filemtime($from . '/' . $file))) {
+                    if (static::is_modified_later($to . '/' . $file, filemtime($from . '/' . $file))) {
                         copy($from . '/' . $file, $to . '/' . $file);
                     }
                 }
