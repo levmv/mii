@@ -385,10 +385,8 @@ class Captcha
     public function generate_challenge()
     {
         // Complexity setting is used as character count
-        $text = Text::random('distinct', max(1, $this->complexity));
+        return Text::random('distinct', max(1, $this->complexity));
 
-        // Complexity setting is used as character count
-        return $text;
     }
 
     /**

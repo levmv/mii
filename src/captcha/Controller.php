@@ -13,15 +13,8 @@ class Controller extends \mii\web\Controller {
     }
 
     public function index() {
-        \Mii::$app->captcha->render(FALSE);
-    }
-
-
-    public function after($content = null)
-    {
         \Mii::$app->captcha->update_response_session();
-
-        return $this->response;
+        \Mii::$app->captcha->render(FALSE);
     }
 
 
