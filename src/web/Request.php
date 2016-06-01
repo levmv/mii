@@ -397,13 +397,13 @@ class Request extends \mii\core\Request
         if($this->_csrf_token === null || $new) {
             if($new || ($this->_csrf_token = $this->load_csrf_token()) === null) {
                 // Generate a new unique token
-                $token = sha1(uniqid(NULL, TRUE));
+                $this->_csrf_token = sha1(uniqid(NULL, TRUE));
 
                 // Store the new token
                 if($this->enable_csrf_cookie) {
-                    $this->set_cookie($this->csrf_token_name, $token);
+                    $this->set_cookie($this->csrf_token_name, $this->_csrf_token);
                 } else {
-                    \Mii::$app->session->set($this->csrf_token_name, $token);
+                    \Mii::$app->session->set($this->csrf_token_name, $this->_csrf_token);
                 }
             }
         }
