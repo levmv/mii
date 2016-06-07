@@ -560,12 +560,13 @@ class Query
         }
 
         if (!empty($this->_union)) {
+            $query = '(' . $query . ')';
             foreach ($this->_union as $u) {
                 $query .= ' UNION ';
                 if ($u['all'] === true) {
                     $query .= 'ALL ';
                 }
-                $query .= $u['select']->compile($db);
+                $query .= '(' . $u['select']->compile_select($db) . ')';
             }
         }
 
