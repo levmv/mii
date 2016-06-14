@@ -1105,6 +1105,9 @@ class Query
 
                         // Quote the min and max value
                         $value = $min . ' AND ' . $max;
+                    } elseif($op === 'IN' AND is_array($value) ) {
+                        $value = '('.implode(',', array_map([$db, 'quote'], $value)).')';
+
                     } elseif ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
                         // Quote the value, it is not a parameter
                         $value = $db->quote($value);
