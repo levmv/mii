@@ -1,6 +1,7 @@
 <?php
 
 namespace mii\db;
+use mii\valid\Rules;
 
 /**
  * Database Query Builder
@@ -592,6 +593,19 @@ class Query
     }
 
     /**
+     * Alias of and_filter()
+     *
+     * @param   mixed $column column name or array($column, $alias) or object
+     * @param   string $op logic operator
+     * @param   mixed $value column value
+     * @return  $this
+     */
+    public function filter($column, $op, $value)
+    {
+        return $this->and_filter($column, $op, $value);
+    }
+
+    /**
      * Creates a new "AND WHERE" condition for the query.
      *
      * @param   mixed $column column name or array($column, $alias) or object
@@ -606,6 +620,24 @@ class Query
         return $this;
     }
 
+
+    /**
+     * Creates a new "AND WHERE" condition for the query. But only for not empty values.
+     *
+     * @param   mixed $column column name or array($column, $alias) or object
+     * @param   string $op logic operator
+     * @param   mixed $value column value
+     * @return  $this
+     */
+    public function and_filter($column, $op, $value)
+    {
+        if ($value === null || $value === "" || Rules::not_empty((is_string($value) ? trim($value) : $value)))
+            return $this;
+
+        return $this->and_where($column, $op, $value);
+    }
+
+
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
@@ -619,6 +651,22 @@ class Query
         $this->_where[] = ['OR' => [$column, $op, $value]];
 
         return $this;
+    }
+
+    /**
+     * Creates a new "OR WHERE" condition for the query.
+     *
+     * @param   mixed $column column name or array($column, $alias) or object
+     * @param   string $op logic operator
+     * @param   mixed $value column value
+     * @return  $this
+     */
+    public function or_filter($column, $op, $value)
+    {
+        if ($value === null || $value === "" || Rules::not_empty((is_string($value) ? trim($value) : $value)))
+            return $this;
+
+        return $this->or_where($column, $op, $value);
     }
 
     /**
