@@ -631,7 +631,7 @@ class Query
      */
     public function and_filter($column, $op, $value)
     {
-        if ($value === null || $value === "" || Rules::not_empty((is_string($value) ? trim($value) : $value)))
+        if ($value === null || $value === "" || !Rules::not_empty((is_string($value) ? trim($value) : $value)))
             return $this;
 
         return $this->and_where($column, $op, $value);
@@ -663,7 +663,7 @@ class Query
      */
     public function or_filter($column, $op, $value)
     {
-        if ($value === null || $value === "" || Rules::not_empty((is_string($value) ? trim($value) : $value)))
+        if ($value === null || $value === "" || !Rules::not_empty((is_string($value) ? trim($value) : $value)))
             return $this;
 
         return $this->or_where($column, $op, $value);
