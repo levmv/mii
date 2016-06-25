@@ -60,6 +60,9 @@ class Query
     // LIMIT ...
     protected $_limit;
 
+    // Quoted query parameters
+    protected $_parameters = [];
+
 
     /**
      * Creates a new SQL query of the specified type.
