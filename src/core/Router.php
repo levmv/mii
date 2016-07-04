@@ -3,6 +3,8 @@
 namespace mii\core;
 
 
+use mii\util\Arr;
+
 class Router {
 
     // Defines the pattern of a {segment}
@@ -22,7 +24,13 @@ class Router {
 
     protected $_defaults = ['action' => 'index'];
 
+    protected $ignore_slash = true;
+
     protected $cache = false;
+
+    protected $cache_id = 'mii_core_router_routes';
+
+    protected $cache_lifetime = 86400;
 
     protected $routes;
 
@@ -43,14 +51,18 @@ class Router {
     public function init() {
 
         if($this->cache) {
-
-        } else {
+            list($this->_routes_list, $this->_named_routes) = get_cached($this->cache_id, [null, null]);
+        }
+        if($this->_routes_list === null) {
             $this->init_routes();
         }
-
-
     }
 
+
+    /**
+     * Process route list.
+     * As result: $this->_routes_list and $this->_named_routes
+     */
     public function init_routes() {
 
         // Sort groups
@@ -62,12 +74,11 @@ class Router {
 
             foreach($group as $pattern => $value) {
 
-                $is_closure = false;
-                $name = '';
+                $name = false;
 
                 if(is_array($value)) {
                     $path = $value['path'];
-                    $name = isset($value['name']) ? $value['name'] : '';
+                    $name = isset($value['name']) ? $value['name'] : false;
 
                     $params = isset($value['params'])
                                 ? array_merge($this->default_parameters, $value['params'])
@@ -103,14 +114,21 @@ class Router {
                     'values' => $values,
                 ];
 
-                if($name) {
-                    $this->_named_routes[$name] = $this->_routes_list[$compiled];
+                if(!$name && !$is_closure) {
+                    $name = $path;
+                }
+
+                if($name !== false AND !isset($this->_named_routes[$name])) {
+                    $this->_named_routes[$name] = $compiled;
                 }
             }
         }
+        if($this->cache) {
+            cache($this->cache_id, [$this->_routes_list, $this->_named_routes], $this->cache_lifetime);
+        }
     }
 
-    public function compile_route($pattern, $parameters) {
+    protected function compile_route($pattern, $parameters) {
 
         // The URI should be considered literal except for keys and optional parts
         // Escape everything preg_quote would escape except for : ( ) { }
@@ -142,8 +160,9 @@ class Router {
 
     public function match($uri) {
 
-        if($uri !== '/')
-            $uri = rtrim($uri, '//');
+        if($uri !== '/') {
+            $uri = trim($uri, '//');
+        }
 
         foreach($this->_routes_list as $route) {
             $result = $this->match_route($uri, $route);
@@ -228,11 +247,11 @@ class Router {
 
     public function url($name, $params = []) {
 
-        if(!isset($this->_routes_list[$name])) {
+        if(!isset($this->_named_routes[$name])) {
             throw new InvalidRouteException('Route :name doesnt exist', [':name' => $name]);
         }
 
-        $route = $this->_routes_list[$name];
+        $route = $this->_routes_list[$this->_named_routes[$name]];
 
         if ($route['is_static'])
         {
@@ -241,23 +260,23 @@ class Router {
             return '/'.$route['pattern'];
         }
 
-        // TODO:
-
         // Keep track of whether an optional param was replaced
         $provided_optional = FALSE;
 
-        while (preg_match('#\([^()]++\)#', $route['compiled'], $match))
+        $uri = $route['pattern'];
+        while (preg_match('#\([^()]++\)#', $uri, $match))
         {
-
             // Search for the matched value
             $search = $match[0];
 
             // Remove the parenthesis from the match as the replace
             $replace = substr($match[0], 1, -1);
 
-            while (preg_match('#'.Route::REGEX_KEY.'#', $replace, $match))
+
+            while (preg_match('#'.static::REGEX_KEY.'#', $replace, $match))
             {
                 list($key, $param) = $match;
+
 
                 if (isset($params[$param]) AND $params[$param] !== Arr::get($this->_defaults, $param))
                 {
@@ -291,8 +310,9 @@ class Router {
             }
 
             // Replace the group in the URI
-            $uri = str_replace($search, $replace, $uri);
+            $uri = str_replace($search, $replace, $route['pattern']);
         }
+
 
         while (preg_match('#'.static::REGEX_KEY.'#', $uri, $match))
         {
@@ -320,7 +340,7 @@ class Router {
         // Trim all extra slashes from the URI
         $uri = preg_replace('#//+#', '/', rtrim($uri, '/'));
 
-        if ($this->is_external())
+        /*if ($this->is_external())
         {
             // Need to add the host to the URI
             $host = $this->_defaults['host'];
@@ -333,9 +353,9 @@ class Router {
 
             // Clean up the host and prepend it to the URI
             $uri = rtrim($host, '/').'/'.$uri;
-        }
+        }*/
 
-        return $uri;
+        return '/'.$uri;
     }
 
 }
