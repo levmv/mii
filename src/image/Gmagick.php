@@ -116,14 +116,14 @@ class Gmagick extends Image {
 
     protected function _do_rotate($degrees)
     {
-        if ($this->im->rotateImage(new ImagickPixel('transparent'), $degrees))
+        if ($this->im->rotateimage(new \GmagickPixel('transparent'), $degrees))
         {
             // Reset the width and height
-            $this->width = $this->im->getImageWidth();
-            $this->height = $this->im->getImageHeight();
+            $this->width = $this->im->getimagewidth();
+            $this->height = $this->im->getimageheight();
 
             // Trim off hidden areas
-            $this->im->setImagePage($this->width, $this->height, 0, 0);
+            //$this->im->setImagePage($this->width, $this->height, 0, 0);
 
             return TRUE;
         }
