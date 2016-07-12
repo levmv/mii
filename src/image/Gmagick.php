@@ -288,7 +288,7 @@ class Gmagick extends Image {
         return FALSE;
     }
 
-    public function copy()
+    public function _copy()
     {
         return new self(clone $this->im);
     }
