@@ -312,21 +312,13 @@ class Request extends \mii\core\Request
     }
 
     /**
-     * Getter/Setter to the security settings for this request. This
-     * method should be treated as immutable.
-     *
-     * @param   boolean $secure is this request secure?
-     * @return  mixed
+     * Return if the request is sent via secure channel (https).
+     * @return boolean if the request is sent via secure channel (https)
      */
-    public function secure($secure = NULL)
+    public function is_secure()
     {
-        if ($secure === NULL)
-            return $this->_secure;
-
-        // Act as a setter
-        $this->_secure = (bool)$secure;
-
-        return $this;
+        return isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1)
+        || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0;
     }
 
 
