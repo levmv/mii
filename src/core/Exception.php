@@ -61,10 +61,10 @@ abstract class Exception extends \Exception {
      *
      * Error [ Code ]: Message ~ File [ Line ]
      *
-     * @param   \Exception  $e
+     * @param   \Throwable  $e
      * @return  string
      */
-    public static function text(\Exception $e)
+    public static function text(\Throwable $e)
     {
         return sprintf('%s [ %s ]: %s ~ %s [ %d ]',
             get_class($e), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
