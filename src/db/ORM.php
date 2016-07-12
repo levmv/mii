@@ -21,6 +21,13 @@ class ORM implements ORMInterface
      */
     protected $_data = [];
 
+
+    /**
+     * @var  array  Unmapped data that is still accessible
+     */
+    protected $_unmapped = [];
+
+
     /**
      * @var  array  Data that's changed since the object was loaded
      */
@@ -180,6 +187,9 @@ class ORM implements ORMInterface
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data))
             return $this->_data[$key];
 
+        if (array_key_exists($key, $this->_unmapped))
+            return $this->_unmapped[$key];
+
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
     }
 
@@ -193,11 +203,14 @@ class ORM implements ORMInterface
      */
     public function set_field($key, $value)
     {
-        if ((isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) AND $value !== $this->_data[$key]) {
+        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
             $this->_data[$key] = $value;
-            if ($this->_loaded !== false) {
+
+            if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
                 $this->_changed[$key] = true;
             }
+        } else {
+            $this->_unmapped[$key] = $value;
         }
     }
 
