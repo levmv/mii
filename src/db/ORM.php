@@ -167,7 +167,15 @@ class ORM implements ORMInterface
 
     public function __set($key, $value)
     {
-        $this->set_field($key, $value);
+        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+            $this->_data[$key] = $value;
+
+            if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
+                $this->_changed[$key] = true;
+            }
+        } else {
+            $this->_unmapped[$key] = $value;
+        }
     }
 
     /**
@@ -193,42 +201,31 @@ class ORM implements ORMInterface
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
     }
 
-    /**
-     * Set the items in the $data array.
-     *
-     * @param string $key the field name to set
-     * @param string $value the value to set to
-     *
-     * @return void
-     */
-    public function set_field($key, $value)
-    {
-        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
-            $this->_data[$key] = $value;
-
-            if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
-                $this->_changed[$key] = true;
-            }
-        } else {
-            $this->_unmapped[$key] = $value;
-        }
-    }
 
     public function set($values, $value = NULL)
     {
+
         if(is_object($values) AND $values instanceof \mii\web\Form) {
+
             $values = $values->changed_fields();
-            foreach ($values as $key => $value) {
-                $this->set_field($key, $value);
-            }
+
         } elseif (!is_array($values)) {
-            $this->set_field($values, $value);
-        } else {
-            foreach ($values as $key => $value) {
-                $this->set_field($key, $value);
-            }
+            $values = [$values => $value];
         }
 
+        foreach ($values as $key => $value) {
+            if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+
+                if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
+                    $this->_changed[$key] = true;
+                }
+
+                $this->_data[$key] = $value;
+
+            } else {
+                $this->_unmapped[$key] = $value;
+            }
+        }
         return $this;
     }
 
