@@ -116,6 +116,14 @@ class '.$name.' extends Migration {
     public function down() {
         return false;
     }
+    
+    public function safe_up() {
+
+    }
+
+    public function safe_down() {
+        return false;
+    }
 
 }
 ';
@@ -171,6 +179,14 @@ class '.$name.' extends Migration {
                 $this->error('Migration #:name failed. Stop.', [':name' => $name]);
                 return;
             };
+
+            DB::begin();
+            try {
+                $obj->safe_up();
+                DB::commit();
+            } catch (\Throwable $e) {
+                DB::rollback();
+            }
 
             DB::insert('INSERT INTO`'.$this->migrate_table.'`(`name`, `date`) VALUES(:name, :date)',
                 [
