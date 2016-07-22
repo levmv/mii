@@ -131,12 +131,10 @@ class ORM implements ORMInterface
     /**
      * Returns an associative array, where the keys of the array is set to $key
      * column of each row, and the value is set to the $display column.
-     * You can optionally specify the $query parameter to pass to filter for
-     * different data.
      *
-     * @param array $key the key to use for the array
-     * @param array $where the value to use for the display
-     * @param array $where the where clause
+     * @param string $key the key to use for the array
+     * @param string $display the value to use for the display
+     * @param string $first first value
      *
      * @return Result
      */
@@ -145,7 +143,7 @@ class ORM implements ORMInterface
         $class = new static();
 
         $query = $class->query_object()
-            ->select($class->fields())
+            ->select([static::$table.'.'.$key, static::$table.'.'.$display] )
             ->from($class->get_table())
             ->as_array();
 
