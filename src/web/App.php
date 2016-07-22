@@ -3,6 +3,7 @@
 namespace mii\web;
 
 use mii\captcha\Captcha;
+use mii\core\Router;
 
 /**
  * Class App

@@ -264,6 +264,7 @@ class Router {
         $provided_optional = FALSE;
 
         $uri = $route['pattern'];
+
         while (preg_match('#\([^()]++\)#', $uri, $match))
         {
             // Search for the matched value
@@ -307,10 +308,11 @@ class Router {
                     $replace = '';
                     break;
                 }
+
             }
 
             // Replace the group in the URI
-            $uri = str_replace($search, $replace, $route['pattern']);
+            $uri = str_replace($search, $replace, $uri);
         }
 
 
