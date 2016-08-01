@@ -94,6 +94,9 @@ class Router {
 
                 if((strpos($pattern, '{') === false AND strpos($pattern, '(') === false)) {
                     // static route
+
+                    $pattern = (string) $pattern; // php automatically converts array key like "555" to integer :(
+
                     $compiled = $pattern;
                     $is_static = true;
                 } else {
@@ -178,6 +181,7 @@ class Router {
     protected function match_route($uri, $route) {
 
         if($route['is_static']) {
+
             if( $uri !== $route['pattern'])
                 return false;
 
