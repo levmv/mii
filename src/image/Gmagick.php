@@ -49,9 +49,9 @@ class Gmagick extends Image {
             Gmagick::check();
         }
 
-
-
-        if(is_object($file)) {
+        if($file === null) {
+            $this->im = new \Gmagick;
+        } elseif(is_object($file)) {
             $this->im = $file;
             $this->width = $this->im->getimagewidth();
             $this->height = $this->im->getimageheight();
@@ -230,8 +230,8 @@ class Gmagick extends Image {
         $color = sprintf('rgb(%d, %d, %d)', $r, $g, $b);
 
         // Create a new image for the background
-        $background = new Imagick;
-        $background->newImage($this->width, $this->height, new ImagickPixel($color));
+        $background = new \Gmagick;
+        $background->newImage($this->width, $this->height, new \GmagickPixel($color));
 
         if ( ! $background->getImageAlphaChannel())
         {
@@ -240,15 +240,15 @@ class Gmagick extends Image {
         }
 
         // Clear the background image
-        $background->setImageBackgroundColor(new ImagickPixel('transparent'));
+        $background->setImageBackgroundColor(new \GmagickPixel('transparent'));
 
         // NOTE: Using setImageOpacity will destroy current alpha channels!
         $background->evaluateImage(Imagick::EVALUATE_MULTIPLY, $opacity / 100, Imagick::CHANNEL_ALPHA);
 
         // Match the colorspace between the two images before compositing
-        $background->setColorspace($this->im->getColorspace());
+        $background->setimagecolorspace($this->im->getimagecolorspace());
 
-        if ($background->compositeImage($this->im, Imagick::COMPOSITE_DISSOLVE, 0, 0))
+        if ($background->compositeimage($this->im, \Gmagick::COMPOSITE_DISSOLVE, 0, 0))
         {
             // Replace the current image with the new image
             $this->im = $background;
@@ -287,6 +287,13 @@ class Gmagick extends Image {
 
         return FALSE;
     }
+
+    protected function _do_blank($width, $height, $background) {
+        $this->im = $this->im->newimage($width, $height, $background);
+        $this->width = $this->im->getimagewidth();
+        $this->height = $this->im->getimageheight();
+    }
+
 
     public function _copy()
     {

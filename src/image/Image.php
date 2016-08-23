@@ -51,7 +51,6 @@ abstract class Image
             $class = config('image.class', Image::$default_class);
         }
 
-
         return new $class($file);
     }
 
@@ -515,6 +514,11 @@ abstract class Image
         return $this;
     }
 
+    public function blank($width, $height, $background = 'white') {
+        $this->_do_blank($width, $height, $background);
+        return $this;
+    }
+
 
     public function strip() {
         return $this->_do_strip();
@@ -670,6 +674,9 @@ abstract class Image
      * @return  void
      */
     abstract protected function _do_watermark(Image $image, $offset_x, $offset_y, $opacity);
+
+
+    abstract protected function _do_blank($width, $height, $background);
 
     /**
      * Execute a background.
