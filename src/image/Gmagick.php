@@ -1,6 +1,8 @@
 <?php
 
 namespace mii\image;
+use mii\core\ErrorException;
+use mii\core\Exception;
 
 /**
  * Support for image manipulation using [Imagick](http://php.net/Imagick).
@@ -343,7 +345,7 @@ class Gmagick extends Image {
                 $type = IMAGETYPE_PNG;
                 break;
             default:
-                throw new Kohana_Exception('Installed ImageMagick does not support :type images',
+                throw new ImageException('Installed Gmagick does not support :type images',
                     array(':type' => $extension));
                 break;
         }
