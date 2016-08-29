@@ -134,17 +134,17 @@ class Blocks
             $assets = [];
 
             $group_name = $this->process_block_assets($block_name, $assets);
-            if($group_name !== false) {
-                $groups[$group_name] = $assets;
-            }
 
+            if($group_name !== false) {
+                $groups[] = ['name' => $group_name, 'assets' => $assets];
+            }
         }
 
         $out = ['css' => '', 'js' => ''];
 
+        foreach ($groups as $group) {
 
-        foreach ($groups as $group_name => $group) {
-            foreach ($group as $type => $files) {
+            foreach ($group['assets'] as $type => $files) {
 
                 if ((bool)$files) {
                     switch($type) {
@@ -156,12 +156,12 @@ class Blocks
 
                         case 'remote':
                             foreach($files as $rtype => $rem) {
-                                $out[$rtype] .= $this->_build_remote_group($group_name, $rtype, $rem);
+                                $out[$rtype] .= $this->_build_remote_group($group['name'], $rtype, $rem);
                             }
 
                             break;
                         default:
-                            $out[$type] .= $this->_build_group($group_name, $type, $files);
+                            $out[$type] .= $this->_build_group($group['name'], $type, $files);
                     }
                 }
             }
@@ -182,8 +182,7 @@ class Blocks
      * @param $files link to assets files array
      * @return bool|string
      */
-    public function process_block_assets($block_name, array &$files)
-    {
+    public function process_block_assets($block_name, array &$files) {
         if (isset($this->_used_blocks[$block_name])) {
             return false;
         }
@@ -191,16 +190,16 @@ class Blocks
         $remote = $this->_blocks[$block_name]->get_remote_assets();
 
         $empty_block = true;
-        if($remote) {
+        if ($remote) {
             $files['remote'] = ['css' => [], 'js' => []];
 
-            if(is_array($remote[0])) {
+            if (is_array($remote[0])) {
                 foreach ($remote[0] as $remote_css => $v)
                     $files['remote']['css'][$remote_css] = true;
             }
 
-            if(is_array($remote[1])) {
-                foreach($remote[1] as $remote_js => $v)
+            if (is_array($remote[1])) {
+                foreach ($remote[1] as $remote_js => $v)
                     $files['remote']['js'][$remote_js] = true;
             }
             $empty_block = false;
@@ -222,26 +221,30 @@ class Blocks
                 }
             }
         }
-        $path = '/'.$this->_block_paths[$block_name];
+        $path = '/' . $this->_block_paths[$block_name];
         $types = ['css', 'js'];
 
+        foreach ($types as $type) {
+            foreach ($this->libraries as $base_path) {
+                //if (!is_dir($base_path . $path))
+                  //  continue;
 
-        foreach ($this->libraries as $base_path) {
-
-            if (!is_dir($base_path.$path))
-                continue;
-
-            foreach ($types as $type) {
                 if (is_file($base_path . $path . $block_name . '.' . $type)) {
                     $files[$type][$block_name . '.' . $type] = $base_path . $path . $block_name . '.' . $type;
                     $empty_block = false;
+                    break;
                 }
             }
+
+        }
+
+        foreach ($this->libraries as $base_path) {
             if (is_dir($base_path . $path . 'assets')) {
-                $files['assets'][$block_name] =  $base_path . $path . 'assets';
+                $files['assets'][$block_name] = $base_path . $path . 'assets';
                 $empty_block = false;
             }
         }
+
 
         if (count($actual_depends) === 0 AND $empty_block) {
             return false;
