@@ -157,13 +157,14 @@ class Block extends Controller {
     }
 
 
-    protected function to_block($from, $block_name, $ext, $callback = null) {
-
-        if(! file_exists($this->input_path . '/'. $from))
-            throw new CliException('Source for :block not found. Skip.', [':block' => $block_name]);
+    protected function to_block($from, $block_name, $ext, $callback = null)
+    {
+        if (!is_array($from))
+            $from = array($from);
 
         $dir = $this->output_path.'/'.implode('/', explode('_', $block_name));
-        if(!is_dir($dir)) {
+
+        if (!is_dir($dir)) {
             try {
                 mkdir($dir, 0777, true);
             } catch (\Exception $e) {
@@ -172,26 +173,46 @@ class Block extends Controller {
             }
         }
 
-        if($callback) {
-            $text = file_get_contents($this->input_path . '/'. $from);
-            file_put_contents($dir.'/'.$block_name.'.'.$ext, call_user_func($callback, $text));
+        $out = '';
 
-        } else {
-            copy($this->input_path . '/'. $from, $dir.'/'.$block_name.'.'.$ext);
+        foreach ($from as $f) {
+
+            if (!file_exists($this->input_path . '/'. $f))
+                throw new CliException('Source for :block not found. Skip.', [':block' => $block_name]);
+
+            $text = file_get_contents($this->input_path . '/' . $f);
+
+            if ($callback)
+                $text = call_user_func($callback, $text);
+
+            $out .= $text . "\n";
         }
 
+        file_put_contents($dir . '/' . $block_name . '.' . $ext, $out);
     }
 
-    protected function to_assets($from, $block_name) {
+    protected function to_assets($from, $block_name, $callback = null)
+    {
+        if (!is_array($from))
+            $from = array($from);
 
-        $filename = basename($from, PATHINFO_FILENAME);
+        $dir = $this->output_path . '/' . implode('/', explode('_', $block_name)) . '/assets';
 
-        $dir = $this->output_path.'/'.implode('/', explode('_', $block_name)).'/assets';
-        if(!is_dir($dir)) {
+        if (!is_dir($dir)) {
             mkdir($dir);
         }
 
-        copy($this->input_path . '/'. $from, $dir.'/'.$filename);
+        foreach ($from as $f) {
+
+            $filename = basename($f, PATHINFO_FILENAME);
+
+            if ($callback) {
+                $file = file_get_contents($this->input_path . '/'. $f);
+                file_put_contents($dir . '/' . $filename, call_user_func($callback, $file));
+            } else {
+                copy($this->input_path . '/' . $f, $dir . '/' . $filename);
+            }
+        }
     }
 
     protected function iterate_dir($from, $callback) {

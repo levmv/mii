@@ -173,6 +173,13 @@ class Form {
         return $this->field('textarea', $name, $attributes);
     }
 
+    public function redactor($name, $attributes = null, $block = 'redactor', $options = [])
+    {
+        return block($block)
+            ->set('textarea', $this->field('textarea', $name, $attributes))
+            ->set('options', $options);
+    }
+
     public function checkbox($name, $attributes = null) {
         return $this->field('checkbox', $name, $attributes);
     }
