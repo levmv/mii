@@ -79,6 +79,7 @@ class Blocks
             foreach ($this->libraries as $library_path) {
                 if (is_file($library_path . '/'. $block_path . $name . '.php')) {
                     $block_file = $library_path . '/'. $block_path . $name . '.php';
+                    break;
                 }
             }
         }
