@@ -234,6 +234,15 @@ class Pagination {
         return $this->items_per_page;
     }
 
+    public function next_page()
+    {
+        return $this->next_page;
+    }
+
+    public function prev_page()
+    {
+        return $this->previous_page;
+    }
 
     /**
      * Request setter / getter

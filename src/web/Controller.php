@@ -64,6 +64,11 @@ class Controller extends \mii\core\Controller
     public $og = [];
 
     /**
+     * @var array Links (rel="prev|next")
+     */
+    public $links = [];
+
+    /**
      * @var string
      */
     public $content = '';
@@ -147,7 +152,8 @@ class Controller extends \mii\core\Controller
         $this->index_block = block($name)
             ->bind('title', $this->title)
             ->bind('description', $this->description)
-            ->bind('og', $this->og);
+            ->bind('og', $this->og)
+            ->bind('links', $this->links);
     }
 
 
