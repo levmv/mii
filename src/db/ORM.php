@@ -21,6 +21,10 @@ class ORM implements ORMInterface
      */
     protected $_data = [];
 
+    /**
+     * @var array Auto-serialize and unserialize columns on get/set
+     */
+    protected $_serialize_fields = [];
 
     /**
      * @var  array  Unmapped data that is still accessible
@@ -49,8 +53,7 @@ class ORM implements ORMInterface
      * @param mixed
      * @return void
      */
-    public function __construct($values = [], $loaded = false)
-    {
+    public function __construct($values = [], $loaded = false) {
         if ($values) {
             foreach (array_intersect_key($values, $this->_data) as $key => $value) {
                 $this->$key = $value;
@@ -59,50 +62,51 @@ class ORM implements ORMInterface
         $this->_loaded = $loaded;
     }
 
+    /**
+     *
+     * @return Query
+     */
+    public static function query() {
+        return (new Query)->table(static::$table)->as_object(static::class);
+    }
+
+    /**
+     * @return \mii\db\Result
+     */
+    public static function all() {
+        return static::find()->get();
+    }
 
     /**
      * @param mixed ID of model to load or set of ids
      * @return Query
      */
-    public static function find($id = null)
-    {
+    public static function find($id = null) {
         if ($id)
             return static::find_by_id($id);
 
         return (new static)->select_query();
     }
 
-
     /**
      * @param $id
      * @return $this
      */
-    public static function find_by_id($id)
-    {
+    public static function find_by_id($id) {
         $class = new static();
 
-        if(is_array($id)) {
-            return $class->select_query()->where('id', 'IN', DB::expr('('.implode(',', $id).')'))->get();
+        if (is_array($id)) {
+            return $class->select_query()->where('id', 'IN', DB::expr('(' . implode(',', $id) . ')'))->get();
         } else {
             return $class->select_query(false)->where('id', '=', $id)->one();
         }
     }
 
     /**
-     *
-     * @return Query
-     */
-    public static function query()
-    {
-        return (new Query)->table(static::$table)->as_object(static::class);
-    }
-
-    /**
      * @param bool $with_order
      * @return Query
      */
-    public function select_query($with_order = true)
-    {
+    public function select_query($with_order = true) {
         $query = $this->query_object()->select($this->fields())->from($this->get_table())->as_object(static::class);
 
         if ($this->_order_by AND $with_order) {
@@ -114,18 +118,34 @@ class ORM implements ORMInterface
         return $query;
     }
 
-
     public function query_object() {
         return new Query;
     }
 
+    /**
+     * Returns an array of the columns in this object.
+     *
+     * @return array
+     */
+    public function fields() {
+        $fields = [];
+
+        foreach ($this->_data as $key => $value) {
+            if (!in_array($key, $this->_exclude_fields)) {
+                $fields[] = $this->get_table() . '.' . $key;
+            }
+        }
+
+        return $fields;
+    }
 
     /**
-     * @return \mii\db\Result
+     * Gets the table name for this object
+     *
+     * @return string
      */
-    public static function all()
-    {
-        return static::find()->get();
+    public function get_table() {
+        return static::$table;
     }
 
     /**
@@ -138,12 +158,11 @@ class ORM implements ORMInterface
      *
      * @return Result
      */
-    public static function select_list($key, $display, $first = NULL)
-    {
+    public static function select_list($key, $display, $first = NULL) {
         $class = new static();
 
         $query = $class->query_object()
-            ->select([static::$table.'.'.$key, static::$table.'.'.$display] )
+            ->select([static::$table . '.' . $key, static::$table . '.' . $display])
             ->from($class->get_table())
             ->as_array();
 
@@ -156,15 +175,11 @@ class ORM implements ORMInterface
         return $query->get()->to_list($key, $display, $first);
     }
 
-
-
-    public function __get($key)
-    {
+    public function __get($key) {
         return $this->get($key);
     }
 
-    public function __set($key, $value)
-    {
+    public function __set($key, $value) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
             if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
@@ -189,10 +204,13 @@ class ORM implements ORMInterface
      *
      * @return String
      */
-    public function get($key)
-    {
-        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data))
-            return $this->_data[$key];
+    public function get($key) {
+        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+
+            return (in_array($key, $this->_serialize_fields, true))
+                ? $this->_unserialize_value($this->_data[$key])
+                : $this->_data[$key];
+        }
 
         if (array_key_exists($key, $this->_unmapped))
             return $this->_unmapped[$key];
@@ -200,11 +218,9 @@ class ORM implements ORMInterface
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
     }
 
+    public function set($values, $value = NULL) {
 
-    public function set($values, $value = NULL)
-    {
-
-        if(is_object($values) AND $values instanceof \mii\web\Form) {
+        if (is_object($values) AND $values instanceof \mii\web\Form) {
 
             $values = $values->changed_fields();
 
@@ -214,6 +230,11 @@ class ORM implements ORMInterface
 
         foreach ($values as $key => $value) {
             if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+
+                if (in_array($key, $this->_serialize_fields))
+                {
+                    $value = $this->_serialize_value($value);
+                }
 
                 if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
                     $this->_changed[$key] = true;
@@ -235,8 +256,7 @@ class ORM implements ORMInterface
      *
      * @return bool
      */
-    public function __isset($name)
-    {
+    public function __isset($name) {
         return isset($this->_data[$name]);
     }
 
@@ -245,40 +265,9 @@ class ORM implements ORMInterface
      *
      * @return array
      */
-    public function as_array()
-    {
+    public function as_array() {
         return $this->_data;
     }
-
-
-    /**
-     * Returns an array of the columns in this object.
-     *
-     * @return array
-     */
-    public function fields()
-    {
-        $fields = [];
-
-        foreach ($this->_data as $key => $value) {
-            if(! in_array($key, $this->_exclude_fields)) {
-                $fields[] = $this->get_table() . '.' . $key;
-            }
-        }
-
-        return $fields;
-    }
-
-    /**
-     * Gets the table name for this object
-     *
-     * @return string
-     */
-    public function get_table()
-    {
-        return static::$table;
-    }
-
 
     /**
      * Checks if the field (or any) was changed
@@ -287,23 +276,33 @@ class ORM implements ORMInterface
      * @return bool
      */
 
-    public function changed($field_name = null)
-    {
+    public function changed($field_name = null) {
         // For not loaded models there is no way to detect changes.
-        if(!$this->loaded())
+        if (!$this->loaded())
             return true;
 
         if ($field_name === null) {
             return count($this->_changed) > 0;
         }
 
-        if(is_array($field_name)) {
+        if (is_array($field_name)) {
             return count(array_intersect($field_name, array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);
     }
 
+    /**
+     * Determine if this model is loaded.
+     *
+     * @return bool
+     */
+    public function loaded($value = null) {
+        if ($value !== null)
+            $this->_loaded = (bool)$value;
+
+        return (bool)$this->_loaded;
+    }
 
     /**
      * Saves the model to your database.
@@ -312,9 +311,8 @@ class ORM implements ORMInterface
      *
      * @return int Affected rows
      */
-    public function update($validation = NULL)
-    {
-        if (! (bool) $this->_changed)
+    public function update($validation = NULL) {
+        if (!(bool)$this->_changed)
             return 0;
 
         if ($this->on_update() === false)
@@ -329,8 +327,11 @@ class ORM implements ORMInterface
             ->execute();
     }
 
-    protected function on_update()
-    {
+    protected function on_update() {
+        return true;
+    }
+
+    protected function on_change() {
         return true;
     }
 
@@ -342,8 +343,7 @@ class ORM implements ORMInterface
      *
      * @return int Inserted row id
      */
-    public function create($validation = NULL)
-    {
+    public function create($validation = NULL) {
         if ($this->on_create() === false) {
             return 0;
         }
@@ -364,14 +364,9 @@ class ORM implements ORMInterface
         return $id[0];
     }
 
-    protected function on_create()
-    {
+    protected function on_create() {
         return true;
 
-    }
-
-    protected function on_change() {
-        return true;
     }
 
     /**
@@ -380,8 +375,7 @@ class ORM implements ORMInterface
      *
      * @return integer
      */
-    public function delete()
-    {
+    public function delete() {
         if ($this->loaded()) {
             $this->_loaded = false;
 
@@ -394,17 +388,8 @@ class ORM implements ORMInterface
         throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
     }
 
-    /**
-     * Determine if this model is loaded.
-     *
-     * @return bool
-     */
-    public function loaded($value = null)
-    {
-        if($value !== null)
-            $this->_loaded = (bool)$value;
+    public function on_load() {
 
-        return (bool)$this->_loaded;
     }
 
     /**
@@ -412,9 +397,20 @@ class ORM implements ORMInterface
      *
      * @return bool
      */
-    public function field_exists($field)
-    {
+    public function field_exists($field) {
         return array_key_exists($field, $this->_data);
     }
+
+
+    protected function _serialize_value($value)
+    {
+        return json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
+    protected function _unserialize_value($value)
+    {
+        return json_decode($value, TRUE);
+    }
+
 
 }
