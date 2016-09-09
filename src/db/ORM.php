@@ -182,6 +182,11 @@ class ORM implements ORMInterface
     public function __set($key, $value) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
+            if (in_array($key, $this->_serialize_fields))
+            {
+                $value = $this->_serialize_value($value);
+            }
+
             if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
                 $this->_changed[$key] = true;
             }
