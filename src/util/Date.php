@@ -691,12 +691,22 @@ class Date
         return ($ucfirst) ? $uf_days[date('w', $date)] : $days[date('w', $date)];
     }
 
-    public static function month($date = null) {
-        static $trans_table = ['September' => 'сентября','November' => 'ноября','October' => 'октября','December' => 'декабря',
+    public static function month($date = null, $genitive = true) {
+        static $trans_table = ['September' => 'сентябрь','November' => 'ноябрь','October' => 'октябрь','December' => 'декабрь',
+            'January' => 'январь','February' => 'февраль','March' => 'март','April' => 'апрель',
+            'May' => 'май','June' => 'июнь','July' => 'июль','August' => 'август'];
+
+
+        static $trans_table_g = ['September' => 'сентября','November' => 'ноября','October' => 'октября','December' => 'декабря',
             'January' => 'января','February' => 'февраля','March' => 'марта','April' => 'апреля',
             'May' => 'мая','June' => 'июня','July' => 'июля','August' => 'августа'];
 
         $name = date('F', $date);
-        return isset($trans_table[$name]) ? $trans_table[$name] : $name;
+
+        if($genitive) {
+            return isset($trans_table_g[$name]) ? $trans_table_g[$name] : $name;
+        } else {
+            return isset($trans_table[$name]) ? $trans_table[$name] : $name;
+        }
     }
 }
