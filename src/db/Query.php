@@ -12,6 +12,11 @@ use mii\valid\Rules;
 class Query
 {
 
+    /**
+     * @var Database
+     */
+    protected $db;
+
     // Query type
     protected $_type;
 
@@ -87,7 +92,6 @@ class Query
      *
      * @param   integer $type query type: Database::SELECT, Database::INSERT, etc
      * @param   string $sql query string
-     * @return  void
      */
     public function __construct($sql = NULL, $type = NULL)
     {
@@ -104,7 +108,7 @@ class Query
     {
         try {
             // Return the SQL string
-            return $this->compile(Database::instance());
+            return $this->compile();
         } catch (DatabaseException $e) {
             return DatabaseException::text($e);
         }
@@ -249,10 +253,8 @@ class Query
      * @param   mixed $table table name or array($table, $alias) or object
      * @return  $this
      */
-    public function from($tables)
+    public function from(...$tables)
     {
-        $tables = func_get_args();
-
         $this->_from = array_merge($this->_from, $tables);
 
         return $this;
@@ -300,10 +302,8 @@ class Query
      * @param   string $columns column name
      * @return  $this
      */
-    public function using($columns)
+    public function using(...$columns)
     {
-        $columns = func_get_args();
-
         call_user_func_array([$this->_last_join, 'using'], $columns);
 
         return $this;
@@ -315,10 +315,8 @@ class Query
      * @param   mixed $columns column name or array($column, $alias) or object
      * @return  $this
      */
-    public function group_by($columns)
+    public function group_by(...$columns)
     {
-        $columns = func_get_args();
-
         $this->_group_by = array_merge($this->_group_by, $columns);
 
         return $this;
@@ -476,18 +474,14 @@ class Query
      * @param   mixed $db Database instance or name of instance
      * @return  string
      */
-    public function compile_select($db = NULL)
+    public function compile_select()
     {
-        if (!is_object($db)) {
-            // Get the database instance
-            $db = \Mii::$app->get('db');
-        }
 
         // Callback to quote columns
-        $quote_column = [$db, 'quote_column'];
+        $quote_column = [$this->db, 'quote_column'];
 
         // Callback to quote tables
-        $quote_table = [$db, 'quote_table'];
+        $quote_table = [$this->db, 'quote_table'];
 
         // Start a selection query
         $query = 'SELECT ';
@@ -507,10 +501,10 @@ class Query
             foreach ($this->_select as $column) {
                 if (is_array($column)) {
                     // Use the column alias
-                    $column = $db->quote_identifier($column);
+                    $column = $this->db->quote_identifier($column);
                 } else {
                     // Apply proper quoting to the column
-                    $column = $db->quote_column($column);
+                    $column = $this->db->quote_column($column);
                 }
 
                 $columns[] = $column;
@@ -527,27 +521,42 @@ class Query
 
         if (!empty($this->_joins)) {
             // Add tables to join
-            $query .= ' ' . $this->_compile_join($db, $this->_joins);
+            $query .= ' ' . $this->_compile_join();
         }
 
         if (!empty($this->_where)) {
             // Add selection conditions
-            $query .= ' WHERE ' . $this->_compile_conditions($db, $this->_where);
+            $query .= ' WHERE ' . $this->_compile_conditions($this->_where);
         }
 
         if (!empty($this->_group_by)) {
             // Add grouping
-            $query .= ' ' . $this->_compile_group_by($db, $this->_group_by);
+
+            $group = [];
+
+            foreach ($this->_group_by as $column) {
+                if (is_array($column)) {
+                    // Use the column alias
+                    $column = $this->db->quote_identifier(end($column));
+                } else {
+                    // Apply proper quoting to the column
+                    $column = $this->db->quote_column($column);
+                }
+
+                $group[] = $column;
+            }
+
+            $query .= ' GROUP BY ' . implode(', ', $group);
         }
 
         if (!empty($this->_having)) {
             // Add filtering conditions
-            $query .= ' HAVING ' . $this->_compile_conditions($db, $this->_having);
+            $query .= ' HAVING ' . $this->_compile_conditions($this->_having);
         }
 
         if (!empty($this->_order_by)) {
             // Add sorting
-            $query .= ' ' . $this->_compile_order_by($db, $this->_order_by);
+            $query .= ' ' . $this->_compile_order_by();
         }
 
         if ($this->_limit !== NULL) {
@@ -567,7 +576,7 @@ class Query
                 if ($u['all'] === true) {
                     $query .= 'ALL ';
                 }
-                $query .= '(' . $u['select']->compile_select($db) . ')';
+                $query .= '(' . $u['select']->compile_select() . ')';
             }
         }
 
@@ -877,18 +886,13 @@ class Query
      * @param   mixed $db Database instance or name of instance
      * @return  string
      */
-    public function compile_insert($db = NULL)
+    public function compile_insert()
     {
-        if (!is_object($db)) {
-            // Get the database instance
-            $db = Database::instance($db);
-        }
-
         // Start an insertion query
-        $query = 'INSERT INTO ' . $db->quote_table($this->_table);
+        $query = 'INSERT INTO ' . $this->db->quote_table($this->_table);
 
         // Add the column names
-        $query .= ' (' . implode(', ', array_map([$db, 'quote_column'], $this->_columns)) . ') ';
+        $query .= ' (' . implode(', ', array_map([$this->db, 'quote_column'], $this->_columns)) . ') ';
 
         if (is_array($this->_values)) {
 
@@ -898,7 +902,7 @@ class Query
                 foreach ($group as $offset => $value) {
                     if ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
                         // Quote the value, it is not a parameter
-                        $group[$offset] = $db->quote($value);
+                        $group[$offset] = $this->db->quote($value);
                     }
                 }
 
@@ -923,34 +927,47 @@ class Query
      * @param   mixed $db Database instance or name of instance
      * @return  string
      */
-    public function compile_update($db = NULL)
+    public function compile_update()
     {
-        if (!is_object($db)) {
-            // Get the database instance
-            $db = Database::instance($db);
-        }
-
         // Start an update query
-        $query = 'UPDATE ' . $db->quote_table($this->_table);
+        $query = 'UPDATE ' . $this->db->quote_table($this->_table);
 
         if (!empty($this->_joins)) {
             // Add tables to join
-            $query .= ' ' . $this->_compile_join($db, $this->_joins);
+            $query .= ' ' . $this->_compile_join();
         }
 
 
         // Add the columns to update
-        $query .= ' SET ' . $this->_compile_set($db, $this->_set);
+
+        $set = [];
+        foreach ($this->_set as $group) {
+            // Split the set
+            list ($column, $value) = $group;
+
+            // Quote the column name
+            $column = $this->db->quote_column($column);
+
+            if ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
+                // Quote the value, it is not a parameter
+                $value = $this->db->quote($value);
+            }
+
+            $set[$column] = $column . ' = ' . $value;
+        }
+
+        $query .= ' SET ' . implode(', ', $set);
+
 
 
         if (!empty($this->_where)) {
             // Add selection conditions
-            $query .= ' WHERE ' . $this->_compile_conditions($db, $this->_where);
+            $query .= ' WHERE ' . $this->_compile_conditions($this->_where);
         }
 
         if (!empty($this->_order_by)) {
             // Add sorting
-            $query .= ' ' . $this->_compile_order_by($db, $this->_order_by);
+            $query .= ' ' . $this->_compile_order_by();
         }
 
         if ($this->_limit !== NULL) {
@@ -963,27 +980,22 @@ class Query
         return $query;
     }
 
-    public function compile_delete($db = NULL)
+    public function compile_delete()
     {
-        if ( ! is_object($db))
-        {
-            // Get the database instance
-            $db = Database::instance($db);
-        }
 
         // Start a deletion query
-        $query = 'DELETE FROM '.$db->quote_table($this->_table);
+        $query = 'DELETE FROM '.$this->db->quote_table($this->_table);
 
         if ( ! empty($this->_where))
         {
             // Add deletion conditions
-            $query .= ' WHERE '.$this->_compile_conditions($db, $this->_where);
+            $query .= ' WHERE '.$this->_compile_conditions($this->_where);
         }
 
         if ( ! empty($this->_order_by))
         {
             // Add sorting
-            $query .= ' '.$this->_compile_order_by($db, $this->_order_by);
+            $query .= ' '.$this->_compile_order_by();
         }
 
         if ($this->_limit !== NULL)
@@ -1001,6 +1013,7 @@ class Query
 
     public function reset()
     {
+        $this->db = null;
         $this->_select =
         $this->_from =
         $this->_joins =
@@ -1034,15 +1047,13 @@ class Query
     /**
      * Compiles an array of JOIN statements into an SQL partial.
      *
-     * @param   object $db Database instance
-     * @param   array $joins join statements
      * @return  string
      */
-    protected function _compile_join(Database $db, array $joins)
+    protected function _compile_join()
     {
         $statements = [];
 
-        foreach ($joins as $join) {
+        foreach ($this->_joins as $join) {
 
 
             if ($join['type'])
@@ -1055,12 +1066,12 @@ class Query
             }
 
             // Quote the table name that is being joined
-            $sql .= ' '.$db->quote_table($join['table']);
+            $sql .= ' '.$this->db->quote_table($join['table']);
 
             if ( ! empty($join['using']))
             {
                 // Quote and concat the columns
-                $sql .= ' USING ('.implode(', ', array_map(array($db, 'quote_column'), $join['using'])).')';
+                $sql .= ' USING ('.implode(', ', array_map(array($this->db, 'quote_column'), $join['using'])).')';
             }
             else
             {
@@ -1077,7 +1088,7 @@ class Query
                     }
 
                     // Quote each of the columns used for the condition
-                    $conditions[] = $db->quote_column($c1).$op.' '.$db->quote_column($c2);
+                    $conditions[] = $this->db->quote_column($c1).$op.' '.$this->db->quote_column($c2);
                 }
 
                 // Concat the conditions "... AND ..."
@@ -1095,11 +1106,10 @@ class Query
      * Compiles an array of conditions into an SQL partial. Used for WHERE
      * and HAVING.
      *
-     * @param   object $db Database instance
      * @param   array $conditions condition statements
      * @return  string
      */
-    protected function _compile_conditions(Database $db, array $conditions)
+    protected function _compile_conditions(array $conditions)
     {
         $last_condition = NULL;
 
@@ -1144,31 +1154,31 @@ class Query
 
                         if ((is_string($min) AND array_key_exists($min, $this->_parameters)) === false) {
                             // Quote the value, it is not a parameter
-                            $min = $db->quote($min);
+                            $min = $this->db->quote($min);
                         }
 
                         if ((is_string($max) AND array_key_exists($max, $this->_parameters)) === false) {
                             // Quote the value, it is not a parameter
-                            $max = $db->quote($max);
+                            $max = $this->db->quote($max);
                         }
 
                         // Quote the min and max value
                         $value = $min . ' AND ' . $max;
                     } elseif($op === 'IN' AND is_array($value) ) {
-                        $value = '('.implode(',', array_map([$db, 'quote'], $value)).')';
+                        $value = '('.implode(',', array_map([$this->db, 'quote'], $value)).')';
 
                     } elseif ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
                         // Quote the value, it is not a parameter
-                        $value = $db->quote($value);
+                        $value = $this->db->quote($value);
                     }
 
                     if ($column) {
                         if (is_array($column)) {
                             // Use the column name
-                            $column = $db->quote_identifier(reset($column));
+                            $column = $this->db->quote_identifier(reset($column));
                         } else {
                             // Apply proper quoting to the column
-                            $column = $db->quote_column($column);
+                            $column = $this->db->quote_column($column);
                         }
                     }
 
@@ -1183,79 +1193,25 @@ class Query
         return $sql;
     }
 
-    /**
-     * Compiles an array of set values into an SQL partial. Used for UPDATE.
-     *
-     * @param   object $db Database instance
-     * @param   array $values updated values
-     * @return  string
-     */
-    protected function _compile_set(Database $db, array $values)
-    {
-        $set = [];
-        foreach ($values as $group) {
-            // Split the set
-            list ($column, $value) = $group;
 
-            // Quote the column name
-            $column = $db->quote_column($column);
-
-            if ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
-                // Quote the value, it is not a parameter
-                $value = $db->quote($value);
-            }
-
-            $set[$column] = $column . ' = ' . $value;
-        }
-
-        return implode(', ', $set);
-    }
-
-    /**
-     * Compiles an array of GROUP BY columns into an SQL partial.
-     *
-     * @param   object $db Database instance
-     * @param   array $columns
-     * @return  string
-     */
-    protected function _compile_group_by(Database $db, array $columns)
-    {
-        $group = [];
-
-        foreach ($columns as $column) {
-            if (is_array($column)) {
-                // Use the column alias
-                $column = $db->quote_identifier(end($column));
-            } else {
-                // Apply proper quoting to the column
-                $column = $db->quote_column($column);
-            }
-
-            $group[] = $column;
-        }
-
-        return 'GROUP BY ' . implode(', ', $group);
-    }
 
     /**
      * Compiles an array of ORDER BY statements into an SQL partial.
      *
-     * @param   object $db Database instance
-     * @param   array $columns sorting columns
      * @return  string
      */
-    protected function _compile_order_by(Database $db, array $columns)
+    protected function _compile_order_by()
     {
         $sort = [];
-        foreach ($columns as $group) {
+        foreach ($this->_order_by as $group) {
             list ($column, $direction) = $group;
 
             if (is_array($column)) {
                 // Use the column alias
-                $column = $db->quote_identifier(end($column));
+                $column = $this->db->quote_identifier(end($column));
             } else {
                 // Apply proper quoting to the column
-                $column = $db->quote_column($column);
+                $column = $this->db->quote_column($column);
             }
 
             if ($direction) {
@@ -1277,15 +1233,27 @@ class Query
      * @param   mixed $db Database instance or name of instance
      * @return  string
      */
-    public function compile($db = NULL)
+    public function compile(Database $db = NULL)
     {
-        if (!is_object($db)) {
-            // Get the database instance
-            $db = Database::instance($db);
+        if (!$db !== null) {
+            $this->db = \Mii::$app->db;
         }
 
-        // Import the SQL locally
-        $sql = $this->_sql;
+        // Compile the SQL query
+        switch ($this->_type) {
+            case Database::SELECT:
+                $sql = $this->compile_select();
+                break;
+            case Database::INSERT:
+                $sql = $this->compile_insert();
+                break;
+            case Database::UPDATE:
+                $sql = $this->compile_update();
+                break;
+            case Database::DELETE:
+                $sql = $this->compile_delete();
+                break;
+        }
 
         if (!empty($this->_parameters)) {
             // Quote all of the values
@@ -1312,9 +1280,8 @@ class Query
     public function execute(Database $db = NULL, $as_object = NULL, $object_params = NULL)
     {
 
-        if (!is_object($db)) {
-            // Get the database instance
-            $db = \Mii::$app->get('db');
+        if (!$db !== null) {
+            $this->db = \Mii::$app->db;
         }
 
         if ($as_object === NULL) {
@@ -1328,16 +1295,16 @@ class Query
         // Compile the SQL query
         switch ($this->_type) {
             case Database::SELECT:
-                $sql = $this->compile_select($db);
+                $sql = $this->compile_select();
                 break;
             case Database::INSERT:
-                $sql = $this->compile_insert($db);
+                $sql = $this->compile_insert();
                 break;
             case Database::UPDATE:
-                $sql = $this->compile_update($db);
+                $sql = $this->compile_update();
                 break;
             case Database::DELETE:
-                $sql = $this->compile_delete($db);
+                $sql = $this->compile_delete();
                 break;
         }
 
@@ -1346,7 +1313,7 @@ class Query
         //}
 
         // Execute the query
-        $result =  $db->query($this->_type, $sql, $as_object, $object_params);
+        $result =  $this->db->query($this->_type, $sql, $as_object, $object_params);
 
         if($this->_index_by)
             $result->index_by($this->_index_by);
