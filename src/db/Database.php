@@ -20,16 +20,6 @@ class Database
     const DELETE = 4;
 
     /**
-     * @var  string  default instance name
-     */
-    public static $default = 'default';
-
-    /**
-     * @var  array  Database instances
-     */
-    public static $instances = [];
-
-    /**
      * @var  string  the last query executed
      */
     public $last_query;
@@ -105,9 +95,6 @@ class Database
                 if ($status = $this->_connection->close()) {
                     // Clear the connection
                     $this->_connection = NULL;
-
-                    // Clear the instance
-                    unset(Database::$instances[$this->_instance]);
                 }
             }
         } catch (\Exception $e) {
@@ -154,8 +141,8 @@ class Database
 
         $benchmark = false;
         if (config('profiling')) {
-            // Benchmark this query for the current instance
-            $benchmark = \mii\util\Profiler::start("Database ({$this->_instance})", $sql);
+            // Benchmark this query
+            $benchmark = \mii\util\Profiler::start("Database", $sql);
         }
 
         // Execute the query
@@ -238,7 +225,7 @@ class Database
 
         if (!empty($this->_config['charset'])) {
             // Set the character set
-            $this->set_charset($this->_config['charset']);
+            $this->_connection->set_charset($this->_config['charset']);
         }
 
         if (!empty($this->_config['connection']['variables'])) {
