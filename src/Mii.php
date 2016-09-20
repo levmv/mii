@@ -164,6 +164,11 @@ class Mii {
 }
 
 
+function url($name, $params = null) {
+    return Mii::$app->router->url($name, $params);
+}
+
+
 function redirect($url, $use_back_url = false) {
 
     if($use_back_url) {
@@ -247,9 +252,12 @@ function e($text) {
 }
 
 if( ! function_exists('dd')) {
-    function dd($fine_print = true)
+    /**
+     * Dump and die
+     */
+    function dd(...$params)
     {
-        if($fine_print) {
+        if(Mii::$app instanceof \mii\web\Controller) {
 
             echo "<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }";
             echo "pre small { font-size: 1em; color: #000080;font-weight:bold}";
@@ -257,14 +265,14 @@ if( ! function_exists('dd')) {
 
             array_map(function($a) {
                 echo \mii\util\Debug::dump($a);
-            }, func_get_args());
+            }, $params);
 
             echo "</pre>\n";
         } else {
 
             array_map(function($a) {
                 var_dump($a);
-            }, func_get_args());
+            }, $params);
         }
         die;
     }

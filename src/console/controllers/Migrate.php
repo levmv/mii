@@ -16,7 +16,7 @@ class Migrate extends Controller {
 
     protected $applied_migrations;
 
-    protected $migrations_paths;
+    protected $migrations_paths = [];
 
     public function before() {
 
@@ -25,7 +25,7 @@ class Migrate extends Controller {
         foreach($config as $name => $value)
             $this->$name = $value;
 
-        if($this->migrations_paths === null)
+        if(empty($this->migrations_paths))
             $this->migrations_paths = [path('app').'/migrations'];
 
 
