@@ -28,6 +28,8 @@ abstract class App {
 
     public $_config = [];
 
+    public $base_url = '/';
+
 
     public function __construct(array $config = []) {
         Mii::$app = $this;
@@ -146,26 +148,25 @@ abstract class App {
             // todo: remove from container
             return;
         }
+        if (is_array($definition)) {
+            // a configuration array
+            if (isset($definition['class'])) {
+                $this->_components[$id] = $definition['class'];
+                unset($definition['class']);
+                $params = (empty($definition)) ? [] : [$definition];
 
-        if(is_string($definition)) {
+                \Mii::$container->share($id, $this->_components[$id], $params);
+            } else {
+                throw new \Exception("The configuration for the \"$id\" component must contain a \"class\" element.");
+            }
+
+        } elseif(is_string($definition)) {
             \Mii::$container->share($id, $definition);
             $this->_components[$id] = true;
 
         } elseif(is_object($definition) || is_callable($definition, true)) {
             // an object, a class name, or a PHP callable
             $this->_components[$id] = $definition;
-
-        } elseif (is_array($definition)) {
-            // a configuration array
-            if (isset($definition['class'])) {
-                $this->_components[$id] = $definition['class'];
-                unset($definition['class']);
-                $params = (count($definition)) ? [$definition] : [];
-
-                \Mii::$container->share($id, $this->_components[$id], $params);
-            } else {
-                throw new \Exception("The configuration for the \"$id\" component must contain a \"class\" element.");
-            }
 
         } else {
             throw new \Exception("Unexpected configuration type for the \"$id\" component: " . gettype($definition));

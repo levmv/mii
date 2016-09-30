@@ -257,7 +257,7 @@ if( ! function_exists('dd')) {
      */
     function dd(...$params)
     {
-        if(Mii::$app instanceof \mii\web\Controller) {
+        if(Mii::$app instanceof \mii\web\App) {
 
             echo "<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }";
             echo "pre small { font-size: 1em; color: #000080;font-weight:bold}";

@@ -46,11 +46,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         // Store the SQL locally
         $this->_query = $sql;
 
-        if (is_object($as_object)) {
-            // Get the object class name
-            $as_object = get_class($as_object);
-        }
-
         // Results as objects or associative arrays
         $this->_as_object = $as_object;
 
@@ -105,7 +100,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             $object = $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
 
             if($object instanceof ORM)
-                $object->loaded(true);
+                $object->__loaded = true;
 
             return $object;
 

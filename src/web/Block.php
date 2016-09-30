@@ -8,12 +8,10 @@ use mii\core\ErrorHandler;
 
 class Block
 {
-
     // Block name
-    protected $_name;
+    public $__name;
 
-    // Block path
-    protected $_path;
+    public $__has_parent;
 
     // Full path to php template
     protected $_file;
@@ -22,15 +20,25 @@ class Block
     protected $_data = [];
 
     // List of remote assets
-    protected $_remote_css = false;
+    public $__remote_css;
 
-    protected $_remote_js = false;
+    public $__remote_js;
 
-    protected $_depends = [];
+    /**
+     * @var array $inline_css
+     */
+    public $__inline_css;
+
+    public $__inline_js;
+
+    protected $_has_remote = 0;
+
+    public $_depends = [];
 
     // Is assigned any values to block ?
     protected $_loaded = false;
 
+    protected static $_global_data = [];
 
     /**
      * Sets the block name and local data. Blocks should almost
@@ -43,14 +51,10 @@ class Block
      * @return  void
      * @uses    View::set_filename
      */
-    public function __construct($name, $file = null, array $values = null)
+    public function __construct($name, $file = null)
     {
-        $this->_name = $name;
-
+        $this->__name = $name;
         $this->_file = $file;
-
-        if ($values !== null)
-            $this->set($values);
     }
 
 
@@ -135,42 +139,46 @@ class Block
         $this->_depends = array_unique(array_merge($this->_depends, $depends));
 
         foreach ($this->_depends as $depend) {
-            Mii::$app->blocks->get($depend);
+            Mii::$app->blocks->get($depend)->__has_parent = true;
         }
 
         return $this;
     }
 
     public function name() {
-        return $this->_name;
+        return $this->__name;
     }
 
 
-    public function get_depends() {
-        return $this->_depends;
-    }
+    public function css($link, $options = []) {
+        if($this->__remote_css === null)
+            $this->__remote_css = [];
 
-    public function css($link) {
-        if(!$this->_remote_css)
-            $this->_remote_css = [];
+        $this->__remote_css[$link] = $options;
 
-        $this->_remote_css[$link] = true;
         return $this;
     }
 
-    public function js($link) {
-        if(!$this->_remote_js)
-            $this->_remote_js = [];
+    public function js($link, $options = []) {
+        if($this->__remote_js === null)
+            $this->__remote_js = [];
 
-        $this->_remote_js[$link] = true;
+        $this->__remote_js[$link] = $options;
         return $this;
     }
 
-    public function get_remote_assets() {
-        if(!$this->_remote_css AND !$this->_remote_js)
-            return false;
+    public function inline_css($code, $options = []) {
+        $this->__inline_css[] = [$code, $options];
+        return $this;
+    }
 
-        return [$this->_remote_css, $this->_remote_js];
+    public function inline_js($code, $options = []) {
+        $this->__inline_js[] = [$code, $options];
+        return $this;
+    }
+
+    public function get_remote() {
+        return $this->_has_remote ? $this->_remote : false;
     }
 
 
@@ -239,6 +247,13 @@ class Block
         return $this;
     }
 
+    public function bind_global($key, & $value)
+    {
+        Block::$_global_data[$key] = & $value;
+
+        return $this;
+    }
+
     public function loaded()
     {
         return $this->_loaded;
@@ -265,7 +280,7 @@ class Block
         }
 
         if (empty($this->_file)) {
-            return '';
+            throw new Exception('Block :block does not have a php file', [':block' => $this->__name]);
         }
 
         $benchmark = false;
@@ -295,6 +310,11 @@ class Block
 
         // Import the view variables to local namespace
         extract($this->_data, EXTR_OVERWRITE);
+
+        if (Block::$_global_data) {
+            // Import the global view variables to local namespace
+            extract(Block::$_global_data, EXTR_SKIP | EXTR_REFS);
+        }
 
         // Capture the view output
         ob_start();

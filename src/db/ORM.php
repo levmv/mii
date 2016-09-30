@@ -43,7 +43,7 @@ class ORM implements ORMInterface
     /**
      * @var boolean Is this model loaded from DB
      */
-    protected $_loaded = false;
+    public $__loaded = false;
 
 
     /**
@@ -59,7 +59,7 @@ class ORM implements ORMInterface
                 $this->$key = $value;
             }
         }
-        $this->_loaded = $loaded;
+        $this->__loaded = $loaded;
     }
 
     /**
@@ -187,7 +187,7 @@ class ORM implements ORMInterface
                 $value = $this->_serialize_value($value);
             }
 
-            if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
+            if ($value !== $this->_data[$key] AND $this->__loaded !== false) {
                 $this->_changed[$key] = true;
             }
 
@@ -241,7 +241,7 @@ class ORM implements ORMInterface
                     $value = $this->_serialize_value($value);
                 }
 
-                if ($value !== $this->_data[$key] AND $this->_loaded !== false) {
+                if ($value !== $this->_data[$key] AND $this->__loaded !== false) {
                     $this->_changed[$key] = true;
                 }
 
@@ -304,9 +304,9 @@ class ORM implements ORMInterface
      */
     public function loaded($value = null) {
         if ($value !== null)
-            $this->_loaded = (bool)$value;
+            $this->__loaded = (bool)$value;
 
-        return (bool)$this->_loaded;
+        return (bool)$this->__loaded;
     }
 
     /**
@@ -362,7 +362,7 @@ class ORM implements ORMInterface
             ->values($this->_data)
             ->execute();
 
-        $this->_loaded = true;
+        $this->__loaded = true;
 
         $this->_data['id'] = $id[0];
 
@@ -382,7 +382,7 @@ class ORM implements ORMInterface
      */
     public function delete() {
         if ($this->loaded()) {
-            $this->_loaded = false;
+            $this->__loaded = false;
 
             return $this->query_object()
                 ->delete($this->get_table())

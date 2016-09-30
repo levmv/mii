@@ -3,9 +3,14 @@
 namespace mii\web;
 
 use Mii;
+use mii\util\HTML;
 
 class Blocks
 {
+    const HEAD = 0;
+    const BEGIN = 1;
+    const END = 2;
+
     public $assets_dir;
 
     protected $block_class = 'mii\web\Block';
@@ -20,18 +25,29 @@ class Blocks
 
     protected $merge = true;
 
+    protected $process_assets = true;
     protected $use_symlink = true;
-    protected $freeze_mode = false;
 
     protected $assets_pub_dir = '/assets';
 
-    protected $css_blocks = [];
-    protected $js_blocks = [];
+    protected $_rendered = false;
+
+    protected $_css = [];
+
+    protected $_js = [ [],[],[] ];
+
+    protected $_files = [
+        '.css' => [
+        ],
+        '.js' => [
+        ],
+    ];
 
 
     public function __construct(array $config = [])
     {
-        $this->configure($config);
+        foreach ($config as $key => $value)
+            $this->$key = $value;
 
         if(!$this->libraries) {
             $this->libraries = [
@@ -58,122 +74,125 @@ class Blocks
      * Create a new block, or get an existing block
      * @static
      * @param $name string Block name
-     * @param bool $values Block params
-     * @param bool $id Block id
      * @return Block
      */
 
 
-    public function get($name, array $values = null)
+    public function get($name)
     {
         if (isset($this->_blocks[$name]))
             return $this->_blocks[$name];
 
-        $block_path = implode('/', explode('_', $name)) . '/';
-        $this->_block_paths[$name] = $block_path;
+        $this->_block_paths[$name] = $block_path = '/'.implode('/', explode('_', $name)) . '/';
 
         $block_file = null;
 
         if (strpos($name, 'i_') !== 0) {
 
+            $block_path .= $name;
+
             foreach ($this->libraries as $library_path) {
-                if (is_file($library_path . '/'. $block_path . $name . '.php')) {
-                    $block_file = $library_path . '/'. $block_path . $name . '.php';
+                if (is_file($library_path . $block_path . '.php')) {
+                    $block_file = $library_path . $block_path  . '.php';
                     break;
                 }
             }
         }
 
-        $this->_blocks[$name] = new $this->block_class($name, $block_file, $values);
+        $this->_blocks[$name] = new $this->block_class($name, $block_file);
+
         return $this->_blocks[$name];
     }
 
 
-    /**
-     * Magic method, returns the output of [Blocks::render_assets].
-     *
-     * @return  string
-     * @uses    View::render
-     */
-    public function __toString()
-    {
-        try {
-            return $this->render();
-        } catch (\Exception $e) {
+    public function css() {
+        if(!$this->_rendered)
+            $this->render();
 
-            /**
-             * Display the exception message.
-             *
-             * We use this method here because it's impossible to throw and
-             * exception from __toString().
-             */
-
-            return Exception::handler($e)->send();
-        }
+        return implode("\n", $this->_css);
     }
+
+
+    public function js($position = null) {
+        if(!$this->_rendered)
+            $this->render();
+
+        if($position === null) {
+            $out = [];
+            foreach($this->_js as $js) {
+                if (!empty($js))
+                    $out[] = implode("\n", $js);
+            }
+            return implode("\n", $out);
+        }
+
+        return implode("\n", $this->_js[$position]);
+    }
+
 
 
     public function render()
     {
-        if($this->freeze_mode) {
-            return $this->fm_render();
-        }
-
         if (config('profiling')) {
             $benchmark = \mii\util\Profiler::start('Assets', __FUNCTION__);
         }
 
-        $this->_used_blocks = [];
-
-        // Пройдем по списку блоков, формируя группы ресурсов
-        // Каждая группа именуется именем основного блока + счетчик зависимостей
-
-        $groups = [];
-
         foreach ($this->_blocks as $block_name => $block) {
 
-            $assets = [];
+            if($block->__has_parent)
+                continue;
 
-            $group_name = $this->process_block_assets($block_name, $assets);
+            $this->process_block_assets($block_name, $block_name, $block->_depends);
 
-            if($group_name !== false) {
-                $groups[] = ['name' => $group_name, 'assets' => $assets];
+            if($this->process_assets) {
+                foreach ($this->libraries as $base_path) {
+                    if (is_dir($base_path . $this->_block_paths[$block_name] . 'assets')) {
+                        $this->_build_assets_dir($block_name, $base_path . $this->_block_paths[$block_name] . 'assets');
+                    }
+                    break;
+                }
             }
         }
 
-        $out = ['css' => '', 'js' => ''];
+        foreach($this->_files as $type => $blocks) {
+            foreach($blocks as $block_name => $block) {
 
-        foreach ($groups as $group) {
+                if(isset($block['files']))
+                    $this->_build_block($block_name, $type, $block['files']);
+                if(isset($block['remote'])) {
 
-            foreach ($group['assets'] as $type => $files) {
+                    if ($type === '.js') {
+                        foreach($block['remote'] as $position => $remote) {
+                            $this->_js[$position][] = implode("\n", $remote);
+                        }
+                    } else {
 
-                if ((bool)$files) {
-                    switch($type) {
-                        case 'assets':
-                            foreach($files as $key => $value) {
-                                $this->_build_assets_dir($key, $value);
-                            }
-                            break;
+                        $content = implode("\n", $block['inline']);
+                        $this->_css[] = '<link type="text/css" href="' . $content . '" rel="stylesheet" />';
+                    }
 
-                        case 'remote':
-                            foreach($files as $rtype => $rem) {
-                                $out[$rtype] .= $this->_build_remote_group($group['name'], $rtype, $rem);
-                            }
+                }
+                if(isset($block['inline'])) {
 
-                            break;
-                        default:
-                            $out[$type] .= $this->_build_group($group['name'], $type, $files);
+                    if ($type === '.js') {
+                        foreach($block['inline'] as $position => $inline) {
+                            $this->_js[$position][] = '<script type="text/javascript">' . implode("\n", $inline) . '</script>';
+                        }
+
+                    } else {
+
+                        $content = implode("\n", $block['inline']);
+                        $this->_css[] = '<link type="text/css" href="' . $content . '" rel="stylesheet" />';
                     }
                 }
             }
-
         }
+
+        $this->_rendered = true;
 
         if (config('profiling')) {
             \mii\util\Profiler::stop($benchmark);
         }
-
-        return $out['css'].$out['js'];
     }
 
     /**
@@ -183,92 +202,86 @@ class Blocks
      * @param $files link to assets files array
      * @return bool|string
      */
-    public function process_block_assets($block_name, array &$files) {
+    public function process_block_assets($block_name, $parent_block, $depends) {
         if (isset($this->_used_blocks[$block_name])) {
             return false;
         }
 
-        $remote = $this->_blocks[$block_name]->get_remote_assets();
-
-        $empty_block = true;
-        if ($remote) {
-            $files['remote'] = ['css' => [], 'js' => []];
-
-            if (is_array($remote[0])) {
-                foreach ($remote[0] as $remote_css => $v)
-                    $files['remote']['css'][$remote_css] = true;
-            }
-
-            if (is_array($remote[1])) {
-                foreach ($remote[1] as $remote_js => $v)
-                    $files['remote']['js'][$remote_js] = true;
-            }
-            $empty_block = false;
-        }
-
-        $depends = $this->_blocks[$block_name]->get_depends();
-
-        $actual_depends = [];
-        if (count($depends)) {
+        if (!empty($depends)) {
             foreach ($this->libraries as $base_path) {
                 foreach ($depends as $depend) {
-                    if (!is_dir($base_path . '/' . $this->_block_paths[$depend]))
-                        continue;
+                    //if (!is_dir($base_path . '/' . $this->_block_paths[$depend]))
+                        //continue;
                     if (isset($this->_used_blocks[$depend]))
                         continue;
-                    $actual_depends[] = $depend;
-                    $this->process_block_assets($depend, $files);
+                    $this->process_block_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
                     $this->_used_blocks[$depend] = true;
                 }
             }
         }
-        $path = '/' . $this->_block_paths[$block_name];
-        $types = ['css', 'js'];
+        $path = $this->_block_paths[$block_name];
+        $types = ['.css', '.js'];
 
         foreach ($types as $type) {
             foreach ($this->libraries as $base_path) {
-                //if (!is_dir($base_path . $path))
-                  //  continue;
 
-                if (is_file($base_path . $path . $block_name . '.' . $type)) {
-                    $files[$type][$block_name . '.' . $type] = $base_path . $path . $block_name . '.' . $type;
-                    $empty_block = false;
+                if (is_file($base_path . $path . $block_name . $type)) {
+                    $this->_files[$type][$parent_block]['files'][$block_name  . $type] = $base_path . $path . $block_name . $type;
                     break;
                 }
             }
-
         }
 
-        foreach ($this->libraries as $base_path) {
-            if (is_dir($base_path . $path . 'assets')) {
-                $files['assets'][$block_name] = $base_path . $path . 'assets';
-                $empty_block = false;
+        if($this->_blocks[$block_name]->__remote_js !== null) {
+            foreach($this->_blocks[$block_name]->__remote_js as $link => $settings) {
+                if(!empty($settings) AND isset($settings['position'])) {
+                    $position = $settings['position'];
+                    unset($settings['position']);
+                } else {
+                    $position = Blocks::END;;
+                }
+
+                $this->_files['.js'][$parent_block]['remote'][$position][] = HTML::script($link, $settings);
             }
         }
 
-
-        if (count($actual_depends) === 0 AND $empty_block) {
-            return false;
+        if($this->_blocks[$block_name]->__remote_css !== null) {
+            if(!isset($this->_files['.css'][$parent_block]['remote']))
+                $this->_files['.css'][$parent_block]['remote'] = [];
+            $this->_files['.css'][$parent_block]['remote'] = array_merge($this->_files['.css'][$parent_block]['remote'], array_keys($this->_blocks[$block_name]->__remote_css));
         }
 
-        if(count($actual_depends)) {
-            $block_name .= crc32(implode('', $actual_depends));
+        if(!empty($this->_blocks[$block_name]->__inline_js)) {
+
+            foreach($this->_blocks[$block_name]->__inline_js as $inline) {
+                $position = (!empty($inline[1]) AND isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
+                if(!isset($this->_files[$type][$parent_block]['inline'][$position]))
+                    $this->_files[$type][$parent_block]['inline'][$position] = [];
+                $this->_files[$type][$parent_block]['inline'][$position][] = $inline[0];
+            }
         }
 
-        return $block_name;
+        if(!empty($this->_blocks[$block_name]->__inline_css)) {
+            if(!isset($this->_files['.css'][$parent_block]['inline']))
+                $this->_files['.css'][$parent_block]['inline'] = $this->_blocks[$block_name]->__inline_css;
+            else
+                $this->_files['.css'][$parent_block]['inline'] = array_merge($this->_files['.css'][$parent_block]['inline'], $this->_blocks[$block_name]->__inline_css);
+        }
     }
 
 
-    private function _build_group($group_name, $type, $files)
+    private function _build_block($block_name, $type, $files)
     {
-        if(! (bool) $files)
-            return '';
+        $result_file_name = $block_name.crc32(implode('', array_keys($files)));
 
         if ($this->merge) {
-            $output = $this->assets_pub_dir . '/' . $group_name . '.' . $type;
+            $web_output = $this->assets_pub_dir . '/' . $result_file_name . $type;
+            $output = path('pub') . $web_output;
             $need_recompile = false;
-            foreach ($files as $name => $file) {
-                if (static::is_modified_later(path('pub') . $output, filemtime($file))) {
+            $is_css = ($type === '.css');
+
+                foreach ($files as $name => $file) {
+                if (!is_file($output)||filemtime($output) < filemtime($file)) {
                     $need_recompile = true;
                     break;
                 }
@@ -279,16 +292,24 @@ class Blocks
                 foreach ($files as $file) {
                     $tmp .=  file_get_contents($file)."\n";
                 }
-                $tmp = $this->_process($tmp, $type);
+
+                if($is_css) {
+                    $tmp = $this->_process_css($tmp);
+                }
 
                 $gz_output = gzencode($tmp, 6);
 
-                file_put_contents(path('pub') . $output, $tmp);
-                file_put_contents(path('pub') . $output.'.gz', $gz_output);
+                file_put_contents($output, $tmp);
+                file_put_contents($output.'.gz', $gz_output);
             }
 
-            return $this->_gen_html($output . '?' . filemtime(path('pub') . $output), $type);
+            if($is_css) {
+                $this->_css[] = $this->_gen_html($web_output . '?' . filemtime($output), $type);
+            } else {
+                $this->_js[Blocks::END][] = $this->_gen_html($web_output . '?' . filemtime($output), $type);
+            }
 
+            return;
         }
 
         $out = [];
@@ -327,23 +348,12 @@ class Blocks
     private function _gen_html($link, $type)
     {
         switch ($type) {
-            case 'css':
+            case '.css':
                 return '<link type="text/css" href="' . $link . '" rel="stylesheet" />';
-            case 'js':
+            case '.js':
                 return '<script src="'.$link.'"></script>';
         }
         return '';
-    }
-
-    private function _process($content, $type)
-    {
-        switch ($type) {
-            case 'css':
-                return $this->_process_css($content);
-            case 'js':
-        }
-
-        return $content;
     }
 
 
@@ -380,15 +390,6 @@ class Blocks
     }
 
 
-    static public function is_modified_later($file, $source_modified_time)
-    {
-        return
-            !is_file($file)
-            ||
-            filemtime($file) < $source_modified_time;
-    }
-
-
     private function _build_assets_dir($blockname, $path)
     {
 
@@ -404,6 +405,7 @@ class Blocks
 
     }
 
+    // todo:
     private function _copy_dir($from, $to) {
 
         $dir = opendir($from);
@@ -422,34 +424,6 @@ class Blocks
             }
         }
         closedir($dir);
-    }
-
-
-    public function fm_render() {
-
-        if (config('profiling')) {
-            $benchmark = \mii\util\Profiler::start('Mii', __FUNCTION__);
-        }
-
-        $css = '';
-        $js = '';
-
-        foreach ($this->_blocks as $block_name => $block) {
-
-            if(isset($this->css_blocks[$block_name])) {
-                $css .= $this->_gen_html($this->assets_pub_dir.'/'.$block_name.'.css?r'.$this->revision, 'css');
-            }
-
-            if(isset($this->js_blocks[$block_name])) {
-                $js .= $this->_gen_html($this->assets_pub_dir.'/'.$block_name.'.js?r'.$this->revision, 'js');
-            }
-        }
-
-        if (config('profiling')) {
-            \mii\util\Profiler::stop($benchmark);
-        }
-
-        return $css.$js;
     }
 
 
