@@ -278,6 +278,13 @@ if( ! function_exists('dd')) {
     }
 }
 
+if ( ! function_exists('__')) {
+    function __($string, $params = []) {
+        $string = Mii::$app->i18n->translate($string);
+        return empty($values) ? $string : strtr($string, $values);
+    }
+}
+
 
 function config($key = null, $default = null) {
 

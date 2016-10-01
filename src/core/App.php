@@ -19,6 +19,8 @@ abstract class App {
 
     public $locale; //'ru_RU.UTF-8';
 
+    public $language = 'ru';
+
     /**
      * @var \mii\core\Container
      */
@@ -40,6 +42,10 @@ abstract class App {
     public function init(array $config) {
 
         $this->_config = $config;
+
+        if(isset($this->_config['language'])) {
+            $this->language = $this->_config['language'];
+        }
 
         if($this->locale)
             setlocale(LC_ALL, $this->locale);

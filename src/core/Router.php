@@ -104,8 +104,6 @@ class Router {
                     $is_static = false;
                 }
 
-                $namespace = rtrim($namespace, "\\")."\\";
-
                 $this->_routes_list[$compiled] = [
                     'name' => $name,
                     'pattern' => $pattern,
@@ -212,11 +210,13 @@ class Router {
 
 
         if($route['is_closure']) {
-            return true;
-            /*  return call_user_func($this->_callback, [
+
+            $callback = $this->routes[$route['namespace']][$route['pattern']];
+
+              $params = call_user_func($callback, [
                   $uri,
                   $matches
-              ]);*/
+              ]);
         }
 
         if(!isset($params['action']))
@@ -225,7 +225,9 @@ class Router {
         $path = $route['path'];
 
         foreach($params as $key => $value) {
-            $path = str_replace('{'.$key.'}', $value, $path);
+            if(is_string($value)) {
+                $path = str_replace('{'.$key.'}', $value, $path);
+            }
         }
 
         if(strpos($path, ':') !== false) {
@@ -240,7 +242,7 @@ class Router {
             $filename = $params['controller'];
         }
 
-        $params['controller'] = $route['namespace'];
+        $params['controller'] = rtrim($route['namespace'], "\\")."\\";
         if(count($path))
             $params['controller'] .= implode("\\", $path)."\\";
         $params['controller'] .= ucfirst($filename);
