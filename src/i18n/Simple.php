@@ -1,5 +1,5 @@
 <?php
-namespace mii\I18n;
+namespace mii\i18n;
 
 
 use mii\web\Exception;
