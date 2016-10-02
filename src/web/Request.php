@@ -188,16 +188,12 @@ class Request extends \mii\core\Request
      */
     public function execute($uri = null)
     {
-        $route_result = \Mii::$app->router->match($this->uri($uri));
+        $params = \Mii::$app->router->match($this->uri($uri));
 
-        if($route_result === false) {
+        if($params === false) {
             throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
                 ':uri' => $this->uri()]);
         }
-
-        $this->_route = $route_result[0]['name'];
-
-        $params = $route_result[1];
 
         $this->controller = $params['controller'];
 
@@ -209,11 +205,6 @@ class Request extends \mii\core\Request
         // Params cannot be changed once matched
         $this->params = $params;
 
-
-        $benchmark = false;
-        if (config('profiling')) {
-            $benchmark = \mii\util\Profiler::start('Requests', $this->uri());
-        }
 
         try {
             if (extension_loaded('newrelic')) {
@@ -245,24 +236,18 @@ class Request extends \mii\core\Request
 
             $response->redirect($e->url);
 
-        }
-        catch (InvalidRouteException $e) {
+        } catch (InvalidRouteException $e) {
             if(config('debug')) {
                 throw $e;
             } else {
                 throw new NotFoundHttpException('Page not found.', $e->getCode(), $e);
             }
-        }
-        catch (ForbiddenHttpException $e) {
+        } catch (ForbiddenHttpException $e) {
             if(config('debug')) {
                 throw $e;
             } else {
                 throw new NotFoundHttpException('Page not found.', $e->getCode(), $e);
             }
-        }
-
-        if ($benchmark) {
-            \mii\util\Profiler::stop($benchmark);
         }
 
         return $response;
@@ -344,10 +329,6 @@ class Request extends \mii\core\Request
             return $this->params[$key];
 
         return $default;
-    }
-
-    public function route() {
-        return $this->_route;
     }
 
     public function get_csrf_from_header()

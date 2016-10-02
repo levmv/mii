@@ -40,6 +40,8 @@ class Router {
 
     protected $_named_routes;
 
+    protected $_current_route;
+
 
     public function __construct($config = []) {
         foreach($config as $key => $value)
@@ -69,59 +71,62 @@ class Router {
         if($this->order !== null && count($this->routes)) {
             $this->routes = array_merge(array_flip($this->order), $this->routes);
         }
-
         foreach($this->routes as $namespace => $group) {
 
             foreach($group as $pattern => $value) {
 
-                $name = false;
-
-                if(is_array($value)) {
-                    $path = $value['path'];
-                    $name = isset($value['name']) ? $value['name'] : false;
-
-                    $params = isset($value['params'])
-                                ? array_merge($this->default_parameters, $value['params'])
-                                : $this->default_parameters;
-                    $values = isset($value['values']) ? $value['values'] : false;
-                } else {
-                    $path = $value;
-                    $params = $this->default_parameters;
-                    $values = false;
-                }
-
-                $is_closure = ($value instanceof \Closure) ;
-
-                if((strpos($pattern, '{') === false AND strpos($pattern, '(') === false)) {
-                    // static route
-
-                    $pattern = (string) $pattern; // php automatically converts array key like "555" to integer :(
-
-                    $compiled = $pattern;
-                    $is_static = true;
-                } else {
-                    $compiled = $this->compile_route($pattern, $params);
-                    $is_static = false;
-                }
-
-                $this->_routes_list[$compiled] = [
-                    'name' => $name,
-                    'pattern' => $pattern,
-                    'path' => $is_closure ? false : $path,
-                    'compiled' => $compiled,
+                $result = [
+                    'pattern' => '',
+                    'path' => '',
                     'namespace' => $namespace,
-                    'is_closure' => $is_closure,
-                    'is_static' => $is_static,
-                    'values' => $values,
+                    'callback' => false,
+                    'is_static' => false,
                 ];
 
-                if(!$name && !$is_closure) {
-                    $name = $path;
+                $params = [];
+                $name = false;
+
+                $result['is_static'] = ((strpos($pattern, '{') === false AND strpos($pattern, '(') === false));
+
+                if(is_array($value)) {
+                    $result['path'] = $value['path'];
+
+                    if(isset($value['name']))
+                        $name = $value['name'];
+
+                    if(isset($value['callback'])) {
+                        $result['callback'] = ($value['callback'] instanceof \Closure) ? true : $value['callback'];
+                    }
+                    if(!$result['is_static']) {
+                        $params = isset($value['params'])
+                            ? array_merge($this->default_parameters, $value['params'])
+                            : $this->default_parameters;
+
+                        if(isset($value['values'])) {
+                            $result['values'] = $value['values'];
+                        }
+                    }
+
+                } elseif(is_string($value)) {
+                    $result['path'] = $value;
+                    if(!$result['is_static']) {
+                        $params = $this->default_parameters;
+                    }
+                } elseif($value instanceof \Closure) {
+                    $result['callback'] = true;
                 }
 
-                if($name !== false AND !isset($this->_named_routes[$name])) {
-                    $this->_named_routes[$name] = $compiled;
+                $key = $result['pattern'] = (string) $pattern; // php automatically converts array key like "555" to integer :(
+
+                if(!$result['is_static']) {
+                    $key = $this->compile_route($pattern, $params);
                 }
+
+                $this->_routes_list[$key] = $result;
+
+                $name = $name ? $name : $result['path'];
+                $this->_named_routes[$name] = $key;
+
             }
         }
         if($this->cache) {
@@ -161,40 +166,51 @@ class Router {
 
     public function match($uri) {
 
+        $benchmark = false;
+        if (config('profiling')) {
+            $benchmark = \mii\util\Profiler::start('Router match', $uri);
+        }
+
         if($uri !== '/') {
             $uri = trim($uri, '//');
         }
 
-        foreach($this->_routes_list as $route) {
-            $result = $this->match_route($uri, $route);
+        foreach($this->_routes_list as $pattern => $route) {
+            $result = $this->match_route($uri, $pattern, $route);
 
             if($result !== false) {
-                return [$route, $result];
+                $this->_current_route = $pattern;
+
+                if ($benchmark) {
+                    \mii\util\Profiler::stop($benchmark);
+                }
+
+                return $result;
             }
+        }
+
+        if ($benchmark) {
+            \mii\util\Profiler::stop($benchmark);
         }
 
         return false;
     }
 
-    protected function match_route($uri, $route) {
+    protected function match_route($uri, $pattern, $route) {
 
-        if($route['is_static']) {
+        if($route['is_static'] === true) {
 
-            if( $uri !== $route['pattern'])
+            if( $uri !== $pattern)
                 return false;
 
             $matches = [];
 
         } else {
-            if ( ! preg_match($route['compiled'], $uri, $matches))
+            if ( ! preg_match($pattern, $uri, $matches))
                 return false;
         }
 
-        $params = [];
-
-        if($route['values']) {
-            $params = $route['values'];
-        }
+        $params = $route['values'] ?? [];
 
         foreach ($matches as $key => $value)
         {
@@ -208,46 +224,57 @@ class Router {
             $params[$key] = $value;
         }
 
+        if($route['callback']) {
 
-        if($route['is_closure']) {
+            if($route['callback'] === true) { // mean its closure
+                $original_route = $this->routes[$route['namespace']][$route['pattern']];
+                $callback = is_array($original_route) ? $original_route['callback'] : $original_route;
+            } else {
+               $callback = $route['callback'];
+            }
+            $params = call_user_func($callback, [
+                $uri,
+                $matches
+            ]);
 
-            $callback = $this->routes[$route['namespace']][$route['pattern']];
+            $params['controller'] = $route['namespace'].'\\'.$params['controller'];
 
-              $params = call_user_func($callback, [
-                  $uri,
-                  $matches
-              ]);
+        } else {
+
+            $path = $route['path'];
+
+            foreach($params as $key => $value) {
+                if(is_string($value)) {
+                    $path = str_replace('{'.$key.'}', $value, $path);
+                }
+            }
+
+            if(strpos($path, ':') !== false) {
+                list($path, $params['action']) = explode(':', $path);
+            }
+
+            $path = explode('/', $path);
+
+            $filename = array_pop($path);
+
+            if(isset($params['controller'])) {
+                $filename = $params['controller'];
+            }
+
+            $params['controller'] = (count($path))
+                ? $route['namespace'].'\\'.implode("\\", $path)."\\".ucfirst($filename)
+                : $route['namespace'].'\\'.ucfirst($filename);
         }
 
         if(!isset($params['action']))
             $params['action'] = 'index';
 
-        $path = $route['path'];
-
-        foreach($params as $key => $value) {
-            if(is_string($value)) {
-                $path = str_replace('{'.$key.'}', $value, $path);
-            }
-        }
-
-        if(strpos($path, ':') !== false) {
-            list($path, $params['action']) = explode(':', $path);
-        }
-
-        $path = explode('/', $path);
-
-        $filename = array_pop($path);
-
-        if(isset($params['controller'])) {
-            $filename = $params['controller'];
-        }
-
-        $params['controller'] = rtrim($route['namespace'], "\\")."\\";
-        if(count($path))
-            $params['controller'] .= implode("\\", $path)."\\";
-        $params['controller'] .= ucfirst($filename);
-
         return $params;
+    }
+
+
+    public function current_route() {
+        return $this->_routes_list[$this->_current_route];
     }
 
 
