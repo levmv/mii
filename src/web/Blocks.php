@@ -305,9 +305,10 @@ class Blocks
             }
 
             if($is_css) {
-                $this->_css[] = $this->_gen_html($web_output . '?' . filemtime($output), $type);
+                $this->_css[] = '<link type="text/css" href="' . $web_output . '?' . filemtime($output) . '" rel="stylesheet">';
+
             } else {
-                $this->_js[Blocks::END][] = $this->_gen_html($web_output . '?' . filemtime($output), $type);
+                $this->_js[Blocks::END][] = '<script src="'.$web_output . '?' . filemtime($output).'"></script>';
             }
 
             return;
@@ -331,33 +332,13 @@ class Blocks
                 }
             }
             if($is_css) {
-                $this->_css[] = $this->_gen_html($this->assets_pub_dir . '/' . $name . '?' . filemtime($output), $type);
+                $this->_css[] = '<link type="text/css" href="' . $this->assets_pub_dir . '/' . $name . '?' . filemtime($output) . '" rel="stylesheet">';
             } else {
-                $this->_js[Blocks::END][] = $this->_gen_html($this->assets_pub_dir . '/' . $name . '?' . filemtime($output), $type);
+                $this->_js[Blocks::END][] = '<script src="'.$this->assets_pub_dir . '/' . $name . '?' . filemtime($output).'"></script>';
             }
         }
 
         return implode("\n", $out);
-    }
-
-    private function _build_remote_group($group_name, $type, $files) {
-        $out = [];
-        foreach ($files as $name => $file) {
-            $out[] = $this->_gen_html($name, $type);
-        }
-        return implode("\n", $out);
-    }
-
-
-    private function _gen_html($link, $type)
-    {
-        switch ($type) {
-            case '.css':
-                return '<link type="text/css" href="' . $link . '" rel="stylesheet" />';
-            case '.js':
-                return '<script src="'.$link.'"></script>';
-        }
-        return '';
     }
 
 
