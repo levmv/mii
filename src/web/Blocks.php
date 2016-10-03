@@ -167,7 +167,7 @@ class Blocks
                         }
                     } else {
 
-                        $content = implode("\n", $block['inline']);
+                        $content = implode("\n", $block['remote']);
                         $this->_css[] = '<link type="text/css" href="' . $content . '" rel="stylesheet" />';
                     }
 
