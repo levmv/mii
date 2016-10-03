@@ -274,11 +274,12 @@ class Blocks
     {
         $result_file_name = $block_name.crc32(implode('', array_keys($files)));
 
+        $is_css = ($type === '.css');
+
         if ($this->merge) {
             $web_output = $this->assets_pub_dir . '/' . $result_file_name . $type;
             $output = path('pub') . $web_output;
             $need_recompile = false;
-            $is_css = ($type === '.css');
 
                 foreach ($files as $name => $file) {
                 if (!is_file($output)||filemtime($output) < filemtime($file)) {
@@ -318,9 +319,8 @@ class Blocks
 
             $output = path('pub').'/'.$this->assets_pub_dir . '/' . $name;
 
-            $mtime = filemtime($file);
+            if (!is_file($output)||filemtime($output) < filemtime($file)) {
 
-            if (static::is_modified_later($output, $mtime)) {
                 try {
                     copy($file, $output);
                 } catch (\Exception $e) {
@@ -330,7 +330,11 @@ class Blocks
                     copy($file['path'], $output);
                 }
             }
-            $out[] = $this->_gen_html($this->assets_pub_dir . '/' . $name . '?' . $mtime, $type);
+            if($is_css) {
+                $this->_css[] = $this->_gen_html($this->assets_pub_dir . '/' . $name . '?' . filemtime($output), $type);
+            } else {
+                $this->_js[Blocks::END][] = $this->_gen_html($this->assets_pub_dir . '/' . $name . '?' . filemtime($output), $type);
+            }
         }
 
         return implode("\n", $out);
