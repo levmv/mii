@@ -43,8 +43,9 @@ abstract class App {
 
         $this->_config = $config;
 
-        if(isset($this->_config['language'])) {
-            $this->language = $this->_config['language'];
+        if(isset($this->_config['app'])) {
+            foreach($this->_config['app'] as $key => $value)
+                $this->$key = $value;
         }
 
         if($this->locale)
@@ -65,9 +66,9 @@ abstract class App {
             $components = $config['components'];
         }
 
-        foreach($components as $name => $config) {
+        foreach($components as $name => $definition) {
 
-            $this->set($name, $config);
+            $this->set($name, $definition);
         }
 
         // register Error handler

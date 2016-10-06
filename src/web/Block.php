@@ -284,7 +284,7 @@ class Block
         }
 
         $benchmark = false;
-        if (config('profiling'))
+        if (config('debug'))
             $benchmark = \mii\util\Profiler::start('Block:render', \mii\util\Debug::path($this->_file));
 
         // Combine local and global data and capture the output

@@ -44,9 +44,9 @@ class ErrorHandler {
     }
 
 
-
     public function report($exception) {
-        // todo: write to log
+
+        \Mii::error(Exception::text($exception), 'mii');
     }
 
 
@@ -76,7 +76,7 @@ class ErrorHandler {
 
             exit(1);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             echo Exception::text($e);
             exit(1);
         }

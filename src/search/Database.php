@@ -33,7 +33,7 @@ class Database extends \mii\db\Database
         $this->_connection or $this->connect();
 
         $benchmark = false;
-        if (config('profiling')) {
+        if (config('debug')) {
             // Benchmark this query for the current instance
             $benchmark = \mii\util\Profiler::start("Sphinx ({$this->_instance})", $sql);
         }

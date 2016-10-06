@@ -30,17 +30,17 @@ class URL {
     public static function base($protocol = NULL, $index = FALSE)
     {
         // Start with the configured base URL
-        $base_url = '/';//Kohana::$base_url;
+        $base_url = \Mii::$app->base_url;
 
         if ($protocol === TRUE)
         {
             // Use the initial request to get the protocol
-            $protocol = Request::instance();
+            $protocol = \Mii::$app->request;
         }
 
         if ($protocol instanceof Request)
         {
-            if ( ! $protocol->secure())
+            if ( ! $protocol->is_secure())
             {
                 // Use the current protocol
                 list($protocol) = explode('/', strtolower($protocol->protocol()));
@@ -214,17 +214,6 @@ class URL {
         return $default;
     }
 
-    static public function back_to_current() {
-        static $cached_url = false;
-
-        if(!$cached_url) {
-            $cached_url = urlencode(URL::site(Request::instance()->uri()));
-        }
-
-
-        return URL::query(['back_url'=>$cached_url]);
-
-    }
 
 
 } // End url

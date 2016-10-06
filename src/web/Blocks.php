@@ -133,7 +133,7 @@ class Blocks
 
     public function render()
     {
-        if (config('profiling')) {
+        if (config('debug')) {
             $benchmark = \mii\util\Profiler::start('Assets', __FUNCTION__);
         }
 
@@ -167,8 +167,13 @@ class Blocks
                         }
                     } else {
 
-                        $content = implode("\n", $block['remote']);
-                        $this->_css[] = '<link type="text/css" href="' . $content . '" rel="stylesheet" />';
+                        foreach($block['remote'] as $condition => $css_remote) {
+                            if($condition) {
+                                $this->_css[] = '<!--[if '.$condition.']><link type="text/css" href="' . implode("\n",$css_remote) . '" rel="stylesheet" /><![endif]-->';
+                            } else {
+                                $this->_css[] = '<link type="text/css" href="' . implode("\n",$css_remote) . '" rel="stylesheet" />';
+                            }
+                        }
                     }
 
                 }
@@ -180,7 +185,6 @@ class Blocks
                         }
 
                     } else {
-
                         $content = implode("\n", $block['inline']);
                         $this->_css[] = '<link type="text/css" href="' . $content . '" rel="stylesheet" />';
                     }
@@ -190,7 +194,7 @@ class Blocks
 
         $this->_rendered = true;
 
-        if (config('profiling')) {
+        if (config('debug')) {
             \mii\util\Profiler::stop($benchmark);
         }
     }
@@ -240,15 +244,24 @@ class Blocks
                 } else {
                     $position = Blocks::END;;
                 }
-
-                $this->_files['.js'][$parent_block]['remote'][$position][] = HTML::script($link, $settings);
+                if(isset($settings['condition'])) {
+                    $condition = $settings['condition'];
+                    unset($settings['condition']);
+                    $this->_files['.js'][$parent_block]['remote'][$position][] = '<!--[if '.$condition.']>'.HTML::script($link, $settings).'<![endif]-->';
+                } else {
+                    $this->_files['.js'][$parent_block]['remote'][$position][] = HTML::script($link, $settings);
+                }
             }
         }
 
         if($this->_blocks[$block_name]->__remote_css !== null) {
             if(!isset($this->_files['.css'][$parent_block]['remote']))
                 $this->_files['.css'][$parent_block]['remote'] = [];
-            $this->_files['.css'][$parent_block]['remote'] = array_merge($this->_files['.css'][$parent_block]['remote'], array_keys($this->_blocks[$block_name]->__remote_css));
+
+            foreach($this->_blocks[$block_name]->__remote_css as $r_css => $r_options) {
+                $condition = $r_options['condition'] ?? '';
+                $this->_files['.css'][$parent_block]['remote'][$condition][] = $r_css;
+            }
         }
 
         if(!empty($this->_blocks[$block_name]->__inline_js)) {

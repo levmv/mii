@@ -174,7 +174,7 @@ class Validation {
     public function check()
     {
         $benchmark = false;
-        if (config('profiling'))
+        if (config('debug'))
         {
             // Start a new benchmark
             $benchmark = \mii\util\Profiler::start('Validation', __FUNCTION__);

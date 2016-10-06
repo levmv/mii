@@ -167,7 +167,7 @@ class Router {
     public function match($uri) {
 
         $benchmark = false;
-        if (config('profiling')) {
+        if (config('debug')) {
             $benchmark = \mii\util\Profiler::start('Router match', $uri);
         }
 
