@@ -1416,7 +1416,7 @@ class Query
     }
 
     /**
-     * @return Result|Array
+     * @return Result|\array
      */
 
     public function get()
