@@ -101,10 +101,9 @@ class Router {
                         $params = isset($value['params'])
                             ? array_merge($this->default_parameters, $value['params'])
                             : $this->default_parameters;
-
-                        if(isset($value['values'])) {
-                            $result['values'] = $value['values'];
-                        }
+                    }
+                    if(isset($value['values'])) {
+                        $result['values'] = $value['values'];
                     }
 
                 } elseif(is_string($value)) {
