@@ -182,13 +182,14 @@ class ORM implements ORMInterface
     public function __set($key, $value) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-            if (in_array($key, $this->_serialize_fields))
-            {
-                $value = $this->_serialize_value($value);
-            }
+            if($this->__loaded !== false) {
+                if (in_array($key, $this->_serialize_fields)) {
+                    $value = $this->_serialize_value($value);
+                }
 
-            if ($value !== $this->_data[$key] AND $this->__loaded !== false) {
-                $this->_changed[$key] = true;
+                if ($value !== $this->_data[$key]) {
+                    $this->_changed[$key] = true;
+                }
             }
 
             $this->_data[$key] = $value;
@@ -212,7 +213,7 @@ class ORM implements ORMInterface
     public function get($key) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-            return (in_array($key, $this->_serialize_fields, true))
+            return ($this->__loaded && in_array($key, $this->_serialize_fields, true))
                 ? $this->_unserialize_value($this->_data[$key])
                 : $this->_data[$key];
         }
@@ -236,13 +237,16 @@ class ORM implements ORMInterface
         foreach ($values as $key => $value) {
             if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-                if (in_array($key, $this->_serialize_fields))
-                {
-                    $value = $this->_serialize_value($value);
-                }
+                if($this->__loaded !== false) {
+                    if (in_array($key, $this->_serialize_fields))
+                    {
+                        $value = $this->_serialize_value($value);
+                    }
 
-                if ($value !== $this->_data[$key] AND $this->__loaded !== false) {
-                    $this->_changed[$key] = true;
+                    if ($value !== $this->_data[$key]) {
+                        $this->_changed[$key] = true;
+                    }
+
                 }
 
                 $this->_data[$key] = $value;
@@ -354,6 +358,9 @@ class ORM implements ORMInterface
         }
 
         $this->on_change();
+
+        foreach($this->_serialize_fields as $field_name)
+            $this->_data[$field_name] = $this->_serialize_value($this->_data[$field_name]);
 
         $columns = array_keys($this->_data);
         $id = $this->query_object()
