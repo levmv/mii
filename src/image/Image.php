@@ -561,8 +561,8 @@ abstract class Image
         {
             if ( ! is_writable($file))
             {
-                throw new Kohana_Exception('File must be writable: :file',
-                    array(':file' => Debug::path($file)));
+                throw new ImageException('File must be writable: :file',
+                    [':file' => Debug::path($file)]);
             }
         }
         else
@@ -572,8 +572,8 @@ abstract class Image
 
             if ( ! is_dir($directory) OR ! is_writable($directory))
             {
-                throw new Kohana_Exception('Directory must be writable: :directory',
-                    array(':directory' => Debug::path($directory)));
+                throw new ImageException('Directory must be writable: :directory',
+                    [':directory' => Debug::path($directory)]);
             }
         }
 
