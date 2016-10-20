@@ -144,14 +144,6 @@ class Blocks
 
             $this->process_block_assets($block_name, $block_name, $block->_depends);
 
-            if($this->process_assets) {
-                foreach ($this->libraries as $base_path) {
-                    if (is_dir($base_path . $this->_block_paths[$block_name] . 'assets')) {
-                        $this->_build_assets_dir($block_name, $base_path . $this->_block_paths[$block_name] . 'assets');
-                    }
-                    break;
-                }
-            }
         }
 
         foreach($this->_files as $type => $blocks) {
@@ -209,6 +201,15 @@ class Blocks
     public function process_block_assets($block_name, $parent_block, $depends) {
         if (isset($this->_used_blocks[$block_name])) {
             return false;
+        }
+
+        if($this->process_assets) {
+            foreach ($this->libraries as $base_path) {
+                if (is_dir($base_path . $this->_block_paths[$block_name] . 'assets')) {
+                    $this->_build_assets_dir($block_name, $base_path . $this->_block_paths[$block_name] . 'assets');
+                }
+                break;
+            }
         }
 
         if (!empty($depends)) {
