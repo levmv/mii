@@ -34,6 +34,24 @@ class Redis
 
     /**
      * @param string $key
+     * @return bool
+     */
+    public function exists($key)
+    {
+        return $this->connection->exists($key);
+    }
+
+    /**
+     * @param string $key
+     * @param int $ttl
+     */
+    public function expire($key, $ttl)
+    {
+        $this->connection->expire($key, $ttl);
+    }
+
+    /**
+     * @param string $key
      * @param string $value
      * @param bool|int|array $options
      * @return bool
@@ -79,5 +97,24 @@ class Redis
     public function publish($channel, $message)
     {
         $this->connection->publish($channel, $message);
+    }
+
+    /**
+     * @param string $key
+     * @param array $values
+     */
+    public function hmset($key, $values)
+    {
+        $this->connection->hMset($key, $values);
+    }
+
+    /**
+     * @param string $key
+     * @param string $field
+     * @return string
+     */
+    public function hget($key, $field)
+    {
+        return $this->connection->hGet($key, $field);
     }
 }
