@@ -175,8 +175,13 @@ class Form {
 
     public function redactor($name, $attributes = null, $block = 'redactor', $options = [])
     {
+        if($attributes === null OR !isset($attributes['id'])) {
+            $attributes['id'] = '__form_redactor__'.$name;
+        }
+
         return block($block)
             ->set('textarea', $this->field('textarea', $name, $attributes))
+            ->set('id', $attributes['id'])
             ->set('options', $options);
     }
 
