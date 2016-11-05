@@ -1,7 +1,8 @@
 <?php namespace mii\util; ?>
 
 <style type="text/css">
-    .mii table.profiler { width: 99%; margin: 0 auto 1em; font-size: 14px; border-collapse: collapse; }
+    .mii {padding: 5px;}
+    .mii table.profiler { width: 100%; max-width: 1920px; background-color:#fff; margin: 0 auto 1em; font-size: 14px; border-collapse: collapse; }
     .mii table.profiler th,
     .mii table.profiler td { padding: 0.2em 0.4em; background: #fff; border: solid 1px #999; border-width: 1px 0; text-align: left; font-weight: normal; font-size: 1em; color: #111; vertical-align: top; text-align: right; }
     .mii table.profiler th.name { text-align: left; }
@@ -37,6 +38,21 @@ $application_cols = array('min', 'max', 'average', 'current');
 ?>
 
 <div class="mii">
+
+    <table class="profiler">
+        <?php $stats = Profiler::application() ?>
+        <tr class="final mark time">
+            <th class="name" rowspan="2" scope="rowgroup"><?php echo 'Application Execution'.' ('.$stats['count'].')' ?></th>
+            <?php foreach ($application_cols as $key): ?>
+                <td class="<?php echo $key ?>"><?php echo number_format($stats[$key]['time'], 6)*1000 ?> <abbr title="seconds">ms</abbr></td>
+            <?php endforeach ?>
+        </tr>
+        <tr class="final mark memory">
+            <?php foreach ($application_cols as $key): ?>
+                <td class="<?php echo $key ?>"><?php echo number_format($stats[$key]['memory'] / 1024, 4) ?> <abbr title="kilobyte">kB</abbr></td>
+            <?php endforeach ?>
+        </tr>
+    </table>
     <?php foreach (Profiler::groups() as $group => $benchmarks): ?>
         <table class="profiler">
             <tr class="group">
@@ -83,18 +99,4 @@ $application_cols = array('min', 'max', 'average', 'current');
         </table>
     <?php endforeach ?>
 
-    <table class="profiler">
-        <?php $stats = Profiler::application() ?>
-        <tr class="final mark time">
-            <th class="name" rowspan="2" scope="rowgroup"><?php echo 'Application Execution'.' ('.$stats['count'].')' ?></th>
-            <?php foreach ($application_cols as $key): ?>
-                <td class="<?php echo $key ?>"><?php echo number_format($stats[$key]['time'], 6)*1000 ?> <abbr title="seconds">ms</abbr></td>
-            <?php endforeach ?>
-        </tr>
-        <tr class="final mark memory">
-            <?php foreach ($application_cols as $key): ?>
-                <td class="<?php echo $key ?>"><?php echo number_format($stats[$key]['memory'] / 1024, 4) ?> <abbr title="kilobyte">kB</abbr></td>
-            <?php endforeach ?>
-        </tr>
-    </table>
 </div>
