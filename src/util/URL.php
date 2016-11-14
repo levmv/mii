@@ -207,9 +207,13 @@ class URL {
 
 
 
-    static public function back_url($default = '') {
+    static public function back_url($default = null) {
         if(isset($_GET['back_url']))
             return urldecode($_GET['back_url']);
+
+        if($default === null) {
+            return URL::current();
+        }
 
         return $default;
     }
