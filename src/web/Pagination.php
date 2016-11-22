@@ -70,7 +70,6 @@ class Pagination {
     protected $request;
 
 
-
     /**
      * Creates a new Pagination object.
      *
@@ -189,7 +188,7 @@ class Pagination {
     /**
      * Checks whether the given page number exists.
      *
-     * @param   integer  page number
+     * @param   integer  $page page number
      * @return  boolean
      */
     public function valid_page($page)
@@ -338,10 +337,9 @@ class Pagination {
         {
             return $this->render();
         }
-        catch(Exception $e)
+        catch(\Exception $e)
         {
-            Exception::handler($e);
-            return '';
+            ErrorHandler::convert_to_error($e);
         }
     }
 
