@@ -260,7 +260,7 @@ class Blocks
                 $this->_files['.css'][$parent_block]['remote'] = [];
 
             foreach($this->_blocks[$block_name]->__remote_css as $r_css => $r_options) {
-                $condition = $r_options['condition'] ?? '';
+                $condition = isset($r_options['condition']) ? $r_options['condition'] : '';
                 $this->_files['.css'][$parent_block]['remote'][$condition][] = $r_css;
             }
         }

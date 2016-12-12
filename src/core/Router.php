@@ -209,7 +209,7 @@ class Router {
                 return false;
         }
 
-        $params = $route['values'] ?? [];
+        $params = isset($route['values']) ? $route['values'] : [];
 
         foreach ($matches as $key => $value)
         {
