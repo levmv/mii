@@ -134,7 +134,8 @@ class Controller extends \mii\core\Controller
             $this->response->content($this->index_block->render(true));
 
         } else {
-            $content = empty($this->content) ? $content : $this->content;
+            if($content === null)
+                $content = $this->content;
 
             if (is_array($content) AND $this->request->is_ajax()) {
                 $this->response->format = Response::FORMAT_JSON;
