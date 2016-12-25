@@ -214,7 +214,7 @@ class Menu
                     ob_clean();
                 }
             }
-            return Exception::handler($e)->body();
+            return ErrorHandler::convert_to_error($e);
         }
     }
 
