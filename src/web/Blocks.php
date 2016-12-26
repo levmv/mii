@@ -30,6 +30,8 @@ class Blocks
 
     protected $assets_pub_dir = '/assets';
 
+    protected $css_process_callback;
+
     protected $_rendered = false;
 
     protected $_css = [];
@@ -358,6 +360,16 @@ class Blocks
 
     private function _process_css($content)
     {
+        if($this->css_process_callback) {
+            try {
+                $content = call_user_func($this->css_process_callback, $content);
+            } catch (\Throwable $e) {
+                Mii::error('CSS user processing failed', 'mii');
+            }
+            return $content;
+        }
+
+
         // https://github.com/matthiasmullie/minify
 
         // strip comments
