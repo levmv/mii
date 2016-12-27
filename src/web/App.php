@@ -29,7 +29,6 @@ class App extends \mii\core\App
     public function default_components() {
         return array_merge(parent::default_components(), [
             'session' => ['class' => 'mii\web\Session'],
-            'blocks' => ['class' => 'mii\web\Blocks'],
             'router' => ['class' => 'mii\core\Router'],
             'request' => ['class' => 'mii\web\Request'],
             'response' => ['class' => 'mii\web\Response'],

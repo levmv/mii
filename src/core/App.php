@@ -83,6 +83,7 @@ abstract class App {
         return [
             'log' => ['class' => \mii\log\Logger::class],
             'user' => ['class' => 'mii\auth\User'],
+            'blocks' => ['class' => 'mii\web\Blocks'],
             'auth' => ['class' => 'mii\auth\Auth'],
             'db' => ['class' => 'mii\db\Database'],
             'cache' => ['class' => 'mii\cache\Apcu'],
