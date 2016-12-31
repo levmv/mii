@@ -19,6 +19,8 @@ class Database
     const UPDATE = 3;
     const DELETE = 4;
 
+    const MULTI = 5;
+
     /**
      * @var  string  the last query executed
      */
@@ -146,7 +148,17 @@ class Database
         }
 
         // Execute the query
-        if (($result = $this->_connection->query($sql)) === false) {
+        if($type === Database::MULTI) {
+            $result = $this->_connection->multi_query($sql);
+            while ($this->_connection->next_result()) {;}
+            if($this->_connection->errno) {
+
+            }
+        } else {
+            $result = $this->_connection->query($sql);
+        }
+
+        if ( $result === false || $this->_connection->errno ) {
             if ($benchmark) {
                 // This benchmark is worthless
                 \mii\util\Profiler::delete($benchmark);
