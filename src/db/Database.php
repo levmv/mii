@@ -150,7 +150,12 @@ class Database
         // Execute the query
         if($type === Database::MULTI) {
             $result = $this->_connection->multi_query($sql);
-            while ($this->_connection->next_result()) {;}
+            $affected_rows = 0;
+            do{
+                $affected_rows+=$this->_connection->affected_rows;
+            } while($this->_connection->more_results() && $this->_connection->next_result());
+            if($result)
+                while ($this->_connection->next_result()) {;}
             if($this->_connection->errno) {
 
             }
