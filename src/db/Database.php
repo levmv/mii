@@ -154,11 +154,7 @@ class Database
             do{
                 $affected_rows+=$this->_connection->affected_rows;
             } while($this->_connection->more_results() && $this->_connection->next_result());
-            if($result)
-                while ($this->_connection->next_result()) {;}
-            if($this->_connection->errno) {
 
-            }
         } else {
             $result = $this->_connection->query($sql);
         }
