@@ -23,7 +23,7 @@ class Captcha
 
     protected $height = 50;
 
-    protected $complexity = 4;
+    protected $complexity = 5;
 
     protected $background;
 
@@ -407,8 +407,8 @@ class Captcha
         // Add a random gradient
         if (! $this->background)
         {
-            $color1 = imagecolorallocate($this->image, mt_rand(0, 100), mt_rand(0, 100), mt_rand(0, 100));
-            $color2 = imagecolorallocate($this->image, mt_rand(0, 100), mt_rand(0, 100), mt_rand(0, 100));
+            $color1 = imagecolorallocate($this->image, mt_rand(0, 105), mt_rand(0, 110), mt_rand(0, 110));
+            $color2 = imagecolorallocate($this->image, mt_rand(0, 105), mt_rand(0, 110), mt_rand(0, 110));
             $this->image_gradient($color1, $color2);
         }
 
@@ -425,7 +425,7 @@ class Captcha
         $spacing = (int) ($this->width * 0.9 / strlen($this->response));
 
         // Background alphabetic character attributes
-        $color_limit = mt_rand(96, 160);
+        $color_limit = mt_rand(96, 162);
         $chars = 'ABEFGJKLPQRTVY';
 
         // Draw each Captcha character with varying attributes
@@ -434,7 +434,7 @@ class Captcha
             // Use different fonts if available
             $font = $this->fontpath.$this->fonts[array_rand($this->fonts)];
 
-            $angle = mt_rand(-40, 20);
+            $angle = mt_rand(-42, 24);
             // Scale the character size on image height
             $size = $default_size / 10 * mt_rand(7, 13);
             $box = imageftbbox($size, $angle, $font, $this->response[$i]);
