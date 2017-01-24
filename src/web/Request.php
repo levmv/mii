@@ -115,7 +115,7 @@ class Request extends \mii\core\Request
 
         if (!empty($_SERVER['HTTPS']) AND filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN)) {
             // This request is secure
-            $this->secure(true);
+            $this->_secure = true;
         }
 
         // Store global GET and POST data in the initial request only
