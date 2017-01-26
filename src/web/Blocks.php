@@ -190,6 +190,8 @@ class Blocks
 
         if (config('debug')) {
             \mii\util\Profiler::stop($benchmark);
+            if (empty($this->_css) AND empty($this->_js[0]) AND empty($this->_js[1]) AND empty($this->_js[2]))
+                \mii\util\Profiler::delete($benchmark);
         }
     }
 
