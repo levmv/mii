@@ -73,11 +73,11 @@ class File extends Target {
 
         $level = Logger::$level_names[$level];
         if (!is_string($text)) {
-            // exceptions may not be serializable if in the call stack somewhere is a Closure
-            if ($text instanceof \Exception) {
+
+            if ($text instanceof \Exception || $text instanceof \Throwable || $text instanceof Exception) {
                 $text = (string) $text;
             } else {
-               // TODO:: $text = Debug::dump($text);
+               $text = var_export($text);
             }
         }
         //$prefix = $this->getMessagePrefix($message);
