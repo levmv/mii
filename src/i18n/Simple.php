@@ -13,6 +13,11 @@ class Simple {
     protected $messages;
 
     public function __construct($config = []) {
+       $this->init($config);
+
+    }
+
+    public function init($config) {
         foreach($config as $key => $value) {
             $this->$key = $value;
         }
@@ -26,16 +31,22 @@ class Simple {
         if($this->language === null) {
             $this->language = \Mii::$app->language;
         }
-
     }
 
     private function load() {
 
         if(!is_file($this->base_path.'/'.$this->language.'.php')) {
-            throw new Exception();
-        }
 
-        $this->messages = require($this->base_path.'/'.$this->language.'.php');
+            list($lang, $country) = explode('-', $this->language);
+
+            if(!is_file($this->base_path.'/'.$lang.'.php')) {
+                throw new Exception();
+            } else {
+                $this->messages = require($this->base_path.'/'.$lang.'.php');
+            }
+        } else {
+            $this->messages = require($this->base_path.'/'.$this->language.'.php');
+        }
     }
 
 
