@@ -115,15 +115,17 @@ class ErrorHandler {
 
         unset($this->_memory_reserve);
 
-        if ($error = error_get_last() AND in_array($error['type'], [E_PARSE, E_ERROR, E_USER_ERROR]))
+
+        // is it fatal ?
+        if ($error = error_get_last() AND in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING]))
         {
             $this->clear_output();
             $exception = new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']);
 
             $this->report($exception);
             $this->render($exception);
-
-            // todo: flush logs
+            
+            \Mii::$app->log && \Mii::$app->log->flush();
 
             // Shutdown now to avoid a "death loop"
             exit(1);
