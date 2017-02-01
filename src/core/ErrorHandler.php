@@ -76,7 +76,7 @@ class ErrorHandler {
 
             exit(1);
 
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             echo Exception::text($e);
             exit(1);
         }

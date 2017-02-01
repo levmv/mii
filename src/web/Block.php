@@ -129,7 +129,7 @@ class Block
 
             return $this->render();
 
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             ErrorHandler::convert_to_error($e);
         }
     }
@@ -325,7 +325,7 @@ class Block
             // Load the view within the current scope
             require $block_filename;
 
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
 
             // Delete the output buffer
             ob_end_clean();

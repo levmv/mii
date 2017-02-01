@@ -365,7 +365,7 @@ class Blocks
         if($this->css_process_callback) {
             try {
                 $content = call_user_func($this->css_process_callback, $content);
-            } catch (\Throwable $e) {
+            } catch (\Exception $e) {
                 Mii::error('CSS user processing failed', 'mii');
             }
             return $content;

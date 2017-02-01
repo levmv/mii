@@ -184,7 +184,7 @@ class '.$name.' extends Migration {
             try {
                 $obj->safe_up();
                 DB::commit();
-            } catch (\Throwable $e) {
+            } catch (\Exception $e) {
                 DB::rollback();
             }
 

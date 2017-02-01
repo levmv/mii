@@ -74,7 +74,7 @@ class File extends Target {
         $level = Logger::$level_names[$level];
         if (!is_string($text)) {
 
-            if ($text instanceof \Exception || $text instanceof \Throwable || $text instanceof Exception) {
+            if ($text instanceof \Exception || $text instanceof Exception) {
                 $text = (string) $text;
             } else {
                $text = var_export($text);

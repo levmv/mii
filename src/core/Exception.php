@@ -64,7 +64,7 @@ abstract class Exception extends \Exception {
      * @param   \Throwable  $e
      * @return  string
      */
-    public static function text(\Throwable $e)
+    public static function text(\Exception $e)
     {
         return sprintf('%s [ %s ]: %s ~ %s [ %d ]',
             get_class($e), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());

@@ -21,6 +21,8 @@ abstract class App {
 
     public $language = 'ru';
 
+    public $time_zone;
+
     /**
      * @var \mii\core\Container
      */
@@ -50,6 +52,10 @@ abstract class App {
 
         if($this->locale)
             setlocale(LC_ALL, $this->locale);
+
+        if($this->time_zone) {
+            date_default_timezone_set($this->time_zone);
+        }
 
         Mii::$container = new Container();
 
