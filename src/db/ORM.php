@@ -91,7 +91,7 @@ class ORM implements ORMInterface
                 throw new \InvalidArgumentException('Wrong conditions array');
 
             return (new static)
-                ->select_query(false)
+                ->select_query(true)
                 ->where($value)
                 ->get();
 
