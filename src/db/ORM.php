@@ -69,7 +69,10 @@ class ORM implements ORMInterface
      * @return Query
      */
     public static function query() {
-        return (new Query)->table(static::$table)->as_object(static::class);
+        return (new static)
+            ->raw_query()
+            ->table(static::$table)
+            ->as_object(static::class);
     }
 
     /**
@@ -165,6 +168,10 @@ class ORM implements ORMInterface
         return $query;
     }
 
+    public function raw_query() : Query {
+        return new Query;
+    }
+
     /**
      * Returns an array of the columns in this object.
      *
@@ -204,7 +211,7 @@ class ORM implements ORMInterface
     public static function select_list($key, $display, $first = NULL) {
         $class = new static();
 
-        $query = $class->query_object()
+        $query = $class->raw_query()
             ->select([static::$table . '.' . $key, static::$table . '.' . $display])
             ->from($class->get_table())
             ->as_array();
@@ -321,7 +328,7 @@ class ORM implements ORMInterface
         if(empty($properties)) {
             return $this->_data;
         }
-        
+
         return Arr::to_array($this, $properties);
     }
 
@@ -376,7 +383,7 @@ class ORM implements ORMInterface
 
         $this->on_change();
 
-        return $this->query_object()
+        return $this->raw_query()
             ->update($this->get_table())
             ->set(array_intersect_key($this->_data, $this->_changed))
             ->where('id', '=', $this->_data['id'])
@@ -408,7 +415,7 @@ class ORM implements ORMInterface
             $this->_data[$field_name] = $this->_serialize_value($this->_data[$field_name]);
 
         $columns = array_keys($this->_data);
-        $id = $this->query_object()
+        $id = $this->raw_query()
             ->insert($this->get_table())
             ->columns($columns)
             ->values($this->_data)
@@ -436,26 +443,13 @@ class ORM implements ORMInterface
         if ($this->loaded()) {
             $this->__loaded = false;
 
-            return $this->query_object()
+            return $this->raw_query()
                 ->delete($this->get_table())
                 ->where('id', '=', $this->_data['id'])
                 ->execute();
         }
 
         throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
-    }
-
-    public function on_load() {
-
-    }
-
-    /**
-     * Returns if the specified field exists in the model
-     *
-     * @return bool
-     */
-    public function field_exists($field) {
-        return array_key_exists($field, $this->_data);
     }
 
 
