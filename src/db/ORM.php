@@ -73,7 +73,27 @@ class ORM implements ORMInterface
     /**
      * @return \mii\db\Result
      */
-    public static function all() {
+    public static function all($value = null) {
+        if(is_array($value)) {
+            if(!is_array($value[0])) {
+                return (new static)
+                    ->select_query()
+                    ->where('id', 'IN', $value)
+                    ->get();
+            }
+
+            if(count($value[0]) !== 3)
+                throw new \InvalidArgumentException('Wrong conditions array');
+
+            return (new static)
+                ->select_query(false)
+                ->where($value)
+                ->get();
+
+        } elseif(is_integer($value) || is_string($value)) {
+            return (new static)->select_query(true)->where('id', '=', (int) $value)->get();
+        }
+
         return static::find()->get();
     }
 
@@ -84,12 +104,32 @@ class ORM implements ORMInterface
         return (new static)->select_query();
     }
 
-    public static function one(int $id) {
-        return (new static)->select_query(false)->where('id', '=', $id)->one();
+    /**
+     * @param mixed $id
+     * @return $this|null
+     */
+
+    public static function one($value = null) {
+        if(is_array($value)) {
+
+            if(count($value[0]) !== 3)
+                throw new \InvalidArgumentException('Wrong conditions array');
+
+            return (new static)
+                ->select_query(false)
+                ->where($value)
+                ->one();
+
+        } elseif(is_integer($value) || is_string($value)) {
+            return (new static)->select_query(false)->where('id', '=', (int) $value)->one();
+        }
+
+        return (new static)->select_query(true)->one();
     }
 
 
     /**
+     * @deprecated
      * @param $id
      * @return $this
      */
@@ -107,7 +147,7 @@ class ORM implements ORMInterface
      * @param bool $with_order
      * @return Query
      */
-    public function select_query($with_order = true) {
+    public function select_query($with_order = true) : Query {
         $query = $this->query_object()->select($this->fields())->from($this->get_table())->as_object(static::class);
 
         if ($this->_order_by AND $with_order) {
