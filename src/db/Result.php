@@ -2,6 +2,8 @@
 
 namespace mii\db;
 
+use mii\util\Arr;
+
 /**
  * Database result wrapper.
  */
@@ -200,15 +202,18 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * Return all of the rows in the result as an array.
      *
      */
-    public function to_array()
+    public function to_array($properties = [])
     {
-        $results = [];
+        if(empty($properties)) {
+            $results = [];
 
-        foreach ($this as $row) {
-            $results[] = $row;
+            foreach ($this as $row) {
+                $results[] = $row;
+            }
+
+            return $results;
         }
-
-        return $results;
+        return Arr::to_array($this, $properties);
     }
 
     public function index_by($column) {

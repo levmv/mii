@@ -3,6 +3,8 @@
 namespace mii\db;
 
 
+use mii\util\Arr;
+
 class ORM implements ORMInterface
 {
 
@@ -147,8 +149,12 @@ class ORM implements ORMInterface
      * @param bool $with_order
      * @return Query
      */
-    public function select_query($with_order = true) : Query {
-        $query = $this->query_object()->select($this->fields())->from($this->get_table())->as_object(static::class);
+    public function select_query($with_order = true, Query $query = null) : Query {
+
+        if($query === null)
+            $query = new Query;
+
+        $query->select($this->fields())->from($this->get_table())->as_object(static::class);
 
         if ($this->_order_by AND $with_order) {
             foreach ($this->_order_by as $column => $direction) {
@@ -157,10 +163,6 @@ class ORM implements ORMInterface
         }
 
         return $query;
-    }
-
-    public function query_object() {
-        return new Query;
     }
 
     /**
@@ -315,8 +317,12 @@ class ORM implements ORMInterface
      *
      * @return array
      */
-    public function as_array() {
-        return $this->_data;
+    public function to_array(array $properties = []) {
+        if(empty($properties)) {
+            return $this->_data;
+        }
+        
+        return Arr::to_array($this, $properties);
     }
 
     /**

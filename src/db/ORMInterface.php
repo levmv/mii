@@ -21,7 +21,7 @@ interface ORMInterface {
 
     public function set($values, $value = NULL);
 
-    public function as_array();
+    public function to_array();
 
     public function fields();
 
