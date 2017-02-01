@@ -244,6 +244,8 @@ class Response {
             return $this->_content;
 
         $this->_content = $content;
+        
+        return null;
     }
 
 

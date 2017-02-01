@@ -3,7 +3,6 @@
 namespace mii\web;
 
 use mii\util\URL;
-use mii\web\Exception;
 
 /**
  * Pagination links generator.
@@ -33,7 +32,7 @@ class Pagination {
     // Total page count
     protected $total_pages;
 
-    protected $block = 'pagination_basic';
+    protected $block = 'pagination';
 
     protected $auto_hide = true;
 
@@ -76,42 +75,30 @@ class Pagination {
      * @param   array  configuration
      * @return  void
      */
-    public function __construct(array $config = [], Request $request = NULL)
+    public function __construct(array $config = [])
     {
         foreach($config as $key => $val)
             $this->$key = $val;
 
-        if ($request === NULL)
-        {
-            $request = \Mii::$app->request;
-        }
-
-        $this->request 	= $request;
-        //$this->route 	= $request->route();
-
-
-        // Assign default route params
-        $this->route_params = array(
-              //  'directory'		=> $request->directory(),
-                'controller' 	=> $request->controller,
-                'action'		=> $request->action,
-            ) ;//+ $request->param();
-
+        if(! $this->request)
+            $this->request = \Mii::$app->request;
 
 
         // Pagination setup
-        $this->setup();
+        $this->calculate();
     }
 
     /**
      * Loads configuration settings into the object and (re)calculates pagination if needed.
      * Allows you to update config settings after a Pagination object has been constructed.
      *
-     * @param   array   configuration
+     * @param   array $config  configuration
      * @return  object  Pagination
      */
-    public function setup()
+    public function calculate(array $config = [])
     {
+        foreach($config as $key => $val)
+            $this->$key = $val;
 
         if($this->current_page === null)
         {
@@ -178,7 +165,7 @@ class Pagination {
 
             case 'route':
 
-                return URL::site($this->route->uri(array_merge($this->route_params,
+                return URL::site($this->route->url(array_merge($this->route_params,
                         array($this->current_page_source_key => $page))).$this->query());
         }
 
@@ -191,25 +178,24 @@ class Pagination {
      * @param   integer  $page page number
      * @return  boolean
      */
-    public function valid_page($page)
+    public function valid_page(int $page) : bool
     {
-
         return $page > 0 AND $page <= $this->total_pages;
     }
 
     /**
      * Renders the pagination links.
      *
-     * @param   mixed   string of the view to use, or a Kohana_View object
+     * @param   mixed   string of the block name to use, or a block object
      * @return  string  pagination output (HTML)
      */
-    public function render($block = NULL)
+    public function render($block = null)
     {
         // Automatically hide pagination whenever it is superfluous
-        if ($this->auto_hide === TRUE AND $this->total_pages <= 1)
+        if ($this->auto_hide === true AND $this->total_pages <= 1)
             return '';
 
-        if ($block === NULL)
+        if ($block === null)
         {
             // Use the view from config
             $block = $this->block;
@@ -243,56 +229,6 @@ class Pagination {
         return $this->previous_page;
     }
 
-    /**
-     * Request setter / getter
-     *
-     * @param	Request
-     * @return	Request	If used as getter
-     * @return	$this	Chainable as setter
-     */
-    public function request(Request $request = NULL)
-    {
-        if ($request === NULL)
-            return $this->request;
-
-        $this->request = $request;
-
-        return $this;
-    }
-
-    /**
-     * Route setter / getter
-     *
-     * @param	Route
-     * @return	Route	Route if used as getter
-     * @return	$this	Chainable as setter
-     */
-    public function route(Route $route = NULL)
-    {
-        if ($route === NULL)
-            return $this->route;
-
-        $this->route = $route;
-
-        return $this;
-    }
-
-    /**
-     * Route parameters setter / getter
-     *
-     * @param	array	Route parameters to set
-     * @return	array	Route parameters if used as getter
-     * @return	$this	Chainable as setter
-     */
-    public function route_params(array $route_params = NULL)
-    {
-        if ($route_params === NULL)
-            return $this->route_params;
-
-        $this->route_params = $route_params;
-
-        return $this;
-    }
 
     /**
      * URL::query() replacement for Pagination use only
@@ -337,19 +273,20 @@ class Pagination {
         {
             return $this->render();
         }
-        catch(\Exception $e)
+        catch(\Throwable $e)
         {
             ErrorHandler::convert_to_error($e);
+            return '';
         }
     }
 
     /**
      * Returns a Pagination property.
      *
-     * @param   string  property name
+     * @param   string  $key property name
      * @return  mixed   Pagination property; NULL if not found
      */
-    public function __get($key)
+    public function __get(string $key)
     {
         return isset($this->$key) ? $this->$key : NULL;
     }
@@ -357,11 +294,11 @@ class Pagination {
     /**
      * Updates a single config setting, and recalculates pagination if needed.
      *
-     * @param   string  config key
-     * @param   mixed   config value
+     * @param   string $key config key
+     * @param   mixed  $value config value
      * @return  void
      */
-    public function __set($key, $value)
+    public function __set(string $key, $value)
     {
         $this->setup(array($key => $value));
     }

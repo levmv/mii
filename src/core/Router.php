@@ -4,6 +4,7 @@ namespace mii\core;
 
 
 use mii\util\Arr;
+use mii\util\URL;
 
 class Router {
 
@@ -288,8 +289,7 @@ class Router {
         if ($route['is_static'])
         {
             // This is a static route, no need to replace anything
-            // TODO: host?
-            return '/'.$route['pattern'];
+            return URL::site('/'.$route['pattern']);
         }
 
         // Keep track of whether an optional param was replaced

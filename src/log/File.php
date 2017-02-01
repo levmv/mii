@@ -5,7 +5,6 @@ namespace mii\log;
 use Mii;
 use mii\core\ErrorException;
 use mii\core\Exception;
-use mii\util\Debug;
 
 class File extends Target {
 
@@ -55,9 +54,7 @@ class File extends Target {
         $this->messages = [];
 
         if (($fp = @fopen($this->file, 'a')) === false) {
-
-            throw new ErrorException;exit;
-            // TODO: throw new Exception("Unable to append to log file: {$this->file}");
+            throw new ErrorException("Unable to append to log file: {$this->file}");
         }
         @flock($fp, LOCK_EX);
 

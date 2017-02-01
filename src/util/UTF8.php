@@ -29,11 +29,6 @@ namespace mii\util;
 
 class UTF8 {
 
-    /**
-     * @var  boolean  Does the server support UTF-8 natively?
-     */
-    public static $server_utf8 = true;
-
 
     /**
      * Recursively cleans arrays, objects, and strings. Removes ASCII control

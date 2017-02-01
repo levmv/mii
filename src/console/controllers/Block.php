@@ -6,8 +6,6 @@ namespace mii\console\controllers;
 use Mii;
 use mii\console\CliException;
 use mii\console\Controller;
-use mii\core\Exception;
-use mii\db\DB;
 
 class Block extends Controller {
 
@@ -37,7 +35,7 @@ class Block extends Controller {
     }
 
 
-    public function index($argv) {
+    public function index() {
 
         foreach($this->blocks as $output_path => $blocks) {
             foreach($blocks as $block => $func) {

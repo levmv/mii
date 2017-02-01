@@ -88,7 +88,6 @@ class Controller extends \mii\core\Controller
      *
      * @param   Request $request Request that created the controller
      * @param   Response $response The request's response
-     * @param   App $app
      */
     public function __construct(Request $request, Response $response)
     {
@@ -189,7 +188,7 @@ class Controller extends \mii\core\Controller
         }
 
         if ($this->csrf_validation && !$this->request->validate_csrf_token()) {
-            throw new BadRequestHttpException('Token mistmatch error');
+            throw new BadRequestHttpException('Token mismatch error');
         }
 
         $this->before();

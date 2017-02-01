@@ -2,9 +2,7 @@
 
 namespace mii\console\controllers;
 
-
 use mii\console\Controller;
-use mii\db\DB;
 
 class Init extends Controller {
 

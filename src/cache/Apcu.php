@@ -92,11 +92,10 @@ class Apcu extends Cache
      *     // Delete all cache entries in the apc group
      *     Cache::instance('apc')->delete_all();
      *
-     * @return  boolean
      */
-    public function delete_all()
+    public function delete_all() : bool
     {
-        return \apcu_clear_cache('user');
+        return \apcu_clear_cache();
     }
 
     /**
@@ -104,8 +103,8 @@ class Apcu extends Cache
      * Useful for shared counters and other persistent integer based
      * tracking.
      *
-     * @param   string    id of cache entry to increment
-     * @param   int       step value to increment by
+     * @param   string    $id of cache entry to increment
+     * @param   int       $step value to increment by
      * @return  integer
      * @return  boolean
      */
@@ -119,8 +118,8 @@ class Apcu extends Cache
      * Useful for shared counters and other persistent integer based
      * tracking.
      *
-     * @param   string    id of cache entry to decrement
-     * @param   int       step value to decrement by
+     * @param   string    $id of cache entry to decrement
+     * @param   int       $step value to decrement by
      * @return  integer
      * @return  boolean
      */

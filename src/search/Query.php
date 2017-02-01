@@ -86,7 +86,7 @@ class Query
     {
         try {
             // Return the SQL string
-            return $this->compile(Database::instance());
+            return $this->compile();
         } catch (DatabaseException $e) {
             return DatabaseException::text($e);
         }
@@ -647,7 +647,7 @@ class Query
     {
         if (!is_object($db)) {
             // Get the database instance
-            $db = Database::instance($db);
+            $db = \Mii::$app->db;
         }
 
         // Start an insertion query
@@ -693,7 +693,7 @@ class Query
     {
         if (!is_object($db)) {
             // Get the database instance
-            $db = Database::instance($db);
+            $db = \Mii::$app->db;
         }
 
         // Start an update query
@@ -1031,8 +1031,8 @@ class Query
      * Execute the current query on the given database.
      *
      * @param   mixed $db Database instance or name of instance
-     * @param   mixed   result object classname, TRUE for stdClass or FALSE for array
-     * @param   array    result object constructor arguments
+     * @param   mixed $as_object result object classname, TRUE for stdClass or FALSE for array
+     * @param   array $object_params result object constructor arguments
      * @return  Result   Result for SELECT queries
      * @return  mixed    the insert id for INSERT queries
      * @return  integer  number of affected rows for all other queries

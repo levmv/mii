@@ -200,11 +200,10 @@ class Blocks
      *
      * @param $block_name
      * @param $files link to assets files array
-     * @return bool|string
      */
-    public function process_block_assets($block_name, $parent_block, $depends) {
+    public function process_block_assets($block_name, $parent_block, $depends) : void {
         if (isset($this->_used_blocks[$block_name])) {
-            return false;
+            return;
         }
 
         if($this->process_assets) {
@@ -217,15 +216,13 @@ class Blocks
         }
 
         if (!empty($depends)) {
-            foreach ($this->libraries as $base_path) {
-                foreach ($depends as $depend) {
-                    //if (!is_dir($base_path . '/' . $this->_block_paths[$depend]))
-                        //continue;
-                    if (isset($this->_used_blocks[$depend]))
-                        continue;
-                    $this->process_block_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
-                    $this->_used_blocks[$depend] = true;
-                }
+            foreach ($depends as $depend) {
+                //if (!is_dir($base_path . '/' . $this->_block_paths[$depend]))
+                    //continue;
+                if (isset($this->_used_blocks[$depend]))
+                    continue;
+                $this->process_block_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
+                $this->_used_blocks[$depend] = true;
             }
         }
         $path = $this->_block_paths[$block_name];
@@ -273,9 +270,9 @@ class Blocks
 
             foreach($this->_blocks[$block_name]->__inline_js as $inline) {
                 $position = (!empty($inline[1]) AND isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
-                if(!isset($this->_files[$type][$parent_block]['inline'][$position]))
-                    $this->_files[$type][$parent_block]['inline'][$position] = [];
-                $this->_files[$type][$parent_block]['inline'][$position][] = $inline[0];
+                if(!isset($this->_files['.js'][$parent_block]['inline'][$position]))
+                    $this->_files['.js'][$parent_block]['inline'][$position] = [];
+                $this->_files['.js'][$parent_block]['inline'][$position][] = $inline[0];
             }
         }
 
@@ -288,7 +285,7 @@ class Blocks
     }
 
 
-    private function _build_block($block_name, $type, $files)
+    private function _build_block($block_name, $type, $files) : void
     {
         $result_file_name = $block_name.crc32(implode('', array_keys($files)));
 
@@ -332,6 +329,7 @@ class Blocks
             return;
         }
 
+        // TODO
         $out = [];
 
         foreach ($files as $name => $file) {
@@ -356,7 +354,7 @@ class Blocks
             }
         }
 
-        return implode("\n", $out);
+
     }
 
 

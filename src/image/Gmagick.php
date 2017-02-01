@@ -1,8 +1,6 @@
 <?php
 
 namespace mii\image;
-use mii\core\ErrorException;
-use mii\core\Exception;
 
 /**
  * Support for image manipulation using [Imagick](http://php.net/Imagick).

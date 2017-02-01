@@ -246,9 +246,8 @@ class Session
      * but not displayed, because sessions are written after output has
      * been sent.
      *
-     * @return  boolean
      */
-    public function close()
+    public function close() : void
     {
         if ($this->is_active()) {
 
@@ -256,46 +255,19 @@ class Session
             $this->_data['last_active'] = time();
 
             // Write and close the session
-            @session_write_close();
+            config('debug') ? session_write_close() : @session_write_close();
         }
-    }
-
-    /**
-     * Restart the session.
-     *
-     *     $success = $session->restart();
-     *
-     * @return  boolean
-     */
-    public function restart()
-    {
-        if ($this->is_active()) {
-
-            // Wipe out the current session.
-            $this->destroy();
-        }
-
-        // Fire up a new session
-        //$status = session_start();
-        $this->open();
-
-        // Use the $_SESSION global for storing data
-    //    $this->_data =& $_SESSION;
-
-        return ;//$status;
     }
 
     /**
      * Completely destroy the current session.
      *
-     *     $success = $session->destroy();
-     *
-     * @return  boolean
      */
-    public function destroy()
+    public function destroy() : void
     {
         if ($this->is_active()) {
 
+            session_unset();
             session_destroy();
             $this->_data = [];
 
@@ -304,10 +276,7 @@ class Session
         }
     }
 
-    /**
-     * @return  string
-     */
-    public function id()
+    public function id() : string
     {
         return session_id();
     }

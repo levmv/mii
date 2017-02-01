@@ -7,7 +7,6 @@ class Redis
     protected $host = '127.0.0.1';
     protected $port = 6379;
     protected $timeout = 0.0;
-    protected $value = 0;
     protected $retry = 0;
     protected $password = '';
     protected $database = false;
@@ -25,7 +24,7 @@ class Redis
             $this->$k = $v;
         }
 
-        $this->connection->connect($this->host, $this->port, $this->timeout, $this->value, $this->retry);
+        $this->connection->connect($this->host, $this->port, $this->timeout, $this->retry);
         $this->connection->auth($this->password);
 
         if ($this->database !== false)

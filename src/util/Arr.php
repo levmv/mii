@@ -23,7 +23,7 @@ class Arr
      * @param   array   $array  array to check
      * @return  boolean
      */
-    public static function isAssoc(array $array)
+    public static function is_assoc(array $array)
     {
         // Keys of the array
         $keys = array_keys($array);
@@ -128,7 +128,7 @@ class Arr
      * @param mixed   $value     Value to set
      * @param string  $delimiter Path delimiter
      */
-    public static function setPath(&$array, $path, $value, $delimiter = null)
+    public static function set_path(&$array, $path, $value, $delimiter = null) : void
     {
         if (!$delimiter) {
             // Use the default delimiter
@@ -226,14 +226,14 @@ class Arr
     {
         $found = array();
         foreach ($paths as $path) {
-            static::setPath($found, $path, static::path($array, $path, $default));
+            static::set_path($found, $path, static::path($array, $path, $default));
         }
 
         return $found;
     }
 
     /**
-     * Retrieves muliple single-key values from a list of arrays.
+     * Retrieves multiple single-key values from a list of arrays.
      *
      *     // Get all of the "id" values from a result
      *     $ids = Arr::pluck($result, 'id');
@@ -343,7 +343,7 @@ class Arr
      */
     public static function merge($array1, $array2)
     {
-        if (static::isAssoc($array2)) {
+        if (static::is_assoc($array2)) {
             foreach ($array2 as $key => $value) {
                 if (is_array($value)
                     && isset($array1[$key])
@@ -364,7 +364,7 @@ class Arr
 
         if (func_num_args() > 2) {
             foreach (array_slice(func_get_args(), 2) as $array2) {
-                if (static::isAssoc($array2)) {
+                if (static::is_assoc($array2)) {
                     foreach ($array2 as $key => $value) {
                         if (is_array($value)
                             && isset($array1[$key])
@@ -482,7 +482,7 @@ class Arr
      */
     public static function flatten($array)
     {
-        $is_assoc = static::isAssoc($array);
+        $is_assoc = static::is_assoc($array);
 
         $flat = array();
         foreach ($array as $key => $value) {

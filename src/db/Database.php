@@ -26,10 +26,6 @@ class Database
      */
     public $last_query;
 
-    /**
-     * @var string Instance name
-     */
-    protected $_instance;
 
     /**
      * @var \mysqli Raw server connection
@@ -107,16 +103,10 @@ class Database
         return $status;
     }
 
-    /**
-     * Returns the database instance name.
-     *
-     *     echo (string) $db;
-     *
-     * @return  string
-     */
+
     public function __toString()
     {
-        return $this->_instance;
+        return 'db';
     }
 
     /**
@@ -291,7 +281,7 @@ class Database
      * @return  string
      * @uses    Database::escape
      */
-    public function quote($value)
+    public function quote($value) : string
     {
         if ($value === NULL) {
             return 'NULL';
@@ -331,7 +321,7 @@ class Database
      * @param   string $value value to quote
      * @return  string
      */
-    public function escape($value)
+    public function escape($value) : string
     {
         // Make sure the database is connected
         $this->_connection or $this->connect();

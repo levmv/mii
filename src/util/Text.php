@@ -378,7 +378,7 @@ class Text {
 
     protected static function _auto_link_urls_callback2($matches)
     {
-        return HTML::anchor('http://'.$matches[0], $matches[0]);
+        return HTML::anchor('//'.$matches[0], $matches[0]);
     }
 
     /**

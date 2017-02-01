@@ -10,7 +10,7 @@ class Request extends \mii\core\Request {
     public $_params = [];
 
 
-    public function init($uri = null)
+    public function init()
     {
 
         if (isset($_SERVER['argv'])) {

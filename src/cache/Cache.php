@@ -2,7 +2,6 @@
 
 namespace mii\cache;
 
-use mii\util\Arr;
 
 abstract class Cache {
 

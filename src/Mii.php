@@ -9,9 +9,9 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '0.9.4';
+    const VERSION = '1.0.0';
 
-    const CODENAME = 'Alnair';
+    const CODENAME = 'Alpha Centauri';
 
     /**
      * @var \mii\web\App|\mii\console\App;
@@ -23,18 +23,16 @@ class Mii {
      */
     public static $container;
 
-
     public static $paths = [
         'mii' => __DIR__
     ];
 
     /**
-    * @var Array of Logger's
+    * @var array List of Logger's
     */
     public static $_loggers = [];
 
     public static function autoloader($class) {
-
 
         // go through the prefixes
         foreach (static::$paths as $prefix => $path) {
@@ -128,8 +126,9 @@ class Mii {
         static $messages;
         if ( ! isset($messages[$file]))
         {
-            if(!file_exists(path('app').'/messages/'.$file.'.php'))
-                return;
+            if(!file_exists(path('app').'/messages/'.$file.'.php')) {
+                throw new \Exception("Message file does not exist: $file");
+            }
 
             // Create a new message list
             $messages[$file] = [];
@@ -298,4 +297,8 @@ function config($key = null, $default = null) {
         return \mii\util\Arr::path(Mii::$app->_config, $key, $default);
 
     return $default;
+}
+
+function config_set(string $key, $value) {
+    \mii\util\Arr::set_path(Mii::$app->_config, $key, $value, '.');
 }

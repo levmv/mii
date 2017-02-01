@@ -77,9 +77,8 @@ class Container
      * @param array $params a list of constructor parameter values. The parameters should be provided in the order
      * they appear in the constructor declaration. If you want to skip some parameters, you should index the remaining
      * ones with the integers that represent their positions in the constructor parameter list.
-     * @param array $config a list of name-value pairs that will be used to initialize the object properties.
      * @return object an instance of the requested class.
-     * @throws InvalidConfigException if the class cannot be recognized or correspond to an invalid definition
+     * @throws \Exception if the class cannot be recognized or correspond to an invalid definition
      */
     public function get($class, $params = [])
     {
@@ -287,7 +286,6 @@ class Container
      * them into the new instance of the specified class.
      * @param string $class the class name
      * @param array $params constructor parameters
-     * @param array $config configurations to be applied to the new instance
      * @return object the newly created instance of the specified class
      */
     protected function build($class, $params)

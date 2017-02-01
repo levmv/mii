@@ -10,6 +10,7 @@ use Mii;
  * @property \mii\db\Database $db The database connection.
  * @property \mii\email\PHPMailer $mailer
  * @property \mii\auth\Auth $auth;
+ * @property ErrorHandler $error;
  */
 
 abstract class App {
@@ -20,6 +21,8 @@ abstract class App {
     public $locale; //'ru_RU.UTF-8';
 
     public $language = 'ru';
+
+    public $timezone;
 
     /**
      * @var \mii\core\Container
@@ -51,6 +54,9 @@ abstract class App {
         if($this->locale)
             setlocale(LC_ALL, $this->locale);
 
+        if($this->timezone)
+            date_default_timezone_set($this->timezone);
+
         Mii::$container = new Container();
 
         $components = $this->default_components();
@@ -81,7 +87,7 @@ abstract class App {
 
     public function default_components() {
         return [
-            'log' => ['class' => \mii\log\Logger::class],
+            'log' => ['class' => 'mii\log\Logger'],
             'user' => ['class' => 'mii\auth\User'],
             'blocks' => ['class' => 'mii\web\Blocks'],
             'auth' => ['class' => 'mii\auth\Auth'],
@@ -94,13 +100,11 @@ abstract class App {
 
     private $_components = [];
 
-    private $_definitions = [];
-
-
     public function __get($name) {
         if ($this->has($name)) {
             return $this->get($name);
         }
+        return false;
     }
 
     public function has($id, $instantiated = false) {
@@ -110,36 +114,13 @@ abstract class App {
     }
 
 
-    public function get($id, $throwException = true) {
+    public function get(string $id) {
 
         if (isset($this->_components[$id])) {
             return Mii::$container->get($id);
         }
 
         throw new \Exception("Unknown component ID: $id");
-
-        if (isset($this->_definitions[$id])) {
-            $definition = $this->_definitions[$id];
-
-            if(is_array($definition)) {
-                $class = $definition['class'];
-                unset($definition['class']);
-            } elseif(is_string($definition)) {
-                $this->_components[$id] = $definition;
-                return \Mii::$container->get($definition);
-            }
-
-            if (is_object($definition) && !$definition instanceof \Closure) {
-                return $this->_components[$id] = $definition;
-            } else {
-                $this->_components[$id] = $class;
-                return \Mii::$container->get($class, [$definition]);
-            }
-        } elseif ($throwException) {
-            throw new \Exception("Unknown component ID: $id");
-        } else {
-            return null;
-        }
     }
 
     public function __isset($name) {
@@ -149,11 +130,11 @@ abstract class App {
         return false;
     }
 
-    public function set($id, $definition) {
+    public function set($id, $definition) : void {
 
         if ($definition === null) {
             unset($this->_components[$id]);
-            // todo: remove from container
+            \Mii::$container->clear($id);
             return;
         }
         if (is_array($definition)) {
@@ -179,27 +160,6 @@ abstract class App {
         } else {
             throw new \Exception("Unexpected configuration type for the \"$id\" component: " . gettype($definition));
         }
-        return;
-
-        if ($definition === null) {
-            unset($this->_components[$id]);
-            // todo: remove from container
-            return;
-        }
-
-        if (is_array($definition)) {
-            // a configuration array
-            if (isset($definition['class'])) {
-                $this->_definitions[$id] = $definition;
-
-                \Mii::$container->share($id, $definition, [$definition]);
-            } else {
-                throw new \Exception("The configuration for the \"$id\" component must contain a \"class\" element.");
-            }
-        }
-
-        $this->_components[$id] = true;
-
     }
 
 }

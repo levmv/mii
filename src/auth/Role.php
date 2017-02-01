@@ -15,32 +15,6 @@ class Role extends ORM {
         'desc' => ''
     ];
 
-    /**
-     * Returns the ids of available roles.
-     *
-     * @param	array  $role
-     * @return	array
-     */
-    public function get_role_ids(array $role)
-    {
-        return ORM::factory('Role')
-            ->load(
-                DB::query('id')
-                    ->where('name', 'IN', $role)
-            )->as_array();
-
-    }
-
-    /**
-     * Loads a role based on name.
-     *
-     * @param	string	$role
-     * @return	Jelly_Model
-     */
-    public function get_role($role)
-    {
-        return Jelly::query('role')->where('name', '=', $role)->limit(1)->select();
-    }
 
     public function users() {
 

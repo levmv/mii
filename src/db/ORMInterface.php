@@ -5,7 +5,7 @@ namespace mii\db;
 interface ORMInterface {
 
 
-    public static function find($id = null);
+    public static function find();
 
     public static function find_by_id($id);
 

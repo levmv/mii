@@ -2,7 +2,11 @@
 
 namespace mii\console;
 
-
+/**
+ * Class App
+ * @property \mii\console\Request $request
+ * @property \mii\console\Response $response
+ */
 class App extends \mii\core\App
 {
 

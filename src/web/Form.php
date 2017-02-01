@@ -2,12 +2,10 @@
 
 namespace mii\web;
 
-
 use mii\db\ORM;
 use mii\util\HTML;
 use mii\util\Upload;
 use mii\valid\Validation;
-use mii\web\Request;
 
 class Form {
 
@@ -231,6 +229,7 @@ class Form {
             case 'file':
                 return HTML::file($name, $attributes);
         }
+        throw new FormException("Wrong field type $type");
     }
 
     public function label($field_name, $label_name, $attributes = null) {

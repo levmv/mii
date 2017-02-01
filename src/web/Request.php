@@ -2,7 +2,6 @@
 
 namespace mii\web;
 
-use Mii;
 use mii\core\InvalidRouteException;
 
 
@@ -458,7 +457,7 @@ class Request extends \mii\core\Request
      * @param   mixed $default default value to return
      * @return  string
      */
-    public function get_cookie($key, $default = null)
+    public function get_cookie(string $key, $default = null)
     {
         if (!isset($_COOKIE[$key])) {
             // The cookie does not exist
@@ -469,7 +468,7 @@ class Request extends \mii\core\Request
         $cookie = $_COOKIE[$key];
 
         // Find the position of the split between salt and contents
-        $split = strlen($this->salt($key, null));
+        $split = strlen($this->salt($key, ''));
 
         if (isset($cookie[$split]) && $cookie[$split] === '~') {
             // Separate the salt and the value
@@ -541,11 +540,11 @@ class Request extends \mii\core\Request
      * @param   string $value value of cookie
      * @return  string
      */
-    public function salt($name, $value)
+    public function salt(string $name, string $value) : string
     {
         // Require a valid salt
         if (!$this->cookie_salt) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 'A valid cookie salt is required. Please set Cookie::$salt before calling this method.' .
                 'For more information check the documentation'
             );

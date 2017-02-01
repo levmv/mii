@@ -373,16 +373,8 @@ class Validation {
 
             if ($translate)
             {
-                if (is_string($translate))
-                {
-                    // Translate the label using the specified language
-                    $label = __($label, NULL, $translate);
-                }
-                else
-                {
-                    // Translate the label
-                    $label = __($label);
-                }
+                // Translate the label
+                $label = __($label);
             }
 
             // Start the translation values list
@@ -420,16 +412,8 @@ class Validation {
 
                         if ($translate)
                         {
-                            if (is_string($translate))
-                            {
-                                // Translate the value using the specified language
-                                $value = __($value, NULL, $translate);
-                            }
-                            else
-                            {
-                                // Translate the value
-                                $value = __($value);
-                            }
+                            // Translate the value
+                            $value = __($value);
                         }
                     }
 
@@ -467,16 +451,8 @@ class Validation {
 
             if ($translate)
             {
-                if (is_string($translate))
-                {
-                    // Translate the message using specified language
-                    $message = __($message, $values, $translate);
-                }
-                else
-                {
-                    // Translate the message using the default language
-                    $message = __($message);
-                }
+                // Translate the message using the default language
+                $message = __($message, $values);
             }
             else
             {

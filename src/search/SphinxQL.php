@@ -41,7 +41,7 @@ class SphinxQL
 
     /**
      * @param string $q
-     * @return Array
+     * @return array
      */
     static function update($q, array $params = []) {
         return static::query(Database::UPDATE, $q, $params);

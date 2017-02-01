@@ -2,6 +2,9 @@
 
 namespace mii\util;
 
+use mii\web\Form;
+use mii\web\Request;
+
 class HTML {
 
     /**
@@ -57,11 +60,6 @@ class HTML {
         'track' => 1,
         'wbr' => 1,
     ];
-
-    /**
-     * @var  boolean  use strict XHTML mode?
-     */
-    public static $strict = TRUE;
 
     /**
      * @var  boolean  automatically target external URLs to a new window?
@@ -341,18 +339,13 @@ class HTML {
             {
                 // Assume non-associative keys are mirrored attributes
                 $key = $value;
-
-                if ( ! HTML::$strict)
-                {
-                    // Just use a key
-                    $value = FALSE;
-                }
+                $value = FALSE;
             }
 
             // Add the attribute key
             $compiled .= ' '.$key;
 
-            if ($value OR HTML::$strict)
+            if ($value)
             {
                 // Add the attribute value
                 $compiled .= '="'.HTML::chars($value).'"';
@@ -453,7 +446,7 @@ class HTML {
             $attributes['type'] = 'text';
         }
 
-        return '<input'.HTML::attributes($attributes).' />';
+        return '<input'.HTML::attributes($attributes).'>';
     }
 
     /**
@@ -680,7 +673,6 @@ class HTML {
                 }
             }
 
-
             // Compile the options into a single string
             $options = "\n".implode("\n", $r_options)."\n";
         }
@@ -732,7 +724,7 @@ class HTML {
 
         $attributes['type'] = 'image';
 
-        return Form::input($name, $value, $attributes);
+        return HTML::input($name, $value, $attributes);
     }
 
     /**

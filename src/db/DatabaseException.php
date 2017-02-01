@@ -3,7 +3,9 @@
 namespace mii\db;
 
 
-class DatabaseException extends \mii\core\Exception {
+use mii\core\Exception;
+
+class DatabaseException extends Exception {
 
     public function get_name() {
         return 'Database Exception';

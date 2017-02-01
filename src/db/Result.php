@@ -96,9 +96,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             return $this->_result->fetch_object();
         } elseif ($this->_as_object AND is_string($this->_as_object)) {
             // Return an object of given class name
-            
             $object = $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
-
             if($object instanceof ORM)
                 $object->__loaded = true;
 
@@ -167,7 +165,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             }
 
         }
-
+        // todo
         $array_display = false;
         $select_array = [$key];
         if (is_array($display)) {

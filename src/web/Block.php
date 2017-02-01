@@ -47,9 +47,7 @@ class Block
      *
      * @param   string $name block name
      * @param   string $file path to block php file
-     * @param   array $params array of values
      * @return  void
-     * @uses    View::set_filename
      */
     public function __construct($name, $file = null)
     {
@@ -105,7 +103,7 @@ class Block
     }
 
     /**
-     * Magic method, unsets a given variable.
+     * Magic method, unset a given variable.
      *
      *     unset($view->foo);
      *
@@ -131,6 +129,7 @@ class Block
 
         } catch (\Throwable $e) {
             ErrorHandler::convert_to_error($e);
+            return '';
         }
     }
 
@@ -269,11 +268,11 @@ class Block
      * [!!] Global variables with the same key name as local variables will be
      * overwritten by the local variable.
      *
-     * @param   string $file view filename
+     * @param   bool $force is force render needed
      * @return  string
      * @uses    Block::capture
      */
-    public function render($force = false)
+    public function render(bool $force = false) : string
     {
         if (!$this->_loaded AND !$force) {
             return '';

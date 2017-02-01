@@ -6,7 +6,6 @@ use Mii;
 use mii\core\ErrorException;
 use mii\util\Text;
 use mii\util\URL;
-use mii\web\Session;
 
 /**
  * @author      Lev Morozov, 2015

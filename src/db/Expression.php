@@ -109,10 +109,10 @@ class Expression {
      */
     public function compile(Database $db = NULL)
     {
-        if ( ! is_object($db))
+        if ($db === null)
         {
             // Get the database instance
-            $db = Database::instance($db);
+            $db = \Mii::$app->db;
         }
 
         $value = $this->value();
@@ -120,7 +120,7 @@ class Expression {
         if ( ! empty($this->_parameters))
         {
             // Quote all of the parameter values
-            $params = array_map(array($db, 'quote'), $this->_parameters);
+            $params = array_map([$db, 'quote'], $this->_parameters);
 
             // Replace the values in the expression
             $value = strtr($value, $params);

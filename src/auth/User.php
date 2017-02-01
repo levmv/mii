@@ -42,7 +42,7 @@ class User extends ORM{
     }
 
 
-    public function has_role($role_names)
+    public function has_role($role_names) : bool
     {
         $roles = $this->get_roles();
 

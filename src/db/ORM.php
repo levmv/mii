@@ -78,15 +78,16 @@ class ORM implements ORMInterface
     }
 
     /**
-     * @param mixed ID of model to load or set of ids
      * @return Query
      */
-    public static function find($id = null) {
-        if ($id)
-            return static::find_by_id($id);
-
+    public static function find()  {
         return (new static)->select_query();
     }
+
+    public static function one(int $id) {
+        return (new static)->select_query(false)->where('id', '=', $id)->one();
+    }
+
 
     /**
      * @param $id
@@ -348,11 +349,9 @@ class ORM implements ORMInterface
      * Saves the model to your database. It will do a
      * database INSERT and assign the inserted row id to $data['id'].
      *
-     * @param mixed $validation a manual validation object to combine the model properties with
-     *
      * @return int Inserted row id
      */
-    public function create($validation = NULL) {
+    public function create() {
         if ($this->on_create() === false) {
             return 0;
         }

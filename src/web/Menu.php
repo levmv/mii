@@ -130,9 +130,9 @@ class Menu
     /**
      * Return Array with menu structure
      *
-     * @return  Array  menu structure
+     * @return  array  menu structure
      */
-    public function as_array()
+    public function as_array() : array
     {
         $menu = [];
         foreach($this->items as $item) {
@@ -214,7 +214,8 @@ class Menu
                     ob_clean();
                 }
             }
-            return ErrorHandler::convert_to_error($e);
+            ErrorHandler::convert_to_error($e);
+            return '';
         }
     }
 

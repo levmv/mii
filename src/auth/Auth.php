@@ -5,7 +5,6 @@ namespace mii\auth;
 use Mii;
 use mii\db\Query;
 use mii\web\Exception;
-use mii\web\Session;
 
 /**
  * User authorization library. Handles user login and logout, as well as secure
@@ -37,7 +36,6 @@ class Auth
      * Loads Session and configuration options.
      *
      * @param   array $config Config Options
-     * @return  void
      */
     public function __construct($config = []) {
         foreach ($config as $name => $value) {
@@ -53,12 +51,12 @@ class Auth
      *
      * @return  mixed
      */
-    public function get_user($default = NULL) {
+    public function get_user() : ?User {
         if ($this->_user)
             return $this->_user;
 
         if ($this->_session->check_cookie()) {
-            $this->_user = $this->_session->get($this->session_key, $default);
+            $this->_user = $this->_session->get($this->session_key);
         }
 
         if (!$this->_user AND Mii::$app->request->get_cookie($this->token_cookie, false)) {
@@ -66,7 +64,7 @@ class Auth
             $this->auto_login();
         }
 
-        return ($this->_user AND $this->_user->loaded()) ? $this->_user : $default;
+        return $this->_user;
     }
 
     public function get_user_model() {
@@ -167,32 +165,16 @@ class Auth
 
     /**
      * Check if there is an active session. Optionally allows checking for a
-     * specific role.
-     *
-     * @param   string $role role name
-     * @return  boolean
+     * specific role. By default checking for «login» role.
      */
-    public function logged_in($role = NULL) {
+    public function logged_in(?string $role = 'login'): bool
+    {
         // Get the user from the session
         $user = $this->get_user();
 
 
-        if ($user AND is_object($user) AND $user->id AND $user->has_role('login')) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Creates a hashed hmac password from a plaintext password. This
-     * method is deprecated, [Auth::hash] should be used instead.
-     *
-     * @deprecated
-     * @param  string $password Plaintext password
-     */
-    public function hash_password($password) {
-        return $this->hash($password);
+        return $user AND is_object($user) AND $user->id AND
+            ($role !== null ? $user->has_role($role) : true);
     }
 
 
@@ -200,10 +182,10 @@ class Auth
      *
      * Uses hash_hmac for legacy projects
      *
-     * @param   string $str password to hash
+     * @param   string $password password to hash
      * @return  string
      */
-    public function hash($password) {
+    public function hash(string $password) : string {
         if ($this->hash_method === 'bcrypt') {
 
             $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->hash_cost]);
@@ -247,24 +229,6 @@ class Auth
 
 
     /**
-     * Get the stored password for a username.
-     *
-     * @param   mixed   username string, or user Jelly object
-     * @return  string
-     */
-    public function password($user) {
-        if (!is_object($user)) {
-            $username = $user;
-
-            // Load the user
-
-            $user = Jelly::query('User')->where(Jelly::factory('User')->unique_key($username), '=', $username)->limit(1)->select();
-        }
-
-        return $user->password;
-    }
-
-    /**
      * Compare password with original (hashed). Works for current (logged in) user
      *
      * @param   string $password
@@ -283,17 +247,11 @@ class Auth
     /**
      * Forces a user to be logged in, without specifying a password.
      *
-     * @param   mixed $user username string, or user Jelly object
+     * @param   User $user
      * @param   boolean $mark_session_as_forced mark the session as forced
      * @return  boolean
      */
-    public function force_login($user, $mark_session_as_forced = false) {
-        if (!is_object($user)) {
-            $user = ORM::factory('User')->find($user);
-
-            if (!$user)
-                return false;
-        }
+    public function force_login(User $user, $mark_session_as_forced = false) {
 
         if ($mark_session_as_forced === true) {
             // Mark the session as forced, to prevent users from changing account information
@@ -302,6 +260,8 @@ class Auth
 
         // Run the standard completion
         $this->complete_login($user);
+
+        return true;
     }
 
     /**
@@ -309,7 +269,7 @@ class Auth
      *
      * @return  mixed
      */
-    public function auto_login() {
+    public function auto_login() : ?User {
         if ($token = Mii::$app->request->get_cookie($this->token_cookie)) {
             // Load the token and user
             $token = Token::find()->where('token', '=', $token)->one();
@@ -347,6 +307,6 @@ class Auth
             }
         }
 
-        return false;
+        return null;
     }
 }
