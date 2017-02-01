@@ -199,8 +199,18 @@ function block($name) {
  * @return  mixed
  * @throws  \mii\cache\CacheException
  */
-function get_cached($id, $default = null) {
-    return Mii::$app->cache->get($id, $default);
+function get_cached($id, $default = null, $callback = null, $lifetime = null) {
+
+    if($callback === null)
+        return Mii::$app->cache->get($id, $default);
+
+    $cached = Mii::$app->cache->get($id, $default);
+    if($cached === $default) {
+        $cached = call_user_func($callback);
+
+        Mii::$app->cache->set($id, $cached, $lifetime);
+    }
+    return $cached;
 }
 
 /**
@@ -223,6 +233,8 @@ function get_cached($id, $default = null) {
 function cache($id, $data, $lifetime = null) {
     return Mii::$app->cache->set($id, $data, $lifetime);
 }
+
+
 
 /**
  * Delete a cache entry based on id, or delete all cache entries.
