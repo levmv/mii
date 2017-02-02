@@ -32,37 +32,13 @@ class Mii {
     */
     public static $_loggers = [];
 
-    public static function autoloader($class) {
 
-        // go through the prefixes
-        foreach (static::$paths as $prefix => $path) {
-
-            if (strpos($class, $prefix) !== 0) {
-                continue;
-            }
-
-            // strip the prefix off the class
-            $class = substr($class, strlen($prefix)+1);
-
-
-            // a partial filename
-            $part = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-
-
-            if (is_file($path . DIRECTORY_SEPARATOR . $part)) {
-                require $path . DIRECTORY_SEPARATOR . $part;
-                return;
-            }
-        }
-    }
-
-
-    public static function get_path($name) {
+    public static function get_path(string $name) : string {
         return static::$paths[$name];
     }
 
 
-    public static function set_path($name, $value = null) {
+    public static function set_path($name, $value = null) : void {
         if(is_array($name)) {
             static::$paths = array_replace(static::$paths, $name);
         } else {
@@ -71,7 +47,7 @@ class Mii {
     }
 
 
-    public static function resolve($path) {
+    public static function resolve(string $path) : string {
         if (strncmp($path, '@', 1)) {
             return $path;
         }
@@ -181,7 +157,7 @@ function redirect($url, $use_back_url = false) {
  * @param $name string
  * @return \mii\web\Block
  */
-function block($name) {
+function block(string $name) : \mii\web\Block {
     return Mii::$app->blocks->get($name);
 }
 
@@ -254,11 +230,11 @@ function clear_cache($id = null) {
 }
 
 
-function path($name) {
+function path(string $name) : string {
     return Mii::$paths[$name];
 }
 
-function e($text) {
+function e(string $text) : string {
     return mii\util\HTML::entities($text, false);
 }
 
@@ -297,11 +273,7 @@ if ( ! function_exists('__')) {
 }
 
 
-function config($key = null, $default = null) {
-
-    if($key === null)
-        return Mii::$app->_config;
-
+function config(string $key, $default = null) {
     if(array_key_exists($key, Mii::$app->_config))
         return Mii::$app->_config[$key];
 
