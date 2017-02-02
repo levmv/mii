@@ -354,7 +354,7 @@ class Validation {
         {
             // Return the error list
             return $this->_errors;
-        }
+        };
 
         // Create a new message list
         $messages = [];

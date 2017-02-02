@@ -121,13 +121,13 @@ class Mii {
         }
     }
 
-    public static function message($file, $path = NULL, $default = NULL)
+    public static function message(string $file, string $path = null, $default = null)
     {
         static $messages;
         if ( ! isset($messages[$file]))
         {
             if(!file_exists(path('app').'/messages/'.$file.'.php')) {
-                throw new \Exception("Message file does not exist: $file");
+                throw new \Exception("Message file does not exist: $file.php");
             }
 
             // Create a new message list
@@ -135,7 +135,7 @@ class Mii {
             $messages[$file] = include(path('app').'/messages/'.$file.'.php');
 
         }
-        if ($path === NULL)
+        if ($path === null)
         {
             // Return all of the messages
             return $messages[$file];

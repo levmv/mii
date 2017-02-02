@@ -14,12 +14,12 @@ class Database
 {
 
     // Query types
-    const SELECT = 1;
-    const INSERT = 2;
-    const UPDATE = 3;
-    const DELETE = 4;
+    public const SELECT = 1;
+    public const INSERT = 2;
+    public const UPDATE = 3;
+    public const DELETE = 4;
 
-    const MULTI = 5;
+    public const MULTI = 5;
 
     /**
      * @var  string  the last query executed
@@ -122,11 +122,9 @@ class Database
      * @param   string $sql SQL query
      * @param   mixed $as_object result object class string, TRUE for stdClass, FALSE for assoc array
      * @param   array $params object construct parameters for result class
-     * @return  Result   Result for SELECT queries
-     * @return  array    list (insert id, row count) for INSERT queries
-     * @return  integer  number of affected rows for all other queries
+     * @return  Result|null   Result for SELECT queries on null
      */
-    public function query($type, $sql, $as_object = false, array $params = NULL)
+    public function query(?int $type, string $sql, bool $as_object = false, array $params = NULL) : Result
     {
         // Make sure the database is connected
         $this->_connection or $this->connect();
@@ -171,20 +169,17 @@ class Database
         if ($type === Database::SELECT) {
             // Return an iterator of results
             return new Result($result, $sql, $as_object, $params);
-        } elseif ($type === Database::INSERT) {
-            // Return a list of insert id and rows created
-            return [
-                $this->_connection->insert_id,
-                $this->_connection->affected_rows,
-            ];
-        } else {
-            // Return the number of rows affected
-            return $this->_connection->affected_rows;
         }
+
+        return null;
     }
 
     public function inserted_id() {
         return $this->_connection->insert_id;
+    }
+
+    public function affected_rows() : int {
+        return $this->_connection->affected_rows;
     }
 
     /**
@@ -422,7 +417,7 @@ class Database
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
      */
-    public function quote_column($column)
+    public function quote_column($column) : string
     {
 
         if (is_array($column)) {
@@ -482,7 +477,7 @@ class Database
      *
      * @return  string
      */
-    public function table_prefix()
+    public function table_prefix() : string
     {
         return $this->_config['table_prefix'];
     }
@@ -502,7 +497,7 @@ class Database
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
      */
-    public function quote_table($table)
+    public function quote_table($table) : string
     {
         if (is_array($table)) {
             list($table, $alias) = $table;
@@ -563,7 +558,7 @@ class Database
      * @param   mixed $value any identifier
      * @return  string
      */
-    public function quote_identifier($value)
+    public function quote_identifier($value) : string
     {
 
         if (is_array($value)) {

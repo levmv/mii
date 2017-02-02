@@ -102,7 +102,7 @@ class Request extends \mii\core\Request
     public $cookie_httponly = false;
 
 
-    public function init()
+    public function init() : void
     {
 
         $this->uri($this->detect_uri());
@@ -185,7 +185,7 @@ class Request extends \mii\core\Request
      *
      * @return  Response
      */
-    public function execute($uri = null)
+    public function execute(string $uri = null) : Response
     {
         $params = \Mii::$app->router->match($this->uri($uri));
 
@@ -257,9 +257,9 @@ class Request extends \mii\core\Request
      * Sets and gets the uri from the request.
      *
      * @param   string $uri
-     * @return  mixed
+     * @return  string
      */
-    public function uri($uri = NULL)
+    public function uri($uri = NULL) : string
     {
         if ($uri === NULL) {
             return empty($this->_uri) ? '/' : $this->_uri;
@@ -269,7 +269,7 @@ class Request extends \mii\core\Request
     }
 
 
-    public function get_user_agent()
+    public function get_user_agent() : string
     {
         return $_SERVER['HTTP_USER_AGENT'];
     }

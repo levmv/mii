@@ -61,7 +61,7 @@ class ACL
      * @param string $object
      * @param string $action
      */
-    public function add_rule($access, $role, $object, $action)
+    public function add_rule($access, $role, $object, $action) : void
     {
         $roles = (array) $role;
 
@@ -78,7 +78,7 @@ class ACL
      * @param string $action
      * @return bool
      */
-    public function check($role, $object = '*', $action = '*')
+    public function check($role, $object = '*', $action = '*') : bool
     {
         if (is_array($role)) {
             foreach ($role as $r) {
@@ -100,7 +100,7 @@ class ACL
      * @param $action
      * @return bool
      */
-    protected function match($role, $object, $action)
+    protected function match($role, $object, $action) : bool
     {
         $roles = $objects = $actions = ['*'];
 

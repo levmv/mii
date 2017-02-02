@@ -82,7 +82,7 @@ class Expression {
      *
      * @return  string
      */
-    public function value()
+    public function value() : string
     {
         return (string) $this->_value;
     }
@@ -107,7 +107,7 @@ class Expression {
      * @param   mixed    Database instance or name of instance
      * @return  string
      */
-    public function compile(Database $db = NULL)
+    public function compile(Database $db = NULL) : string
     {
         if ($db === null)
         {

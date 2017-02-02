@@ -6,7 +6,7 @@ class DB
 {
 
 
-    static function raw($q, array $params = []) {
+    static function raw(string $q, array $params = []) {
         return static::query(null, $q, $params);
     }
 
@@ -14,7 +14,7 @@ class DB
      * @param string $q
      * @return Result
      */
-    static function select($q, array $params = []) {
+    static function select(string $q, array $params = []) {
         return static::query(Database::SELECT, $q, $params);
     }
 
@@ -22,9 +22,9 @@ class DB
      * @param int
      * @param string $q
      * @param array $params
-     * @return Result
+     * @return Result|int|string
      */
-    static function query($type, $q, array $params = []) {
+    static function query(?int $type, string $q, array $params = []) {
 
         $db = \Mii::$app->db;
 
@@ -36,14 +36,23 @@ class DB
             $q = strtr($q, $values);
         }
 
-        return $db->query($type, $q);
+        $result = $db->query($type, $q);
+
+        switch ($type) {
+            case Database::SELECT:
+                return $result;
+            case Database::INSERT:
+                return $db->inserted_id();
+            default:
+                return $db->affected_rows();
+        }
     }
 
     /**
      * @param string $q
-     * @return Result
+     * @return int
      */
-    static function update($q, array $params = []) {
+    static function update(string $q, array $params = []) : int {
         return static::query(Database::UPDATE, $q, $params);
     }
 
@@ -51,15 +60,15 @@ class DB
      * @param string $q
      * @return Result
      */
-    static function insert($q, array $params = []) {
+    static function insert(string $q, array $params = []) {
         return static::query(Database::INSERT, $q, $params);
     }
 
     /**
      * @param string $q
-     * @return Result
+     * @return int
      */
-    static function delete($q, array $params = []) {
+    static function delete(string $q, array $params = []) : int{
         return static::query(Database::DELETE, $q, $params);
     }
 
@@ -68,20 +77,20 @@ class DB
      * @param array $params
      * @return Expression
      */
-    static function expr($value, array $params = []) {
+    static function expr($value, array $params = []) : Expression {
         return new Expression($value, $params);
     }
 
 
-    static function begin() {
+    static function begin() : void {
         \Mii::$app->db->begin();
     }
 
-    static function commit() {
+    static function commit() : void {
         \Mii::$app->db->commit();
     }
 
-    static function rollback() {
+    static function rollback() : void {
         \Mii::$app->db->rollback();
     }
 

@@ -119,7 +119,7 @@ class Controller extends \mii\core\Controller
     }
 
 
-    protected function after($content = null)
+    protected function after($content = null) : Response
     {
         if ($this->render_layout AND $this->response->format === Response::FORMAT_HTML AND !$this->request->is_ajax()) {
 
@@ -145,7 +145,7 @@ class Controller extends \mii\core\Controller
         return $this->response;
     }
 
-    public function setup_index($block_name = false)
+    public function setup_index($block_name = false) : void
     {
         $name = ($block_name) ? $block_name : $this->index_block_name;
 
@@ -157,7 +157,7 @@ class Controller extends \mii\core\Controller
     }
 
 
-    public function setup_layout($block_name = null, $depends = null)
+    public function setup_layout($block_name = null, $depends = null) : void
     {
         if($block_name === null)
             $block_name = $this->layout_block_name;
@@ -171,7 +171,7 @@ class Controller extends \mii\core\Controller
     }
 
 
-    public function execute($params = [])
+    public function execute($params = []) : Response
     {
         $method = new \ReflectionMethod($this, $this->request->action);
 

@@ -73,14 +73,13 @@ class Container
      * only if the class is instantiated the first time.
      *
      * @param string $class the class name or an alias name (e.g. `foo`) that was previously registered via [[set()]]
-     * or [[setSingleton()]].
      * @param array $params a list of constructor parameter values. The parameters should be provided in the order
      * they appear in the constructor declaration. If you want to skip some parameters, you should index the remaining
      * ones with the integers that represent their positions in the constructor parameter list.
      * @return object an instance of the requested class.
      * @throws \Exception if the class cannot be recognized or correspond to an invalid definition
      */
-    public function get($class, $params = [])
+    public function get(string $class, array $params = [])
     {
         if (isset($this->_shared[$class])) {
             // singleton
@@ -216,7 +215,7 @@ class Container
      * @return boolean whether the container has the definition of the specified name..
      * @see set()
      */
-    public function has($class)
+    public function has($class) : bool
     {
         return isset($this->_definitions[$class]);
     }
@@ -228,7 +227,7 @@ class Container
      * @return boolean whether the given name corresponds to a registered singleton. If `$checkInstance` is true,
      * the method should return a value indicating whether the singleton has been instantiated.
      */
-    public function has_shared($class, $checkInstance = false)
+    public function has_shared(string $class, $checkInstance = false) : bool
     {
         return $checkInstance ? isset($this->_shared[$class]) : array_key_exists($class, $this->_shared);
     }
@@ -237,7 +236,7 @@ class Container
      * Removes the definition for the specified name.
      * @param string $class class name, interface name or alias name
      */
-    public function clear($class)
+    public function clear(string $class) : void
     {
         unset($this->_definitions[$class], $this->_shared[$class]);
     }
@@ -247,7 +246,6 @@ class Container
      * @param string $class class name
      * @param string|array|callable $definition the class definition
      * @return array the normalized class definition
-     * @throws InvalidConfigException if the definition is invalid.
      */
     protected function normalize_definition($class, $definition)
     {
@@ -308,7 +306,7 @@ class Container
      * @param array $params the constructor parameters
      * @return array the merged parameters
      */
-    protected function merge_params($class, $params)
+    protected function merge_params(string $class, $params)
     {
         if (empty($this->_params[$class])) {
             return $params;
@@ -328,7 +326,7 @@ class Container
      * @param string $class class name, interface name or alias name
      * @return array the dependencies of the specified class.
      */
-    protected function get_dependencies($class)
+    protected function get_dependencies(string $class) : array
     {
         if (isset($this->_reflections[$class])) {
             return [$this->_reflections[$class], $this->_dependencies[$class]];
@@ -360,9 +358,8 @@ class Container
      * @param array $dependencies the dependencies
      * @param ReflectionClass $reflection the class reflection associated with the dependencies
      * @return array the resolved dependencies
-     * @throws InvalidConfigException if a dependency cannot be resolved or if a dependency cannot be fulfilled.
      */
-    protected function resolve_dependencies($dependencies, $reflection = null)
+    protected function resolve_dependencies(array $dependencies, $reflection = null) : array
     {
         foreach ($dependencies as $index => $dependency) {
             if ($dependency instanceof Instance) {

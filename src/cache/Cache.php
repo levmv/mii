@@ -26,7 +26,6 @@ abstract class Cache {
      * Overload the __clone() method to prevent cloning
      *
      * @return  void
-     * @throws  Cache_Exception
      */
     final public function __clone()
     {
@@ -117,7 +116,7 @@ abstract class Cache {
      * @param   string  $id  id of cache to sanitize
      * @return  string
      */
-    protected function _sanitize_id($id)
+    protected function _sanitize_id($id) : string
     {
         // Change slashes and spaces to underscores
         return $this->prefix.str_replace(['/', '\\', ' '], '_', $id);
