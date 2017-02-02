@@ -27,12 +27,6 @@ class Mii {
         'mii' => __DIR__
     ];
 
-    /**
-    * @var array List of Logger's
-    */
-    public static $_loggers = [];
-
-
     public static function get_path(string $name) : string {
         return static::$paths[$name];
     }
@@ -61,13 +55,6 @@ class Mii {
         return $path;
     }
 
-    /**
-     * Sets the logger object.
-     * @param Logger $logger the logger object.
-     */
-    public static function add_logger(Logger $logger) {
-        static::$_loggers[] = $logger;
-    }
 
     public static function error($msg, $category = 'app') {
 
@@ -89,12 +76,6 @@ class Mii {
     public static function log($level, $msg, $category) {
         if(static::$app->has('log'))
             static::$app->log->log($level, $msg, $category);
-    }
-
-    public static function flush_logs() {
-        foreach(static::$_loggers as $logger) {
-            $logger->flush();
-        }
     }
 
     public static function message(string $file, string $path = null, $default = null)
