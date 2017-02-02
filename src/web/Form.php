@@ -38,7 +38,7 @@ class Form {
 
         if(is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
-            $data = $data->as_array();
+            $data = $data->to_array();
         }
 
         if(count($data)) {
@@ -60,7 +60,7 @@ class Form {
             $data = \Mii::$app->request->post();
         } elseif(is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
-            $data = $data->as_array();
+            $data = $data->to_array();
         }
 
         if(count($data)) {

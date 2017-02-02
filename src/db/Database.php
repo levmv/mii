@@ -124,7 +124,7 @@ class Database
      * @param   array $params object construct parameters for result class
      * @return  Result|null   Result for SELECT queries on null
      */
-    public function query(?int $type, string $sql, $as_object = false, array $params = NULL) : Result
+    public function query(?int $type, string $sql, $as_object = false, array $params = NULL) : ?Result
     {
         // Make sure the database is connected
         $this->_connection or $this->connect();
