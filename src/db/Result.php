@@ -61,8 +61,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     /**
      * Result destruction cleans up all open result sets.
-     *
-     * @return  void
      */
     public function __destruct()
     {
@@ -110,7 +108,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         }
     }
 
-    public function all()
+    public function all() : array
     {
         if ($this->_as_object) {
             return $this->populate($this);
@@ -120,7 +118,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function populate($rows)
+    public function populate($rows) : array
     {
 
         if ($this->_index_by === null) {
@@ -202,7 +200,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * Return all of the rows in the result as an array.
      *
      */
-    public function to_array($properties = [])
+    public function to_array(array $properties = []) : array
     {
         if(empty($properties)) {
             $results = [];
@@ -216,7 +214,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         return Arr::to_array($this, $properties);
     }
 
-    public function index_by($column) {
+    public function index_by(string $column) {
         $this->_index_by = $column;
         return $this;
     }
@@ -253,7 +251,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  integer
      */
-    public function count()
+    public function count() : int
     {
         return $this->_total_rows;
     }
@@ -324,7 +322,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  integer
      */
-    public function key()
+    public function key() : int
     {
         return $this->_current_row;
     }
@@ -376,9 +374,8 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * [!!] This method is only used internally.
      *
-     * @return  boolean
      */
-    public function valid()
+    public function valid() : bool
     {
         return $this->offsetExists($this->_current_row);
     }
