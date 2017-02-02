@@ -288,7 +288,7 @@ class Auth
 
                     // Complete the login with the found data
 
-                    $user = call_user_func([$this->user_model, 'find'], $new_token->user_id);
+                    $user = call_user_func([$this->user_model, 'one'], $new_token->user_id);
 
                     $this->complete_login($user);
 

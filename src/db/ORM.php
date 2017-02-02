@@ -114,7 +114,7 @@ class ORM implements ORMInterface
      * @return $this|null
      */
 
-    public static function one($value = null) {
+    public static function one($value = null)  {
         if(is_array($value)) {
 
             if(count($value[0]) !== 3)

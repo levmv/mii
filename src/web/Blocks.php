@@ -65,7 +65,7 @@ class Blocks
         }
     }
 
-    public function configure($config) {
+    public function configure(array $config) : void {
 
         foreach ($config as $key => $value)
             $this->$key = $value;
@@ -80,7 +80,7 @@ class Blocks
      */
 
 
-    public function get($name)
+    public function get(string $name) : Block
     {
         if (isset($this->_blocks[$name]))
             return $this->_blocks[$name];
@@ -107,7 +107,7 @@ class Blocks
     }
 
 
-    public function css() {
+    public function css() : string {
         if(!$this->_rendered)
             $this->render();
 
@@ -115,7 +115,7 @@ class Blocks
     }
 
 
-    public function js($position = null) {
+    public function js(?int $position = null) : string {
         if(!$this->_rendered)
             $this->render();
 
@@ -133,7 +133,7 @@ class Blocks
 
 
 
-    public function render()
+    public function render() : void
     {
         if (config('debug')) {
             $benchmark = \mii\util\Profiler::start('Assets', __FUNCTION__);
@@ -285,7 +285,7 @@ class Blocks
     }
 
 
-    private function _build_block($block_name, $type, $files) : void
+    private function _build_block(string $block_name, string $type, array $files) : void
     {
         $result_file_name = $block_name.crc32(implode('', array_keys($files)));
 
@@ -341,7 +341,7 @@ class Blocks
                 try {
                     copy($file, $output);
                 } catch (\Exception $e) {
-                    Mii::error('Cant copy file '.$output, 'mii');
+                    Mii::error("Cant copy file $output", 'mii');
                     $dir = dirname($output);
                     mkdir($dir, 0777, true);
                     copy($file['path'], $output);
@@ -353,12 +353,10 @@ class Blocks
                 $this->_js[Blocks::END][] = '<script src="'.$this->assets_pub_dir . '/' . $name . '?' . filemtime($output).'"></script>';
             }
         }
-
-
     }
 
 
-    private function _process_css($content)
+    private function _process_css(string $content) : string
     {
         if($this->css_process_callback) {
             try {
@@ -368,7 +366,6 @@ class Blocks
             }
             return $content;
         }
-
 
         // https://github.com/matthiasmullie/minify
 
@@ -401,7 +398,7 @@ class Blocks
     }
 
 
-    private function _build_assets_dir($blockname, $path)
+    private function _build_assets_dir(string $blockname, string $path) : void
     {
 
         $output = $this->assets_dir.'/'. $blockname ;

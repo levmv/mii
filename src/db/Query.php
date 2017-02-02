@@ -735,6 +735,36 @@ class Query
         return $this;
     }
 
+
+    public function reset() {
+        $this->db = null;
+        $this->_select =
+        $this->_from =
+        $this->_joins =
+        $this->_where =
+        $this->_group_by =
+        $this->_having =
+        $this->_order_by =
+        $this->_union = [];
+
+        $this->_distinct = false;
+
+        $this->_limit =
+        $this->_offset =
+        $this->_last_join = NULL;
+
+        $this->_parameters = [];
+
+        $this->_sql = NULL;
+
+        $this->_table = NULL;
+        $this->_columns =
+        $this->_values = [];
+
+
+        return $this;
+    }
+
     /**
      * Compile the SQL query and return it.
      *
@@ -851,36 +881,6 @@ class Query
         $this->_sql = $query;
 
         return $query;
-    }
-
-
-    public function reset() {
-        $this->db = null;
-        $this->_select =
-        $this->_from =
-        $this->_joins =
-        $this->_where =
-        $this->_group_by =
-        $this->_having =
-        $this->_order_by =
-        $this->_union = [];
-
-        $this->_distinct = false;
-
-        $this->_limit =
-        $this->_offset =
-        $this->_last_join = NULL;
-
-        $this->_parameters = [];
-
-        $this->_sql = NULL;
-
-        $this->_table = NULL;
-        $this->_columns =
-        $this->_values = [];
-
-
-        return $this;
     }
 
     /**

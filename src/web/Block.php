@@ -49,7 +49,7 @@ class Block
      * @param   string $file path to block php file
      * @return  void
      */
-    public function __construct($name, $file = null)
+    public function __construct(string $name, ?string $file = null)
     {
         $this->__name = $name;
         $this->_file = $file;
@@ -97,7 +97,7 @@ class Block
      * @param   string $key variable name
      * @return  boolean
      */
-    public function __isset($key)
+    public function __isset(string $key) : bool
     {
         return (isset($this->_data[$key]));
     }
@@ -110,18 +110,17 @@ class Block
      * @param   string $key variable name
      * @return  void
      */
-    public function __unset($key)
+    public function __unset(string $key)
     {
         unset($this->_data[$key]);
     }
 
     /**
-     * Magic method, returns the output of [View::render].
+     * Magic method, returns the output of [Block::render].
      *
      * @return  string
-     * @uses    View::render
      */
-    public function __toString()
+    public function __toString() : string
     {
         try {
 
@@ -133,7 +132,7 @@ class Block
         }
     }
 
-    public function depends(array $depends)
+    public function depends(array $depends) : Block
     {
         $this->_depends = array_unique(array_merge($this->_depends, $depends));
 
@@ -144,12 +143,12 @@ class Block
         return $this;
     }
 
-    public function name() {
+    public function name() : string {
         return $this->__name;
     }
 
 
-    public function css($link, $options = []) {
+    public function css(string $link, array $options = []) {
         if($this->__remote_css === null)
             $this->__remote_css = [];
 
@@ -158,7 +157,7 @@ class Block
         return $this;
     }
 
-    public function js($link, $options = []) {
+    public function js(string $link, array $options = []) {
         if($this->__remote_js === null)
             $this->__remote_js = [];
 
@@ -166,22 +165,17 @@ class Block
         return $this;
     }
 
-    public function inline_css($code, $options = []) {
+    public function inline_css(string $code, array $options = []) {
         $this->__inline_css[] = [$code, $options];
         return $this;
     }
 
-    public function inline_js($code, $options = []) {
+    public function inline_js(string $code, array $options = []) {
         $this->__inline_js[] = [$code, $options];
         return $this;
     }
 
-    public function get_remote() {
-        return $this->_has_remote ? $this->_remote : false;
-    }
-
-
-    public function get($key, $default = NULL)
+    public function get(string $key, $default = NULL)
     {
 
         if (array_key_exists($key, $this->_data)) {
@@ -207,7 +201,7 @@ class Block
      *     // Create the values $food and $beverage in the view
      *     $view->set(array('food' => 'bread', 'beverage' => 'water'));
      *
-     * @param   string $key variable name or an array of variables
+     * @param   mixed $key variable name or an array of variables
      * @param   mixed $value value
      * @return  $this
      */
@@ -239,23 +233,23 @@ class Block
      * @param   mixed $value referenced variable
      * @return  $this
      */
-    public function bind($key, & $value)
+    public function bind(string $key, & $value)
     {
         $this->_data[$key] =& $value;
 
         return $this;
     }
 
-    public function bind_global($key, & $value)
+    public function bind_global(string $key, & $value)
     {
         Block::$_global_data[$key] = & $value;
 
         return $this;
     }
 
-    public function loaded()
+    public function loaded() : bool
     {
-        return $this->_loaded;
+        return (bool) $this->_loaded;
     }
 
 
@@ -263,7 +257,7 @@ class Block
      * Renders the view object to a string. Global and local data are merged
      * and extracted to create local variables within the view file.
      *
-     *     $output = $view->render();
+     *     $output = $block->render();
      *
      * [!!] Global variables with the same key name as local variables will be
      * overwritten by the local variable.
@@ -304,7 +298,7 @@ class Block
      * @throws \Exception
      * @return  string
      */
-    protected function capture($block_filename)
+    protected function capture(string $block_filename) : string
     {
 
         // Import the view variables to local namespace

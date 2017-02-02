@@ -40,12 +40,19 @@ $application_cols = array('min', 'max', 'average', 'current');
 <div class="mii">
 
     <table class="profiler">
-        <?php $stats = Profiler::application() ?>
+        <?php $stats = Profiler::application(); ?>
         <tr class="final mark time">
             <th class="name" rowspan="2" scope="rowgroup"><?php echo 'Application Execution'.' ('.$stats['count'].')' ?></th>
-            <?php foreach ($application_cols as $key): ?>
-                <td class="<?php echo $key ?>"><?php echo number_format($stats[$key]['time'], 6)*1000 ?> <abbr title="seconds">ms</abbr></td>
-            <?php endforeach ?>
+            <?php try {foreach ($application_cols as $key):  ?>
+                <td class="<?php echo $key ?>">
+                    <?php if($stats[$key]['time'] > 2):?>
+                        <?php echo number_format($stats[$key]['time'], 3, ',', '') ?> <abbr title="seconds">s</abbr>
+                    <?php else:?>
+
+                    <?php echo number_format($stats[$key]['time'], 5)*1000 ?> <abbr title="seconds">ms</abbr>
+                    <?php endif;?>
+                </td>
+            <?php endforeach; } catch(\Throwable $t) { throw  $t;} ?>
         </tr>
         <tr class="final mark memory">
             <?php foreach ($application_cols as $key): ?>
