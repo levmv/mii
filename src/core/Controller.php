@@ -32,7 +32,7 @@ abstract class Controller
 
 
 
-    protected function after() : Response {}
+    protected function after() {};
 
 
 }
