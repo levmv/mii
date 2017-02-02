@@ -110,20 +110,21 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     public function all() : array
     {
-        if ($this->_as_object) {
-            return $this->populate($this);
-        } else {
-            return $this->populate($this->_result->fetch_all(MYSQLI_ASSOC));
+        if ($this->_index_by) {
+
+            return $this->_as_object
+                ? $this->index($this)
+                : $this->index($this->_result->fetch_all(MYSQLI_ASSOC));
         }
+
+        return $this->_as_object
+            ? $this->to_array()
+            : $this->_result->fetch_all(MYSQLI_ASSOC);
     }
 
 
-    public function populate($rows) : array
+    public function index($rows) : array
     {
-
-        if ($this->_index_by === null) {
-            return $rows;
-        }
         $result = [];
 
         if (!is_string($this->_index_by)) {
@@ -154,7 +155,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function to_list($key, $display, $first = NULL) {
+    public function to_list($key, $display, $first = null) : array {
         $rows = [];
 
         if ($first) {
@@ -165,33 +166,14 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             }
 
         }
-        // todo
-        $array_display = false;
-        $select_array = [$key];
-        if (is_array($display)) {
-            $array_display = true;
-            $select_array = array_merge($select_array, $display);
-        } else {
-            $select_array[] = $display;
-        }
 
-        $as_object = $this->_as_object;
-        $this->_as_object = false;
-
-        $all = $this->all();
-
-        foreach ($all as $row) {
-            if ($array_display) {
-                $display_str = [];
-                foreach ($display as $text)
-                    $display_str[] = $row[$text];
-                $rows[$row[$key]] = implode(' - ', $display_str);
-            } else {
+        foreach ($this as $row) {
+            if($this->_as_object)
+                $rows[$row->$key] = $row->$display;
+            else
                 $rows[$row[$key]] = $row[$display];
-            }
         }
 
-        $this->_as_object = $as_object;
         return $rows;
     }
 
