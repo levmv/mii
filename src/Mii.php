@@ -215,7 +215,7 @@ function path(string $name) : string {
     return Mii::$paths[$name];
 }
 
-function e(string $text) : string {
+function e(?string $text) : string {
     return mii\util\HTML::entities($text, false);
 }
 
