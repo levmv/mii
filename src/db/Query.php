@@ -1178,9 +1178,7 @@ class Query
      */
     public function compile(Database $db = NULL): string {
 
-        if ($db === null) {
-            $this->db = \Mii::$app->db;
-        }
+        $this->db = ($db === null) ? \Mii::$app->db : $db;
 
         // Compile the SQL query
         switch ($this->_type) {
@@ -1200,7 +1198,7 @@ class Query
 
         if (!empty($this->_parameters)) {
             // Quote all of the values
-            $values = array_map([$db, 'quote'], $this->_parameters);
+            $values = array_map([$this->db, 'quote'], $this->_parameters);
 
             // Replace the values in the SQL
             $sql = strtr($sql, $values);
