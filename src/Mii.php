@@ -9,7 +9,7 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '1.0.0';
+    const VERSION = '1.0.1';
 
     const CODENAME = 'Alpha Centauri';
 
