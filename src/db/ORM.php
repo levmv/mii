@@ -383,11 +383,13 @@ class ORM implements ORMInterface
 
         $this->on_change();
 
-        return $this->raw_query()
+        $this->raw_query()
             ->update($this->get_table())
             ->set(array_intersect_key($this->_data, $this->_changed))
             ->where('id', '=', $this->_data['id'])
             ->execute();
+
+        return \Mii::$app->db->affected_rows();
     }
 
     protected function on_update() {
@@ -415,7 +417,7 @@ class ORM implements ORMInterface
             $this->_data[$field_name] = $this->_serialize_value($this->_data[$field_name]);
 
         $columns = array_keys($this->_data);
-        $id = $this->raw_query()
+        $this->raw_query()
             ->insert($this->get_table())
             ->columns($columns)
             ->values($this->_data)
@@ -423,9 +425,9 @@ class ORM implements ORMInterface
 
         $this->__loaded = true;
 
-        $this->_data['id'] = $id[0];
+        $this->_data['id'] = \Mii::$app->db->inserted_id();
 
-        return $id[0];
+        return $this->_data['id'];
     }
 
     protected function on_create() {
