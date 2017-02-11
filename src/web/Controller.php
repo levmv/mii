@@ -184,7 +184,7 @@ class Controller extends \mii\core\Controller
         $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
 
         if (!$this->acl->check($roles, $this->request->controller, $this->request->action)) {
-            throw new ForbiddenHttpException('User has no rights to access :page', [':page' => $this->request->uri()]);
+            $this->on_access_denied();
         }
 
         if ($this->csrf_validation && !$this->request->validate_csrf_token()) {
@@ -196,6 +196,10 @@ class Controller extends \mii\core\Controller
         $content = call_user_func_array([$this, $this->request->action], $args);
 
         return $this->after($content);
+    }
+
+    protected function on_access_denied() {
+        throw new ForbiddenHttpException('User has no rights to access :page', [':page' => $this->request->uri()]);
     }
 
     protected function process_action_params(\ReflectionMethod $method, $params)

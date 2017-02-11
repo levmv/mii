@@ -187,25 +187,28 @@ class Request extends \mii\core\Request
      */
     public function execute(string $uri = null) : Response
     {
-        $params = \Mii::$app->router->match($this->uri($uri));
-
-        if($params === false) {
-            throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
-                ':uri' => $this->uri()]);
-        }
-
-        $this->controller = $params['controller'];
-
-        $this->action = $params['action'];
-
-        // These are accessible as public vars and can be overloaded
-        unset($params['controller'], $params['action']);
-
-        // Params cannot be changed once matched
-        $this->params = $params;
-
-
         try {
+
+            $response = new Response;
+
+            $params = \Mii::$app->router->match($this->uri($uri));
+
+            if($params === false) {
+                throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
+                    ':uri' => $this->uri()]);
+            }
+
+            $this->controller = $params['controller'];
+
+            $this->action = $params['action'];
+
+            // These are accessible as public vars and can be overloaded
+            unset($params['controller'], $params['action']);
+
+            // Params cannot be changed once matched
+            $this->params = $params;
+
+
             if (extension_loaded('newrelic')) {
                 newrelic_name_transaction($this->controller . '::' . $this->action);
             }
@@ -217,7 +220,9 @@ class Request extends \mii\core\Request
                 );
             }
 
-            $response = new Response;
+            if($this->action === 'execute') {
+                throw new \InvalidArgumentException('Action name can not be "execute"');
+            }
 
             // Create a new instance of the controller
             $controller = \Mii::$container->get($this->controller, [$this, $response]);

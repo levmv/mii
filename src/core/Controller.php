@@ -17,7 +17,6 @@ abstract class Controller
      * 3. After the controller action is called, the [Controller::after] method
      * will be called.
      *
-     * @throws  HTTP_Exception_404
      * @return  Response
      */
     public function execute($params = [])
