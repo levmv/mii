@@ -98,10 +98,21 @@ class Form {
         return array_intersect_key($this->fields, $this->_changed);
     }
 
-    public function changed($field_name = null)
+    /**
+     * Checks if the field (or any) was changed
+     *
+     * @param string|array|null $field_name
+     * @return bool
+     */
+
+    public function changed($field_name = null) : bool
     {
         if ($field_name === null) {
             return count($this->_changed) > 0;
+        }
+
+        if (is_array($field_name)) {
+            return count(array_intersect($field_name, array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);
@@ -141,7 +152,7 @@ class Form {
         return $this->validation->has_errors();
     }
 
-    public function open($action = NULL, $attributes = NULL) {
+    public function open($action = null, $attributes = null) : string {
 
         $this->check_prepared();
 
@@ -163,11 +174,11 @@ class Form {
         return HTML::close();
     }
 
-    public function input($name, $attributes = null) {
+    public function input($name, $attributes = null) : string {
         return $this->field('input', $name, $attributes);
     }
 
-    public function textarea($name, $attributes = null) {
+    public function textarea($name, $attributes = null) : string {
         return $this->field('textarea', $name, $attributes);
     }
 
@@ -183,28 +194,28 @@ class Form {
             ->set('options', $options);
     }
 
-    public function checkbox($name, $attributes = null) {
+    public function checkbox($name, $attributes = null) : string {
         return $this->field('checkbox', $name, $attributes);
     }
 
-    public function hidden($name, $attributes = null) {
+    public function hidden($name, $attributes = null) : string {
         return $this->field('hidden', $name, $attributes);
     }
 
-    public function file($name, $attributes = null) {
+    public function file($name, $attributes = null) : string {
         return $this->field('file', $name, $attributes);
     }
 
 
-    public function select($name, $attributes = null) {
+    public function select($name, $attributes = null) : string {
         return $this->field('select', $name, $attributes);
     }
 
-    public function password($name, $attributes = null) {
+    public function password($name, $attributes = null) : string {
         return $this->field('password', $name, $attributes);
     }
 
-    public function field($type, $name, $attributes = null) {
+    public function field($type, $name, $attributes = null) : string {
 
         if(!array_key_exists($name, $this->fields)) {
             $this->fields[$name] = null;
