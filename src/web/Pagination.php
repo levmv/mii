@@ -229,6 +229,24 @@ class Pagination {
         return $this->previous_page;
     }
 
+    public function links() : array {
+        $links = [];
+        if ($this->next_page()) {
+            $links[] = [
+                'rel' => 'next',
+                'href' => $this->url($this->next_page())
+            ];
+        }
+
+        if ($this->prev_page()) {
+            $links[] = [
+                'rel' => 'prev',
+                'href' => $this->url($this->prev_page())
+            ];
+        }
+        return [];
+    }
+
 
     /**
      * URL::query() replacement for Pagination use only
