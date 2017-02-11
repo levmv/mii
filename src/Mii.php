@@ -120,7 +120,7 @@ class Mii {
 }
 
 
-function url($name, $params = null) {
+function url(string $name, array $params = []) : string {
     return Mii::$app->router->url($name, $params);
 }
 

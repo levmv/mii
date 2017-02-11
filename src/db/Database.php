@@ -122,7 +122,7 @@ class Database
      * @param   string $sql SQL query
      * @param   mixed $as_object result object class string, TRUE for stdClass, FALSE for assoc array
      * @param   array $params object construct parameters for result class
-     * @return  Result|null   Result for SELECT queries on null
+     * @return  Result|null   Result for SELECT queries or null
      */
     public function query(?int $type, string $sql, $as_object = false, array $params = NULL) : ?Result
     {

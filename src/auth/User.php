@@ -79,7 +79,7 @@ class User extends ORM{
 
         $list = [];
 
-        if($this->roles_cache AND !empty($this->roles_cache )) {
+        if($this->roles_cache AND !empty($this->roles_cache)) {
             $list = explode(':',$this->roles_cache);
 
         } else {

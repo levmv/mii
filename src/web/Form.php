@@ -7,7 +7,8 @@ use mii\util\HTML;
 use mii\util\Upload;
 use mii\valid\Validation;
 
-class Form {
+class Form
+{
 
     /**
      * @var Validation
@@ -35,13 +36,12 @@ class Form {
 
         $this->validation = new Validation();
 
-
-        if(is_object($data) AND $data instanceof ORM) {
+        if (is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
             $data = $data->to_array();
         }
 
-        if(count($data)) {
+        if (count($data)) {
             foreach (array_intersect_key($data, $this->fields) as $key => $value) {
                 $this->set($key, $value);
             }
@@ -56,20 +56,20 @@ class Form {
 
     public function load($data = null) {
 
-        if($this->posted()) {
+        if ($this->posted()) {
             $data = \Mii::$app->request->post();
-        } elseif(is_object($data) AND $data instanceof ORM) {
+        } elseif (is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
             $data = $data->to_array();
         }
 
-        if(count($data)) {
+        if (count($data)) {
             foreach (array_intersect_key($data, $this->fields) as $key => $value) {
                 $this->set($key, $value);
             }
         }
 
-        if(!$this->posted() AND !$this->is_prepared) {
+        if (!$this->posted() AND !$this->is_prepared) {
             $this->prepare();
             $this->is_prepared = true;
         }
@@ -85,16 +85,15 @@ class Form {
         return [];
     }
 
-    public function fields() {
+    public function fields(): array {
         return $this->fields;
     }
 
-    public function model() {
+    public function model(): ?ORM {
         return $this->_model;
     }
 
-    public function changed_fields()
-    {
+    public function changed_fields(): array {
         return array_intersect_key($this->fields, $this->_changed);
     }
 
@@ -105,8 +104,7 @@ class Form {
      * @return bool
      */
 
-    public function changed($field_name = null) : bool
-    {
+    public function changed($field_name = null): bool {
         if ($field_name === null) {
             return count($this->_changed) > 0;
         }
@@ -118,17 +116,17 @@ class Form {
         return isset($this->_changed[$field_name]);
     }
 
-    public function get($name) {
+    public function get(string $name) {
         return $this->fields[$name];
     }
 
-    public function set($name, $value) {
+    public function set(string $name, $value) {
         $this->_changed[$name] = true;
-        return $this->fields[$name] =  $value;
+        return $this->fields[$name] = $value;
     }
 
 
-    public function validate() {
+    public function validate(): bool {
 
         $this->validation->rules($this->rules());
 
@@ -136,33 +134,33 @@ class Form {
 
         $passed = $this->validation->check();
 
-        if($passed === false) {
+        if ($passed === false) {
             $this->check_prepared();
         }
 
         return $passed;
     }
 
-    public function errors() {
+    public function errors(): array {
         return $this->validation->errors($this->message_file);
     }
 
 
-    public function has_errors() {
-        return $this->validation->has_errors();
+    public function has_errors(): bool {
+        return $this->validation->has_errors() > 0;
     }
 
-    public function open($action = null, $attributes = null) : string {
+    public function open($action = null, ?array $attributes = null): string {
 
         $this->check_prepared();
 
         $out = HTML::open($action, $attributes);
 
         $is_post = $attributes === null ||
-                   ! isset($attributes['method']) ||
-                   strcasecmp($attributes['method'], 'post') === 0;
+            !isset($attributes['method']) ||
+            strcasecmp($attributes['method'], 'post') === 0;
 
-        if(\Mii::$app->request->сsrf_validation && $is_post) {
+        if (\Mii::$app->request->сsrf_validation && $is_post) {
 
             $out .= HTML::hidden(\Mii::$app->request->csrf_token_name, \Mii::$app->request->csrf_token());
         }
@@ -170,22 +168,21 @@ class Form {
         return $out;
     }
 
-    public function close() {
+    public function close(): string {
         return HTML::close();
     }
 
-    public function input($name, $attributes = null) : string {
+    public function input($name, $attributes = null): string {
         return $this->field('input', $name, $attributes);
     }
 
-    public function textarea($name, $attributes = null) : string {
+    public function textarea($name, $attributes = null): string {
         return $this->field('textarea', $name, $attributes);
     }
 
-    public function redactor($name, $attributes = null, $block = 'redactor', $options = [])
-    {
-        if($attributes === null OR !isset($attributes['id'])) {
-            $attributes['id'] = '__form_redactor__'.$name;
+    public function redactor($name, $attributes = null, $block = 'redactor', $options = []) {
+        if ($attributes === null OR !isset($attributes['id'])) {
+            $attributes['id'] = '__form_redactor__' . $name;
         }
 
         return block($block)
@@ -194,34 +191,34 @@ class Form {
             ->set('options', $options);
     }
 
-    public function checkbox($name, $attributes = null) : string {
+    public function checkbox($name, $attributes = null): string {
         return $this->field('checkbox', $name, $attributes);
     }
 
-    public function hidden($name, $attributes = null) : string {
+    public function hidden($name, $attributes = null): string {
         return $this->field('hidden', $name, $attributes);
     }
 
-    public function file($name, $attributes = null) : string {
+    public function file($name, $attributes = null): string {
         return $this->field('file', $name, $attributes);
     }
 
 
-    public function select($name, $attributes = null) : string {
+    public function select($name, $attributes = null): string {
         return $this->field('select', $name, $attributes);
     }
 
-    public function password($name, $attributes = null) : string {
+    public function password($name, $attributes = null): string {
         return $this->field('password', $name, $attributes);
     }
 
-    public function field($type, $name, $attributes = null) : string {
+    public function field($type, $name, $attributes = null): string {
 
-        if(!array_key_exists($name, $this->fields)) {
+        if (!array_key_exists($name, $this->fields)) {
             $this->fields[$name] = null;
         }
 
-        switch($type) {
+        switch ($type) {
             case 'input':
                 return HTML::input($name, $this->fields[$name], $attributes);
             case 'hidden':
@@ -229,12 +226,12 @@ class Form {
             case 'textarea':
                 return HTML::textarea($name, $this->fields[$name], $attributes);
             case 'checkbox':
-                return HTML::checkbox($name, 1, (bool) $this->fields[$name], $attributes);
+                return HTML::checkbox($name, 1, (bool)$this->fields[$name], $attributes);
             case 'password':
                 return HTML::password($name, $this->fields[$name], $attributes);
             case 'select':
-                if($attributes AND isset($attributes['multiple']) AND $attributes['multiple'] !== false) {
-                    return HTML::select($name.'[]', $this->select_data[$name], $this->fields[$name], $attributes);
+                if ($attributes AND isset($attributes['multiple']) AND $attributes['multiple'] !== false) {
+                    return HTML::select($name . '[]', $this->select_data[$name], $this->fields[$name], $attributes);
                 }
                 return HTML::select($name, $this->select_data[$name], $this->fields[$name], $attributes);
             case 'file':
@@ -243,20 +240,20 @@ class Form {
         throw new FormException("Wrong field type $type");
     }
 
-    public function label($field_name, $label_name, $attributes = null) {
+    public function label($field_name, $label_name, $attributes = null): string {
         $this->labels[$field_name] = $label_name;
 
         return HTML::label($field_name, $label_name, $attributes);
     }
 
-    public function uploaded($name) {
+    public function uploaded($name): bool {
 
         return isset($_FILES[$name]) AND Upload::not_empty($_FILES[$name]) AND Upload::valid($_FILES[$name]);
 
     }
 
-    public function check_prepared() {
-        if(!$this->is_prepared) {
+    public function check_prepared(): void {
+        if (!$this->is_prepared) {
             $this->prepare();
             $this->is_prepared = true;
         }
@@ -266,7 +263,6 @@ class Form {
     public function prepare() {
 
     }
-
 
 
 }

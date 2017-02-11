@@ -66,7 +66,7 @@ class Router {
      * Process route list.
      * As result: $this->_routes_list and $this->_named_routes
      */
-    public function init_routes() {
+    public function init_routes() : void {
 
         // Sort groups
         if($this->order !== null && count($this->routes)) {
@@ -134,7 +134,7 @@ class Router {
         }
     }
 
-    protected function compile_route($pattern, $parameters) {
+    protected function compile_route(string $pattern, array $parameters) : string {
 
         // The URI should be considered literal except for keys and optional parts
         // Escape everything preg_quote would escape except for : ( ) { }
@@ -156,7 +156,6 @@ class Router {
             $replace[] = "'".$key."'".$value;
         }
 
-
         // Replace the default regex with the user-specified regex
         $expression = str_replace($search, $replace, $expression);
 
@@ -164,7 +163,7 @@ class Router {
     }
 
 
-    public function match($uri) {
+    public function match(string $uri) {
 
         $benchmark = false;
         if (config('debug')) {
@@ -196,7 +195,7 @@ class Router {
         return false;
     }
 
-    protected function match_route($uri, $pattern, $route) {
+    protected function match_route(string $uri, string $pattern, array $route) {
 
         if($route['is_static'] === true) {
 
@@ -232,10 +231,7 @@ class Router {
             } else {
                $callback = $route['callback'];
             }
-            $params = call_user_func($callback, [
-                $uri,
-                $matches
-            ]);
+            $params = call_user_func($callback, $matches);
 
             $params['controller'] = $route['namespace'].'\\'.$params['controller'];
 
@@ -278,7 +274,7 @@ class Router {
     }
 
 
-    public function url($name, $params = []) {
+    public function url(string $name, array $params = []) : string {
 
         if(!isset($this->_named_routes[$name])) {
             throw new InvalidRouteException('Route :name doesnt exist', [':name' => $name]);
@@ -289,11 +285,11 @@ class Router {
         if ($route['is_static'])
         {
             // This is a static route, no need to replace anything
-            return URL::site('/'.$route['pattern']);
+            return URL::site($route['pattern']);
         }
 
         // Keep track of whether an optional param was replaced
-        $provided_optional = FALSE;
+        $provided_optional = false;
 
         $uri = $route['pattern'];
 
@@ -311,7 +307,7 @@ class Router {
                 list($key, $param) = $match;
 
 
-                if (isset($params[$param]) AND $params[$param] !== Arr::get($this->_defaults, $param))
+                if ($params !== null AND isset($params[$param]) AND $params[$param] !== Arr::get($this->_defaults, $param))
                 {
                     // Future optional params should be required
                     $provided_optional = TRUE;
@@ -374,22 +370,8 @@ class Router {
         // Trim all extra slashes from the URI
         $uri = preg_replace('#//+#', '/', rtrim($uri, '/'));
 
-        /*if ($this->is_external())
-        {
-            // Need to add the host to the URI
-            $host = $this->_defaults['host'];
 
-            if (strpos($host, '://') === FALSE)
-            {
-                // Use the default defined protocol
-                $host = Route::$default_protocol.$host;
-            }
-
-            // Clean up the host and prepend it to the URI
-            $uri = rtrim($host, '/').'/'.$uri;
-        }*/
-
-        return '/'.$uri;
+        return URL::site($uri);
     }
 
 }

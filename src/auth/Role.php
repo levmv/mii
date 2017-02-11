@@ -20,7 +20,6 @@ class Role extends ORM {
 
         $class = \Mii::$app->auth->get_user_model();
 
-
         return (new $class)
             ->select_query()
             ->join('roles_users')

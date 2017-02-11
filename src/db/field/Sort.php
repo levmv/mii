@@ -4,6 +4,7 @@ namespace mii\db\field;
 
 
 use mii\db\DB;
+use mii\db\ORM;
 use mii\db\Query;
 
 class Sort {
@@ -14,15 +15,14 @@ class Sort {
     protected $_model;
     protected $_field;
 
-    public function __construct($model = NULL, $field_name = NULL)
+    public function __construct(?ORM $model = NULL, ?string $field_name = NULL)
     {
         $this->_model = $model;
         $this->_field = $field_name;
     }
 
 
-
-    public function value($parent_field = false) {
+    public function value(?string $parent_field = null) {
 
         if($parent_field) {
 

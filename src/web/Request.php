@@ -50,6 +50,8 @@ class Request extends \mii\core\Request
     protected $_uri;
 
 
+    protected $_hostname;
+
     /**
      * @var array    query parameters
      */
@@ -273,6 +275,16 @@ class Request extends \mii\core\Request
         return $this->_uri = $uri;
     }
 
+    public function get_hostname() : string {
+
+        if(!$this->_hostname) {
+            $http = $this->is_secure() ? 'https' : 'http';
+            $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+            $this->_hostname =  $http . '://' . $domain;
+        }
+
+        return $this->_hostname;
+    }
 
     public function get_user_agent() : string
     {
