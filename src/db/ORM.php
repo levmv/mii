@@ -5,7 +5,7 @@ namespace mii\db;
 
 use mii\util\Arr;
 
-class ORM implements ORMInterface
+class ORM
 {
 
     /**
@@ -32,7 +32,6 @@ class ORM implements ORMInterface
      * @var  array  Unmapped data that is still accessible
      */
     protected $_unmapped = [];
-
 
     /**
      * @var  array  Data that's changed since the object was loaded
@@ -78,7 +77,7 @@ class ORM implements ORMInterface
     /**
      * @return \mii\db\Result
      */
-    public static function all($value = null) {
+    public static function all($value = null) : Result {
         if(is_array($value)) {
             if(!is_array($value[0])) {
                 return (new static)
@@ -177,12 +176,14 @@ class ORM implements ORMInterface
      *
      * @return array
      */
-    public function fields() {
+    public function fields() : array {
         $fields = [];
+
+        $table = $this->get_table();
 
         foreach ($this->_data as $key => $value) {
             if (!in_array($key, $this->_exclude_fields)) {
-                $fields[] = $this->get_table() . '.' . $key;
+                $fields[] = "$table.$key";
             }
         }
 
@@ -194,7 +195,7 @@ class ORM implements ORMInterface
      *
      * @return string
      */
-    public function get_table() {
+    public function get_table() : string {
         return static::$table;
     }
 
@@ -260,7 +261,7 @@ class ORM implements ORMInterface
      *
      * @return String
      */
-    public function get($key) {
+    public function get(string $key) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
             return ($this->__loaded && in_array($key, $this->_serialize_fields, true))
@@ -274,7 +275,7 @@ class ORM implements ORMInterface
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
     }
 
-    public function set($values, $value = NULL) {
+    public function set($values, $value = NULL) : ORM {
 
         if (is_object($values) AND $values instanceof \mii\web\Form) {
 
@@ -324,7 +325,7 @@ class ORM implements ORMInterface
      *
      * @return array
      */
-    public function to_array(array $properties = []) {
+    public function to_array(array $properties = []) : array {
         if(empty($properties)) {
             return $this->_data;
         }
@@ -339,7 +340,7 @@ class ORM implements ORMInterface
      * @return bool
      */
 
-    public function changed($field_name = null) {
+    public function changed($field_name = null) : bool {
         // For not loaded models there is no way to detect changes.
         if (!$this->loaded())
             return true;
