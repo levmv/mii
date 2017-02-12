@@ -9,9 +9,9 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '1.0.1';
+    const VERSION = '1.1.0';
 
-    const CODENAME = 'Alpha Centauri';
+    const CODENAME = 'Proxima Centauri';
 
     /**
      * @var \mii\web\App|\mii\console\App;
