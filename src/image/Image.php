@@ -31,7 +31,7 @@ abstract class Image
     /**
      * @var  string  default driver: GD, ImageMagick, etc
      */
-    public static $default_class = '\mii\image\Gmagick';
+    public static $default_class = Gmagick::class;
 
     // Status of the driver check
     protected static $_checked = FALSE;
