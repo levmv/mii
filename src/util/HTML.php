@@ -345,7 +345,7 @@ class HTML {
             // Add the attribute key
             $compiled .= ' '.$key;
 
-            if ($value)
+            if ($value OR $value === '0')
             {
                 // Add the attribute value
                 $compiled .= '="'.HTML::chars($value).'"';
