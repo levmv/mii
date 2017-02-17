@@ -28,6 +28,9 @@ class ORM
      */
     protected $_serialize_fields = [];
 
+
+    protected $_serialize_cache = [];
+
     /**
      * @var  array  Unmapped data that is still accessible
      */
@@ -234,16 +237,20 @@ class ORM
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
             if($this->__loaded !== false) {
-                if (in_array($key, $this->_serialize_fields)) {
-                    $value = $this->_serialize_value($value);
-                }
-
                 if ($value !== $this->_data[$key]) {
                     $this->_changed[$key] = true;
                 }
+
+                if (in_array($key, $this->_serialize_fields)) {
+                    $this->_serialize_cache[$key] = $value;
+                } else {
+                    $this->_data[$key] = $value;
+                }
+
+            } else {
+                $this->_data[$key] = $value;
             }
 
-            $this->_data[$key] = $value;
         } else {
             $this->_unmapped[$key] = $value;
         }
@@ -265,7 +272,7 @@ class ORM
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
             return ($this->__loaded && in_array($key, $this->_serialize_fields, true))
-                ? $this->_unserialize_value($this->_data[$key])
+                ? $this->_unserialize_value($key)
                 : $this->_data[$key];
         }
 
@@ -288,19 +295,14 @@ class ORM
         foreach ($values as $key => $value) {
             if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-                if($this->__loaded !== false) {
-                    if (in_array($key, $this->_serialize_fields))
-                    {
-                        $value = $this->_serialize_value($value);
-                    }
-
+                if (in_array($key, $this->_serialize_fields)) {
+                    $this->_serialize_cache[$key] = $value;
+                } else {
                     if ($value !== $this->_data[$key]) {
                         $this->_changed[$key] = true;
                     }
-
+                    $this->_data[$key] = $value;
                 }
-
-                $this->_data[$key] = $value;
 
             } else {
                 $this->_unmapped[$key] = $value;
@@ -375,7 +377,11 @@ class ORM
      *
      * @return int Affected rows
      */
-    public function update($validation = NULL) {
+    public function update() {
+
+        if(!empty($this->_serialize_fields))
+            $this->_invalidate_serialize_cache();
+
         if (!(bool)$this->_changed)
             return 0;
 
@@ -408,14 +414,14 @@ class ORM
      * @return int Inserted row id
      */
     public function create() {
+        if(!empty($this->_serialize_fields))
+            $this->_invalidate_serialize_cache();
+
         if ($this->on_create() === false) {
             return 0;
         }
 
         $this->on_change();
-
-        foreach($this->_serialize_fields as $field_name)
-            $this->_data[$field_name] = $this->_serialize_value($this->_data[$field_name]);
 
         $columns = array_keys($this->_data);
         $this->raw_query()
@@ -455,15 +461,35 @@ class ORM
         throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
     }
 
+    protected function _invalidate_serialize_cache() : void {
+        foreach($this->_serialize_fields as $key) {
+
+            $value = isset($this->_serialize_cache[$key])
+                    ? $this->_serialize_value($this->_serialize_cache[$key])
+                    : $this->_serialize_value($this->_data[$key]);
+
+            if($value !== $this->_data[$key]) {
+                $this->_data[$key] = $value;
+
+                if($this->__loaded)
+                    $this->_changed[$key] = true;
+            }
+
+        }
+    }
 
     protected function _serialize_value($value)
     {
         return json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
-    protected function _unserialize_value($value)
+    protected function _unserialize_value($key)
     {
-        return json_decode($value, TRUE);
+        if(!array_key_exists($key, $this->_serialize_cache)) {
+            assert(is_string($this->_data[$key]), 'Unserialized field must have a string value');
+            $this->_serialize_cache[$key] = json_decode($this->_data[$key], TRUE);
+        }
+        return $this->_serialize_cache[$key];
     }
 
 
