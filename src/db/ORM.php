@@ -462,6 +462,9 @@ class ORM
     }
 
     protected function _invalidate_serialize_cache() : void {
+        if(empty($this->_serialize_cache))
+            return;
+
         foreach($this->_serialize_fields as $key) {
 
             $value = isset($this->_serialize_cache[$key])
