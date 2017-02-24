@@ -997,6 +997,9 @@ class Query
                     } elseif ($op === 'IN' AND is_array($value)) {
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
 
+                    } elseif ($op === 'NOT IN' AND is_array($value)) {
+                        $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
+
                     } elseif (is_string($value)) {
                         $value = $this->db->quote($value);
                     }

@@ -75,7 +75,7 @@ class Mii {
 
     public static function log($level, $msg, $category) {
         if(static::$app->has('log'))
-            static::$app->log->log($level, $msg, $category);
+            static::$app->get('log')->log($level, $msg, $category);
     }
 
     public static function message(string $file, string $path = null, $default = null)

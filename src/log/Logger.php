@@ -72,7 +72,6 @@ class Logger {
         foreach($this->targets as $name => $logger) {
 
             $ref = new \ReflectionClass($logger['class']);
-
             $this->targets[$name] = $ref->newInstanceArgs([$logger]);
         }
 
