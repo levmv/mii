@@ -103,6 +103,12 @@ class Response {
     protected $_headers = [];
 
 
+
+    public function __construct($config = []) {
+        foreach($config as $key => $value)
+            $this->$key = $value;
+    }
+
     /**
      * Adds a new header.
      * If there is already a header with the same name, it will be replaced.

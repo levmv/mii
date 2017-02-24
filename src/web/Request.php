@@ -227,9 +227,13 @@ class Request extends \mii\core\Request
             }
 
             // Create a new instance of the controller
-            $controller = \Mii::$container->get($this->controller, [$this, $response]);
 
-            \Mii::$app->controller = $controller;
+            if(\Mii::$app->container === null) {
+                $class = new \ReflectionClass($this->controller);
+                \Mii::$app->controller = $controller =  $class->newInstanceArgs([$this, $response]);
+            } else {
+                \Mii::$app->controller = $controller = \Mii::$container->get($this->controller, [$this, $response]);
+            }
 
             // Run the controller's execute() method
             $response = $controller->execute($params);
