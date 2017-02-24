@@ -46,14 +46,21 @@ class App extends \mii\core\App
     }
 
     public function default_components() {
-        return array_merge(parent::default_components(), [
+        return [
+            'log' => ['class' => 'mii\log\Logger'],
+            'user' => ['class' => 'mii\auth\User'],
+            'blocks' => ['class' => 'mii\web\Blocks'],
+            'auth' => ['class' => 'mii\auth\Auth'],
+            'db' => ['class' => 'mii\db\Database'],
+            'cache' => ['class' => 'mii\cache\Apcu'],
+            'mailer' => ['class' => 'mii\email\PHPMailer'],
             'session' => ['class' => 'mii\web\Session'],
             'router' => ['class' => 'mii\core\Router'],
             'request' => ['class' => 'mii\web\Request'],
             'response' => ['class' => 'mii\web\Response'],
             'captcha' => ['class' => 'mii\captcha\Captcha'],
             'error' => ['class' => 'mii\web\ErrorHandler']
-        ]);
+        ];
     }
 
 

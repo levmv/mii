@@ -24,9 +24,6 @@ class Query
     // SQL statement
     protected $_sql;
 
-    // Quoted query parameters
-    protected $_parameters = [];
-
     // Return results as associative arrays or objects
     protected $_as_object = false;
 
@@ -126,7 +123,6 @@ class Query
 
     public function as_array() {
         $this->_as_object = false;
-
         $this->_object_params = [];
 
         return $this;
@@ -136,11 +132,11 @@ class Query
     /**
      * Returns results as objects
      *
-     * @param   string $class classname or TRUE for stdClass
+     * @param   string $class classname
      * @param   array $params
      * @return  $this
      */
-    public function as_object($class = true, array $params = NULL) {
+    public function as_object($class, array $params = NULL) {
         $this->_as_object = $class;
 
         if ($params) {
@@ -151,46 +147,6 @@ class Query
         return $this;
     }
 
-    /**
-     * Set the value of a parameter in the query.
-     *
-     * @param   string $param parameter key to replace
-     * @param   mixed $value value to use
-     * @return  $this
-     */
-    public function param($param, $value) {
-        // Add or overload a new parameter
-        $this->_parameters[$param] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Bind a variable to a parameter in the query.
-     *
-     * @param   string $param parameter key to replace
-     * @param   mixed $var variable to use
-     * @return  $this
-     */
-    public function bind($param, & $var) {
-        // Bind a value to a variable
-        $this->_parameters[$param] =& $var;
-
-        return $this;
-    }
-
-    /**
-     * Add multiple parameters to the query.
-     *
-     * @param   array $params list of parameters
-     * @return  $this
-     */
-    public function parameters(array $params) {
-        // Merge the new parameters in
-        $this->_parameters = $params + $this->_parameters;
-
-        return $this;
-    }
 
 
     /**** SELECT ****/
@@ -205,7 +161,7 @@ class Query
     public function select(array $columns = null) {
         $this->_type = Database::SELECT;
 
-        if (!empty($columns)) {
+        if ($columns !== null) {
             // Set the initial columns
             $this->_select = $columns;
         }
@@ -220,8 +176,8 @@ class Query
      * @param   boolean $value enable or disable distinct columns
      * @return  $this
      */
-    public function distinct($value) {
-        $this->_distinct = (bool)$value;
+    public function distinct(bool $value) {
+        $this->_distinct = $value;
 
         return $this;
     }
@@ -512,68 +468,6 @@ class Query
         return $this->or_where($column, $op, $value);
     }
 
-    /**
-     * @deprecated
-     * Alias of and_where_open()
-     * @return  $this
-     */
-    public function where_open() {
-        return $this->and_where_open();
-    }
-
-    /**
-     * @deprecated
-     * Opens a new "AND WHERE (...)" grouping.
-     *
-     * @return  $this
-     */
-    public function and_where_open() {
-        $this->_where[] = ['AND' => '('];
-
-        return $this;
-    }
-
-    /**
-     * @deprecated
-     * Opens a new "OR WHERE (...)" grouping.
-     *
-     * @return  $this
-     */
-    public function or_where_open() {
-        $this->_where[] = ['OR' => '('];
-
-        return $this;
-    }
-
-    /**
-     * @deprecated
-     * Closes an open "WHERE (...)" grouping.
-     *
-     * @return  $this
-     */
-    public function where_close() {
-        return $this->and_where_close();
-    }
-
-    /**
-     * @deprecated
-     * Closes an open "WHERE (...)" grouping or removes the grouping when it is
-     * empty.
-     *
-     * @return  $this
-     */
-    public function where_close_empty() {
-        $group = end($this->_where);
-
-        if ($group AND reset($group) === '(') {
-            array_pop($this->_where);
-
-            return $this;
-        }
-
-        return $this->where_close();
-    }
-
     public function end($check_for_empty = false) {
 
         if($this->_last_condition_where) {
@@ -753,8 +647,6 @@ class Query
         $this->_offset =
         $this->_last_join = NULL;
 
-        $this->_parameters = [];
-
         $this->_sql = NULL;
 
         $this->_table = NULL;
@@ -783,8 +675,7 @@ class Query
 
             foreach ($this->_values as $group) {
                 foreach ($group as $offset => $value) {
-                    if ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
-                        // Quote the value, it is not a parameter
+                    if (is_string($value)) {
                         $group[$offset] = $this->db->quote($value);
                     }
                 }
@@ -827,8 +718,7 @@ class Query
             // Quote the column name
             $column = $this->db->quote_column($column);
 
-            if ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
-                // Quote the value, it is not a parameter
+            if (is_string($value)) {
                 $value = $this->db->quote($value);
             }
 
@@ -890,9 +780,6 @@ class Query
      */
     public function compile_select(): string {
 
-        // Callback to quote columns
-        $quote_column = [$this->db, 'quote_column'];
-
         // Callback to quote tables
         $quote_table = [$this->db, 'quote_table'];
 
@@ -929,7 +816,7 @@ class Query
 
         if (!empty($this->_from)) {
             // Set tables to select from
-            $query .= ' FROM ' . implode(', ', array_unique(array_map($quote_table, $this->_from)));
+            $query .= ' FROM ' . implode(', ', array_map($quote_table, $this->_from));
         }
 
         if (!empty($this->_joins)) {
@@ -1055,7 +942,7 @@ class Query
      * @param   array $conditions condition statements
      * @return  string
      */
-    protected function _compile_conditions(array $conditions) {
+    protected function _compile_conditions(array $conditions) : string {
         $last_condition = NULL;
 
         $sql = '';
@@ -1097,13 +984,11 @@ class Query
                         // BETWEEN always has exactly two arguments
                         list($min, $max) = $value;
 
-                        if ((is_string($min) AND array_key_exists($min, $this->_parameters)) === false) {
-                            // Quote the value, it is not a parameter
+                        if (is_string($min)) {
                             $min = $this->db->quote($min);
                         }
 
-                        if ((is_string($max) AND array_key_exists($max, $this->_parameters)) === false) {
-                            // Quote the value, it is not a parameter
+                        if (is_string($max)) {
                             $max = $this->db->quote($max);
                         }
 
@@ -1112,8 +997,7 @@ class Query
                     } elseif ($op === 'IN' AND is_array($value)) {
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
 
-                    } elseif ((is_string($value) AND array_key_exists($value, $this->_parameters)) === false) {
-                        // Quote the value, it is not a parameter
+                    } elseif (is_string($value)) {
                         $value = $this->db->quote($value);
                     }
 
@@ -1196,14 +1080,6 @@ class Query
                 break;
         }
 
-        if (!empty($this->_parameters)) {
-            // Quote all of the values
-            $values = array_map([$this->db, 'quote'], $this->_parameters);
-
-            // Replace the values in the SQL
-            $sql = strtr($sql, $values);
-        }
-
         return $sql;
     }
 
@@ -1212,23 +1088,23 @@ class Query
      * Execute the current query on the given database.
      *
      * @param   mixed $db Database instance or name of instance
-     * @param   mixed   result object classname, TRUE for stdClass or FALSE for array
+     * @param   mixed   result object classname or null for array
      * @param   array    result object constructor arguments
      * @return  Result   Result for SELECT queries
      * @return  mixed    the insert id for INSERT queries
      * @return  integer  number of affected rows for all other queries
      */
-    public function execute(Database $db = NULL, $as_object = NULL, $object_params = NULL) {
+    public function execute(Database $db = NULL, $as_object = null, $object_params = NULL) {
 
         if ($db === null) {
             $this->db = \Mii::$app->db;
         }
 
-        if ($as_object === NULL) {
+        if ($as_object === null) {
             $as_object = $this->_as_object;
         }
 
-        if ($object_params === NULL) {
+        if ($object_params === null) {
             $object_params = $this->_object_params;
         }
 
@@ -1356,6 +1232,13 @@ class Query
         return $this->execute();
     }
 
+
+    public function each() {
+        $result = $this->execute();
+
+        yield from $result->each();
+
+    }
 
     public function one() {
         $this->limit(1);

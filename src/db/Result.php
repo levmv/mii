@@ -77,30 +77,23 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             $this->_current_row = $this->_internal_row = $offset;
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
 
     public function current()
     {
         if ($this->_current_row !== $this->_internal_row AND !$this->seek($this->_current_row))
-            return NULL;
+            return null;
 
         // Increment internal row for optimization assuming rows are fetched in order
         $this->_internal_row++;
 
-        if ($this->_as_object === true) {
-            // Return an stdClass
-            return $this->_result->fetch_object();
-        } elseif ($this->_as_object AND is_string($this->_as_object)) {
+        if ($this->_as_object) {
             // Return an object of given class name
-            $object = $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
-            if($object instanceof ORM)
-                $object->__loaded = true;
-
-            return $object;
+            return $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
 
         } else {
             // Return an array of the row
@@ -154,6 +147,44 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         return $result;
     }
 
+    public function each() {
+
+        if($this->_current_row) {
+            $this->_result->data_seek(0);
+            $this->_current_row = $this->_internal_row = 0;
+        }
+
+        if ($this->_index_by) {
+
+            if (!is_string($this->_index_by)) {
+
+                foreach($this as $row) {
+                    yield call_user_func($this->_index_by, $row) => $row;
+                }
+            } elseif($this->_as_object) {
+                for($i=0;$i<$this->_total_rows;$i++) {
+                    $row = $this->_result->fetch_object();
+                    yield $row->{$this->_index_by} => $row;
+                }
+            } else {
+                for($i=0;$i<$this->_total_rows;$i++) {
+                    $row = $this->_result->fetch_object();
+                    yield $row[$this->_index_by] => $row;
+                }
+            }
+        }
+
+        if($this->_as_object) {
+            for($i=0;$i<$this->_total_rows;$i++) {
+                yield $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
+            }
+        } else {
+            for($i=0;$i<$this->_total_rows;$i++) {
+                yield $this->_result->fetch_assoc();
+            }
+        }
+    }
+
 
     public function to_list($key, $display, $first = null) : array {
         $rows = [];
@@ -166,14 +197,13 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             }
 
         }
-
-        foreach ($this as $row) {
+        foreach ($this->each() as $row) {
             if($this->_as_object)
                 $rows[$row->$key] = $row->$display;
             else
                 $rows[$row[$key]] = $row[$display];
-        }
 
+        }
         return $rows;
     }
 
@@ -187,7 +217,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         if(empty($properties)) {
             $results = [];
 
-            foreach ($this as $row) {
+            foreach ($this->each() as $row) {
                 $results[] = $row;
             }
 

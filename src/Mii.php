@@ -255,7 +255,7 @@ if ( ! function_exists('__')) {
 
 
 function config(string $key, $default = null) {
-    if(array_key_exists($key, Mii::$app->_config))
+    if(isset( Mii::$app->_config[$key]) || array_key_exists($key, Mii::$app->_config))
         return Mii::$app->_config[$key];
 
     if(strpos($key, '.') !== false)

@@ -74,14 +74,17 @@ class ORM
         return (new static)
             ->raw_query()
             ->table(static::$table)
-            ->as_object(static::class);
+            ->as_object(static::class, [[], true]);
     }
 
     /**
      * @return \mii\db\Result
      */
     public static function all($value = null) : Result {
-        if(is_array($value)) {
+        if($value !== null) {
+
+            assert(is_array($value) === true, 'Value must be an array or null');
+
             if(!is_array($value[0])) {
                 return (new static)
                     ->select_query()
@@ -89,19 +92,36 @@ class ORM
                     ->get();
             }
 
-            if(count($value[0]) !== 3)
-                throw new \InvalidArgumentException('Wrong conditions array');
+            assert(count($value[0]) === 3, "Wrong conditions array");
 
             return (new static)
                 ->select_query(true)
                 ->where($value)
                 ->get();
-
-        } elseif(is_integer($value) || is_string($value)) {
-            return (new static)->select_query(true)->where('id', '=', (int) $value)->get();
         }
 
         return static::find()->get();
+    }
+
+    public static function each($value = null) : \Generator {
+        if(is_array($value)) {
+            if(!is_array($value[0])) {
+                return (new static)
+                    ->select_query()
+                    ->where('id', 'IN', $value)
+                    ->each();
+            }
+
+            assert(count($value[0]) === 3, "Wrong conditions array");
+
+            return (new static)
+                ->select_query(true)
+                ->where($value)
+                ->each();
+
+        }
+
+        return static::find()->each();
     }
 
     /**
@@ -119,8 +139,7 @@ class ORM
     public static function one($value = null)  {
         if(is_array($value)) {
 
-            if(count($value[0]) !== 3)
-                throw new \InvalidArgumentException('Wrong conditions array');
+            assert(count($value[0]) === 3, "Wrong conditions array");
 
             return (new static)
                 ->select_query(false)
@@ -159,7 +178,7 @@ class ORM
         if($query === null)
             $query = new Query;
 
-        $query->select($this->fields())->from($this->get_table())->as_object(static::class);
+        $query->select($this->fields())->from($this->get_table())->as_object(static::class, [[], true]);
 
         if ($this->_order_by AND $with_order) {
             foreach ($this->_order_by as $column => $direction) {

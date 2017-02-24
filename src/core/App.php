@@ -107,7 +107,7 @@ abstract class App {
         return false;
     }
 
-    public function has($id, $instantiated = false) {
+    public function has(string $id, $instantiated = false) {
         return $instantiated
             ? isset($this->_components[$id]) AND \Mii::$container->has($this->_components[$id])
             : isset($this->_components[$id]);
