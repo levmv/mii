@@ -147,44 +147,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         return $result;
     }
 
-    public function each() {
-
-        if($this->_current_row) {
-            $this->_result->data_seek(0);
-            $this->_current_row = $this->_internal_row = 0;
-        }
-
-        if ($this->_index_by) {
-
-            if (!is_string($this->_index_by)) {
-
-                foreach($this as $row) {
-                    yield call_user_func($this->_index_by, $row) => $row;
-                }
-            } elseif($this->_as_object) {
-                for($i=0;$i<$this->_total_rows;$i++) {
-                    $row = $this->_result->fetch_object();
-                    yield $row->{$this->_index_by} => $row;
-                }
-            } else {
-                for($i=0;$i<$this->_total_rows;$i++) {
-                    $row = $this->_result->fetch_object();
-                    yield $row[$this->_index_by] => $row;
-                }
-            }
-        }
-
-        if($this->_as_object) {
-            for($i=0;$i<$this->_total_rows;$i++) {
-                yield $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
-            }
-        } else {
-            for($i=0;$i<$this->_total_rows;$i++) {
-                yield $this->_result->fetch_assoc();
-            }
-        }
-    }
-
 
     public function to_list($key, $display, $first = null) : array {
         $rows = [];
@@ -197,7 +159,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             }
 
         }
-        foreach ($this->each() as $row) {
+        foreach ($this as $row) {
             if($this->_as_object)
                 $rows[$row->$key] = $row->$display;
             else
@@ -217,13 +179,29 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         if(empty($properties)) {
             $results = [];
 
-            foreach ($this->each() as $row) {
+            foreach ($this as $row) {
                 $results[] = $row;
             }
 
             return $results;
         }
-        return Arr::to_array($this, $properties);
+
+        $result = [];
+        foreach ($this as $object) {
+            foreach ($properties as $key => $name) {
+                if (is_int($key)) {
+                    $result[$name] = $object->$name;
+                } else {
+                    if (is_string($name)) {
+                        $result[$key] = $object->$name;
+                    } elseif ($name instanceof \Closure) {
+                        $result[$key] = $name($object);
+                    }
+                }
+            }
+        }
+
+        return $result;
     }
 
     public function index_by(string $column) {

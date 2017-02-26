@@ -49,6 +49,8 @@ class Query
     // SELECT ...
     protected $_select = [];
 
+    protected $_quoted_select = [];
+
     // DISTINCT
     protected $_distinct = false;
 
@@ -158,12 +160,18 @@ class Query
      * @param   array $columns column list
      * @return  Query
      */
-    public function select(array $columns = null) {
+    public function select(array $columns = null, bool $already_quoted = false) {
         $this->_type = Database::SELECT;
 
         if ($columns !== null) {
             // Set the initial columns
-            $this->_select = $columns;
+            if($already_quoted) {
+                $this->_quoted_select = $columns;
+                $this->_select = [];
+            } else {
+                $this->_select = $columns;
+                $this->_quoted_select = [];
+            }
         }
 
         return $this;
@@ -791,12 +799,12 @@ class Query
             $query .= 'DISTINCT ';
         }
 
-        if (empty($this->_select)) {
+        if (empty($this->_select) AND empty($this->_quoted_select)) {
             // Select all columns
             $query .= '*';
         } else {
 
-            $columns = [];
+            $columns = $this->_quoted_select;
 
             foreach ($this->_select as $column) {
                 if (is_array($column)) {
@@ -1235,13 +1243,6 @@ class Query
         return $this->execute();
     }
 
-
-    public function each() {
-        $result = $this->execute();
-
-        yield from $result->each();
-
-    }
 
     public function one() {
         $this->limit(1);

@@ -54,10 +54,15 @@ class Router {
     public function init() {
 
         if($this->cache) {
+
             list($this->_routes_list, $this->_named_routes) = get_cached($this->cache_id, [null, null]);
-        }
-        if($this->_routes_list === null) {
+            if($this->_routes_list === null)
+                $this->init_routes();
+
+        } else {
+
             $this->init_routes();
+
         }
     }
 
@@ -72,6 +77,7 @@ class Router {
         if($this->order !== null && count($this->routes)) {
             $this->routes = array_merge(array_flip($this->order), $this->routes);
         }
+
         foreach($this->routes as $namespace => $group) {
 
             foreach($group as $pattern => $value) {
@@ -87,7 +93,7 @@ class Router {
                 $params = [];
                 $name = false;
 
-                $result['is_static'] = ((strpos($pattern, '{') === false AND strpos($pattern, '(') === false));
+                $is_static = ((strpos($pattern, '{') === false AND strpos($pattern, '(') === false));
 
                 if(is_array($value)) {
                     $result['path'] = $value['path'];
@@ -98,7 +104,7 @@ class Router {
                     if(isset($value['callback'])) {
                         $result['callback'] = ($value['callback'] instanceof \Closure) ? true : $value['callback'];
                     }
-                    if(!$result['is_static']) {
+                    if(!$is_static) {
                         $params = isset($value['params'])
                             ? array_merge($this->default_parameters, $value['params'])
                             : $this->default_parameters;
@@ -109,7 +115,7 @@ class Router {
 
                 } elseif(is_string($value)) {
                     $result['path'] = $value;
-                    if(!$result['is_static']) {
+                    if(!$is_static) {
                         $params = $this->default_parameters;
                     }
                 } elseif($value instanceof \Closure) {
@@ -118,7 +124,9 @@ class Router {
 
                 $key = $result['pattern'] = (string) $pattern; // php automatically converts array key like "555" to integer :(
 
-                if(!$result['is_static']) {
+                if($is_static) {
+                    $result['is_static'] = true;
+                } else {
                     $key = $this->compile_route($pattern, $params);
                 }
 

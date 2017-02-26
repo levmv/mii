@@ -26,7 +26,7 @@ class ORM
     /**
      * @var array Auto-serialize and unserialize columns on get/set
      */
-    protected $_serialize_fields = [];
+    protected $_serialize_fields;
 
 
     protected $_serialize_cache = [];
@@ -80,7 +80,7 @@ class ORM
     /**
      * @return \mii\db\Result
      */
-    public static function all($value = null) : Result {
+    public static function all($value = null) : array {
         if($value !== null) {
 
             assert(is_array($value) === true, 'Value must be an array or null');
@@ -89,7 +89,7 @@ class ORM
                 return (new static)
                     ->select_query()
                     ->where('id', 'IN', $value)
-                    ->get();
+                    ->all();
             }
 
             assert(count($value[0]) === 3, "Wrong conditions array");
@@ -97,32 +97,12 @@ class ORM
             return (new static)
                 ->select_query(true)
                 ->where($value)
-                ->get();
+                ->all();
         }
 
-        return static::find()->get();
+        return static::find()->all();
     }
 
-    public static function each($value = null) : \Generator {
-        if(is_array($value)) {
-            if(!is_array($value[0])) {
-                return (new static)
-                    ->select_query()
-                    ->where('id', 'IN', $value)
-                    ->each();
-            }
-
-            assert(count($value[0]) === 3, "Wrong conditions array");
-
-            return (new static)
-                ->select_query(true)
-                ->where($value)
-                ->each();
-
-        }
-
-        return static::find()->each();
-    }
 
     /**
      * @return Query
@@ -155,21 +135,6 @@ class ORM
 
 
     /**
-     * @deprecated
-     * @param $id
-     * @return $this
-     */
-    public static function find_by_id($id) {
-        $class = new static();
-
-        if (is_array($id)) {
-            return $class->select_query()->where('id', 'IN', DB::expr('(' . implode(',', $id) . ')'))->get();
-        } else {
-            return $class->select_query(false)->where('id', '=', $id)->one();
-        }
-    }
-
-    /**
      * @param bool $with_order
      * @return Query
      */
@@ -178,7 +143,7 @@ class ORM
         if($query === null)
             $query = new Query;
 
-        $query->select($this->fields())->from($this->get_table())->as_object(static::class, [[], true]);
+        $query->select($this->fields(), true)->from($this->get_table())->as_object(static::class, [[], true]);
 
         if ($this->_order_by AND $with_order) {
             foreach ($this->_order_by as $column => $direction) {
@@ -205,7 +170,7 @@ class ORM
 
         foreach ($this->_data as $key => $value) {
             if (!in_array($key, $this->_exclude_fields)) {
-                $fields[] = "$table.$key";
+                $fields[] = "`$table`.`$key`"; // TODO: support for table prefixes
             }
         }
 
@@ -248,9 +213,6 @@ class ORM
         return $query->get()->to_list($key, $display, $first);
     }
 
-    public function __get($key) {
-        return $this->get($key);
-    }
 
     public function __set($key, $value) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
@@ -260,7 +222,7 @@ class ORM
                     $this->_changed[$key] = true;
                 }
 
-                if (in_array($key, $this->_serialize_fields)) {
+                if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
                     $this->_serialize_cache[$key] = $value;
                 } else {
                     $this->_data[$key] = $value;
@@ -276,21 +238,12 @@ class ORM
     }
 
     /**
-     * Retrieve items from the $data array.
-     *
-     *    <h1><?=$blog_entry->title?></h1>
-     *    <p><?=$blog_entry->content?></p>
-     *
-     * @param string $key the field name to look for
-     *
-     * @throws ORMException
-     *
-     * @return String
+     * MUST BE EQUAL TO ::GET()
      */
-    public function get(string $key) {
+    public function __get($key) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-            return ($this->__loaded && in_array($key, $this->_serialize_fields, true))
+            return ($this->_serialize_fields !== null && $this->__loaded && in_array($key, $this->_serialize_fields, true))
                 ? $this->_unserialize_value($key)
                 : $this->_data[$key];
         }
@@ -300,6 +253,21 @@ class ORM
 
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
     }
+
+    public function get(string $key) {
+        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+
+            return ($this->_serialize_fields !== null && $this->__loaded && in_array($key, $this->_serialize_fields, true))
+                ? $this->_unserialize_value($key)
+                : $this->_data[$key];
+        }
+
+        if (array_key_exists($key, $this->_unmapped))
+            return $this->_unmapped[$key];
+
+        throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
+    }
+
 
     public function set($values, $value = NULL) : ORM {
 
@@ -314,7 +282,7 @@ class ORM
         foreach ($values as $key => $value) {
             if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-                if (in_array($key, $this->_serialize_fields)) {
+                if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
                     $this->_serialize_cache[$key] = $value;
                 } else {
                     if ($value !== $this->_data[$key]) {
@@ -398,7 +366,7 @@ class ORM
      */
     public function update() {
 
-        if(!empty($this->_serialize_fields))
+        if($this->_serialize_fields !== null && !empty($this->_serialize_fields))
             $this->_invalidate_serialize_cache();
 
         if (!(bool)$this->_changed)
@@ -433,7 +401,7 @@ class ORM
      * @return int Inserted row id
      */
     public function create() {
-        if(!empty($this->_serialize_fields))
+        if($this->_serialize_fields !== null && !empty($this->_serialize_fields))
             $this->_invalidate_serialize_cache();
 
         if ($this->on_create() === false) {
@@ -481,7 +449,7 @@ class ORM
     }
 
     protected function _invalidate_serialize_cache() : void {
-        if(empty($this->_serialize_cache))
+        if($this->_serialize_fields === null || empty($this->_serialize_cache))
             return;
 
         foreach($this->_serialize_fields as $key) {
