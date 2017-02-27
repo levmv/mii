@@ -4,7 +4,7 @@ namespace mii\console;
 
 use mii\util\Console;
 
-class Controller extends \mii\core\Controller
+class Controller
 {
 
     public $name;
