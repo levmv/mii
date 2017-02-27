@@ -5,7 +5,7 @@ namespace mii\web;
 use Mii;
 use mii\core\ACL;
 
-class Controller extends \mii\core\Controller
+class Controller
 {
 
     /**
@@ -33,11 +33,6 @@ class Controller extends \mii\core\Controller
     public $index_block;
 
     public $index_block_name = 'index';
-
-    /**
-     * @var Block
-     */
-    public $head = false;
 
     /**
      * @var Block
@@ -171,7 +166,7 @@ class Controller extends \mii\core\Controller
     }
 
 
-    public function execute($params = []) : Response
+    public function execute() : Response
     {
         $method = new \ReflectionMethod($this, $this->request->action);
 
@@ -179,6 +174,11 @@ class Controller extends \mii\core\Controller
 
         $this->access_rules();
 
+        if (\Mii::$app->session->check_cookie()) {
+
+            $this->user = Mii::$app->user = Mii::$app->auth->get_user();
+
+        }
         $this->user = Mii::$app->user = Mii::$app->auth->get_user();
 
         $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
@@ -193,9 +193,7 @@ class Controller extends \mii\core\Controller
 
         $this->before();
 
-        $content = call_user_func_array([$this, $this->request->action], $args);
-
-        return $this->after($content);
+        return $this->after(call_user_func_array([$this, $this->request->action], $args));
     }
 
     protected function on_access_denied() {

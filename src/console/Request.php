@@ -3,11 +3,30 @@
 namespace mii\console;
 
 
-class Request extends \mii\core\Request {
+class Request  {
     /**
      * @var  array   parameters from the route
      */
     public $_params = [];
+
+
+    /**
+     * @var  string  controller to be executed
+     */
+    public $controller;
+
+    /**
+     * @var  string  action to be executed in the controller
+     */
+    public $action;
+
+
+    public function __construct($config = []) {
+        foreach($config as $key => $value)
+            $this->$key = $value;
+
+        $this->init();
+    }
 
 
     public function init()

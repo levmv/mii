@@ -31,7 +31,7 @@ abstract class App {
 
     public $controller;
 
-    public $_config = [];
+    public $_config;
 
     public $base_url = '/';
 
@@ -111,7 +111,6 @@ abstract class App {
 
 
     private $_components = [];
-    private $_definitions = [];
     private $_instances = [];
 
 

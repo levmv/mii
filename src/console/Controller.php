@@ -26,6 +26,16 @@ class Controller extends \mii\core\Controller
     }
 
 
+    protected function before()
+    {
+        return true;
+    }
+
+
+
+    protected function after() {}
+
+
     /**
      * Executes the given action and calls the [Controller::before] and [Controller::after] methods.
      *
