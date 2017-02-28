@@ -134,6 +134,20 @@ class Request
         if ($uri !== '' && $uri[0] !== '/') {
             $uri = preg_replace('/^(http|https):\/\/[^\/]+/i', '', $uri);
         }
+
+        if ($request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) {
+            // Valid URL path found, set it.
+            $uri = $request_uri;
+        }
+        // Decode the request URI
+        $uri = rawurldecode($uri);
+
+        $base_url = parse_url(\Mii::$app->base_url, PHP_URL_PATH);
+        if (strpos($uri, $base_url) === 0) {
+            // Remove the base URL from the URI
+            $uri = (string)substr($uri, strlen($base_url));
+        }
+
         $this->uri($uri);
 
         if (isset($_SERVER['REQUEST_METHOD'])) {
