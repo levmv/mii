@@ -156,18 +156,22 @@ function block(string $name) : \mii\web\Block {
  * @return  mixed
  * @throws  \mii\cache\CacheException
  */
-function get_cached($id, $default = null, $callback = null, $lifetime = null) {
+function get_cached($id, $default = null, $lifetime = null) {
 
-    if($callback === null)
-        return Mii::$app->cache->get($id, $default);
 
-    $cached = Mii::$app->cache->get($id, $default);
-    if($cached === $default) {
-        $cached = call_user_func($callback);
+    if(is_object($default) && $default instanceof \Closure) {
 
-        Mii::$app->cache->set($id, $cached, $lifetime);
+        $cached = Mii::$app->cache->get($id);
+        if($cached === null) {
+            $cached = call_user_func($default);
+
+            Mii::$app->cache->set($id, $cached, $lifetime);
+        }
+        return $cached;
     }
-    return $cached;
+
+    return Mii::$app->cache->get($id, $default);
+
 }
 
 /**
