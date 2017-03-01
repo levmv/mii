@@ -9,10 +9,6 @@ class Migration {
 
     public function down() { return false; }
 
-    public function init() {
-
-
-
-    }
+    public function init() {}
 
 }

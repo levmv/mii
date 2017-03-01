@@ -5,7 +5,7 @@ namespace mii\db;
 
 use mii\util\Arr;
 
-class ORM implements ORMInterface
+class ORM
 {
 
     /**
@@ -26,13 +26,15 @@ class ORM implements ORMInterface
     /**
      * @var array Auto-serialize and unserialize columns on get/set
      */
-    protected $_serialize_fields = [];
+    protected $_serialize_fields;
+
+
+    protected $_serialize_cache = [];
 
     /**
      * @var  array  Unmapped data that is still accessible
      */
     protected $_unmapped = [];
-
 
     /**
      * @var  array  Data that's changed since the object was loaded
@@ -72,35 +74,35 @@ class ORM implements ORMInterface
         return (new static)
             ->raw_query()
             ->table(static::$table)
-            ->as_object(static::class);
+            ->as_object(static::class, [[], true]);
     }
 
     /**
      * @return \mii\db\Result
      */
-    public static function all($value = null) {
-        if(is_array($value)) {
+    public static function all($value = null) : array {
+        if($value !== null) {
+
+            assert(is_array($value) === true, 'Value must be an array or null');
+
             if(!is_array($value[0])) {
                 return (new static)
                     ->select_query()
                     ->where('id', 'IN', $value)
-                    ->get();
+                    ->all();
             }
 
-            if(count($value[0]) !== 3)
-                throw new \InvalidArgumentException('Wrong conditions array');
+            assert(count($value[0]) === 3, "Wrong conditions array");
 
             return (new static)
                 ->select_query(true)
                 ->where($value)
-                ->get();
-
-        } elseif(is_integer($value) || is_string($value)) {
-            return (new static)->select_query(true)->where('id', '=', (int) $value)->get();
+                ->all();
         }
 
-        return static::find()->get();
+        return static::find()->all();
     }
+
 
     /**
      * @return Query
@@ -117,8 +119,7 @@ class ORM implements ORMInterface
     public static function one($value = null)  {
         if(is_array($value)) {
 
-            if(count($value[0]) !== 3)
-                throw new \InvalidArgumentException('Wrong conditions array');
+            assert(count($value[0]) === 3, "Wrong conditions array");
 
             return (new static)
                 ->select_query(false)
@@ -134,21 +135,6 @@ class ORM implements ORMInterface
 
 
     /**
-     * @deprecated
-     * @param $id
-     * @return $this
-     */
-    public static function find_by_id($id) {
-        $class = new static();
-
-        if (is_array($id)) {
-            return $class->select_query()->where('id', 'IN', DB::expr('(' . implode(',', $id) . ')'))->get();
-        } else {
-            return $class->select_query(false)->where('id', '=', $id)->one();
-        }
-    }
-
-    /**
      * @param bool $with_order
      * @return Query
      */
@@ -157,7 +143,7 @@ class ORM implements ORMInterface
         if($query === null)
             $query = new Query;
 
-        $query->select($this->fields())->from($this->get_table())->as_object(static::class);
+        $query->select($this->fields(), true)->from($this->get_table())->as_object(static::class, [[], true]);
 
         if ($this->_order_by AND $with_order) {
             foreach ($this->_order_by as $column => $direction) {
@@ -177,12 +163,14 @@ class ORM implements ORMInterface
      *
      * @return array
      */
-    public function fields() {
+    public function fields() : array {
         $fields = [];
+
+        $table = $this->get_table();
 
         foreach ($this->_data as $key => $value) {
             if (!in_array($key, $this->_exclude_fields)) {
-                $fields[] = $this->get_table() . '.' . $key;
+                $fields[] = "`$table`.`$key`"; // TODO: support for table prefixes
             }
         }
 
@@ -194,7 +182,7 @@ class ORM implements ORMInterface
      *
      * @return string
      */
-    public function get_table() {
+    public function get_table() : string {
         return static::$table;
     }
 
@@ -225,46 +213,38 @@ class ORM implements ORMInterface
         return $query->get()->to_list($key, $display, $first);
     }
 
-    public function __get($key) {
-        return $this->get($key);
-    }
 
     public function __set($key, $value) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
             if($this->__loaded !== false) {
-                if (in_array($key, $this->_serialize_fields)) {
-                    $value = $this->_serialize_value($value);
-                }
-
                 if ($value !== $this->_data[$key]) {
                     $this->_changed[$key] = true;
                 }
+
+                if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
+                    $this->_serialize_cache[$key] = $value;
+                } else {
+                    $this->_data[$key] = $value;
+                }
+
+            } else {
+                $this->_data[$key] = $value;
             }
 
-            $this->_data[$key] = $value;
         } else {
             $this->_unmapped[$key] = $value;
         }
     }
 
     /**
-     * Retrieve items from the $data array.
-     *
-     *    <h1><?=$blog_entry->title?></h1>
-     *    <p><?=$blog_entry->content?></p>
-     *
-     * @param string $key the field name to look for
-     *
-     * @throws ORMException
-     *
-     * @return String
+     * MUST BE EQUAL TO ::GET()
      */
-    public function get($key) {
+    public function __get($key) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-            return ($this->__loaded && in_array($key, $this->_serialize_fields, true))
-                ? $this->_unserialize_value($this->_data[$key])
+            return ($this->_serialize_fields !== null && $this->__loaded && in_array($key, $this->_serialize_fields, true))
+                ? $this->_unserialize_value($key)
                 : $this->_data[$key];
         }
 
@@ -274,7 +254,22 @@ class ORM implements ORMInterface
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
     }
 
-    public function set($values, $value = NULL) {
+    public function get(string $key) {
+        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+
+            return ($this->_serialize_fields !== null && $this->__loaded && in_array($key, $this->_serialize_fields, true))
+                ? $this->_unserialize_value($key)
+                : $this->_data[$key];
+        }
+
+        if (array_key_exists($key, $this->_unmapped))
+            return $this->_unmapped[$key];
+
+        throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
+    }
+
+
+    public function set($values, $value = NULL) : ORM {
 
         if (is_object($values) AND $values instanceof \mii\web\Form) {
 
@@ -287,19 +282,14 @@ class ORM implements ORMInterface
         foreach ($values as $key => $value) {
             if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-                if($this->__loaded !== false) {
-                    if (in_array($key, $this->_serialize_fields))
-                    {
-                        $value = $this->_serialize_value($value);
-                    }
-
+                if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
+                    $this->_serialize_cache[$key] = $value;
+                } else {
                     if ($value !== $this->_data[$key]) {
                         $this->_changed[$key] = true;
                     }
-
+                    $this->_data[$key] = $value;
                 }
-
-                $this->_data[$key] = $value;
 
             } else {
                 $this->_unmapped[$key] = $value;
@@ -324,7 +314,7 @@ class ORM implements ORMInterface
      *
      * @return array
      */
-    public function to_array(array $properties = []) {
+    public function to_array(array $properties = []) : array {
         if(empty($properties)) {
             return $this->_data;
         }
@@ -339,7 +329,7 @@ class ORM implements ORMInterface
      * @return bool
      */
 
-    public function changed($field_name = null) {
+    public function changed($field_name = null) : bool {
         // For not loaded models there is no way to detect changes.
         if (!$this->loaded())
             return true;
@@ -374,7 +364,11 @@ class ORM implements ORMInterface
      *
      * @return int Affected rows
      */
-    public function update($validation = NULL) {
+    public function update() {
+
+        if($this->_serialize_fields !== null && !empty($this->_serialize_fields))
+            $this->_invalidate_serialize_cache();
+
         if (!(bool)$this->_changed)
             return 0;
 
@@ -407,14 +401,14 @@ class ORM implements ORMInterface
      * @return int Inserted row id
      */
     public function create() {
+        if($this->_serialize_fields !== null && !empty($this->_serialize_fields))
+            $this->_invalidate_serialize_cache();
+
         if ($this->on_create() === false) {
             return 0;
         }
 
         $this->on_change();
-
-        foreach($this->_serialize_fields as $field_name)
-            $this->_data[$field_name] = $this->_serialize_value($this->_data[$field_name]);
 
         $columns = array_keys($this->_data);
         $this->raw_query()
@@ -454,15 +448,38 @@ class ORM implements ORMInterface
         throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
     }
 
+    protected function _invalidate_serialize_cache() : void {
+        if($this->_serialize_fields === null || empty($this->_serialize_cache))
+            return;
+
+        foreach($this->_serialize_fields as $key) {
+
+            $value = isset($this->_serialize_cache[$key])
+                    ? $this->_serialize_value($this->_serialize_cache[$key])
+                    : $this->_serialize_value($this->_data[$key]);
+
+            if($value !== $this->_data[$key]) {
+                $this->_data[$key] = $value;
+
+                if($this->__loaded)
+                    $this->_changed[$key] = true;
+            }
+
+        }
+    }
 
     protected function _serialize_value($value)
     {
         return json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
-    protected function _unserialize_value($value)
+    protected function _unserialize_value($key)
     {
-        return json_decode($value, TRUE);
+        if(!array_key_exists($key, $this->_serialize_cache)) {
+            assert(is_string($this->_data[$key]), 'Unserialized field must have a string value');
+            $this->_serialize_cache[$key] = json_decode($this->_data[$key], TRUE);
+        }
+        return $this->_serialize_cache[$key];
     }
 
 

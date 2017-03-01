@@ -77,30 +77,23 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             $this->_current_row = $this->_internal_row = $offset;
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
 
     public function current()
     {
         if ($this->_current_row !== $this->_internal_row AND !$this->seek($this->_current_row))
-            return NULL;
+            return null;
 
         // Increment internal row for optimization assuming rows are fetched in order
         $this->_internal_row++;
 
-        if ($this->_as_object === true) {
-            // Return an stdClass
-            return $this->_result->fetch_object();
-        } elseif ($this->_as_object AND is_string($this->_as_object)) {
+        if ($this->_as_object) {
             // Return an object of given class name
-            $object = $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
-            if($object instanceof ORM)
-                $object->__loaded = true;
-
-            return $object;
+            return $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
 
         } else {
             // Return an array of the row
@@ -166,14 +159,13 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             }
 
         }
-
         foreach ($this as $row) {
             if($this->_as_object)
                 $rows[$row->$key] = $row->$display;
             else
                 $rows[$row[$key]] = $row[$display];
-        }
 
+        }
         return $rows;
     }
 
@@ -193,7 +185,23 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
             return $results;
         }
-        return Arr::to_array($this, $properties);
+
+        $result = [];
+        foreach ($this as $object) {
+            foreach ($properties as $key => $name) {
+                if (is_int($key)) {
+                    $result[$name] = $object->$name;
+                } else {
+                    if (is_string($name)) {
+                        $result[$key] = $object->$name;
+                    } elseif ($name instanceof \Closure) {
+                        $result[$key] = $name($object);
+                    }
+                }
+            }
+        }
+
+        return $result;
     }
 
     public function index_by(string $column) {

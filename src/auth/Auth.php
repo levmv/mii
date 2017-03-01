@@ -80,6 +80,7 @@ class Auth
      * @return  boolean
      */
     public function login($username, $password, $remember = true) {
+
         if (empty($password))
             return false;
 
@@ -89,6 +90,7 @@ class Auth
 
         if (!$user)
             return false;
+
 
         if ($user->id AND $user->has_role('login') AND $this->verify_password($password, $user->password)) {
             if ($remember === true) {

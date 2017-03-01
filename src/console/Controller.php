@@ -4,7 +4,7 @@ namespace mii\console;
 
 use mii\util\Console;
 
-class Controller extends \mii\core\Controller
+class Controller
 {
 
     public $name;
@@ -24,6 +24,16 @@ class Controller extends \mii\core\Controller
         $this->response = $response;
 
     }
+
+
+    protected function before()
+    {
+        return true;
+    }
+
+
+
+    protected function after() {}
 
 
     /**

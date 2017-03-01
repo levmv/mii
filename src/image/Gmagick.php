@@ -215,6 +215,8 @@ class Gmagick extends Image {
 
     protected function _do_watermark(Image $image, $offset_x, $offset_y, $opacity)
     {
+        $image->get_raw_image()->setImageBackgroundColor(new \GmagickPixel('transparent'));
+        $image->get_raw_image()->setimagecolorspace(\Gmagick::COLORSPACE_TRANSPARENT);
 
         return $this->im->compositeimage(
             $image->get_raw_image(),

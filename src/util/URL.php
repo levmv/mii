@@ -15,72 +15,33 @@ class URL {
      *     // Absolute URL path with no host or protocol
      *     echo URL::base();
      *
-     *     // Absolute URL path with host, https protocol and index.php if set
-     *     echo URL::base('https', TRUE);
+     *     // Absolute URL path with host, https protocol
+     *     echo URL::base('https');
      *
-     *     // Absolute URL path with host and protocol from $request
-     *     echo URL::base($request);
+     *     // Absolute URL path with '//'
+     *     echo URL::base('//');
      *
-     * @param   mixed    $protocol Protocol string, [Request], or boolean
-     * @param   boolean  $index    Add index file to URL?
+     * @param   mixed    $protocol Protocol string or boolean
      * @return  string
-     * @uses    Kohana::$index_file
-     * @uses    Request::protocol()
      */
-    public static function base($protocol = NULL, $index = FALSE)
+    public static function base($protocol = null) : string
     {
-        // Start with the configured base URL
-        $base_url = \Mii::$app->base_url;
+        if($protocol === null) {
+            return \Mii::$app->base_url;
+        }
 
         if ($protocol === TRUE)
         {
-            // Use the initial request to get the protocol
-            $protocol = \Mii::$app->request;
+            return \Mii::$app->request->get_hostname().\Mii::$app->base_url;
         }
 
-        if ($protocol instanceof Request)
-        {
-            if ( ! $protocol->is_secure())
-            {
-                // Use the current protocol
-                list($protocol) = explode('/', strtolower($protocol->protocol()));
-            }
-            else
-            {
-                $protocol = 'https';
-            }
-        }
+        if($protocol !== '//')
+            $protocol = $protocol.'://';
 
-        if ( ! $protocol)
-        {
-            // Use the configured default protocol
-            $protocol = parse_url($base_url, PHP_URL_SCHEME);
-        }
+        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
 
-        if (is_string($protocol))
-        {
-            if ($port = parse_url($base_url, PHP_URL_PORT))
-            {
-                // Found a port, make it usable for the URL
-                $port = ':'.$port;
-            }
 
-            if ($domain = parse_url($base_url, PHP_URL_HOST))
-            {
-                // Remove everything but the path from the URL
-                $base_url = parse_url($base_url, PHP_URL_PATH);
-            }
-            else
-            {
-                // Attempt to use HTTP_HOST and fallback to SERVER_NAME
-                $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-            }
-
-            // Add the protocol and domain to the base URL
-            $base_url = $protocol.'://'.$domain.$port.$base_url;
-        }
-
-        return $base_url;
+        return $protocol.$domain.\Mii::$app->base_url;
     }
 
     /**
@@ -89,24 +50,21 @@ class URL {
      *     echo URL::site('foo/bar');
      *
      * @param   string  $uri        Site URI to convert
-     * @param   mixed   $protocol   Protocol string or [Request] class to use protocol from
-     * @param   boolean $index		Include the index_page in the URL
-     * @return  string
-     * @uses    URL::base
+     * @param   mixed   $protocol   Protocol string or true
      */
-    public static function site($uri = '', $protocol = NULL, $index = TRUE)
+    public static function site(string $uri = '', $protocol = null) : string
     {
         // Chop off possible scheme, host, port, user and pass parts
         $path = preg_replace('~^[-a-z0-9+.]++://[^/]++/?~', '', trim($uri, '/'));
 
-        if ( ! UTF8::is_ascii($path))
+        if ( preg_match('/[^\x00-\x7F]/S', $path))
         {
             // Encode all non-ASCII characters, as per RFC 1738
             $path = preg_replace_callback('~([^/]+)~', '\mii\util\URL::_rawurlencode_callback', $path);
         }
 
         // Concat the URL
-        return URL::base($protocol, $index).$path;
+        return URL::base($protocol).$path;
     }
 
     /**
@@ -137,7 +95,7 @@ class URL {
      * @param   boolean  $use_get  Include current request GET parameters
      * @return  string
      */
-    public static function query(array $params = NULL, $use_get = TRUE)
+    public static function query(array $params = null, $use_get = null)
     {
         if ($use_get)
         {
@@ -201,13 +159,13 @@ class URL {
     }
 
 
-    static public function current($params = null) {
+    static public function current(array $params = null) : string {
         return static::site(\Mii::$app->request->uri()).static::query($params);
     }
 
 
 
-    static public function back_url($default = null) {
+    static public function back_url(string $default = null) : string {
         if(isset($_GET['back_url']))
             return urldecode($_GET['back_url']);
 
@@ -220,4 +178,4 @@ class URL {
 
 
 
-} // End url
+}

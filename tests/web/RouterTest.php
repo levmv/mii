@@ -11,18 +11,23 @@ class RouterTest extends TestCase {
 
     public function testRouter()
     {
+
+        $this->mockWebApplication(
+            [
+
+            ]
+        );
+
         $all = $this->getRoutes();
         foreach($all as $name => $group) {
 
+
+
             $router = new Router($group[0]);
 
-            foreach($group[1] as $test => $result) {
-
-                list($route, $params) = $router->match($test);
-
-                $this->assertEquals($result, $params, $name."; ".$test);
-
-                //$this->assertNotFalse($result, $name."; ".$test);
+            foreach($group[1] as $uri => $result) {
+                $params = $router->match($uri);
+                $this->assertEquals($result, $params, $name."; ".$uri);
 
             }
         }
@@ -35,15 +40,15 @@ class RouterTest extends TestCase {
             $this->mockWebApplication(
                 [
                     'components' => [
-                        'router' => $group[0]
+                        'router' => [
+                            'routes' => $group['routes']
+                        ]
                     ]
                 ]
             );
-
-            foreach($group[1] as $test) {
+            foreach($group['tests'] as $test) {
 
                 $url = url($test[0], $test[1]);
-
                 $this->assertEquals($url, $test[2]);
 
             }
@@ -57,19 +62,16 @@ class RouterTest extends TestCase {
 
         return [
             [
-                [
-                    'routes' => [
-                        'app\test' => [
-                            'foo/bar' => 'test',
-                            'test' => 'test',
-                            'some/{id}' => [
-                                'path' => 'some/test',
-                                'name' => 'testurl'
-                            ]
+                'routes' => [
+                    'app\test' => [
+                        'foo/bar' => 'test',
+                        'some/{id}' => [
+                            'path' => 'some/test',
+                            'name' => 'testurl'
                         ]
                     ]
                 ],
-                [
+                'tests' => [
                     ['test', [], '/foo/bar'],
                     ['testurl', ['id' => 1], '/some/1']
                 ]

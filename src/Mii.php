@@ -9,9 +9,9 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '1.0.1';
+    const VERSION = '1.1.0';
 
-    const CODENAME = 'Alpha Centauri';
+    const CODENAME = 'Proxima Centauri';
 
     /**
      * @var \mii\web\App|\mii\console\App;
@@ -75,7 +75,7 @@ class Mii {
 
     public static function log($level, $msg, $category) {
         if(static::$app->has('log'))
-            static::$app->log->log($level, $msg, $category);
+            static::$app->get('log')->log($level, $msg, $category);
     }
 
     public static function message(string $file, string $path = null, $default = null)
@@ -120,7 +120,7 @@ class Mii {
 }
 
 
-function url($name, $params = null) {
+function url(string $name, array $params = []) : string {
     return Mii::$app->router->url($name, $params);
 }
 
@@ -156,18 +156,22 @@ function block(string $name) : \mii\web\Block {
  * @return  mixed
  * @throws  \mii\cache\CacheException
  */
-function get_cached($id, $default = null, $callback = null, $lifetime = null) {
+function get_cached($id, $default = null, $lifetime = null) {
 
-    if($callback === null)
-        return Mii::$app->cache->get($id, $default);
 
-    $cached = Mii::$app->cache->get($id, $default);
-    if($cached === $default) {
-        $cached = call_user_func($callback);
+    if(is_object($default) && $default instanceof \Closure) {
 
-        Mii::$app->cache->set($id, $cached, $lifetime);
+        $cached = Mii::$app->cache->get($id);
+        if($cached === null) {
+            $cached = call_user_func($default);
+
+            Mii::$app->cache->set($id, $cached, $lifetime);
+        }
+        return $cached;
     }
-    return $cached;
+
+    return Mii::$app->cache->get($id, $default);
+
 }
 
 /**
@@ -255,7 +259,7 @@ if ( ! function_exists('__')) {
 
 
 function config(string $key, $default = null) {
-    if(array_key_exists($key, Mii::$app->_config))
+    if(isset( Mii::$app->_config[$key]) || array_key_exists($key, Mii::$app->_config))
         return Mii::$app->_config[$key];
 
     if(strpos($key, '.') !== false)

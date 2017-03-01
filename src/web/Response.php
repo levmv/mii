@@ -8,7 +8,7 @@ class Response {
     public $exit_status = 0;
 
     // HTTP status codes and messages
-    public static $messages = array(
+    public static $messages = [
         // Informational 1xx
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -65,7 +65,7 @@ class Response {
         505 => 'HTTP Version Not Supported',
         507 => 'Insufficient Storage',
         509 => 'Bandwidth Limit Exceeded'
-    );
+    ];
 
 
     const FORMAT_RAW = 'raw';
@@ -87,11 +87,6 @@ class Response {
     protected $_content = '';
 
     /**
-     * @var  array       Cookies to be returned in the response
-     */
-    protected $_cookies = array();
-
-    /**
      * @var  string      The response protocol
      */
     protected $_protocol;
@@ -102,6 +97,12 @@ class Response {
 
     protected $_headers = [];
 
+
+
+    public function __construct($config = []) {
+        foreach($config as $key => $value)
+            $this->$key = $value;
+    }
 
     /**
      * Adds a new header.

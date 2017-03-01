@@ -5,7 +5,7 @@ namespace mii\web;
 use mii\core\InvalidRouteException;
 
 
-class Request extends \mii\core\Request
+class Request
 {
 
     // HTTP Methods
@@ -49,6 +49,8 @@ class Request extends \mii\core\Request
      */
     protected $_uri;
 
+
+    protected $_hostname;
 
     /**
      * @var array    query parameters
@@ -101,11 +103,52 @@ class Request extends \mii\core\Request
      */
     public $cookie_httponly = false;
 
+    /**
+     * @var  array   parameters from the route
+     */
+    public $params = [];
+
+    /**
+     * @var  string  controller to be executed
+     */
+    public $controller;
+
+    /**
+     * @var  string  action to be executed in the controller
+     */
+    public $action;
+
+
+    public function __construct($config = []) {
+        foreach($config as $key => $value)
+            $this->$key = $value;
+
+        $this->init();
+    }
+
 
     public function init() : void
     {
+        $uri = $_SERVER['REQUEST_URI'];
 
-        $this->uri($this->detect_uri());
+        if ($uri !== '' && $uri[0] !== '/') {
+            $uri = preg_replace('/^(http|https):\/\/[^\/]+/i', '', $uri);
+        }
+
+        if ($request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) {
+            // Valid URL path found, set it.
+            $uri = $request_uri;
+        }
+        // Decode the request URI
+        $uri = rawurldecode($uri);
+
+        $base_url = parse_url(\Mii::$app->base_url, PHP_URL_PATH);
+        if (strpos($uri, $base_url) === 0) {
+            // Remove the base URL from the URI
+            $uri = (string)substr($uri, strlen($base_url));
+        }
+
+        $this->uri($uri);
 
         if (isset($_SERVER['REQUEST_METHOD'])) {
             // Use the server request method
@@ -117,65 +160,8 @@ class Request extends \mii\core\Request
             $this->_secure = true;
         }
 
-        // Store global GET and POST data in the initial request only
         $this->_get = &$_GET;
         $this->_post = &$_POST;
-
-    }
-
-    /**
-     * Automatically detects the URI of the main request using PATH_INFO,
-     * REQUEST_URI, PHP_SELF or REDIRECT_URL.
-     *
-     *
-     * @return  string  URI of the main request
-     */
-    public function detect_uri()
-    {
-        if (!empty($_SERVER['PATH_INFO'])) {
-            // PATH_INFO does not contain the docroot or index
-            $uri = $_SERVER['PATH_INFO'];
-        } else {
-            // REQUEST_URI and PHP_SELF include the docroot and index
-
-            if (isset($_SERVER['REQUEST_URI'])) {
-                /**
-                 * We use REQUEST_URI as the fallback value. The reason
-                 * for this is we might have a malformed URL such as:
-                 *
-                 *  http://localhost/http://example.com/judge.php
-                 *
-                 * which parse_url can't handle. So rather than leave empty
-                 * handed, we'll use this.
-                 */
-                $uri = $_SERVER['REQUEST_URI'];
-
-                if ($request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) {
-                    // Valid URL path found, set it.
-                    $uri = $request_uri;
-                }
-
-                // Decode the request URI
-                $uri = rawurldecode($uri);
-            } elseif (isset($_SERVER['PHP_SELF'])) {
-                $uri = $_SERVER['PHP_SELF'];
-            } elseif (isset($_SERVER['REDIRECT_URL'])) {
-                $uri = $_SERVER['REDIRECT_URL'];
-            } else {
-                throw new Exception('Unable to detect the URI using PATH_INFO, REQUEST_URI, PHP_SELF or REDIRECT_URL');
-            }
-
-            // Get the path from the base URL, including the index file
-            $base_url = parse_url('/', PHP_URL_PATH);
-
-            if (strpos($uri, $base_url) === 0) {
-                // Remove the base URL from the URI
-                $uri = (string)substr($uri, strlen($base_url));
-            }
-
-        }
-
-        return $uri;
     }
 
 
@@ -187,42 +173,41 @@ class Request extends \mii\core\Request
      */
     public function execute(string $uri = null) : Response
     {
-        $params = \Mii::$app->router->match($this->uri($uri));
-
-        if($params === false) {
-            throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
-                ':uri' => $this->uri()]);
-        }
-
-        $this->controller = $params['controller'];
-
-        $this->action = $params['action'];
-
-        // These are accessible as public vars and can be overloaded
-        unset($params['controller'], $params['action']);
-
-        // Params cannot be changed once matched
-        $this->params = $params;
-
-
         try {
-            if (extension_loaded('newrelic')) {
-                newrelic_name_transaction($this->controller . '::' . $this->action);
-            }
-
-            if (!$this->controller || !class_exists($this->controller)) {
-
-                throw new InvalidRouteException("Controller class (:class) doesn't exist.",
-                    [':class' => $this->controller]
-                );
-            }
 
             $response = new Response;
 
-            // Create a new instance of the controller
-            $controller = \Mii::$container->get($this->controller, [$this, $response]);
+            $params = \Mii::$app->router->match($this->uri($uri));
 
-            \Mii::$app->controller = $controller;
+            if($params === false) {
+                throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
+                    ':uri' => $this->uri()]);
+            }
+
+            $this->controller = $params['controller'];
+
+            $this->action = $params['action'];
+
+            // These are accessible as public vars and can be overloaded
+            unset($params['controller'], $params['action']);
+
+            // Params cannot be changed once matched
+            $this->params = $params;
+
+            assert($this->controller &&  class_exists($this->controller), "Controller class ".$this->controller." doesn't exist.");
+
+            if($this->action === 'execute') {
+                throw new \InvalidArgumentException('Action name can not be "execute"');
+            }
+
+            // Create a new instance of the controller
+
+            if(\Mii::$app->container === null) {
+                $class = new \ReflectionClass($this->controller);
+                \Mii::$app->controller = $controller =  $class->newInstanceArgs([$this, $response]);
+            } else {
+                \Mii::$app->controller = $controller = \Mii::$container->get($this->controller, [$this, $response]);
+            }
 
             // Run the controller's execute() method
             $response = $controller->execute($params);
@@ -268,6 +253,16 @@ class Request extends \mii\core\Request
         return $this->_uri = $uri;
     }
 
+    public function get_hostname() : string {
+
+        if(!$this->_hostname) {
+            $http = $this->is_secure() ? 'https' : 'http';
+            $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+            $this->_hostname =  $http . '://' . $domain;
+        }
+
+        return $this->_hostname;
+    }
 
     public function get_user_agent() : string
     {
@@ -317,7 +312,6 @@ class Request extends \mii\core\Request
     {
         if($key) {
             return isset($this->_get[$key]) ? $this->_get[$key] : $default;
-
         }
 
         return $this->_get;
@@ -332,8 +326,8 @@ class Request extends \mii\core\Request
 
     public function get_csrf_from_header()
     {
-        $key = 'HTTP_' . str_replace('-', '_', strtoupper(static::CSRF_HEADER));
-        return isset($_SERVER[$key]) ? $_SERVER[$key] : null;
+        // must be like self::CSRF_HEADER
+        return isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : null;
     }
 
     public function check_csrf_token($token = false) {

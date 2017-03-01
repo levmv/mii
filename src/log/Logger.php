@@ -70,7 +70,9 @@ class Logger {
             $this->$key = $value;
 
         foreach($this->targets as $name => $logger) {
-            $this->targets[$name] = \Mii::$container->get($logger['class'], [$logger]);
+
+            $ref = new \ReflectionClass($logger['class']);
+            $this->targets[$name] = $ref->newInstanceArgs([$logger]);
         }
 
         register_shutdown_function(function () {
