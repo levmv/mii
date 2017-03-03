@@ -186,8 +186,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             return $results;
         }
 
-        $result = [];
+        $results = [];
         foreach ($this as $object) {
+            $result = [];
             foreach ($properties as $key => $name) {
                 if (is_int($key)) {
                     $result[$name] = $object->$name;
@@ -199,9 +200,10 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
                     }
                 }
             }
+            $results[] = $result;
         }
 
-        return $result;
+        return $results;
     }
 
     public function index_by(string $column) {
