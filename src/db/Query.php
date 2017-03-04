@@ -975,13 +975,13 @@ class Query
                     // Split the condition
                     list($column, $op, $value) = $condition;
 
-                    if ($value === NULL) {
+                    if ($value === null) {
                         if ($op === '=') {
                             // Convert "val = NULL" to "val IS NULL"
-                            $op = 'IS';
+                            $op = 'IS NULL';
                         } elseif ($op === '!=') {
-                            // Convert "val != NULL" to "valu IS NOT NULL"
-                            $op = 'IS NOT';
+                            // Convert "val != NULL" to "val IS NOT NULL"
+                            $op = 'IS NOT NULL';
                         }
                     }
 
