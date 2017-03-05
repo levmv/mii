@@ -683,9 +683,7 @@ class Query
 
             foreach ($this->_values as $group) {
                 foreach ($group as $offset => $value) {
-                    if (is_string($value)) {
-                        $group[$offset] = $this->db->quote($value);
-                    }
+                    $group[$offset] = $this->db->quote($value);
                 }
 
                 $groups[] = '(' . implode(', ', $group) . ')';
@@ -726,9 +724,7 @@ class Query
             // Quote the column name
             $column = $this->db->quote_column($column);
 
-            if (is_string($value)) {
-                $value = $this->db->quote($value);
-            }
+            $value = $this->db->quote($value);
 
             $set[$column] = $column . ' = ' . $value;
         }
@@ -978,10 +974,10 @@ class Query
                     if ($value === null) {
                         if ($op === '=') {
                             // Convert "val = NULL" to "val IS NULL"
-                            $op = 'IS NULL';
+                            $op = 'IS ';
                         } elseif ($op === '!=') {
                             // Convert "val != NULL" to "val IS NOT NULL"
-                            $op = 'IS NOT NULL';
+                            $op = 'IS NOT ';
                         }
                     }
 
@@ -1008,7 +1004,7 @@ class Query
                     } elseif ($op === 'NOT IN' AND is_array($value)) {
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
 
-                    } elseif (is_string($value)) {
+                    } else {
                         $value = $this->db->quote($value);
                     }
 

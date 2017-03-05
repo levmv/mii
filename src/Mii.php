@@ -81,15 +81,21 @@ class Mii {
     public static function message(string $file, string $path = null, $default = null)
     {
         static $messages;
+        $file = Mii::resolve($file);
+
         if ( ! isset($messages[$file]))
         {
-            if(!file_exists(path('app').'/messages/'.$file.'.php')) {
+
+            if(file_exists($file.'.php')) {
+                $content = include($file.'.php');
+            } elseif(file_exists(path('app').'/messages/'.$file.'.php')) {
+                $content = include(path('app').'/messages/'.$file.'.php');
+            } else {
                 throw new \Exception("Message file does not exist: $file.php");
             }
-
             // Create a new message list
             $messages[$file] = [];
-            $messages[$file] = include(path('app').'/messages/'.$file.'.php');
+            $messages[$file] = $content;
 
         }
         if ($path === null)
