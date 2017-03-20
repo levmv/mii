@@ -160,7 +160,7 @@ class URL {
 
 
     static public function current(array $params = null) : string {
-        return static::site(\Mii::$app->request->uri()).static::query($params);
+        return static::site(\Mii::$app->request->uri()).static::query($params, true);
     }
 
 
