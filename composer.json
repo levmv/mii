@@ -5,7 +5,7 @@
   "homepage": "https://github.com/levmorozov/mii",
   "license": "MIT",
   "require": {
-    "phpmailer/phpmailer": "5.2.14",
+    "phpmailer/phpmailer": "~5.2",
     "php": ">=7.1"
   },
   "require-dev": {
