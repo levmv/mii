@@ -2,7 +2,8 @@
 
 namespace mii\email;
 
-
+use PHPMailer\PHPMailer\PHPMailer as Mailer;
+use PHPMailer\PHPMailer\Exception;
 use mii\web\Block;
 
 class PHPMailer {
@@ -26,7 +27,7 @@ class PHPMailer {
             $this->$key = $value;
         }
 
-        $this->mailer = new \PHPMailer();
+        $this->mailer = new Mailer(true);
 
         $this->mailer->CharSet = 'UTF-8';
         if($this->from_mail) {
