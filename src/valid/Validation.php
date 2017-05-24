@@ -467,4 +467,14 @@ class Validation {
         return $messages;
     }
 
+    /**
+     * Returns the error values.
+     *
+     * @return  array
+     */
+    public function errors_values()
+    {
+        return $this->_errors;
+    }
+
 } // End Validation
