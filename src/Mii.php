@@ -9,9 +9,9 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '1.2.2';
+    const VERSION = '1.2.7';
 
-    const CODENAME = 'Luytens Star';
+    const CODENAME = 'τ Ceti';
 
     /**
      * @var \mii\web\App|\mii\console\App;
