@@ -145,6 +145,10 @@ class Form
         return $this->validation->errors($this->message_file);
     }
 
+    public function errors_values() : array
+    {
+        return $this->validation->errors_values();
+    }
 
     public function has_errors(): bool {
         return $this->validation->has_errors() > 0;
