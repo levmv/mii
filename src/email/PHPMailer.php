@@ -51,21 +51,27 @@ class PHPMailer {
 
     public function send( $to, $name, $subject, $body ) {
 
-        $this->mailer->addAddress($to, $name);
-        $this->mailer->Subject = $subject;
+        try {
+            $this->mailer->addAddress($to, $name);
+            $this->mailer->Subject = $subject;
 
-        if($body instanceof Block) {
-            $html = $body->render(true);
-            $path = \Mii::$app->blocks->assets_dir.'/'.implode('/', explode('_', $body->name())) . '/'; // todo: move this to something like block->path()
-            $this->mailer->msgHTML($html, $path);
-        } else {
+            if ($body instanceof Block) {
+                $html = $body->render(true);
+                $path = \Mii::$app->blocks->assets_dir . '/' . implode('/', explode('_', $body->name())) . '/'; // todo: move this to something like block->path()
+                $this->mailer->msgHTML($html, $path);
+            } else {
 
-            $this->mailer->Body = $body;
+                $this->mailer->Body = $body;
+            }
+
+            $result = $this->mailer->send();
+
+            $this->mailer->clearAllRecipients();
+
+        } catch (\Throwable $t) {
+
+            $result = false;
         }
-
-        $result = $this->mailer->send();
-
-        $this->mailer->clearAllRecipients();
 
         return $result;
 
