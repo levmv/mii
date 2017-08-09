@@ -3,7 +3,9 @@
 namespace mii\console;
 
 
-class Request  {
+use mii\core\Component;
+
+class Request extends Component {
     /**
      * @var  array   parameters from the route
      */
@@ -21,16 +23,10 @@ class Request  {
     public $action;
 
 
-    public function __construct($config = []) {
+    public function init(array $config = []) : void
+    {
         foreach($config as $key => $value)
             $this->$key = $value;
-
-        $this->init();
-    }
-
-
-    public function init()
-    {
 
         if (isset($_SERVER['argv'])) {
             $argv = $_SERVER['argv'];

@@ -1,6 +1,7 @@
 <?php
 
 namespace mii\db;
+use mii\core\Component;
 
 
 /**
@@ -10,7 +11,7 @@ namespace mii\db;
  * @copyright  (c) 2015 Lev Morozov
  * @copyright  (c) 2008-2012 Kohana Team
  */
-class Database
+class Database extends Component
 {
 
     // Query types
@@ -45,7 +46,7 @@ class Database
      *
      * @return  void
      */
-    public function __construct(array $config)
+    public function init(array $config = []) : void
     {
         // Set the instance name
         //$this->_instance = $name;
@@ -197,21 +198,35 @@ class Database
             return;
 
         // Extract the connection parameters, adding required variables
-        extract($this->_config['connection'] + [
-                'database' => '',
-                'hostname' => '',
-                'username' => '',
-                'password' => '',
-                'socket'   => '',
-                'port'     => 3306,
-            ]);
+
+        $config = [
+            'database' => '',
+            'hostname' => '',
+            'username' => '',
+            'password' => '',
+            'socket'   => '',
+            'port'     => 3306,
+        ];
+
+        foreach ($config as $k => $v) {
+            if(isset($this->_config['connection'][$k]))
+            $config[$k] = $this->_config['connection'][$k];
+        }
 
         // Prevent this information from showing up in traces
         unset($this->_config['connection']['username'], $this->_config['connection']['password']);
 
 
         try {
-            $this->_connection = mysqli_connect($hostname, $username, $password, $database, $port, $socket);
+            $this->_connection = mysqli_connect(
+                $config['hostname'],
+                $config['username'],
+                $config['password'],
+                $config['database'],
+                $config['port'],
+                $config['socket']
+            );
+
         } catch (\Exception $e) {
             // No connection exists
             $this->_connection = NULL;

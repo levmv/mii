@@ -3,7 +3,7 @@
 namespace mii\core;
 
 
-class ErrorHandler {
+class ErrorHandler extends Component {
 
     /**
      * @var integer the size of the reserved memory. A portion of memory is pre-allocated so that
@@ -18,12 +18,6 @@ class ErrorHandler {
      * @var string Used to reserve memory for fatal error handler.
      */
     private $_memory_reserve;
-
-
-    public function __construct($config = []) {
-        foreach($config as $key => $value)
-            $this->$key = $value;
-    }
 
 
     public function register() {

@@ -7,7 +7,7 @@ use mii\db\ORM;
 use mii\db\Query;
 use Mii;
 
-class User extends ORM{
+class User extends ORM {
 
     public function on_change() {
         if($this->changed('password')) {

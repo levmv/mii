@@ -12,14 +12,14 @@ class Apcu extends Cache
      * @param  array $config configuration
      * @throws CacheException
      */
-    public function __construct(array $config)
+    public function init(array $config = []) : void
     {
 
         if (!extension_loaded('apcu')) {
             throw new CacheException('PHP APC extension is not available.');
         }
 
-        parent::__construct($config);
+        parent::init($config);
     }
 
     /**
@@ -128,4 +128,9 @@ class Apcu extends Cache
         return \apcu_dec($id, $step);
     }
 
+
+    protected function _sanitize_id($id) : string
+    {
+        return $this->prefix.$id;
+    }
 }

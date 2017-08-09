@@ -9,7 +9,7 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii {
 
-    const VERSION = '1.2.7';
+    const VERSION = '1.2.9';
 
     const CODENAME = 'τ Ceti';
 

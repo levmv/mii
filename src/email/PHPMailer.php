@@ -20,7 +20,7 @@ class PHPMailer {
     protected $from_name = '';
 
 
-    public function __construct(array $config)
+    public function init(array $config = []) : void
     {
 
         foreach($config as $key => $value) {

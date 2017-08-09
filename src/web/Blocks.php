@@ -3,9 +3,10 @@
 namespace mii\web;
 
 use Mii;
+use mii\core\Component;
 use mii\util\HTML;
 
-class Blocks
+class Blocks extends Component
 {
     const HEAD = 0;
     const BEGIN = 1;
@@ -46,10 +47,9 @@ class Blocks
     ];
 
 
-    public function __construct(array $config = [])
+    public function init(array $config = []) : void
     {
-        foreach ($config as $key => $value)
-            $this->$key = $value;
+        parent::init($config);
 
         if(!$this->libraries) {
             $this->libraries = [

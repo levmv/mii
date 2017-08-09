@@ -3,6 +3,7 @@
 namespace mii\auth;
 
 use Mii;
+use mii\core\Component;
 use mii\db\Query;
 use mii\web\Exception;
 
@@ -11,7 +12,7 @@ use mii\web\Exception;
  * password hashing.
  *
  */
-class Auth
+class Auth extends Component
 {
     protected $_session;
 
@@ -37,10 +38,8 @@ class Auth
      *
      * @param   array $config Config Options
      */
-    public function __construct($config = []) {
-        foreach ($config as $name => $value) {
-            $this->$name = $value;
-        }
+    public function init(array $config = []) : void {
+        parent::init($config);
         $this->_session = \Mii::$app->session;
     }
 

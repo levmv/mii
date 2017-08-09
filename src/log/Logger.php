@@ -2,7 +2,9 @@
 
 namespace mii\log;
 
-class Logger {
+use mii\core\Component;
+
+class Logger extends Component {
 
     public $targets = [];
 
@@ -65,9 +67,9 @@ class Logger {
 
 
 
-    public function __construct($config = []) {
-        foreach($config as $key => $value)
-            $this->$key = $value;
+    public function init(array $config = []) : void {
+
+        parent::init($config);
 
         foreach($this->targets as $name => $logger) {
 

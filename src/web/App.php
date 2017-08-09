@@ -48,7 +48,6 @@ class App extends \mii\core\App
     public function default_components() {
         return [
             'log' => ['class' => 'mii\log\Logger'],
-            'user' => ['class' => 'mii\auth\User'],
             'blocks' => ['class' => 'mii\web\Blocks'],
             'auth' => ['class' => 'mii\auth\Auth'],
             'db' => ['class' => 'mii\db\Database'],

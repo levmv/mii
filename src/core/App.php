@@ -100,7 +100,6 @@ abstract class App {
     public function default_components() {
         return [
             'log' => ['class' => 'mii\log\Logger'],
-            'user' => ['class' => 'mii\auth\User'],
             'blocks' => ['class' => 'mii\web\Blocks'],
             'auth' => ['class' => 'mii\auth\Auth'],
             'db' => ['class' => 'mii\db\Database'],
@@ -222,9 +221,9 @@ abstract class App {
         if(is_string($class)) {
             $ref = new \ReflectionClass($class);
             if(!empty($this->_config['components'][$id]))
-                return $ref->newInstanceArgs([$this->_config['components'][$id]]);
+                return $ref->newInstanceArgs([$this->_config['components'][$id], $id]);
 
-            return $ref->newInstanceArgs([[]]);
+            return $ref->newInstanceArgs([[], $id]);
         }
 
         if (is_object($class) && $class instanceof \Closure) {

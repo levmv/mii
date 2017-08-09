@@ -3,7 +3,9 @@
 namespace mii\web;
 
 
-class Response {
+use mii\core\Component;
+
+class Response extends Component {
 
     public $exit_status = 0;
 
@@ -97,12 +99,6 @@ class Response {
 
     protected $_headers = [];
 
-
-
-    public function __construct($config = []) {
-        foreach($config as $key => $value)
-            $this->$key = $value;
-    }
 
     /**
      * Adds a new header.

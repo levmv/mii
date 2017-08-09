@@ -3,24 +3,15 @@
 namespace mii\cache;
 
 
-abstract class Cache {
+use mii\core\Component;
+
+abstract class Cache extends Component {
 
 
     protected $default_expire = 3600;
 
     protected $prefix = '';
 
-    /**
-     * Ensures singleton pattern is observed, loads the default expiry
-     *
-     * @param  array  $config  configuration
-     */
-    public function __construct(array $config)
-    {
-        foreach ($config as $name => $value) {
-            $this->$name = $value;
-        }
-    }
 
     /**
      * Overload the __clone() method to prevent cloning

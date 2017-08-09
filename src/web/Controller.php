@@ -183,6 +183,9 @@ class Controller
 
         $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
 
+        if(empty($roles))
+            $roles = '*';
+        
         if (!$this->acl->check($roles, $this->request->controller, $this->request->action)) {
             $this->on_access_denied();
         }

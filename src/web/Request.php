@@ -2,10 +2,11 @@
 
 namespace mii\web;
 
+use mii\core\Component;
 use mii\core\InvalidRouteException;
 
 
-class Request
+class Request extends Component
 {
 
     // HTTP Methods
@@ -119,16 +120,12 @@ class Request
     public $action;
 
 
-    public function __construct($config = []) {
+    public function init(array $config = []) : void
+    {
+
         foreach($config as $key => $value)
             $this->$key = $value;
 
-        $this->init();
-    }
-
-
-    public function init() : void
-    {
         $uri = $_SERVER['REQUEST_URI'];
 
         if ($uri !== '' && $uri[0] !== '/') {

@@ -6,7 +6,7 @@ namespace mii\core;
 use mii\util\Arr;
 use mii\util\URL;
 
-class Router {
+class Router extends Component {
 
     // Defines the pattern of a {segment}
     const REGEX_KEY     = '{([a-zA-Z0-9_]++)}';
@@ -44,14 +44,9 @@ class Router {
     protected $_current_route;
 
 
-    public function __construct($config = []) {
-        foreach($config as $key => $value)
-            $this->$key = $value;
+    public function init(array $config = []) : void {
 
-        $this->init();
-    }
-
-    public function init() {
+        parent::init($config);
 
         if($this->cache) {
 

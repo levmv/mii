@@ -3,7 +3,9 @@
 namespace mii\web;
 
 
-class Session
+use mii\core\Component;
+
+class Session extends Component
 {
 
     /**
@@ -33,24 +35,9 @@ class Session
 
     protected $_flash = '__flash';
 
-    /**
-     * Overloads the name, lifetime, and encrypted session settings.
-     *
-     * [!!] Sessions can only be created using the [Session::instance] method.
-     *
-     * @param   array $config configuration
-     * @param   string $id session id
-     * @return  void
-     * @uses    Session::read
-     */
-    public function __construct(array $config = [])
-    {
 
-        if (isset($config['name'])) {
-            // Cookie name to store the session id in
-            $this->_name = (string)$config['name'];
-        }
 
+    public function init(array $config = []) : void {
         if (isset($config['lifetime'])) {
             // Cookie lifetime
             $this->_lifetime = (int)$config['lifetime'];
@@ -65,11 +52,7 @@ class Session
             // Enable or disable encryption of data
             $this->_encrypted = $config['encrypted'];
         }
-
-        // Load the session
-        //$this->read($id);
     }
-
 
     /**
      *
