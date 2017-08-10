@@ -187,7 +187,7 @@ class Controller
             $roles = '*';
         
         if (!$this->acl->check($roles, $this->request->controller, $this->request->action)) {
-            $this->on_access_denied();
+            return $this->on_access_denied();
         }
 
         if ($this->csrf_validation && !$this->request->validate_csrf_token()) {
