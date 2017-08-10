@@ -66,7 +66,10 @@ class ACL
         $roles = (array) $role;
 
         foreach ($roles as $r) {
-            $this->_rules[$r][$object][$action] = $access;
+            $action = (array) $action;
+            foreach($action as $a) {
+                $this->_rules[$r][$object][$a] = $access;
+            }
         }
     }
 
