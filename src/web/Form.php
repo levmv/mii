@@ -9,25 +9,28 @@ use mii\valid\Validation;
 
 class Form
 {
-
     /**
      * @var Validation
      */
     public $validation;
 
-    public $fields = [];
-
-    public $select_data = [];
+    public $_fields = [];
 
     public $labels = [];
 
     public $message_file;
 
+    protected $scenario;
+
     protected $_changed = [];
+
+    protected $_select_data = [];
 
     protected $_model;
 
     protected $is_prepared = false;
+
+    protected $_loaded = false;
 
     /**
      * @param null $data Initial data for form. If null then request->post() will be used
@@ -36,16 +39,20 @@ class Form
 
         $this->validation = new Validation();
 
+        $this->_fields = $this->fields();
+
         if (is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
             $data = $data->to_array();
         }
 
         if (count($data)) {
-            foreach (array_intersect_key($data, $this->fields) as $key => $value) {
+            foreach (array_intersect_key($data, $this->_fields) as $key => $value) {
                 $this->set($key, $value);
             }
         }
+
+        $this->_changed = [];
     }
 
     /**
@@ -54,39 +61,83 @@ class Form
      * @return bool
      */
 
-    public function load($data = null) {
+    public function load($data = null) : bool {
 
-        if ($this->posted()) {
-            $data = \Mii::$app->request->post();
-        } elseif (is_object($data) AND $data instanceof ORM) {
+        if($this->_loaded AND $data === null)
+            return true;
+
+        if (is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
             $data = $data->to_array();
         }
 
-        if (count($data)) {
-            foreach (array_intersect_key($data, $this->fields) as $key => $value) {
-                $this->set($key, $value);
+        if(is_array($data) AND count($data)) {
+
+            $this->load_fields($data);
+
+        } elseif($this->posted()) {
+            $data = \Mii::$app->request->post();
+
+            $this->load_fields($data);
+
+            // try to detect possible file fields and load them
+
+            $unchanged = array_diff(array_keys($this->_fields), $this->_changed);
+            foreach($unchanged as $key) {
+                $file = \Mii::$app->upload->get_file($key);
+                if($file !== null)
+                    $this->set($key, $file);
             }
         }
 
-        if (!$this->posted() AND !$this->is_prepared) {
+        if (!$this->_loaded AND !$this->is_prepared) {
             $this->prepare();
             $this->is_prepared = true;
         }
 
-        return $this->posted();
+        return $this->_loaded;
     }
 
-    public function posted() {
+    private function load_fields($data) : void {
+        foreach (array_intersect_key($data, $this->_fields) as $key => $value) {
+            $this->set($key, $value);
+        }
+        $this->_loaded = true;
+    }
+
+
+    public function before_validate() {
+
+    }
+
+
+    public function after_validate($passed) {
+
+    }
+
+    public function prepare() {
+
+    }
+
+
+    public function loaded() : bool {
+        return $this->_loaded;
+    }
+
+    public function posted() : bool {
         return \Mii::$app->request->method() === Request::POST;
     }
 
-    public function rules() {
+    public function rules() : array {
         return [];
     }
 
+    public function set_fields($fields) {
+        $this->_fields = $fields;
+    }
+
     public function fields(): array {
-        return $this->fields;
+        return [];
     }
 
     public function model(): ?ORM {
@@ -94,7 +145,7 @@ class Form
     }
 
     public function changed_fields(): array {
-        return array_intersect_key($this->fields, $this->_changed);
+        return array_intersect_key($this->_fields, $this->_changed);
     }
 
     /**
@@ -117,26 +168,28 @@ class Form
     }
 
     public function get(string $name) {
-        return $this->fields[$name];
+        return $this->_fields[$name];
     }
 
     public function set(string $name, $value) {
         $this->_changed[$name] = true;
-        return $this->fields[$name] = $value;
+        return $this->_fields[$name] = $value;
     }
 
 
-    public function validate(): bool {
+    public function validate($scenario = null): bool {
+
+        $this->before_validate();
+
+        $this->scenario = $scenario;
 
         $this->validation->rules($this->rules());
 
-        $this->validation->data(\Mii::$app->request->post());
+        $this->validation->data($this->_fields);
 
         $passed = $this->validation->check();
 
-        if ($passed === false) {
-            $this->check_prepared();
-        }
+        $this->after_validate($passed);
 
         return $passed;
     }
@@ -155,8 +208,6 @@ class Form
     }
 
     public function open($action = null, ?array $attributes = null): string {
-
-        $this->check_prepared();
 
         $out = HTML::open($action, $attributes);
 
@@ -208,7 +259,9 @@ class Form
     }
 
 
-    public function select($name, $attributes = null): string {
+    public function select($name, $data = null, $attributes = null): string {
+        if($data !== null)
+            $this->_select_data[$name] = $data;
         return $this->field('select', $name, $attributes);
     }
 
@@ -218,26 +271,41 @@ class Form
 
     public function field($type, $name, $attributes = null): string {
 
-        if (!array_key_exists($name, $this->fields)) {
-            $this->fields[$name] = null;
+        if (!array_key_exists($name, $this->_fields)) {
+            $this->_fields[$name] = null;
         }
 
         switch ($type) {
             case 'input':
-                return HTML::input($name, $this->fields[$name], $attributes);
+                return HTML::input($name, $this->_fields[$name], $attributes);
             case 'hidden':
-                return HTML::hidden($name, $this->fields[$name], $attributes);
+                return HTML::hidden($name, $this->_fields[$name], $attributes);
             case 'textarea':
-                return HTML::textarea($name, $this->fields[$name], $attributes);
+                return HTML::textarea($name, $this->_fields[$name], $attributes);
             case 'checkbox':
-                return HTML::checkbox($name, 1, (bool)$this->fields[$name], $attributes);
+                $hidden = '';
+                if(isset($attributes['uncheck'])) {
+                    $hidden = HTML::hidden($name, $attributes['uncheck']);
+                    unset($attributes['uncheck']);
+                }
+                return $hidden.HTML::checkbox($name, 1, (bool)$this->_fields[$name], $attributes);
             case 'password':
-                return HTML::password($name, $this->fields[$name], $attributes);
+                return HTML::password($name, $this->_fields[$name], $attributes);
             case 'select':
                 if ($attributes AND isset($attributes['multiple']) AND $attributes['multiple'] !== false) {
-                    return HTML::select($name . '[]', $this->select_data[$name], $this->fields[$name], $attributes);
+                    return HTML::select(
+                        $name . '[]',
+                        isset($this->_select_data[$name]) ? $this->_select_data[$name] : [],
+                        $this->_fields[$name],
+                        $attributes
+                    );
                 }
-                return HTML::select($name, $this->select_data[$name], $this->fields[$name], $attributes);
+                return HTML::select(
+                    $name,
+                    isset($this->_select_data[$name]) ? $this->_select_data[$name] : [],
+                    $this->_fields[$name],
+                    $attributes
+                );
             case 'file':
                 return HTML::file($name, $attributes);
         }
@@ -253,18 +321,6 @@ class Form
     public function uploaded($name): bool {
 
         return isset($_FILES[$name]) AND Upload::not_empty($_FILES[$name]) AND Upload::valid($_FILES[$name]);
-
-    }
-
-    public function check_prepared(): void {
-        if (!$this->is_prepared) {
-            $this->prepare();
-            $this->is_prepared = true;
-        }
-    }
-
-
-    public function prepare() {
 
     }
 

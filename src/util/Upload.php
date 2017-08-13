@@ -17,7 +17,7 @@ class Upload {
     /**
      * @var  string  default upload directory
      */
-    public static $default_directory = 'upload';
+    public static $default_directory = '/tmp/upload';
 
     /**
      * Save an uploaded file to a new location. If no filename is provided,

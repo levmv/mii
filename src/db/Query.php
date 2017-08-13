@@ -1233,7 +1233,7 @@ class Query
         $this->_order_by = $old_order;
         $this->_as_object = $as_object;
 
-        return $count;
+        return (int) $count;
     }
 
     /**

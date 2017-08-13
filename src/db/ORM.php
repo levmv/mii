@@ -58,6 +58,7 @@ class ORM
      * @return void
      */
     public function __construct($values = [], $loaded = false) {
+
         if ($values) {
             foreach (array_intersect_key($values, $this->_data) as $key => $value) {
                 $this->$key = $value;
@@ -288,7 +289,7 @@ class ORM
                     if ($value !== $this->_data[$key]) {
                         $this->_changed[$key] = true;
                     }
-                    $this->_data[$key] = $value;
+                    $this->_data[$key] =  $value;
                 }
 
             } else {
@@ -377,9 +378,20 @@ class ORM
 
         $this->on_change();
 
+        $data = array_intersect_key($this->_data, $this->_changed);
+
+        $schema = $this->get_tables_schema();
+
+        foreach($data as $key => $value) {
+
+            if(isset($schema[$key]) && $schema[$key]['type'] === 'int') {
+                $data[$key] = (int) $value;
+            }
+        }
+
         $this->raw_query()
             ->update($this->get_table())
-            ->set(array_intersect_key($this->_data, $this->_changed))
+            ->set($data)
             ->where('id', '=', $this->_data['id'])
             ->execute();
 
@@ -409,6 +421,18 @@ class ORM
         }
 
         $this->on_change();
+
+
+
+        $schema = $this->get_tables_schema();
+
+        foreach($this->_data as $key => $value) {
+
+            if(isset($schema[$key]) && $schema[$key]['type'] === 'int') {
+                $this->_data[$key] = (int) $value;
+            }
+        }
+
 
         $columns = array_keys($this->_data);
         $this->raw_query()
@@ -480,6 +504,78 @@ class ORM
             $this->_serialize_cache[$key] = json_decode($this->_data[$key], TRUE);
         }
         return $this->_serialize_cache[$key];
+    }
+
+
+    private function get_types() {
+
+        $schema = $this->get_tables_schema();
+
+
+    }
+
+
+    private function convert_type_to_php($type) {
+
+        if($type === 'int' || $type === 'smallint' || $type === 'tinyint')
+            return 'int';
+
+        return 'string';
+
+    }
+
+
+    private function get_tables_schema() {
+
+        if(null === ($columns = get_cached('1tb_schema_'.$this->get_table()))) {
+            $table_info = DB::select("SHOW FULL COLUMNS FROM " . $this->get_table())->to_array();
+
+
+            $columns = [];
+            foreach ($table_info as $info) {
+                $column = [];
+
+                $info = array_change_key_case($info, CASE_LOWER);
+
+
+                $column_name = $info['field'];
+                $column['allow_null'] = $info['null'] === 'YES';
+                $column['type'] = $info['type'];
+
+                if (preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $info['type'], $matches)) {
+
+                    $column['type'] = $this->convert_type_to_php(strtolower($matches[1]));
+
+                    $type = strtolower($matches[1]);
+
+
+
+                    if (!empty($matches[2])) {
+                        if ($type === 'enum') {
+                        } else {
+                            $values = explode(',', $matches[2]);
+                            $column['size'] = (int)$values[0];
+                            if (isset($values[1])) {
+                                $column['scale'] = (int)$values[1];
+                            }
+                            if ($column['size'] === 1 && $type === 'bit') {
+                                $column['type'] = 'boolean';
+                            } elseif ($type === 'bit') {
+                                if ($column['size'] > 32) {
+                                    $column['type'] = 'bigint';
+                                } elseif ($column['size'] === 32) {
+                                    $column['type'] = 'integer';
+                                }
+                            }
+                        }
+                    }
+                }
+                $columns[$column_name] = $column;
+            }
+            cache('tb_schema_'.$this->get_table(), $columns, 3600);
+        }
+
+        return $columns;
     }
 
 

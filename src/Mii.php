@@ -141,10 +141,23 @@ function redirect($url, $use_back_url = false) {
 }
 
 /**
+ * Check if user logged in and has specified roles
+ * @param mixed $role Role name or array of role names
+ * @return bool
+ */
+function logged_in($role = 'login') : bool {
+    return Mii::$app->auth->logged_in($role);
+}
+
+
+/**
  * @param $name string
  * @return \mii\web\Block
  */
-function block(string $name) : \mii\web\Block {
+function block(string $name, array $params = null) : \mii\web\Block {
+    if($params !== null) {
+        return Mii::$app->blocks->get($name)->set($params);
+    }
     return Mii::$app->blocks->get($name);
 }
 

@@ -15,6 +15,7 @@ use mii\core\Router;
  * @property Router $router
  * @property Response $response
  * @property Captcha $captcha
+ * @property UploadHandler $upload
  *
  */
 class App extends \mii\core\App
@@ -58,6 +59,7 @@ class App extends \mii\core\App
             'request' => ['class' => 'mii\web\Request'],
             'response' => ['class' => 'mii\web\Response'],
             'captcha' => ['class' => 'mii\captcha\Captcha'],
+            'upload' => ['class' => 'mii\web\UploadHandler'],
             'error' => ['class' => 'mii\web\ErrorHandler']
         ];
     }

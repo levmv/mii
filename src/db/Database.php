@@ -39,6 +39,8 @@ class Database extends Component
     protected $_config;
 
 
+    protected $_dbname;
+
     /**
      * Stores the database configuration locally and name the instance.
      *
@@ -216,6 +218,7 @@ class Database extends Component
         // Prevent this information from showing up in traces
         unset($this->_config['connection']['username'], $this->_config['connection']['password']);
 
+        $this->_dbname = $config['database'];
 
         try {
             $this->_connection = mysqli_connect(
@@ -497,6 +500,12 @@ class Database extends Component
         return $this->_config['table_prefix'];
     }
 
+
+
+    public function db_name() : string
+    {
+        return $this->_dbname;
+    }
     /**
      * Quote a database table name and adds the table prefix if needed.
      *

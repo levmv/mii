@@ -6,7 +6,8 @@ namespace mii\valid;
 use mii\util\Arr;
 use Mii;
 
-class Validation {
+class Validation
+{
 
     // Field rules
     protected $_rules = [];
@@ -30,11 +31,10 @@ class Validation {
      * Sets the unique "any field" key and creates an ArrayObject from the
      * passed array.
      *
-     * @param   array   $array  array to validate
+     * @param   array $array array to validate
      * @return  void
      */
-    public function __construct(array $array = [])
-    {
+    public function __construct(array $array = []) {
         $this->_data = $array;
     }
 
@@ -44,15 +44,14 @@ class Validation {
      *
      * @return  array
      */
-    public function data($data = null)
-    {
-        if($data === null)
+    public function data($data = null) {
+        if ($data === null)
             return $this->_data;
         $this->_data = $data;
     }
 
     public function field($name) {
-        if(isset($this->_data[$name]))
+        if (isset($this->_data[$name]))
             return $this->_data[$name];
 
         return null;
@@ -61,12 +60,11 @@ class Validation {
     /**
      * Sets or overwrites the label name for a field.
      *
-     * @param   string  $field  field name
-     * @param   string  $label  label
+     * @param   string $field field name
+     * @param   string $label label
      * @return  $this
      */
-    public function label($field, $label)
-    {
+    public function label($field, $label) {
         // Set the label for this field
         $this->_labels[$field] = $label;
 
@@ -76,11 +74,10 @@ class Validation {
     /**
      * Sets labels using an array.
      *
-     * @param   array   $labels list of field => label names
+     * @param   array $labels list of field => label names
      * @return  $this
      */
-    public function labels(array $labels)
-    {
+    public function labels(array $labels) {
         $this->_labels = $labels + $this->_labels;
 
         return $this;
@@ -112,15 +109,13 @@ class Validation {
      *
      * [!!] Errors must be added manually when using closures!
      *
-     * @param   string      $field  field name
-     * @param   callback    $rule   valid PHP callback or closure
-     * @param   array       $params extra parameters for the rule
+     * @param   string $field field name
+     * @param   callback $rule valid PHP callback or closure
+     * @param   array $params extra parameters for the rule
      * @return  $this
      */
-    public function rule($field, $rule, array $params = [])
-    {
-        if ($field !== TRUE AND ! isset($this->_labels[$field]))
-        {
+    public function rule($field, $rule, array $params = []) {
+        if ($field !== TRUE AND !isset($this->_labels[$field])) {
             // Set the field label to the field name
             $this->_labels[$field] = $field;
         }
@@ -134,19 +129,17 @@ class Validation {
     /**
      * Add rules using an array.
      *
-     * @param   array   $rules  list of rules
+     * @param   array $rules list of rules
      * @return  $this
      */
-    public function rules(array $rules)
-    {
-        foreach ($rules as $row)
-        {
+    public function rules(array $rules) {
+        foreach ($rules as $row) {
             $field = $row[0];
-            $rule  = $row[1];
+            $rule = $row[1];
             $params = isset($row[2]) ? $row[2] : [];
 
-            if(is_array($field)) {
-                foreach($field as $field_name) {
+            if (is_array($field)) {
+                foreach ($field as $field_name) {
                     $this->rule($field_name, $rule, $params);
                 }
             } else {
@@ -157,7 +150,6 @@ class Validation {
 
         return $this;
     }
-
 
 
     /**
@@ -171,11 +163,9 @@ class Validation {
      *
      * @return  boolean
      */
-    public function check()
-    {
+    public function check() {
         $benchmark = false;
-        if (config('debug'))
-        {
+        if (config('debug')) {
             // Start a new benchmark
             $benchmark = \mii\util\Profiler::start('Validation', __FUNCTION__);
         }
@@ -186,14 +176,11 @@ class Validation {
         $expected = Arr::merge(array_keys($this->_data), array_keys($this->_labels));
 
         // Import the rules locally
-        $rules     = $this->_rules;
-
-
+        $rules = $this->_rules;
 
         $data = [];
 
-        foreach ($expected as $field)
-        {
+        foreach ($expected as $field) {
             // Use the submitted value or NULL if no data exists
             $data[$field] = isset($this->_data[$field]) ? $this->_data[$field] : null;
 
@@ -202,17 +189,13 @@ class Validation {
         $this->_data = $data;
 
 
-
         // Execute the rules
-        foreach ($rules as $field => $set)
-        {
+        foreach ($rules as $field => $set) {
             // Get the field value
             $value = $this->_data[$field];
 
 
-
-            foreach ($set as $array)
-            {
+            foreach ($set as $array) {
                 // Rules are defined as array($rule, $params)
                 list($rule, $params) = $array;
 
@@ -220,12 +203,10 @@ class Validation {
 
                 // Default the error name to be the rule (except array and lambda rules)
                 $error_name = $rule;
-                if (is_array($rule))
-                {
+                if (is_array($rule)) {
 
                     // Allows rule('field', array(':model', 'some_rule'));
-                    if (is_string($rule[0]) AND array_key_exists($rule[0], $this->_bound))
-                    {
+                    if (is_string($rule[0]) AND array_key_exists($rule[0], $this->_bound)) {
                         // Replace with bound value
                         $rule[0] = $this->_bound[$rule[0]];
                     }
@@ -233,17 +214,13 @@ class Validation {
                     // This is an array callback, the method name is the error name
                     $error_name = $rule[1];
                     $passed = call_user_func_array($rule, $params);
-                }
-                elseif ( ! is_string($rule))
-                {
+                } elseif (!is_string($rule)) {
                     // This is a lambda function, there is no error name (errors must be added manually)
                     $error_name = FALSE;
                     array_unshift($params, $field);
                     array_unshift($params, $this);
                     $passed = call_user_func_array($rule, $params);
-                }
-                elseif (method_exists('mii\valid\Rules', $rule))
-                {
+                } elseif (method_exists('mii\valid\Rules', $rule)) {
                     // Use a method in this object
                     $method = new \ReflectionMethod('mii\valid\Rules', $rule);
 
@@ -251,18 +228,14 @@ class Validation {
 
                     $passed = $method->invokeArgs(NULL, $params);
 
-                }
-                elseif (strpos($rule, '::') === FALSE)
-                {
+                } elseif (strpos($rule, '::') === FALSE) {
 
                     // Use a function call
                     $function = new \ReflectionFunction($rule);
 
                     // Call $function($this[$field], $param, ...) with Reflection
                     $passed = $function->invokeArgs($params);
-                }
-                else
-                {
+                } else {
                     // Split the class and method of the rule
                     list($class, $method) = explode('::', $rule, 2);
 
@@ -276,19 +249,16 @@ class Validation {
                 }
 
                 // Ignore return values from rules when the field is empty
-                if ( ! in_array($rule, $this->_empty_rules) AND ! Rules::not_empty($value))
+                if (!in_array($rule, $this->_empty_rules) AND !Rules::not_empty($value))
                     continue;
 
-                if ($passed === FALSE AND $error_name !== FALSE)
-                {
+                if ($passed === FALSE AND $error_name !== FALSE) {
                     // Add the rule to the errors
                     $this->error($field, $error_name, $params);
 
                     // This field has an error, stop executing rules
                     break;
-                }
-                elseif (isset($this->_errors[$field]))
-                {
+                } elseif (isset($this->_errors[$field])) {
                     // The callback added the error manually, stop checking rules
                     break;
                 }
@@ -297,8 +267,7 @@ class Validation {
         }
 
 
-        if ($benchmark)
-        {
+        if ($benchmark) {
             // Stop benchmarking
             \mii\util\Profiler::stop($benchmark);
         }
@@ -309,13 +278,12 @@ class Validation {
     /**
      * Add an error to a field.
      *
-     * @param   string  $field  field name
-     * @param   string  $error  error message
-     * @param   array   $params
+     * @param   string $field field name
+     * @param   string $error error message
+     * @param   array $params
      * @return  $this
      */
-    public function error($field, $error, array $params = NULL)
-    {
+    public function error($field, $error, array $params = NULL) {
         $this->_errors[$field] = $error;
 
         return $this;
@@ -344,14 +312,12 @@ class Validation {
      *     // Get errors from messages/forms/login.php
      *     $errors = $Validation->errors('forms/login');
      *
-     * @param   string  $file       file to load error messages from
-     * @param   mixed   $translate  translate the message
+     * @param   string $file file to load error messages from
+     * @param   mixed $translate translate the message
      * @return  array
      */
-    public function errors($file = null, $translate = false)
-    {
-        if ($file === NULL)
-        {
+    public function errors($file = null, $translate = false) {
+        if ($file === NULL) {
             // Return the error list
             return $this->_errors;
         };
@@ -359,9 +325,8 @@ class Validation {
         // Create a new message list
         $messages = [];
 
-        foreach ($this->_errors as $field => $set)
-        {
-            if(is_array($set)) {
+        foreach ($this->_errors as $field => $set) {
+            if (is_array($set)) {
                 list($error, $params) = $set;
             } else {
                 $error = $set;
@@ -371,8 +336,7 @@ class Validation {
             // Get the label for this field
             $label = $this->_labels[$field];
 
-            if ($translate)
-            {
+            if ($translate) {
                 // Translate the label
                 $label = __($label);
             }
@@ -383,79 +347,58 @@ class Validation {
                 ':value' => $this->field($field),
             ];
 
-            if (is_array($values[':value']))
-            {
+            if (is_array($values[':value'])) {
                 // All values must be strings
                 $values[':value'] = implode(', ', Arr::flatten($values[':value']));
             }
 
-            if ($params)
-            {
-                foreach ($params as $key => $value)
-                {
-                    if (is_array($value))
-                    {
+            if ($params) {
+                foreach ($params as $key => $value) {
+                    if (is_array($value)) {
                         // All values must be strings
                         $value = implode(', ', Arr::flatten($value));
-                    }
-                    elseif (is_object($value))
-                    {
+                    } elseif (is_object($value)) {
                         // Objects cannot be used in message files
                         continue;
                     }
 
                     // Check if a label for this parameter exists
-                    if (isset($this->_labels[$value]))
-                    {
+                    if (isset($this->_labels[$value])) {
                         // Use the label as the value, eg: related field name for "matches"
                         $value = $this->_labels[$value];
 
-                        if ($translate)
-                        {
+                        if ($translate) {
                             // Translate the value
                             $value = __($value);
                         }
                     }
 
                     // Add each parameter as a numbered value, starting from 1
-                    $values[':param'.($key + 1)] = $value;
+                    $values[':param' . ($key + 1)] = $value;
                 }
             }
 
 
-            if($message = Arr::path($this->_error_messages, "{$field}.{$error}") AND is_string($message)) {
+            if ($message = Arr::path($this->_error_messages, "{$field}.{$error}") AND is_string($message)) {
 
-            }
-            elseif ($message = Mii::message($file, "{$field}.{$error}") AND is_string($message))
-            {
+            } elseif ($message = Mii::message($file, "{$field}.{$error}") AND is_string($message)) {
 
                 // Found a message for this field and error
-            }
-            elseif ($message = Mii::message($file, "{$field}.default") AND is_string($message))
-            {
+            } elseif ($message = Mii::message($file, "{$field}.default") AND is_string($message)) {
                 // Found a default message for this field
-            }
-            elseif ($message = Mii::message($file, $error) AND is_string($message))
-            {
+            } elseif ($message = Mii::message($file, $error) AND is_string($message)) {
                 // Found a default message for this error
-            }
-            elseif ($message = Mii::message('validation', $error) AND is_string($message))
-            {
+            } elseif ($message = Mii::message('validation', $error) AND is_string($message)) {
                 // Found a default message for this error
-            }
-            else
-            {
+            } else {
                 // No message exists, display the path expected
                 $message = "{$file}.{$field}.{$error}";
             }
 
-            if ($translate)
-            {
+            if ($translate) {
                 // Translate the message using the default language
                 $message = __($message, $values);
-            }
-            else
-            {
+            } else {
                 // Do not translate, just replace the values
                 $message = strtr($message, $values);
             }
@@ -472,8 +415,7 @@ class Validation {
      *
      * @return  array
      */
-    public function errors_values()
-    {
+    public function errors_values() {
         return $this->_errors;
     }
 

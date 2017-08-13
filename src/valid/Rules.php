@@ -2,6 +2,9 @@
 
 namespace mii\valid;
 
+use mii\util\Num;
+use mii\web\UploadedFile;
+
 class Rules {
 
 
@@ -563,6 +566,60 @@ class Rules {
     public static function matches($array, $field, $match)
     {
         return ($array[$field] === $array[$match]);
+    }
+
+
+    /**
+     * Test if an uploaded file is an allowed file type, by extension.
+     *
+     *     $array->rule('file', 'file_type', [':value', ['jpg', 'png', 'gif']]);
+     *
+     * @param   array   $file       $_FILES item
+     * @param   array   $allowed    allowed file extensions
+     * @return  bool
+     */
+    public static function file_type(UploadedFile $file, array $allowed) : bool
+    {
+        if ($file->has_error())
+            return true;
+
+        $ext = strtolower(pathinfo($file->name, PATHINFO_EXTENSION));
+
+        return in_array($ext, $allowed);
+    }
+
+    /**
+     * Validation rule to test if an uploaded file is allowed by file size.
+     * File sizes are defined as: SB, where S is the size (1, 8.5, 300, etc.)
+     * and B is the byte unit (K, MiB, GB, etc.). All valid byte units are
+     * defined in Num::$byte_units
+     *
+     *     $array->rule('file', 'file_size', array(':value', '1M'))
+     *     $array->rule('file', 'file_size', array(':value', '2.5KiB'))
+     *
+     * @param   array   $file   $_FILES item
+     * @param   string  $size   maximum file size allowed
+     * @return  bool
+     */
+    public static function file_size(UploadedFile $file, $size)
+    {
+        if ($file->error === UPLOAD_ERR_INI_SIZE)
+        {
+            // Upload is larger than PHP allowed size (upload_max_filesize)
+            return FALSE;
+        }
+
+        if ($file->error !== UPLOAD_ERR_OK)
+        {
+            // The upload failed, no size to check
+            return TRUE;
+        }
+
+        // Convert the provided size to bytes for comparison
+        $size = Num::bytes($size);
+
+        // Test that the file is under or equal to the max size
+        return ($file->size <= $size);
     }
 
 }
