@@ -167,13 +167,29 @@ class Form
         return isset($this->_changed[$field_name]);
     }
 
+    public function __set($name, $value) {
+        $this->set($name, $value);
+    }
+
+    public function __get($name) {
+        return $this->get($name);
+    }
+
+
     public function get(string $name) {
         return $this->_fields[$name];
     }
 
-    public function set(string $name, $value) {
-        $this->_changed[$name] = true;
-        return $this->_fields[$name] = $value;
+    public function set($name, $value = null) {
+
+        if (!is_array($name)) {
+            $name = [$name => $value];
+        }
+
+        foreach ($name as $key => $value) {
+            $this->_changed[$key] = true;
+            $this->_fields[$key] = $value;
+        }
     }
 
 
@@ -192,6 +208,12 @@ class Form
         $this->after_validate($passed);
 
         return $passed;
+    }
+
+    public function error($field, $error, array $params = null) {
+        $this->validation->error($field, $error, $params);
+
+        return $this;
     }
 
     public function errors(): array {

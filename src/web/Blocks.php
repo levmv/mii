@@ -131,9 +131,7 @@ class Blocks extends Component
 
 
     public function render(): void {
-        if (config('debug')) {
-            $benchmark = \mii\util\Profiler::start('Assets', __FUNCTION__);
-        }
+
 
         foreach ($this->_blocks as $block_name => $block) {
 
@@ -183,12 +181,6 @@ class Blocks extends Component
         }
 
         $this->_rendered = true;
-
-        if (config('debug')) {
-            \mii\util\Profiler::stop($benchmark);
-            if (empty($this->_css) AND empty($this->_js[0]) AND empty($this->_js[1]) AND empty($this->_js[2]))
-                \mii\util\Profiler::delete($benchmark);
-        }
     }
 
     /**
@@ -281,7 +273,12 @@ class Blocks extends Component
 
 
     private function _build_block(string $block_name, string $type, array $files): void {
+
         $result_file_name = $block_name . crc32(implode('', array_keys($files)));
+
+        if (config('debug')) {
+            $benchmark = \mii\util\Profiler::start('Assets', $result_file_name.$type);
+        }
 
         $is_css = ($type === '.css');
 
@@ -318,6 +315,12 @@ class Blocks extends Component
 
             } else {
                 $this->_js[Blocks::END][] = '<script src="' . $web_output . '?' . filemtime($output) . '"></script>';
+            }
+
+            if (config('debug')) {
+                \mii\util\Profiler::stop($benchmark);
+                if (empty($this->_css) AND empty($this->_js[0]) AND empty($this->_js[1]) AND empty($this->_js[2]))
+                    \mii\util\Profiler::delete($benchmark);
             }
 
             return;

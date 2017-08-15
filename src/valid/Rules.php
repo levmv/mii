@@ -63,8 +63,9 @@ class Rules
      * @param   integer $length minimum length required
      * @return  boolean
      */
-    public static function min_length($value, $length) {
-        return mb_strlen($value) >= $length;
+    public static function min($value, $length) {
+
+        return static::_check_size($value, $length, 1);
     }
 
     /**
@@ -74,9 +75,22 @@ class Rules
      * @param   integer $length maximum length required
      * @return  boolean
      */
-    public static function max_length($value, $length) {
-        return mb_strlen($value) <= $length;
+    public static function max($value, $length) {
+        return static::_check_size($value, $length, -1);
     }
+
+
+    public static function _check_size($value, $length, $dir) {
+        if(is_object($value) && $value instanceof UploadedFile)
+            return static::file_size($value, $length, $dir);
+
+        if(is_string($value)) {
+            return (mb_strlen($value) <=> $length) === $dir;
+        }
+
+        return ($value <=> $length) === $dir;
+    }
+
 
     /**
      * Checks that a field is exactly the right length.
@@ -94,7 +108,7 @@ class Rules
             return FALSE;
         }
 
-        return mb_strlen($value) === $length;
+        return static::_check_size($value, $length, 0);
     }
 
     /**
@@ -422,8 +436,11 @@ class Rules
 
 
 
-    public static function uploaded(UploadedFile $file): bool {
-        return !$file->has_error() && $file->is_uploaded_file();
+    public static function uploaded( $file): bool {
+        return is_object($file) &&
+            $file instanceof UploadedFile &&
+            !$file->has_error() &&
+            $file->is_uploaded_file();
     }
 
 
@@ -436,7 +453,11 @@ class Rules
      * @param   array $allowed allowed file extensions
      * @return  bool
      */
-    public static function file_type(UploadedFile $file, array $allowed): bool {
+    public static function file_type($file, array $allowed): bool {
+
+        if(! $file instanceof UploadedFile)
+            return true;
+
         if ($file->has_error())
             return true;
 
@@ -458,7 +479,7 @@ class Rules
      * @param   string $size maximum file size allowed
      * @return  bool
      */
-    public static function file_size(UploadedFile $file, $size) {
+    public static function file_size(UploadedFile $file, $size, $dir = -1) {
         if ($file->error === UPLOAD_ERR_INI_SIZE) {
             // Upload is larger than PHP allowed size (upload_max_filesize)
             return FALSE;
@@ -472,8 +493,8 @@ class Rules
         // Convert the provided size to bytes for comparison
         $size = Num::bytes($size);
 
-        // Test that the file is under or equal to the max size
-        return ($file->size <= $size);
+
+        return ($file->size <=> $size) === $dir;
     }
 
 }
