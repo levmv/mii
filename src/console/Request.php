@@ -5,7 +5,8 @@ namespace mii\console;
 
 use mii\core\Component;
 
-class Request extends Component {
+class Request extends Component
+{
     /**
      * @var  array   parameters from the route
      */
@@ -23,9 +24,8 @@ class Request extends Component {
     public $action;
 
 
-    public function init(array $config = []) : void
-    {
-        foreach($config as $key => $value)
+    public function init(array $config = []): void {
+        foreach ($config as $key => $value)
             $this->$key = $value;
 
         if (isset($_SERVER['argv'])) {
@@ -53,7 +53,7 @@ class Request extends Component {
                 $params[$name] = isset($matches[3]) ? $matches[3] : true;
 
             } else {
-                if($c === 0) {
+                if ($c === 0) {
                     $this->action = $param;
                 } else {
                     $params[] = $param;
@@ -72,51 +72,51 @@ class Request extends Component {
         $controller_class = $controller = $this->controller;
 
         $namespaces = config('console.namespaces', []);
-        if(count($namespaces)) {
-            $controller_class = array_shift($namespaces).'\\'.$controller;
+        if (count($namespaces)) {
+            $controller_class = array_shift($namespaces) . '\\' . $controller;
         }
 
-            while (!class_exists($controller_class)) {
+        while (!class_exists($controller_class)) {
 
-                // Try next controller
+            // Try next controller
 
-                if(count($namespaces)) {
-                    $controller_class = array_shift($namespaces).'\\'.$controller;
-                    continue;
-                } else {
+            if (count($namespaces)) {
+                $controller_class = array_shift($namespaces) . '\\' . $controller;
+                continue;
+            } else {
 
-                    // try mii controller
-                    $controller_class = 'mii\\console\\controllers\\'.$controller;
+                // try mii controller
+                $controller_class = 'mii\\console\\controllers\\' . $controller;
 
-                    if (!class_exists($controller_class)) {
-                        throw new CliException('Unknown command :com',
-                            [':com' => $controller]
-                        );
-                    }
+                if (!class_exists($controller_class)) {
+                    throw new CliException('Unknown command :com',
+                        [':com' => $controller]
+                    );
                 }
             }
-            // Load the controller using reflection
-            $class = new \ReflectionClass($controller_class);
+        }
+        // Load the controller using reflection
+        $class = new \ReflectionClass($controller_class);
 
-            if ($class->isAbstract()) {
-                throw new CliException(
-                    'Cannot create instances of abstract :controller',
-                    [':controller' => $controller]
-                );
-            }
-            $response = new Response;
+        if ($class->isAbstract()) {
+            throw new CliException(
+                'Cannot create instances of abstract :controller',
+                [':controller' => $controller]
+            );
+        }
+        $response = new Response;
 
-            // Create a new instance of the controller
-            $controller = $class->newInstance($this, $response);
+        // Create a new instance of the controller
+        $controller = $class->newInstance($this, $response);
 
-            // Run the controller's execute() method
-            $response = $class->getMethod('execute')->invoke($controller, $this->params);
+        // Run the controller's execute() method
+        $response = $class->getMethod('execute')->invoke($controller, $this->params);
 
 
-            if (!$response instanceof Response) {
-                // Controller failed to return a Response.
-                throw new CliException('Controller failed to return a Response');
-            }
+        if (!$response instanceof Response) {
+            // Controller failed to return a Response.
+            throw new CliException('Controller failed to return a Response');
+        }
 
 
         return $response;

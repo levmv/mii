@@ -36,8 +36,7 @@ class Session extends Component
     protected $_flash = '__flash';
 
 
-
-    public function init(array $config = []) : void {
+    public function init(array $config = []): void {
         if (isset($config['lifetime'])) {
             // Cookie lifetime
             $this->_lifetime = (int)$config['lifetime'];
@@ -61,8 +60,7 @@ class Session extends Component
      * @return bool
      */
 
-    public function check_cookie()
-    {
+    public function check_cookie() {
         return isset($_COOKIE[$this->_name]);
     }
 
@@ -73,8 +71,7 @@ class Session extends Component
      *
      * @return  string
      */
-    public function name()
-    {
+    public function name() {
         return $this->_name;
     }
 
@@ -87,24 +84,21 @@ class Session extends Component
      * @param   mixed $default default value to return
      * @return  mixed
      */
-    public function get($key, $default = null)
-    {
+    public function get($key, $default = null) {
         $this->open();
 
         return array_key_exists($key, $this->_data) ? $this->_data[$key] : $default;
     }
 
 
-    public function has($key)
-    {
+    public function has($key) {
         $this->open();
 
         return array_key_exists($key, $this->_data);
     }
 
 
-    public function open($id = null)
-    {
+    public function open($id = null) {
 
         if ($this->is_active())
             return;
@@ -141,8 +135,7 @@ class Session extends Component
         return;
     }
 
-    public function is_active()
-    {
+    public function is_active() {
         return session_status() === PHP_SESSION_ACTIVE;
     }
 
@@ -155,8 +148,7 @@ class Session extends Component
      * @param   mixed $value value
      * @return  $this
      */
-    public function set($key, $value)
-    {
+    public function set($key, $value) {
         $this->open();
 
         $this->_data[$key] = $value;
@@ -173,8 +165,7 @@ class Session extends Component
      * @param   mixed $value referenced value
      * @return  $this
      */
-    public function bind($key, & $value)
-    {
+    public function bind($key, & $value) {
         $this->open();
 
         $this->_data[$key] =& $value;
@@ -190,8 +181,7 @@ class Session extends Component
      * @param   string $key,... variable name
      * @return  $this
      */
-    public function delete(...$args)
-    {
+    public function delete(...$args) {
         $this->open();
 
         foreach ($args as $key) {
@@ -208,9 +198,8 @@ class Session extends Component
      *
      * @return  string
      */
-    public function regenerate($delete_old = false)
-    {
-        if($this->is_active()) {
+    public function regenerate($delete_old = false) {
+        if ($this->is_active()) {
             // Regenerate the session id
             @session_regenerate_id($delete_old);
         } else {
@@ -230,8 +219,7 @@ class Session extends Component
      * been sent.
      *
      */
-    public function close() : void
-    {
+    public function close(): void {
         if ($this->is_active()) {
 
             // Set the last active timestamp
@@ -246,8 +234,7 @@ class Session extends Component
      * Completely destroy the current session.
      *
      */
-    public function destroy() : void
-    {
+    public function destroy(): void {
         if ($this->is_active()) {
 
             session_unset();
@@ -259,14 +246,12 @@ class Session extends Component
         }
     }
 
-    public function id() : string
-    {
+    public function id(): string {
         return session_id();
     }
 
 
-    public function flash($key, $value = true)
-    {
+    public function flash($key, $value = true) {
         $this->open();
 
         $counters = $this->get($this->_flash, []);

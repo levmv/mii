@@ -9,7 +9,8 @@ namespace mii\core;
 use ReflectionClass;
 
 
-class Instance {
+class Instance
+{
 
     public $id;
 
@@ -79,8 +80,7 @@ class Container
      * @return object an instance of the requested class.
      * @throws \Exception if the class cannot be recognized or correspond to an invalid definition
      */
-    public function get(string $class, array $params = [])
-    {
+    public function get(string $class, array $params = []) {
         if (isset($this->_shared[$class])) {
             // singleton
             return $this->_shared[$class];
@@ -180,8 +180,7 @@ class Container
      * constructor when [[get()]] is called.
      * @return $this the container itself
      */
-    public function set($class, $definition = [], array $params = [])
-    {
+    public function set($class, $definition = [], array $params = []) {
         $this->_definitions[$class] = $this->normalize_definition($class, $definition);
         $this->_params[$class] = $params;
         unset($this->_shared[$class]);
@@ -201,8 +200,7 @@ class Container
      * @return $this the container itself
      * @see set()
      */
-    public function share($class, $definition = [], array $params = [])
-    {
+    public function share($class, $definition = [], array $params = []) {
         $this->_definitions[$class] = $this->normalize_definition($class, $definition);
         $this->_params[$class] = $params;
         $this->_shared[$class] = null;
@@ -215,8 +213,7 @@ class Container
      * @return boolean whether the container has the definition of the specified name..
      * @see set()
      */
-    public function has($class) : bool
-    {
+    public function has($class): bool {
         return isset($this->_definitions[$class]);
     }
 
@@ -227,8 +224,7 @@ class Container
      * @return boolean whether the given name corresponds to a registered singleton. If `$checkInstance` is true,
      * the method should return a value indicating whether the singleton has been instantiated.
      */
-    public function has_shared(string $class, $checkInstance = false) : bool
-    {
+    public function has_shared(string $class, $checkInstance = false): bool {
         return $checkInstance ? isset($this->_shared[$class]) : array_key_exists($class, $this->_shared);
     }
 
@@ -236,8 +232,7 @@ class Container
      * Removes the definition for the specified name.
      * @param string $class class name, interface name or alias name
      */
-    public function clear(string $class) : void
-    {
+    public function clear(string $class): void {
         unset($this->_definitions[$class], $this->_shared[$class]);
     }
 
@@ -247,8 +242,7 @@ class Container
      * @param string|array|callable $definition the class definition
      * @return array the normalized class definition
      */
-    protected function normalize_definition($class, $definition)
-    {
+    protected function normalize_definition($class, $definition) {
         if (empty($definition)) {
             return ['class' => $class];
         } elseif (is_string($definition)) {
@@ -273,8 +267,7 @@ class Container
      * Returns the list of the object definitions or the loaded shared objects.
      * @return array the list of the object definitions or the loaded shared objects (type or ID => definition or instance).
      */
-    public function getDefinitions()
-    {
+    public function getDefinitions() {
         return $this->_definitions;
     }
 
@@ -286,8 +279,7 @@ class Container
      * @param array $params constructor parameters
      * @return object the newly created instance of the specified class
      */
-    protected function build($class, $params)
-    {
+    protected function build($class, $params) {
         /* @var $reflection ReflectionClass */
         list ($reflection, $dependencies) = $this->get_dependencies($class);
 
@@ -306,8 +298,7 @@ class Container
      * @param array $params the constructor parameters
      * @return array the merged parameters
      */
-    protected function merge_params(string $class, $params)
-    {
+    protected function merge_params(string $class, $params) {
         if (empty($this->_params[$class])) {
             return $params;
         } elseif (empty($params)) {
@@ -326,8 +317,7 @@ class Container
      * @param string $class class name, interface name or alias name
      * @return array the dependencies of the specified class.
      */
-    protected function get_dependencies(string $class) : array
-    {
+    protected function get_dependencies(string $class): array {
         if (isset($this->_reflections[$class])) {
             return [$this->_reflections[$class], $this->_dependencies[$class]];
         }
@@ -359,8 +349,7 @@ class Container
      * @param ReflectionClass $reflection the class reflection associated with the dependencies
      * @return array the resolved dependencies
      */
-    protected function resolve_dependencies(array $dependencies, $reflection = null) : array
-    {
+    protected function resolve_dependencies(array $dependencies, $reflection = null): array {
         foreach ($dependencies as $index => $dependency) {
             if ($dependency instanceof Instance) {
                 if ($dependency->id !== null) {

@@ -2,8 +2,8 @@
 
 namespace mii\util;
 
-use mii\web\Exception;
 use mii\core\ErrorException;
+use mii\web\Exception;
 
 /**
  * Upload helper class for working with uploaded files and [Validation].
@@ -12,7 +12,8 @@ use mii\core\ErrorException;
  * @copyright  (c) 2007-2012 Kohana Team
  * @license    http://kohanaframework.org/license
  */
-class Upload {
+class Upload
+{
 
     /**
      * @var  string  default upload directory
@@ -31,50 +32,43 @@ class Upload {
      *         Upload::save($array['file']);
      *     }
      *
-     * @param   array   $file       uploaded file data
-     * @param   string  $filename   new filename
-     * @param   string  $directory  new directory
-     * @param   integer $chmod      chmod mask
+     * @param   array $file uploaded file data
+     * @param   string $filename new filename
+     * @param   string $directory new directory
+     * @param   integer $chmod chmod mask
      * @return  string  on success, full path to new file
      * @return  FALSE   on failure
      */
-    public static function save(array $file, $filename = NULL, $directory = NULL, $chmod = 0644)
-    {
-        if ( ! isset($file['tmp_name']) OR ! is_uploaded_file($file['tmp_name']))
-        {
+    public static function save(array $file, $filename = NULL, $directory = NULL, $chmod = 0644) {
+        if (!isset($file['tmp_name']) OR !is_uploaded_file($file['tmp_name'])) {
             // Ignore corrupted uploads
             return FALSE;
         }
 
-        if ($filename === NULL)
-        {
+        if ($filename === NULL) {
             // Use the default filename, with a timestamp pre-pended
-            $filename = uniqid().$file['name'];
+            $filename = uniqid() . $file['name'];
         }
 
         // Remove spaces from the filename
         $filename = preg_replace('/\s+/u', '_', $filename);
 
 
-        if ($directory === NULL)
-        {
+        if ($directory === NULL) {
             // Use the pre-configured upload directory
             $directory = Upload::$default_directory;
         }
 
-        if ( ! is_dir($directory) OR ! is_writable(realpath($directory)))
-        {
+        if (!is_dir($directory) OR !is_writable(realpath($directory))) {
             throw new Exception('Directory :dir must be writable',
                 [':dir' => Debug::path($directory)]);
         }
 
         // Make the filename into a complete path
-        $filename = realpath($directory).DIRECTORY_SEPARATOR.$filename;
+        $filename = realpath($directory) . DIRECTORY_SEPARATOR . $filename;
 
-        if (move_uploaded_file($file['tmp_name'], $filename))
-        {
-            if ($chmod !== FALSE)
-            {
+        if (move_uploaded_file($file['tmp_name'], $filename)) {
+            if ($chmod !== FALSE) {
                 // Set permissions on filename
                 chmod($filename, $chmod);
             }
@@ -182,11 +176,10 @@ class Upload {
      *
      *     $array->rule('file', 'Upload::valid')
      *
-     * @param   array   $file   $_FILES item
+     * @param   array $file $_FILES item
      * @return  bool
      */
-    public static function valid($file)
-    {
+    public static function valid($file) {
 
         return (isset($file['error'])
             AND isset($file['name'])
@@ -200,11 +193,10 @@ class Upload {
      *
      *     $array->rule('file', 'Upload::not_empty');
      *
-     * @param   array   $file   $_FILES item
+     * @param   array $file $_FILES item
      * @return  bool
      */
-    public static function not_empty(array $file)
-    {
+    public static function not_empty(array $file) {
         return (isset($file['error'])
             AND isset($file['tmp_name'])
             AND $file['error'] === UPLOAD_ERR_OK
@@ -216,12 +208,11 @@ class Upload {
      *
      *     $array->rule('file', 'Upload::type', array(':value', array('jpg', 'png', 'gif')));
      *
-     * @param   array   $file       $_FILES item
-     * @param   array   $allowed    allowed file extensions
+     * @param   array $file $_FILES item
+     * @param   array $allowed allowed file extensions
      * @return  bool
      */
-    public static function type(array $file, array $allowed)
-    {
+    public static function type(array $file, array $allowed) {
         if ($file['error'] !== UPLOAD_ERR_OK)
             return TRUE;
 
@@ -239,20 +230,17 @@ class Upload {
      *     $array->rule('file', 'Upload::size', array(':value', '1M'))
      *     $array->rule('file', 'Upload::size', array(':value', '2.5KiB'))
      *
-     * @param   array   $file   $_FILES item
-     * @param   string  $size   maximum file size allowed
+     * @param   array $file $_FILES item
+     * @param   string $size maximum file size allowed
      * @return  bool
      */
-    public static function size(array $file, $size)
-    {
-        if ($file['error'] === UPLOAD_ERR_INI_SIZE)
-        {
+    public static function size(array $file, $size) {
+        if ($file['error'] === UPLOAD_ERR_INI_SIZE) {
             // Upload is larger than PHP allowed size (upload_max_filesize)
             return FALSE;
         }
 
-        if ($file['error'] !== UPLOAD_ERR_OK)
-        {
+        if ($file['error'] !== UPLOAD_ERR_OK) {
             // The upload failed, no size to check
             return TRUE;
         }
@@ -277,51 +265,40 @@ class Upload {
      *     $array->rule('image', 'Upload::image', array(':value', 100, 100, TRUE));
      *
      *
-     * @param   array   $file       $_FILES item
-     * @param   integer $max_width  maximum width of image
+     * @param   array $file $_FILES item
+     * @param   integer $max_width maximum width of image
      * @param   integer $max_height maximum height of image
-     * @param   boolean $exact      match width and height exactly?
+     * @param   boolean $exact match width and height exactly?
      * @return  boolean
      */
-    public static function image(array $file, $max_width = NULL, $max_height = NULL, $exact = FALSE)
-    {
-        if (Upload::not_empty($file))
-        {
-            try
-            {
+    public static function image(array $file, $max_width = NULL, $max_height = NULL, $exact = FALSE) {
+        if (Upload::not_empty($file)) {
+            try {
                 // Get the width and height from the uploaded image
                 list($width, $height) = getimagesize($file['tmp_name']);
-            }
-            catch (ErrorException $e)
-            {
+            } catch (ErrorException $e) {
                 // Ignore read errors
             }
 
-            if (empty($width) OR empty($height))
-            {
+            if (empty($width) OR empty($height)) {
                 // Cannot get image size, cannot validate
                 return FALSE;
             }
 
-            if ( ! $max_width)
-            {
+            if (!$max_width) {
                 // No limit, use the image width
                 $max_width = $width;
             }
 
-            if ( ! $max_height)
-            {
+            if (!$max_height) {
                 // No limit, use the image height
                 $max_height = $height;
             }
 
-            if ($exact)
-            {
+            if ($exact) {
                 // Check if dimensions match exactly
                 return ($width === $max_width AND $height === $max_height);
-            }
-            else
-            {
+            } else {
                 // Check if size is within maximum dimensions
                 return ($width <= $max_width AND $height <= $max_height);
             }

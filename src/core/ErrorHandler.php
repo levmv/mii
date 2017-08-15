@@ -3,7 +3,8 @@
 namespace mii\core;
 
 
-class ErrorHandler extends Component {
+class ErrorHandler extends Component
+{
 
     /**
      * @var integer the size of the reserved memory. A portion of memory is pre-allocated so that
@@ -31,8 +32,7 @@ class ErrorHandler extends Component {
         register_shutdown_function([$this, 'handle_fatal_error']);
     }
 
-    public function unregister()
-    {
+    public function unregister() {
         restore_error_handler();
         restore_exception_handler();
     }
@@ -49,9 +49,7 @@ class ErrorHandler extends Component {
     }
 
 
-
-    public function handle_exception($e)
-    {
+    public function handle_exception($e) {
         // disable error capturing to avoid recursive errors while handling exceptions
         $this->unregister();
 
@@ -78,8 +76,7 @@ class ErrorHandler extends Component {
     }
 
 
-    public function handle_error($code, $error, $file, $line)
-    {
+    public function handle_error($code, $error, $file, $line) {
         if (error_reporting() & $code) {
 
             unset($this->_memory_reserve);
@@ -111,14 +108,13 @@ class ErrorHandler extends Component {
 
 
         // is it fatal ?
-        if ($error = error_get_last() AND in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING]))
-        {
+        if ($error = error_get_last() AND in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING])) {
             $this->clear_output();
             $exception = new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']);
 
             $this->report($exception);
             $this->render($exception);
-            
+
             \Mii::$app->log && \Mii::$app->log->flush();
 
             // Shutdown now to avoid a "death loop"
@@ -131,8 +127,7 @@ class ErrorHandler extends Component {
     /**
      * Removes all output echoed before calling this method.
      */
-    public function clear_output()
-    {
+    public function clear_output() {
         // the following manual level counting is to deal with zlib.output_compression set to On
         for ($level = ob_get_level(); $level > 0; --$level) {
             if (!@ob_end_clean()) {
@@ -140,6 +135,7 @@ class ErrorHandler extends Component {
             }
         }
     }
+
     /**
      * Converts an exception into a PHP error.
      *
@@ -147,8 +143,7 @@ class ErrorHandler extends Component {
      * to PHP errors because exceptions cannot be thrown inside of them.
      * @param \Exception $exception the exception to convert to a PHP error.
      */
-    public static function convert_to_error($exception)
-    {
+    public static function convert_to_error($exception) {
         trigger_error(Exception::text($exception), E_USER_ERROR);
     }
 

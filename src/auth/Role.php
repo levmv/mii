@@ -4,7 +4,8 @@ namespace mii\auth;
 
 use mii\db\ORM;
 
-class Role extends ORM {
+class Role extends ORM
+{
 
     protected static $table = 'roles';
 
@@ -27,7 +28,6 @@ class Role extends ORM {
             ->where('roles_users.role_id', '=', $this->id);
 
     }
-
 
 
 }

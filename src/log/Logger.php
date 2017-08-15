@@ -4,7 +4,8 @@ namespace mii\log;
 
 use mii\core\Component;
 
-class Logger extends Component {
+class Logger extends Component
+{
 
     public $targets = [];
 
@@ -66,12 +67,11 @@ class Logger extends Component {
     ];
 
 
-
-    public function init(array $config = []) : void {
+    public function init(array $config = []): void {
 
         parent::init($config);
 
-        foreach($this->targets as $name => $logger) {
+        foreach ($this->targets as $name => $logger) {
 
             $ref = new \ReflectionClass($logger['class']);
             $this->targets[$name] = $ref->newInstanceArgs([$logger]);
@@ -83,14 +83,14 @@ class Logger extends Component {
     }
 
     public function log($level, $message, $category) {
-        foreach($this->targets as $target) {
+        foreach ($this->targets as $target) {
             $target->log($level, $message, $category);
         }
     }
 
     public function flush() {
 
-        foreach($this->targets as $target) {
+        foreach ($this->targets as $target) {
             $target->flush();
         }
     }

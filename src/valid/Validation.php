@@ -3,8 +3,8 @@
 namespace mii\valid;
 
 
-use mii\util\Arr;
 use Mii;
+use mii\util\Arr;
 
 class Validation
 {
@@ -42,7 +42,7 @@ class Validation
     /**
      * Returns the array of data to be validated.
      *
-     * @return  array
+     * @return mixed
      */
     public function data($data = null) {
         if ($data === null)
@@ -115,7 +115,7 @@ class Validation
      * @return  $this
      */
     public function rule($field, $rule, array $params = []) {
-        if ($field !== TRUE AND !isset($this->_labels[$field])) {
+        if ($field !== true AND !isset($this->_labels[$field])) {
             // Set the field label to the field name
             $this->_labels[$field] = $field;
         }

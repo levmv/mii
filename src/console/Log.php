@@ -6,16 +6,17 @@ use mii\log\File;
 use mii\log\Logger;
 use mii\util\Console;
 
-class Log extends File {
+class Log extends File
+{
 
     protected $controllers;
 
     public function log($level, $message, $category) {
 
-        if(! ($this->levels & $level))
+        if (!($this->levels & $level))
             return;
 
-        if($this->category AND !in_array($category, $this->category))
+        if ($this->category AND !in_array($category, $this->category))
             return;
 
         $this->messages[] = [$message, $level, $category, time()];
@@ -23,13 +24,13 @@ class Log extends File {
         if (!is_string($message)) {
 
             if ($message instanceof \Exception) {
-                $message = (string) $message;
+                $message = (string)$message;
             }
         }
 
         $params = [];
 
-        switch($level) {
+        switch ($level) {
             case Logger::WARNING:
                 $params = [Console::FG_PURPLE];
                 break;
@@ -41,10 +42,10 @@ class Log extends File {
                 break;
         }
 
-        if(count($params))
+        if (count($params))
             $message = Console::ansi_format($message, $params);
 
-        Console::stdout($message."\n");
+        Console::stdout($message . "\n");
 
     }
 

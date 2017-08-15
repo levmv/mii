@@ -7,7 +7,8 @@ use Mii;
 use mii\console\CliException;
 use mii\console\Controller;
 
-class Block extends Controller {
+class Block extends Controller
+{
 
     public $description = 'Blocks builder';
 
@@ -17,8 +18,8 @@ class Block extends Controller {
 
     public function before() {
 
-        $this->input_path = path('vendor').'/bower/';
-        $this->output_path = path('app').'/blocks';
+        $this->input_path = path('vendor') . '/bower/';
+        $this->output_path = path('app') . '/blocks';
 
         $this->blocks = $this->block_rules();
 
@@ -26,7 +27,7 @@ class Block extends Controller {
 
     public function block_rules() {
         return [
-            path('app').'/blocks' => [
+            path('app') . '/blocks' => [
                 'i_jquery' => 'do_jquery',
                 'i_chosen' => 'do_chosen',
                 'i_fancybox' => 'do_fancybox'
@@ -37,8 +38,8 @@ class Block extends Controller {
 
     public function index() {
 
-        foreach($this->blocks as $output_path => $blocks) {
-            foreach($blocks as $block => $func) {
+        foreach ($this->blocks as $output_path => $blocks) {
+            foreach ($blocks as $block => $func) {
 
                 $this->output_path = Mii::resolve($output_path);
 
@@ -62,8 +63,8 @@ class Block extends Controller {
 
         $this->to_block('chosen/chosen.jquery.min.js', $block, 'js');
 
-        $this->to_block('chosen/chosen.min.css', $block, 'css', function($text) use ($block) {
-            return str_replace('url(chosen', 'url(/assets/'.$block.'/chosen', $text);
+        $this->to_block('chosen/chosen.min.css', $block, 'css', function ($text) use ($block) {
+            return str_replace('url(chosen', 'url(/assets/' . $block . '/chosen', $text);
         });
 
         $this->to_assets('chosen/chosen-sprite.png', $block);
@@ -83,8 +84,8 @@ class Block extends Controller {
 
         $this->to_block('fotorama/fotorama.js', $block, 'js');
 
-        $this->to_block('fotorama/fotorama.css', $block, 'css', function($text) use ($block) {
-            return str_replace('url(fotorama', 'url(/assets/'.$block.'/fotorama', $text);
+        $this->to_block('fotorama/fotorama.css', $block, 'css', function ($text) use ($block) {
+            return str_replace('url(fotorama', 'url(/assets/' . $block . '/fotorama', $text);
         });
 
         $this->to_assets('fotorama/fotorama.png', $block);
@@ -102,8 +103,8 @@ class Block extends Controller {
 
         $this->to_block('fancyBox/source/jquery.fancybox.pack.js', $block, 'js');
 
-        $this->to_block('fancyBox/source/jquery.fancybox.css', 'i_fancybox', 'css', function($text) use ($block) {
-            return str_replace("url('", "url('/assets/".$block."/", $text);
+        $this->to_block('fancyBox/source/jquery.fancybox.css', 'i_fancybox', 'css', function ($text) use ($block) {
+            return str_replace("url('", "url('/assets/" . $block . "/", $text);
         });
 
         $this->to_assets('fancyBox/source/fancybox_loading.gif', $block);
@@ -129,12 +130,12 @@ class Block extends Controller {
     protected function do_jqueryui($block) {
         $this->to_block('jquery-ui/jquery-ui.min.js', $block, 'js');
         $this->to_block('jquery-ui/themes/ui-lightness/jquery-ui.min.css', $block, 'css',
-            function($text) use ($block) {
-                return str_replace('url("images', 'url("assets/'.$block, $text);
+            function ($text) use ($block) {
+                return str_replace('url("images', 'url("assets/' . $block, $text);
             });
 
-        $this->iterate_dir('jquery-ui/themes/ui-lightness/images', function($file) use ($block) {
-            $this->to_assets('jquery-ui/themes/ui-lightness/images/'.$file, $block);
+        $this->iterate_dir('jquery-ui/themes/ui-lightness/images', function ($file) use ($block) {
+            $this->to_assets('jquery-ui/themes/ui-lightness/images/' . $file, $block);
         });
 
     }
@@ -146,21 +147,20 @@ class Block extends Controller {
 
     protected function do_fontawesome($block) {
         $this->to_block('font-awesome/css/font-awesome.min.css', $block, 'css',
-            function($text) use ($block) {
-                return str_replace('../fonts', '/assets/'.$block, $text);
+            function ($text) use ($block) {
+                return str_replace('../fonts', '/assets/' . $block, $text);
             });
-        $this->iterate_dir('font-awesome/fonts/', function($file) use ($block) {
-            $this->to_assets('font-awesome/fonts/'.$file, $block);
+        $this->iterate_dir('font-awesome/fonts/', function ($file) use ($block) {
+            $this->to_assets('font-awesome/fonts/' . $file, $block);
         });
     }
 
 
-    protected function to_block($from, $block_name, $ext, $callback = null)
-    {
+    protected function to_block($from, $block_name, $ext, $callback = null) {
         if (!is_array($from))
             $from = array($from);
 
-        $dir = $this->output_path.'/'.implode('/', explode('_', $block_name));
+        $dir = $this->output_path . '/' . implode('/', explode('_', $block_name));
 
         if (!is_dir($dir)) {
             try {
@@ -175,7 +175,7 @@ class Block extends Controller {
 
         foreach ($from as $f) {
 
-            if (!file_exists($this->input_path . '/'. $f))
+            if (!file_exists($this->input_path . '/' . $f))
                 throw new CliException('Source for :block not found. Skip.', [':block' => $block_name]);
 
             $text = file_get_contents($this->input_path . '/' . $f);
@@ -189,8 +189,7 @@ class Block extends Controller {
         file_put_contents($dir . '/' . $block_name . '.' . $ext, $out);
     }
 
-    protected function to_assets($from, $block_name, $callback = null)
-    {
+    protected function to_assets($from, $block_name, $callback = null) {
         if (!is_array($from))
             $from = array($from);
 
@@ -205,7 +204,7 @@ class Block extends Controller {
             $filename = basename($f, PATHINFO_FILENAME);
 
             if ($callback) {
-                $file = file_get_contents($this->input_path . '/'. $f);
+                $file = file_get_contents($this->input_path . '/' . $f);
                 file_put_contents($dir . '/' . $filename, call_user_func($callback, $file));
             } else {
                 copy($this->input_path . '/' . $f, $dir . '/' . $filename);
@@ -214,9 +213,9 @@ class Block extends Controller {
     }
 
     protected function iterate_dir($from, $callback) {
-        $files = scandir($this->input_path . '/'. $from);
-        array_map(function($item) use ($callback) {
-            if($item === '.' OR $item === '..')
+        $files = scandir($this->input_path . '/' . $from);
+        array_map(function ($item) use ($callback) {
+            if ($item === '.' OR $item === '..')
                 return;
 
             call_user_func($callback, $item);

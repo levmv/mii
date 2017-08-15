@@ -6,7 +6,8 @@ use Mii;
 use mii\core\ErrorException;
 use mii\core\Exception;
 
-class File extends Target {
+class File extends Target
+{
 
 
     protected $base_path;
@@ -22,16 +23,16 @@ class File extends Target {
     public function __construct($params) {
         $this->file = Mii::resolve($params['file']);
         $this->levels = isset($params['levels']) ? $params['levels'] : Logger::ALL;
-        $this->category = isset($params['category']) ? $params['category'] : [] ;
+        $this->category = isset($params['category']) ? $params['category'] : [];
     }
 
 
     public function log($level, $message, $category) {
 
-        if(! ($this->levels & $level))
+        if (!($this->levels & $level))
             return;
 
-        if(count($category) AND $this->category AND !in_array($category, $this->category))
+        if (count($category) AND $this->category AND !in_array($category, $this->category))
             return;
 
 
@@ -42,7 +43,7 @@ class File extends Target {
 
     public function flush() {
 
-        if(!count($this->messages))
+        if (!count($this->messages))
             return;
 
         $path = dirname($this->file);
@@ -64,21 +65,20 @@ class File extends Target {
     }
 
 
-    public function format_message($message)
-    {
+    public function format_message($message) {
         list($text, $level, $category, $timestamp) = $message;
 
         $level = Logger::$level_names[$level];
         if (!is_string($text)) {
 
             if ($text instanceof \Exception || $text instanceof \Throwable || $text instanceof Exception) {
-                $text = (string) $text;
+                $text = (string)$text;
             } else {
-               $text = var_export($text);
+                $text = var_export($text);
             }
         }
         //$prefix = $this->getMessagePrefix($message);
-        return date('Y-m-d H:i:s', $timestamp) . " [$level][".$category."] $text";
+        return date('Y-m-d H:i:s', $timestamp) . " [$level][" . $category . "] $text";
 
     }
 }

@@ -15,8 +15,7 @@ class App extends \mii\core\App
     protected $_session;
 
 
-    public function run()
-    {
+    public function run() {
         try {
             $this->request = new Request();
             $this->request->execute()->send();

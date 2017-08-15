@@ -3,7 +3,8 @@
 namespace mii\core;
 
 
-class Component {
+class Component
+{
 
     protected $component_id = '';
 
@@ -14,8 +15,8 @@ class Component {
     }
 
 
-    public function init(array $config = []) : void {
-        foreach($config as $key => $value)
+    public function init(array $config = []): void {
+        foreach ($config as $key => $value)
             $this->$key = $value;
     }
 

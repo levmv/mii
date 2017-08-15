@@ -3,12 +3,12 @@
 namespace mii\captcha;
 
 
-class Controller extends \mii\web\Controller {
+class Controller extends \mii\web\Controller
+{
 
     public $render_layout = false;
 
-    protected function access_rules()
-    {
+    protected function access_rules() {
         $this->acl->allow('*');
     }
 

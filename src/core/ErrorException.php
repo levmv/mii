@@ -21,8 +21,7 @@ class ErrorException extends \ErrorException
      * @param $lineno [optional]
      * @param $previous [optional]
      */
-    public function __construct($message = '', $code = 0, $severity = 1, $filename = __FILE__, $lineno = __LINE__, \Exception $previous = null)
-    {
+    public function __construct($message = '', $code = 0, $severity = 1, $filename = __FILE__, $lineno = __LINE__, \Exception $previous = null) {
         parent::__construct($message, $code, $severity, $filename, $lineno, $previous);
 
         if (function_exists('xdebug_get_function_stack')) {
@@ -58,16 +57,14 @@ class ErrorException extends \ErrorException
      * @param array $error error got from error_get_last()
      * @return boolean if error is one of fatal type
      */
-    public static function is_fatal_error($error)
-    {
+    public static function is_fatal_error($error) {
         return isset($error['type']) && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING]);
     }
 
     /**
      * @return string the user-friendly name of this exception
      */
-    public function get_name()
-    {
+    public function get_name() {
         static $names = [
             E_COMPILE_ERROR => 'PHP Compile Error',
             E_COMPILE_WARNING => 'PHP Compile Warning',

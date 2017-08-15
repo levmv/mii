@@ -165,7 +165,7 @@ class Query
 
         if ($columns !== null) {
             // Set the initial columns
-            if($already_quoted) {
+            if ($already_quoted) {
                 $this->_quoted_select = $columns;
                 $this->_select = [];
             } else {
@@ -293,10 +293,10 @@ class Query
      * @return  $this
      */
     public function and_having($column, $op, $value = NULL) {
-        if($column === null) {
+        if ($column === null) {
             $this->_having[] = ['AND' => '('];
             $this->_last_condition_where = false;
-        } elseif(is_array($column)) {
+        } elseif (is_array($column)) {
             foreach ($column as $row) {
                 $this->_having[] = ['AND' => $row];
             }
@@ -316,10 +316,10 @@ class Query
      * @return  $this
      */
     public function or_having($column = null, $op = null, $value = null) {
-        if($column === null) {
+        if ($column === null) {
             $this->_having[] = ['OR' => '('];
             $this->_last_condition_where = false;
-        } elseif(is_array($column)) {
+        } elseif (is_array($column)) {
             foreach ($column as $row) {
                 $this->_having[] = ['OR' => $row];
             }
@@ -478,7 +478,7 @@ class Query
 
     public function end($check_for_empty = false) {
 
-        if($this->_last_condition_where) {
+        if ($this->_last_condition_where) {
             if ($check_for_empty !== false) {
                 $group = end($this->_where);
 
@@ -895,7 +895,7 @@ class Query
      *
      * @return  string
      */
-    protected function _compile_join() : string {
+    protected function _compile_join(): string {
         $statements = [];
 
         foreach ($this->_joins as $join) {
@@ -946,7 +946,7 @@ class Query
      * @param   array $conditions condition statements
      * @return  string
      */
-    protected function _compile_conditions(array $conditions) : string {
+    protected function _compile_conditions(array $conditions): string {
         $last_condition = NULL;
 
         $sql = '';
@@ -1115,6 +1115,13 @@ class Query
             $object_params = $this->_object_params;
         }
 
+        assert(in_array($this->_type, [
+            Database::SELECT,
+            Database::INSERT,
+            Database::UPDATE,
+            Database::DELETE
+        ]), 'Wrong query type!');
+
         // Compile the SQL query
         switch ($this->_type) {
             case Database::SELECT:
@@ -1130,6 +1137,8 @@ class Query
                 $sql = $this->compile_delete();
                 break;
         }
+
+
 
         // Execute the query
         $result = $this->db->query($this->_type, $sql, $as_object, $object_params);
@@ -1233,7 +1242,7 @@ class Query
         $this->_order_by = $old_order;
         $this->_as_object = $as_object;
 
-        return (int) $count;
+        return (int)$count;
     }
 
     /**

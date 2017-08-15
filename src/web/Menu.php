@@ -46,23 +46,22 @@ class Menu
      * @param array $params
      */
 
-    public function __construct($items = null, $block_name = null, $current_id = null, $current_url = null)
-    {
+    public function __construct($items = null, $block_name = null, $current_id = null, $current_url = null) {
         $this->_uri = trim(URL::site(\Mii::$app->request->uri()), '/');
 
         if ($items) {
             $this->items = $items;
         }
 
-        if($block_name) {
+        if ($block_name) {
             $this->_block_name = $block_name;
         }
 
-        if($current_id !== null) {
+        if ($current_id !== null) {
             $this->current_id($current_id);
         }
 
-        if($current_url !== null) {
+        if ($current_url !== null) {
             $this->current_url($current_url);
         }
     }
@@ -71,15 +70,6 @@ class Menu
 
     }
 
-    /**
-     * @deprecated
-     *
-     *
-     */
-    public function current_item($current = null)
-    {
-        return $this->current_url($current);
-    }
 
     public function current_url($current_url = null) {
 
@@ -102,7 +92,6 @@ class Menu
             $this->_current_item = $current_url;
         }
     }
-
 
 
     public function current_id($current_id = null) {
@@ -132,10 +121,9 @@ class Menu
      *
      * @return  array  menu structure
      */
-    public function as_array() : array
-    {
+    public function as_array(): array {
         $menu = [];
-        foreach($this->items as $item) {
+        foreach ($this->items as $item) {
 
             $active = $this->active($item);
 
@@ -144,17 +132,16 @@ class Menu
                 ? $children = (new Menu($item['children']))->as_array()
                 : [];
 
-            $menu[] = array( 'name'    => $item['name'],
-                             'url'     => $item['url'],
-                             'children'=> $children,
-                             'active'  => ($active === Menu::ACTIVE_ITEM),
-                             'current' => ($active === Menu::CURRENT_ITEM));
+            $menu[] = array('name' => $item['name'],
+                'url' => $item['url'],
+                'children' => $children,
+                'active' => ($active === Menu::ACTIVE_ITEM),
+                'current' => ($active === Menu::CURRENT_ITEM));
         }
         return $menu;
     }
 
-    public function get($key, $default = NULL)
-    {
+    public function get($key, $default = NULL) {
 
         if (array_key_exists($key, $this->_data)) {
             return $this->_data[$key];
@@ -167,8 +154,7 @@ class Menu
         }
     }
 
-    public function set($key, $value = NULL)
-    {
+    public function set($key, $value = NULL) {
         if (is_array($key)) {
             foreach ($key as $name => $value) {
                 $this->_data[$name] = $value;
@@ -181,8 +167,7 @@ class Menu
     }
 
 
-    public function render($block_name = null)
-    {
+    public function render($block_name = null) {
         $this->on_render();
 
 
@@ -191,13 +176,12 @@ class Menu
         }
 
         return block($this->_block_name)
-                ->set('list', $this->as_array())
-                ->render();
+            ->set('list', $this->as_array())
+            ->render();
     }
 
 
-    public function __toString()
-    {
+    public function __toString() {
         try {
             return $this->render();
         } catch (\Exception $e) {
@@ -222,7 +206,7 @@ class Menu
 
     protected function active($value) {
 
-        if($this->_current_id !== null)
+        if ($this->_current_id !== null)
             return $this->is_active_id($value['id']);
 
         return $this->is_active_url($value['url']);
@@ -235,8 +219,7 @@ class Menu
      * @param   string  Url of item to check against
      * @return  mixed   Returns Menu::CURRENT_ITEM for current, Menu::ACTIVE_ITEM for active, or 0
      */
-    protected function is_active_url($url)
-    {
+    protected function is_active_url($url) {
         $uri = ($this->_current_url !== null) ? $this->_current_url : $this->_uri;
 
         $link = trim(URL::site($url), '/');
@@ -258,16 +241,12 @@ class Menu
             }
             return Menu::ACTIVE_ITEM;
         }
-
-        return 0;
     }
 
-    protected function is_active_id($id)
-    {
+    protected function is_active_id($id) {
         return ($this->_current_id == $id) ? Menu::CURRENT_ITEM : 0;
 
     }
-
 
 
 }

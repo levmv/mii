@@ -2,12 +2,9 @@
 
 namespace mii\db;
 
-use mii\util\Arr;
-
 /**
  * Database result wrapper.
  */
-
 class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 {
 
@@ -40,8 +37,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param   array $params
      * @return  void
      */
-    public function __construct($result, $sql, $as_object = false, array $params = NULL)
-    {
+    public function __construct($result, $sql, $as_object = false, array $params = NULL) {
         // Store the result locally
         $this->_result = $result;
 
@@ -62,16 +58,14 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     /**
      * Result destruction cleans up all open result sets.
      */
-    public function __destruct()
-    {
+    public function __destruct() {
         if (is_resource($this->_result)) {
             $this->_result->free();
         }
     }
 
 
-    public function seek($offset)
-    {
+    public function seek($offset) {
         if ($this->offsetExists($offset) AND $this->_result->data_seek($offset)) {
             // Set the current row to the offset
             $this->_current_row = $this->_internal_row = $offset;
@@ -83,8 +77,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function current()
-    {
+    public function current() {
         if ($this->_current_row !== $this->_internal_row AND !$this->seek($this->_current_row))
             return null;
 
@@ -101,8 +94,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         }
     }
 
-    public function all() : array
-    {
+    public function all(): array {
         if ($this->_index_by) {
 
             return $this->_as_object
@@ -116,8 +108,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function index($rows) : array
-    {
+    public function index($rows): array {
         $result = [];
 
         if (!is_string($this->_index_by)) {
@@ -130,7 +121,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
         }
 
-        if($this->_as_object) {
+        if ($this->_as_object) {
             foreach ($rows as $row) {
                 $key = $row->{$this->_index_by};
                 $result[$key] = $row;
@@ -148,7 +139,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function to_list($key, $display, $first = null) : array {
+    public function to_list($key, $display, $first = null): array {
         $rows = [];
 
         if ($first) {
@@ -160,7 +151,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
         }
         foreach ($this as $row) {
-            if($this->_as_object)
+            if ($this->_as_object)
                 $rows[$row->$key] = $row->$display;
             else
                 $rows[$row[$key]] = $row[$display];
@@ -174,9 +165,8 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * Return all of the rows in the result as an array.
      *
      */
-    public function to_array(array $properties = []) : array
-    {
-        if(empty($properties)) {
+    public function to_array(array $properties = []): array {
+        if (empty($properties)) {
             $results = [];
 
             foreach ($this as $row) {
@@ -221,8 +211,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param   mixed $default default value if the column does not exist
      * @return  mixed
      */
-    public function column($name, $default = NULL)
-    {
+    public function column($name, $default = NULL) {
         $row = $this->current();
 
         if ($this->_as_object) {
@@ -243,8 +232,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  integer
      */
-    public function count() : int
-    {
+    public function count(): int {
         return $this->_total_rows;
     }
 
@@ -259,8 +247,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param   int $offset
      * @return  boolean
      */
-    public function offsetExists($offset)
-    {
+    public function offsetExists($offset) {
         return ($offset >= 0 AND $offset < $this->_total_rows);
     }
 
@@ -272,8 +259,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param   int $offset
      * @return  mixed
      */
-    public function offsetGet($offset)
-    {
+    public function offsetGet($offset) {
         if (!$this->seek($offset))
             return NULL;
 
@@ -289,8 +275,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param   mixed $value
      * @return  void
      */
-    final public function offsetSet($offset, $value)
-    {
+    final public function offsetSet($offset, $value) {
         throw new DatabaseException('Database results are read-only');
     }
 
@@ -302,8 +287,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param   int $offset
      * @return  void
      */
-    final public function offsetUnset($offset)
-    {
+    final public function offsetUnset($offset) {
         throw new DatabaseException('Database results are read-only');
     }
 
@@ -314,8 +298,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  integer
      */
-    public function key() : int
-    {
+    public function key(): int {
         return $this->_current_row;
     }
 
@@ -326,8 +309,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  $this
      */
-    public function next()
-    {
+    public function next() {
         ++$this->_current_row;
 
         return $this;
@@ -340,8 +322,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  $this
      */
-    public function prev()
-    {
+    public function prev() {
         --$this->_current_row;
 
         return $this;
@@ -354,8 +335,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  $this
      */
-    public function rewind()
-    {
+    public function rewind() {
         $this->_current_row = 0;
 
         return $this;
@@ -367,8 +347,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * [!!] This method is only used internally.
      *
      */
-    public function valid() : bool
-    {
+    public function valid(): bool {
         return $this->offsetExists($this->_current_row);
     }
 

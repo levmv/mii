@@ -3,12 +3,17 @@
 namespace mii\db;
 
 
-class Migration {
+class Migration
+{
 
-    public function up() {}
+    public function up() {
+    }
 
-    public function down() { return false; }
+    public function down() {
+        return false;
+    }
 
-    public function init() {}
+    public function init() {
+    }
 
 }

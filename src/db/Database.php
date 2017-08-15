@@ -1,6 +1,7 @@
 <?php
 
 namespace mii\db;
+
 use mii\core\Component;
 
 
@@ -48,8 +49,7 @@ class Database extends Component
      *
      * @return  void
      */
-    public function init(array $config = []) : void
-    {
+    public function init(array $config = []): void {
         // Set the instance name
         //$this->_instance = $name;
 
@@ -73,8 +73,7 @@ class Database extends Component
      *
      * @return  void
      */
-    public function __destruct()
-    {
+    public function __destruct() {
         $this->disconnect();
     }
 
@@ -86,8 +85,7 @@ class Database extends Component
      *
      * @return  boolean
      */
-    public function disconnect()
-    {
+    public function disconnect() {
         try {
             // Database is assumed disconnected
             $status = true;
@@ -107,8 +105,7 @@ class Database extends Component
     }
 
 
-    public function __toString()
-    {
+    public function __toString() {
         return 'db';
     }
 
@@ -127,8 +124,7 @@ class Database extends Component
      * @param   array $params object construct parameters for result class
      * @return  Result|null   Result for SELECT queries or null
      */
-    public function query(?int $type, string $sql, $as_object = false, array $params = NULL) : ?Result
-    {
+    public function query(?int $type, string $sql, $as_object = false, array $params = NULL): ?Result {
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
@@ -139,18 +135,18 @@ class Database extends Component
         }
 
         // Execute the query
-        if($type === Database::MULTI) {
+        if ($type === Database::MULTI) {
             $result = $this->_connection->multi_query($sql);
             $affected_rows = 0;
-            do{
-                $affected_rows+=$this->_connection->affected_rows;
-            } while($this->_connection->more_results() && $this->_connection->next_result());
+            do {
+                $affected_rows += $this->_connection->affected_rows;
+            } while ($this->_connection->more_results() && $this->_connection->next_result());
 
         } else {
             $result = $this->_connection->query($sql);
         }
 
-        if ( $result === false || $this->_connection->errno ) {
+        if ($result === false || $this->_connection->errno) {
             if ($benchmark) {
                 // This benchmark is worthless
                 \mii\util\Profiler::delete($benchmark);
@@ -181,7 +177,7 @@ class Database extends Component
         return $this->_connection->insert_id;
     }
 
-    public function affected_rows() : int {
+    public function affected_rows(): int {
         return $this->_connection->affected_rows;
     }
 
@@ -194,8 +190,7 @@ class Database extends Component
      * @throws  DatabaseException
      * @return  void
      */
-    public function connect()
-    {
+    public function connect() {
         if ($this->_connection)
             return;
 
@@ -206,13 +201,13 @@ class Database extends Component
             'hostname' => '',
             'username' => '',
             'password' => '',
-            'socket'   => '',
-            'port'     => 3306,
+            'socket' => '',
+            'port' => 3306,
         ];
 
         foreach ($config as $k => $v) {
-            if(isset($this->_config['connection'][$k]))
-            $config[$k] = $this->_config['connection'][$k];
+            if (isset($this->_config['connection'][$k]))
+                $config[$k] = $this->_config['connection'][$k];
         }
 
         // Prevent this information from showing up in traces
@@ -266,8 +261,7 @@ class Database extends Component
      * @param   string $charset character set name
      * @return  void
      */
-    public function set_charset($charset)
-    {
+    public function set_charset($charset) {
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
@@ -294,8 +288,7 @@ class Database extends Component
      * @return  string
      * @uses    Database::escape
      */
-    public function quote($value) : string
-    {
+    public function quote($value): string {
         if ($value === NULL) {
             return 'NULL';
         } elseif ($value === true) {
@@ -334,8 +327,7 @@ class Database extends Component
      * @param   string $value value to quote
      * @return  string
      */
-    public function escape($value) : string
-    {
+    public function escape($value): string {
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
@@ -370,8 +362,7 @@ class Database extends Component
      * @param string $mode transaction mode
      * @return  boolean
      */
-    public function begin($mode = NULL)
-    {
+    public function begin($mode = NULL) {
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
@@ -392,8 +383,7 @@ class Database extends Component
      *
      * @return  boolean
      */
-    public function commit()
-    {
+    public function commit() {
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
@@ -408,8 +398,7 @@ class Database extends Component
      *
      * @return  boolean
      */
-    public function rollback()
-    {
+    public function rollback() {
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
@@ -435,8 +424,7 @@ class Database extends Component
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
      */
-    public function quote_column($column) : string
-    {
+    public function quote_column($column): string {
 
         if (is_array($column)) {
             list($column, $alias) = $column;
@@ -495,17 +483,15 @@ class Database extends Component
      *
      * @return  string
      */
-    public function table_prefix() : string
-    {
+    public function table_prefix(): string {
         return $this->_config['table_prefix'];
     }
 
 
-
-    public function db_name() : string
-    {
+    public function db_name(): string {
         return $this->_dbname;
     }
+
     /**
      * Quote a database table name and adds the table prefix if needed.
      *
@@ -521,8 +507,7 @@ class Database extends Component
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
      */
-    public function quote_table($table) : string
-    {
+    public function quote_table($table): string {
         if (is_array($table)) {
             list($table, $alias) = $table;
             $alias = str_replace('`', '``', $alias);
@@ -582,8 +567,7 @@ class Database extends Component
      * @param   mixed $value any identifier
      * @return  string
      */
-    public function quote_identifier($value) : string
-    {
+    public function quote_identifier($value): string {
 
         if (is_array($value)) {
             list($value, $alias) = $value;

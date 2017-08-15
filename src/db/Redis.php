@@ -16,8 +16,7 @@ class Redis
      * Redis constructor.
      * @param $config
      */
-    public function __construct($config)
-    {
+    public function __construct($config) {
         $this->connection = new \Redis();
 
         foreach ($config as $k => $v) {
@@ -35,8 +34,7 @@ class Redis
      * @param string $key
      * @return bool
      */
-    public function exists($key)
-    {
+    public function exists($key) {
         return $this->connection->exists($key);
     }
 
@@ -44,8 +42,7 @@ class Redis
      * @param string $key
      * @param int $ttl
      */
-    public function expire($key, $ttl)
-    {
+    public function expire($key, $ttl) {
         $this->connection->expire($key, $ttl);
     }
 
@@ -55,8 +52,7 @@ class Redis
      * @param bool|int|array $options
      * @return bool
      */
-    public function set($key, $value, $options = false)
-    {
+    public function set($key, $value, $options = false) {
         return $options === false
             ? $this->connection->set($key, $value)
             : $this->connection->set($key, $value, $options);
@@ -66,8 +62,7 @@ class Redis
      * @param string $key
      * @return bool|string
      */
-    public function get($key)
-    {
+    public function get($key) {
         return $this->connection->get($key);
     }
 
@@ -75,8 +70,7 @@ class Redis
      * @param string $key
      * @return int
      */
-    public function incr($key)
-    {
+    public function incr($key) {
         return $this->connection->incr($key);
     }
 
@@ -84,8 +78,7 @@ class Redis
      * @param string $key
      * @return int
      */
-    public function decr($key)
-    {
+    public function decr($key) {
         return $this->connection->decr($key);
     }
 
@@ -93,8 +86,7 @@ class Redis
      * @param string $channel
      * @param string $message
      */
-    public function publish($channel, $message)
-    {
+    public function publish($channel, $message) {
         $this->connection->publish($channel, $message);
     }
 
@@ -102,8 +94,7 @@ class Redis
      * @param string $key
      * @param array $values
      */
-    public function hmset($key, $values)
-    {
+    public function hmset($key, $values) {
         $this->connection->hMset($key, $values);
     }
 
@@ -112,8 +103,7 @@ class Redis
      * @param string $field
      * @return string
      */
-    public function hget($key, $field)
-    {
+    public function hget($key, $field) {
         return $this->connection->hGet($key, $field);
     }
 }

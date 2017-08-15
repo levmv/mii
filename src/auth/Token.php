@@ -25,7 +25,6 @@ class Token extends ORM
         $this->created = time();
 
         do {
-            // TODO: change to random_bytes() when php 7.0 will come
             $this->token = bin2hex(random_bytes(20));
         } while ($this->get_token($this->token) !== null);
 

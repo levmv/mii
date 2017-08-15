@@ -19,8 +19,7 @@ class ACL
      * @param string $action
      * @return $this
      */
-    public function allow($role, $object = '*', $action = '*')
-    {
+    public function allow($role, $object = '*', $action = '*') {
         $this->add_rule(true, $role, $object, $action);
 
         return $this;
@@ -34,8 +33,7 @@ class ACL
      * @param string $action
      * @return $this
      */
-    public function deny($role, $object = '*', $action = '*')
-    {
+    public function deny($role, $object = '*', $action = '*') {
         $this->add_rule(false, $role, $object, $action);
 
         return $this;
@@ -46,8 +44,7 @@ class ACL
      *
      * @return $this
      */
-    public function clear()
-    {
+    public function clear() {
         $this->_rules = [];
 
         return $this;
@@ -61,13 +58,12 @@ class ACL
      * @param string $object
      * @param string $action
      */
-    public function add_rule($access, $role, $object, $action) : void
-    {
-        $roles = (array) $role;
+    public function add_rule($access, $role, $object, $action): void {
+        $roles = (array)$role;
 
         foreach ($roles as $r) {
-            $action = (array) $action;
-            foreach($action as $a) {
+            $action = (array)$action;
+            foreach ($action as $a) {
                 $this->_rules[$r][$object][$a] = $access;
             }
         }
@@ -81,8 +77,7 @@ class ACL
      * @param string $action
      * @return bool
      */
-    public function check($role, $object = '*', $action = '*') : bool
-    {
+    public function check($role, $object = '*', $action = '*'): bool {
         if (is_array($role)) {
             foreach ($role as $r) {
                 if ($this->match($r, $object, $action))
@@ -103,8 +98,7 @@ class ACL
      * @param $action
      * @return bool
      */
-    protected function match($role, $object, $action) : bool
-    {
+    protected function match($role, $object, $action): bool {
         $roles = $objects = $actions = ['*'];
 
         $allow = false;

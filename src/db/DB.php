@@ -52,7 +52,7 @@ class DB
      * @param string $q
      * @return int
      */
-    static function update(string $q, array $params = []) : int {
+    static function update(string $q, array $params = []): int {
         return static::query(Database::UPDATE, $q, $params);
     }
 
@@ -68,7 +68,7 @@ class DB
      * @param string $q
      * @return int
      */
-    static function delete(string $q, array $params = []) : int{
+    static function delete(string $q, array $params = []): int {
         return static::query(Database::DELETE, $q, $params);
     }
 
@@ -77,20 +77,20 @@ class DB
      * @param array $params
      * @return Expression
      */
-    static function expr($value, array $params = []) : Expression {
+    static function expr($value, array $params = []): Expression {
         return new Expression($value, $params);
     }
 
 
-    static function begin() : void {
+    static function begin(): void {
         \Mii::$app->db->begin();
     }
 
-    static function commit() : void {
+    static function commit(): void {
         \Mii::$app->db->commit();
     }
 
-    static function rollback() : void {
+    static function rollback(): void {
         \Mii::$app->db->rollback();
     }
 

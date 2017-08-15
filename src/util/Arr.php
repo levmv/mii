@@ -20,11 +20,10 @@ class Arr
      *     // Returns false
      *     Arr::isAssoc('foo', 'bar');
      *
-     * @param   array   $array  array to check
+     * @param   array $array array to check
      * @return  boolean
      */
-    public static function is_assoc(array $array)
-    {
+    public static function is_assoc(array $array) {
         // Keys of the array
         $keys = array_keys($array);
 
@@ -37,11 +36,10 @@ class Arr
      * Test if a value is an array with an additional check for array-like objects.
      *
      *
-     * @param   mixed   $value  value to check
+     * @param   mixed $value value to check
      * @return  boolean
      */
-    public static function is_array($value)
-    {
+    public static function is_array($value) {
         if (is_array($value)) {
             return true;
         }
@@ -56,14 +54,13 @@ class Arr
      *     // Get the value of $array['foo']['bar']
      *     $value = Arr::path($array, 'foo.bar');
      *
-     * @param   array   $array      array to search
-     * @param   mixed   $path       key path string (delimiter separated) or array of keys
-     * @param   mixed   $default    default value if the path is not set
-     * @param   string  $delimiter  key path delimiter
+     * @param   array $array array to search
+     * @param   mixed $path key path string (delimiter separated) or array of keys
+     * @param   mixed $default default value if the path is not set
+     * @param   string $delimiter key path delimiter
      * @return  mixed
      */
-    public static function path($array, $path, $default = null, $delimiter = null)
-    {
+    public static function path($array, $path, $default = null, $delimiter = null) {
         if (!static::is_array($array)) {
             // This is not an array!
             return $default;
@@ -95,7 +92,7 @@ class Arr
 
             if (ctype_digit($key)) {
                 // Make the key an integer
-                $key = (int) $key;
+                $key = (int)$key;
             }
 
             if (isset($array[$key])) {
@@ -123,13 +120,12 @@ class Arr
      * Set a value on an array by path.
      *
      * @see Arr::path()
-     * @param array   $array     Array to update
-     * @param string  $path      Path
-     * @param mixed   $value     Value to set
-     * @param string  $delimiter Path delimiter
+     * @param array $array Array to update
+     * @param string $path Path
+     * @param mixed $value Value to set
+     * @param string $delimiter Path delimiter
      */
-    public static function set_path(&$array, $path, $value, $delimiter = null) : void
-    {
+    public static function set_path(&$array, $path, $value, $delimiter = null): void {
         if (!$delimiter) {
             // Use the default delimiter
             $delimiter = static::$delimiter;
@@ -148,7 +144,7 @@ class Arr
 
             if (is_string($key) && ctype_digit($key)) {
                 // Make the key an integer
-                $key = (int) $key;
+                $key = (int)$key;
             }
 
             if (!isset($array[$key])) {
@@ -168,12 +164,11 @@ class Arr
      *     // Fill an array with values 5, 10, 15, 20
      *     $values = Arr::range(5, 20);
      *
-     * @param   integer $step   stepping
-     * @param   integer $max    ending number
+     * @param   integer $step stepping
+     * @param   integer $max ending number
      * @return  array
      */
-    public static function range($step = 10, $max = 100)
-    {
+    public static function range($step = 10, $max = 100) {
         if ($step < 1) {
             return array();
         }
@@ -196,13 +191,12 @@ class Arr
      *     // Get the value "sorting" from $_GET, if it exists
      *     $sorting = Arr::get($_GET, 'sorting');
      *
-     * @param   array   $array      array to extract from
-     * @param   string  $key        key name
-     * @param   mixed   $default    default value
+     * @param   array $array array to extract from
+     * @param   string $key key name
+     * @param   mixed $default default value
      * @return  mixed
      */
-    public static function get($array, $key, $default = null)
-    {
+    public static function get($array, $key, $default = null) {
         return isset($array[$key]) ? $array[$key] : $default;
     }
 
@@ -217,13 +211,12 @@ class Arr
      *     $data = array('level1' => array('level2a' => 'value 1', 'level2b' => 'value 2'));
      *     Arr::extract($data, array('level1.level2a', 'password'));
      *
-     * @param   array  $array    array to extract paths from
-     * @param   array  $paths    list of path
-     * @param   mixed  $default  default value
+     * @param   array $array array to extract paths from
+     * @param   array $paths list of path
+     * @param   mixed $default default value
      * @return  array
      */
-    public static function extract($array, array $paths, $default = null)
-    {
+    public static function extract($array, array $paths, $default = null) {
         $found = array();
         foreach ($paths as $path) {
             static::set_path($found, $path, static::path($array, $path, $default));
@@ -240,12 +233,11 @@ class Arr
      *
      * [!!] A list of arrays is an array that contains arrays, eg: array(array $a, array $b, array $c, ...)
      *
-     * @param   array   $array  list of arrays to check
-     * @param   string  $key    key to pluck
+     * @param   array $array list of arrays to check
+     * @param   string $key key to pluck
      * @return  array
      */
-    public static function pluck($array, $key)
-    {
+    public static function pluck($array, $key) {
         $values = array();
 
         foreach ($array as $row) {
@@ -264,13 +256,12 @@ class Arr
      *     // Add an empty value to the start of a select list
      *     Arr::unshift($array, 'none', 'Select a value');
      *
-     * @param   array   $array  array to modify
-     * @param   string  $key    array key name
-     * @param   mixed   $val    array value
+     * @param   array $array array to modify
+     * @param   string $key array key name
+     * @param   mixed $val array value
      * @return  array
      */
-    public static function unshift(array &$array, $key, $val)
-    {
+    public static function unshift(array &$array, $key, $val) {
         $array = array_reverse($array, true);
         $array[$key] = $val;
         $array = array_reverse($array, true);
@@ -297,13 +288,12 @@ class Arr
      * [!!] Unlike `array_map`, this method requires a callback and will only map
      * a single array.
      *
-     * @param   mixed   $callbacks  array of callbacks to apply to every element in the array
-     * @param   array   $array      array to map
-     * @param   array   $keys       array of keys to apply to
+     * @param   mixed $callbacks array of callbacks to apply to every element in the array
+     * @param   array $array array to map
+     * @param   array $keys array of keys to apply to
      * @return  array
      */
-    public static function map($callbacks, $array, $keys = null)
-    {
+    public static function map($callbacks, $array, $keys = null) {
         foreach ($array as $key => $val) {
             if (is_array($val)) {
                 $array[$key] = static::map($callbacks, $array[$key]);
@@ -337,12 +327,11 @@ class Arr
      *     // The output of $john will now be:
      *     array('name' => 'mary', 'children' => array('fred', 'paul', 'sally', 'jane'))
      *
-     * @param   array  $array1      initial array
-     * @param   array  $array2,...  array to merge
+     * @param   array $array1 initial array
+     * @param   array $array2,... array to merge
      * @return  array
      */
-    public static function merge($array1, $array2)
-    {
+    public static function merge($array1, $array2) {
         if (static::is_assoc($array2)) {
             foreach ($array2 as $key => $value) {
                 if (is_array($value)
@@ -401,12 +390,11 @@ class Arr
      *     // The output of $array will now be:
      *     array('name' => 'jack', 'mood' => 'happy', 'food' => 'tacos')
      *
-     * @param   array   $array1 master array
-     * @param   array   $array2 input arrays that will overwrite existing values
+     * @param   array $array1 master array
+     * @param   array $array2 input arrays that will overwrite existing values
      * @return  array
      */
-    public static function overwrite($array1, $array2)
-    {
+    public static function overwrite($array1, $array2) {
         foreach (array_intersect_key($array2, $array1) as $key => $value) {
             $array1[$key] = $value;
         }
@@ -432,11 +420,10 @@ class Arr
      *     // Get the result of the callback
      *     $result = call_user_func_array($func, $params);
      *
-     * @param   string  $str    callback string
+     * @param   string $str callback string
      * @return  array   function, params
      */
-    public static function callback($str)
-    {
+    public static function callback($str) {
         // Overloaded as parts are found
         $command = $params = null;
 
@@ -476,12 +463,11 @@ class Arr
      *
      * [!!] The keys of array values will be discarded.
      *
-     * @param   array   $array  array to flatten
+     * @param   array $array array to flatten
      * @return  array
      * @since   3.0.6
      */
-    public static function flatten($array)
-    {
+    public static function flatten($array) {
         $is_assoc = static::is_assoc($array);
 
         $flat = array();
@@ -500,8 +486,7 @@ class Arr
     }
 
 
-    public static function to_array($object, $properties = [], $recursive = true)
-    {
+    public static function to_array($object, $properties = [], $recursive = true) {
         if (is_array($object)) {
             if ($recursive) {
                 foreach ($object as $key => $value) {
@@ -514,7 +499,7 @@ class Arr
         } elseif ($object instanceof \Traversable) {
 
             $result = [];
-            foreach($object as $obj) {
+            foreach ($object as $obj) {
                 $result[] = static::to_array($obj, $properties, $recursive);
             }
             return $result;

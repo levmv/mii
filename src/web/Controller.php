@@ -84,8 +84,7 @@ class Controller
      * @param   Request $request Request that created the controller
      * @param   Response $response The request's response
      */
-    public function __construct(Request $request, Response $response)
-    {
+    public function __construct(Request $request, Response $response) {
         // Assign the request to the controller
         $this->request = $request;
 
@@ -95,17 +94,14 @@ class Controller
         $this->acl = new ACL;
     }
 
-    protected function access_rules()
-    {
+    protected function access_rules() {
     }
 
-    public function index()
-    {
+    public function index() {
     }
 
 
-    protected function before()
-    {
+    protected function before() {
         if (!$this->request->is_ajax()) {
             $this->setup_layout();
         }
@@ -114,8 +110,7 @@ class Controller
     }
 
 
-    protected function after($content = null) : Response
-    {
+    protected function after($content = null): Response {
         if ($this->render_layout AND $this->response->format === Response::FORMAT_HTML AND !$this->request->is_ajax()) {
 
             $this->setup_index();
@@ -128,7 +123,7 @@ class Controller
             $this->response->content($this->index_block->render(true));
 
         } else {
-            if($content === null)
+            if ($content === null)
                 $content = $this->content;
 
             if (is_array($content) AND $this->request->is_ajax()) {
@@ -140,8 +135,7 @@ class Controller
         return $this->response;
     }
 
-    public function setup_index($block_name = false) : void
-    {
+    public function setup_index($block_name = false): void {
         $name = ($block_name) ? $block_name : $this->index_block_name;
 
         $this->index_block = block($name)
@@ -152,12 +146,11 @@ class Controller
     }
 
 
-    public function setup_layout($block_name = null, $depends = null) : void
-    {
-        if($block_name === null)
+    public function setup_layout($block_name = null, $depends = null): void {
+        if ($block_name === null)
             $block_name = $this->layout_block_name;
 
-        if($depends === null)
+        if ($depends === null)
             $depends = $this->layout_depends;
 
         $this->layout = block($block_name)
@@ -166,8 +159,7 @@ class Controller
     }
 
 
-    public function execute() : Response
-    {
+    public function execute(): Response {
         $method = new \ReflectionMethod($this, $this->request->action);
 
         $args = $this->process_action_params($method, $this->request->params);
@@ -183,9 +175,9 @@ class Controller
 
         $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
 
-        if(empty($roles))
+        if (empty($roles))
             $roles = '*';
-        
+
         if (!$this->acl->check($roles, $this->request->controller, $this->request->action)) {
             return $this->on_access_denied();
         }
@@ -203,8 +195,7 @@ class Controller
         throw new ForbiddenHttpException('User has no rights to access :page', [':page' => $this->request->uri()]);
     }
 
-    protected function process_action_params(\ReflectionMethod $method, $params)
-    {
+    protected function process_action_params(\ReflectionMethod $method, $params) {
         $args = [];
         $missing = [];
         $action_params = [];

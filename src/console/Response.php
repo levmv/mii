@@ -3,13 +3,14 @@
 namespace mii\console;
 
 
-class Response {
+class Response
+{
 
     public $exit_status = 0;
 
 
     public function __construct($config = []) {
-        foreach($config as $key => $value)
+        foreach ($config as $key => $value)
             $this->$key = $value;
 
     }

@@ -7,7 +7,8 @@ use mii\db\DB;
 use mii\db\ORM;
 use mii\db\Query;
 
-class Sort {
+class Sort
+{
 
     /**
      * @var \mii\db\ORM
@@ -15,8 +16,7 @@ class Sort {
     protected $_model;
     protected $_field;
 
-    public function __construct(?ORM $model = NULL, ?string $field_name = NULL)
-    {
+    public function __construct(?ORM $model = NULL, ?string $field_name = NULL) {
         $this->_model = $model;
         $this->_field = $field_name;
     }
@@ -24,17 +24,17 @@ class Sort {
 
     public function value(?string $parent_field = null) {
 
-        if($parent_field) {
+        if ($parent_field) {
 
             $value = (new Query)
                 ->select([
-                    [DB::expr('MAX('.$this->_field.')'),  $this->_field]
+                    [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
                 ])
                 ->from($this->_model->get_table())
                 ->where($parent_field, '=', $this->_model->get($parent_field))
                 ->one();
 
-            if($value) {
+            if ($value) {
                 $value = $value[$this->_field] ?: 0;
             }
 
@@ -42,18 +42,18 @@ class Sort {
 
             $value = (new Query)
                 ->select([
-                    [DB::expr('MAX('.$this->_field.')'), $this->_field]
+                    [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
                 ])
                 ->from($this->_model->get_table())
                 ->one();
 
-            if($value) {
+            if ($value) {
                 $value = $value[$this->_field] ?: 0;
             }
 
         }
 
-        return $value+1;
+        return $value + 1;
     }
 
 

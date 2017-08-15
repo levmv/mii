@@ -1,4 +1,9 @@
 <?php
+
 namespace mii\db;
 
-class ORMException extends DatabaseException {};
+class ORMException extends DatabaseException
+{
+}
+
+;

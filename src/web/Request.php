@@ -64,7 +64,7 @@ class Request extends Component
     protected $_post = [];
 
 
-    public $сsrf_validation = true;
+    public $csrf_validation = true;
 
 
     public $enable_csrf_cookie = true;
@@ -120,10 +120,9 @@ class Request extends Component
     public $action;
 
 
-    public function init(array $config = []) : void
-    {
+    public function init(array $config = []): void {
 
-        foreach($config as $key => $value)
+        foreach ($config as $key => $value)
             $this->$key = $value;
 
         $uri = $_SERVER['REQUEST_URI'];
@@ -168,15 +167,14 @@ class Request extends Component
      *
      * @return  Response
      */
-    public function execute(string $uri = null) : Response
-    {
+    public function execute(string $uri = null): Response {
         try {
 
             $response = new Response;
 
             $params = \Mii::$app->router->match($this->uri($uri));
 
-            if($params === false) {
+            if ($params === false) {
                 throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
                     ':uri' => $this->uri()]);
             }
@@ -191,17 +189,17 @@ class Request extends Component
             // Params cannot be changed once matched
             $this->params = $params;
 
-            assert($this->controller &&  class_exists($this->controller), "Controller class ".$this->controller." doesn't exist.");
+            assert($this->controller && class_exists($this->controller), "Controller class " . $this->controller . " doesn't exist.");
 
-            if($this->action === 'execute') {
+            if ($this->action === 'execute') {
                 throw new \InvalidArgumentException('Action name can not be "execute"');
             }
 
             // Create a new instance of the controller
 
-            if(\Mii::$app->container === null) {
+            if (\Mii::$app->container === null) {
                 $class = new \ReflectionClass($this->controller);
-                \Mii::$app->controller = $controller =  $class->newInstanceArgs([$this, $response]);
+                \Mii::$app->controller = $controller = $class->newInstanceArgs([$this, $response]);
             } else {
                 \Mii::$app->controller = $controller = \Mii::$container->get($this->controller, [$this, $response]);
             }
@@ -218,16 +216,16 @@ class Request extends Component
             $response->redirect($e->url);
 
         } catch (InvalidRouteException $e) {
-            if(config('debug')) {
+            if (config('debug')) {
                 throw $e;
             } else {
-                throw new NotFoundHttpException('Page not found.', $e->getCode(), $e);
+                throw new NotFoundHttpException();
             }
         } catch (ForbiddenHttpException $e) {
-            if(config('debug')) {
+            if (config('debug')) {
                 throw $e;
             } else {
-                throw new NotFoundHttpException('Page not found.', $e->getCode(), $e);
+                throw new NotFoundHttpException();
             }
         }
 
@@ -241,8 +239,7 @@ class Request extends Component
      * @param   string $uri
      * @return  string
      */
-    public function uri($uri = NULL) : string
-    {
+    public function uri($uri = NULL): string {
         if ($uri === NULL) {
             return empty($this->_uri) ? '/' : $this->_uri;
         }
@@ -250,19 +247,18 @@ class Request extends Component
         return $this->_uri = $uri;
     }
 
-    public function get_hostname() : string {
+    public function get_hostname(): string {
 
-        if(!$this->_hostname) {
+        if (!$this->_hostname) {
             $http = $this->is_secure() ? 'https' : 'http';
             $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-            $this->_hostname =  $http . '://' . $domain;
+            $this->_hostname = $http . '://' . $domain;
         }
 
         return $this->_hostname;
     }
 
-    public function get_user_agent() : string
-    {
+    public function get_user_agent(): string {
         return $_SERVER['HTTP_USER_AGENT'];
     }
 
@@ -274,8 +270,7 @@ class Request extends Component
      * @param   string $method Method to use for this request
      * @return  mixed
      */
-    public function method($method = NULL)
-    {
+    public function method($method = NULL) {
         if ($method === NULL) {
             // Act as a getter
             return $this->_method;
@@ -291,10 +286,9 @@ class Request extends Component
      * Return if the request is sent via secure channel (https).
      * @return boolean if the request is sent via secure channel (https)
      */
-    public function is_secure()
-    {
+    public function is_secure() {
         return isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1)
-        || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0;
+            || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0;
     }
 
 
@@ -305,9 +299,8 @@ class Request extends Component
      * @param   string $value the default parameter value if the parameter does not exist.
      * @return  mixed
      */
-    public function get($key = null, $default = null)
-    {
-        if($key) {
+    public function get($key = null, $default = null) {
+        if ($key) {
             return isset($this->_get[$key]) ? $this->_get[$key] : $default;
         }
 
@@ -315,27 +308,26 @@ class Request extends Component
     }
 
     public function param($key, $default = null) {
-        if(isset($this->params[$key]))
+        if (isset($this->params[$key]))
             return $this->params[$key];
 
         return $default;
     }
 
-    public function get_csrf_from_header()
-    {
+    public function get_csrf_from_header() {
         // must be like self::CSRF_HEADER
         return isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : null;
     }
 
     public function check_csrf_token($token = false) {
 
-        if(!$token) {
+        if (!$token) {
 
-            if(isset($_POST[$this->csrf_token_name])) {
+            if (isset($_POST[$this->csrf_token_name])) {
 
                 $token = $_POST[$this->csrf_token_name];
 
-            } elseif(null !== ($token = $this->get_csrf_from_header())) {
+            } elseif (null !== ($token = $this->get_csrf_from_header())) {
 
             } else {
                 \Mii::error('crsf_token not found', 'mii');
@@ -347,7 +339,7 @@ class Request extends Component
 
     public function validate_csrf_token() {
 
-        if (!$this->сsrf_validation || in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+        if (!$this->csrf_validation || in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
             return true;
         }
 
@@ -357,13 +349,13 @@ class Request extends Component
 
     public function csrf_token($new = false) {
 
-        if($this->_csrf_token === null || $new) {
-            if($new || ($this->_csrf_token = $this->load_csrf_token()) === null) {
+        if ($this->_csrf_token === null || $new) {
+            if ($new || ($this->_csrf_token = $this->load_csrf_token()) === null) {
                 // Generate a new unique token
                 $this->_csrf_token = sha1(uniqid(NULL, TRUE));
 
                 // Store the new token
-                if($this->enable_csrf_cookie) {
+                if ($this->enable_csrf_cookie) {
                     $this->set_cookie($this->csrf_token_name, $this->_csrf_token);
                 } else {
                     \Mii::$app->session->set($this->csrf_token_name, $this->_csrf_token);
@@ -375,7 +367,7 @@ class Request extends Component
     }
 
     public function load_csrf_token() {
-        if($this->enable_csrf_cookie) {
+        if ($this->enable_csrf_cookie) {
             return $this->get_cookie($this->csrf_token_name);
         } else {
             return \Mii::$app->session->get($this->csrf_token_name);
@@ -390,8 +382,7 @@ class Request extends Component
      * @param   string $default Default value if parameter does not exist
      * @return  mixed
      */
-    public function post($key = null, $default = null)
-    {
+    public function post($key = null, $default = null) {
         if ($key === null) {
             return $this->_post;
         }
@@ -403,8 +394,7 @@ class Request extends Component
      * Returns whether this is an AJAX (XMLHttpRequest) request.
      * @return boolean whether this is an AJAX (XMLHttpRequest) request.
      */
-    public function is_ajax()
-    {
+    public function is_ajax() {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
@@ -412,8 +402,7 @@ class Request extends Component
      * Returns whether this is a PJAX request
      * @return boolean whether this is a PJAX request
      */
-    public function is_pjax()
-    {
+    public function is_pjax() {
         return $this->is_ajax() && !empty($_SERVER['HTTP_X_PJAX']);
     }
 
@@ -428,15 +417,13 @@ class Request extends Component
      * Returns the raw HTTP request body.
      * @return string the request body
      */
-    public function raw_body()
-    {
+    public function raw_body() {
         if ($this->_raw_body === null) {
             $this->_raw_body = file_get_contents('php://input');
         }
 
         return $this->_raw_body;
     }
-
 
 
     /**
@@ -448,8 +435,7 @@ class Request extends Component
      * @param   mixed $default default value to return
      * @return  string
      */
-    public function get_cookie(string $key, $default = null)
-    {
+    public function get_cookie(string $key, $default = null) {
         if (!isset($_COOKIE[$key])) {
             // The cookie does not exist
             return $default;
@@ -487,8 +473,7 @@ class Request extends Component
      * @param   integer $expiration lifetime in seconds
      * @return  boolean
      */
-    public function set_cookie($name, $value, $expiration = null)
-    {
+    public function set_cookie($name, $value, $expiration = null) {
         if ($expiration === null) {
             // Use the default expiration
             $expiration = $this->cookie_expiration;
@@ -514,8 +499,7 @@ class Request extends Component
      * @param   string $name cookie name
      * @return  boolean
      */
-    public function delete_cookie($name)
-    {
+    public function delete_cookie($name) {
         // Remove the cookie
         unset($_COOKIE[$name]);
 
@@ -531,8 +515,7 @@ class Request extends Component
      * @param   string $value value of cookie
      * @return  string
      */
-    public function salt(string $name, string $value) : string
-    {
+    public function salt(string $name, string $value): string {
         // Require a valid salt
         if (!$this->cookie_salt) {
             throw new \InvalidArgumentException(

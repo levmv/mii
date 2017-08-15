@@ -5,7 +5,8 @@ namespace mii\web;
 
 use mii\core\Component;
 
-class Response extends Component {
+class Response extends Component
+{
 
     public $exit_status = 0;
 
@@ -107,10 +108,9 @@ class Response extends Component {
      * @param string $value the value of the header
      * @return static object itself
      */
-    public function set_header($name, $value = '')
-    {
+    public function set_header($name, $value = '') {
         $name = strtolower($name);
-        $this->_headers[$name] = (array) $value;
+        $this->_headers[$name] = (array)$value;
         return $this;
     }
 
@@ -122,20 +122,18 @@ class Response extends Component {
      * @param string $value the value of the header
      * @return static the collection object itself
      */
-    public function add_header($name, $value)
-    {
+    public function add_header($name, $value) {
         $name = strtolower($name);
         $this->_headers[$name][] = $value;
         return $this;
     }
 
 
-
     public function send_headers() {
         if (headers_sent()) {
             return $this;
         }
-        if(!isset($this->_headers['content-type'])) {
+        if (!isset($this->_headers['content-type'])) {
             $this->set_header('content-type', $this->_content_type . '; charset=UTF-8');
         }
 
@@ -146,7 +144,7 @@ class Response extends Component {
         $status = $this->status();
 
         // Create the response header
-        header($protocol.' '.$status.' '.Response::$messages[$status]);
+        header($protocol . ' ' . $status . ' ' . Response::$messages[$status]);
 
         if ($this->_headers) {
             foreach ($this->_headers as $name => $values) {
@@ -168,19 +166,16 @@ class Response extends Component {
      * Gets or sets the HTTP protocol. The standard protocol to use
      * is `HTTP/1.1`.
      *
-     * @param   string   $protocol Protocol to set to the request/response
+     * @param   string $protocol Protocol to set to the request/response
      * @return  mixed
      */
-    public function protocol($protocol = NULL)
-    {
-        if ($protocol)
-        {
+    public function protocol($protocol = NULL) {
+        if ($protocol) {
             $this->_protocol = strtoupper($protocol);
             return $this;
         }
 
-        if ($this->_protocol === NULL)
-        {
+        if ($this->_protocol === NULL) {
             $this->_protocol = 'HTTP/1.1';
         }
 
@@ -197,24 +192,18 @@ class Response extends Component {
      *      // Get the current status
      *      $status = $response->status();
      *
-     * @param   integer  $status Status to set to this response
+     * @param   integer $status Status to set to this response
      * @return  mixed
      */
-    public function status($status = NULL)
-    {
+    public function status($status = NULL) {
 
-        if ($status === NULL)
-        {
+        if ($status === NULL) {
             return $this->_status;
-        }
-        elseif (array_key_exists($status, Response::$messages))
-        {
-            $this->_status = (int) $status;
+        } elseif (array_key_exists($status, Response::$messages)) {
+            $this->_status = (int)$status;
             return $this;
-        }
-        else
-        {
-            throw new Exception(__METHOD__.' unknown status value : :value', array(':value' => $status));
+        } else {
+            throw new Exception(__METHOD__ . ' unknown status value : :value', array(':value' => $status));
         }
     }
 
@@ -223,7 +212,7 @@ class Response extends Component {
 
         // todo: process url
 
-        if(\Mii::$app->request->is_ajax()) {
+        if (\Mii::$app->request->is_ajax()) {
             $this->set_header('X-Redirect', $url);
         } else {
             $this->set_header('Location', $url);
@@ -235,28 +224,27 @@ class Response extends Component {
     }
 
 
-
     public function content($content = null) {
-        if($content === null)
+        if ($content === null)
             return $this->_content;
 
         $this->_content = $content;
-        
+
         return null;
     }
 
 
     public function send() {
-        switch($this->format) {
+        switch ($this->format) {
             case self::FORMAT_HTML:
-                $this->set_header('content-type','text/html; charset=UTF-8');
+                $this->set_header('content-type', 'text/html; charset=UTF-8');
                 break;
             case self::FORMAT_JSON:
-                $this->set_header('content-type','application/json; charset=UTF-8');
+                $this->set_header('content-type', 'application/json; charset=UTF-8');
                 $this->_content = json_encode($this->_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 break;
             case self::FORMAT_XML:
-                $this->set_header('content-type','application/xml; charset=UTF-8');
+                $this->set_header('content-type', 'application/xml; charset=UTF-8');
                 break;
 
 

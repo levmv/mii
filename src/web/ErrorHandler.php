@@ -6,28 +6,28 @@ use mii\core\ErrorException;
 use mii\core\Exception;
 use mii\core\UserException;
 
-class ErrorHandler extends \mii\core\ErrorHandler {
+class ErrorHandler extends \mii\core\ErrorHandler
+{
 
     public $route;
 
     public function render($exception) {
 
-        if(\Mii::$app->has('response')) {
+        if (\Mii::$app->has('response')) {
             $response = \Mii::$app->response;
         } else {
             $response = new Response();
         }
 
-        if($this->route && $response->format === Response::FORMAT_HTML && !config('debug')) {
+        if ($this->route && $response->format === Response::FORMAT_HTML && !config('debug')) {
 
             \Mii::$app->request->execute($this->route)->send();
             return;
 
 
+        } elseif ($response->format === Response::FORMAT_HTML) {
 
-        } elseif( $response->format === Response::FORMAT_HTML) {
-
-            if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
 
                 $response->content('<pre>' . e(Exception::text($exception)) . '</pre>');
 
@@ -59,8 +59,7 @@ class ErrorHandler extends \mii\core\ErrorHandler {
 
     }
 
-    public function render_file($__file, $__params)
-    {
+    public function render_file($__file, $__params) {
         $__params['handler'] = $this;
         ob_start();
         ob_implicit_flush(false);

@@ -38,7 +38,7 @@ class Auth extends Component
      *
      * @param   array $config Config Options
      */
-    public function init(array $config = []) : void {
+    public function init(array $config = []): void {
         parent::init($config);
         $this->_session = \Mii::$app->session;
     }
@@ -50,7 +50,7 @@ class Auth extends Component
      *
      * @return  mixed
      */
-    public function get_user() : ?User {
+    public function get_user(): ?User {
         if ($this->_user)
             return $this->_user;
 
@@ -168,8 +168,7 @@ class Auth extends Component
      * Check if there is an active session. Optionally allows checking for a
      * specific role. By default checking for «login» role.
      */
-    public function logged_in(?string $role = 'login'): bool
-    {
+    public function logged_in(?string $role = 'login'): bool {
         // Get the user from the session
         $user = $this->get_user();
 
@@ -186,7 +185,7 @@ class Auth extends Component
      * @param   string $password password to hash
      * @return  string
      */
-    public function hash(string $password) : string {
+    public function hash(string $password): string {
         if ($this->hash_method === 'bcrypt') {
 
             $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->hash_cost]);
@@ -270,7 +269,7 @@ class Auth extends Component
      *
      * @return  mixed
      */
-    public function auto_login() : ?User {
+    public function auto_login(): ?User {
         if ($token = Mii::$app->request->get_cookie($this->token_cookie)) {
             // Load the token and user
             $token = Token::find()->where('token', '=', $token)->one();

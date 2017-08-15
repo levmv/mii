@@ -37,7 +37,7 @@ class Blocks extends Component
 
     protected $_css = [];
 
-    protected $_js = [ [],[],[] ];
+    protected $_js = [[], [], []];
 
     protected $_files = [
         '.css' => [
@@ -47,25 +47,24 @@ class Blocks extends Component
     ];
 
 
-    public function init(array $config = []) : void
-    {
+    public function init(array $config = []): void {
         parent::init($config);
 
-        if(!$this->libraries) {
+        if (!$this->libraries) {
             $this->libraries = [
-                path('app').'/blocks'
+                path('app') . '/blocks'
             ];
         } else {
-            for($i=0; $i<count($this->libraries); $i++)
-                $this->libraries[$i] = Mii::resolve($this->libraries[$i]); 
+            for ($i = 0; $i < count($this->libraries); $i++)
+                $this->libraries[$i] = Mii::resolve($this->libraries[$i]);
         }
 
-        if(!$this->assets_dir) {
-            $this->assets_dir = path('pub').'/assets';
+        if (!$this->assets_dir) {
+            $this->assets_dir = path('pub') . '/assets';
         }
     }
 
-    public function configure(array $config) : void {
+    public function configure(array $config): void {
 
         foreach ($config as $key => $value)
             $this->$key = $value;
@@ -80,12 +79,11 @@ class Blocks extends Component
      */
 
 
-    public function get(string $name) : Block
-    {
+    public function get(string $name): Block {
         if (isset($this->_blocks[$name]))
             return $this->_blocks[$name];
 
-        $this->_block_paths[$name] = $block_path = '/'.implode('/', explode('_', $name)) . '/';
+        $this->_block_paths[$name] = $block_path = '/' . implode('/', explode('_', $name)) . '/';
 
         $block_file = null;
 
@@ -95,7 +93,7 @@ class Blocks extends Component
 
             foreach ($this->libraries as $library_path) {
                 if (is_file($library_path . $block_path . '.php')) {
-                    $block_file = $library_path . $block_path  . '.php';
+                    $block_file = $library_path . $block_path . '.php';
                     break;
                 }
             }
@@ -107,21 +105,21 @@ class Blocks extends Component
     }
 
 
-    public function css() : string {
-        if(!$this->_rendered)
+    public function css(): string {
+        if (!$this->_rendered)
             $this->render();
 
         return implode("\n", $this->_css);
     }
 
 
-    public function js(?int $position = null) : string {
-        if(!$this->_rendered)
+    public function js(?int $position = null): string {
+        if (!$this->_rendered)
             $this->render();
 
-        if($position === null) {
+        if ($position === null) {
             $out = [];
-            foreach($this->_js as $js) {
+            foreach ($this->_js as $js) {
                 if (!empty($js))
                     $out[] = implode("\n", $js);
             }
@@ -132,49 +130,47 @@ class Blocks extends Component
     }
 
 
-
-    public function render() : void
-    {
+    public function render(): void {
         if (config('debug')) {
             $benchmark = \mii\util\Profiler::start('Assets', __FUNCTION__);
         }
 
         foreach ($this->_blocks as $block_name => $block) {
 
-            if($block->__has_parent)
+            if ($block->__has_parent)
                 continue;
 
             $this->process_block_assets($block_name, $block_name, $block->_depends);
 
         }
 
-        foreach($this->_files as $type => $blocks) {
-            foreach($blocks as $block_name => $block) {
+        foreach ($this->_files as $type => $blocks) {
+            foreach ($blocks as $block_name => $block) {
 
-                if(isset($block['files']))
+                if (isset($block['files']))
                     $this->_build_block($block_name, $type, $block['files']);
-                if(isset($block['remote'])) {
+                if (isset($block['remote'])) {
 
                     if ($type === '.js') {
-                        foreach($block['remote'] as $position => $remote) {
+                        foreach ($block['remote'] as $position => $remote) {
                             $this->_js[$position][] = implode("\n", $remote);
                         }
                     } else {
 
-                        foreach($block['remote'] as $condition => $css_remote) {
-                            if($condition) {
-                                $this->_css[] = '<!--[if '.$condition.']><link type="text/css" href="' . implode("\n",$css_remote) . '" rel="stylesheet" /><![endif]-->';
+                        foreach ($block['remote'] as $condition => $css_remote) {
+                            if ($condition) {
+                                $this->_css[] = '<!--[if ' . $condition . ']><link type="text/css" href="' . implode("\n", $css_remote) . '" rel="stylesheet" /><![endif]-->';
                             } else {
-                                $this->_css[] = '<link type="text/css" href="' . implode("\n",$css_remote) . '" rel="stylesheet" />';
+                                $this->_css[] = '<link type="text/css" href="' . implode("\n", $css_remote) . '" rel="stylesheet" />';
                             }
                         }
                     }
 
                 }
-                if(isset($block['inline'])) {
+                if (isset($block['inline'])) {
 
                     if ($type === '.js') {
-                        foreach($block['inline'] as $position => $inline) {
+                        foreach ($block['inline'] as $position => $inline) {
                             $this->_js[$position][] = '<script type="text/javascript">' . implode("\n", $inline) . '</script>';
                         }
 
@@ -199,14 +195,13 @@ class Blocks extends Component
      * Recursively process a block and its dependencies
      *
      * @param $block_name
-     * @param $files link to assets files array
      */
-    public function process_block_assets($block_name, $parent_block, $depends) : void {
+    public function process_block_assets($block_name, $parent_block, $depends): void {
         if (isset($this->_used_blocks[$block_name])) {
             return;
         }
 
-        if($this->process_assets) {
+        if ($this->process_assets) {
             foreach ($this->libraries as $base_path) {
                 if (is_dir($base_path . $this->_block_paths[$block_name] . 'assets')) {
                     $this->_build_assets_dir($block_name, $base_path . $this->_block_paths[$block_name] . 'assets');
@@ -218,7 +213,7 @@ class Blocks extends Component
         if (!empty($depends)) {
             foreach ($depends as $depend) {
                 //if (!is_dir($base_path . '/' . $this->_block_paths[$depend]))
-                    //continue;
+                //continue;
                 if (isset($this->_used_blocks[$depend]))
                     continue;
                 $this->process_block_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
@@ -232,52 +227,52 @@ class Blocks extends Component
             foreach ($this->libraries as $base_path) {
 
                 if (is_file($base_path . $path . $block_name . $type)) {
-                    $this->_files[$type][$parent_block]['files'][$block_name  . $type] = $base_path . $path . $block_name . $type;
+                    $this->_files[$type][$parent_block]['files'][$block_name . $type] = $base_path . $path . $block_name . $type;
                     break;
                 }
             }
         }
 
-        if($this->_blocks[$block_name]->__remote_js !== null) {
-            foreach($this->_blocks[$block_name]->__remote_js as $link => $settings) {
-                if(!empty($settings) AND isset($settings['position'])) {
+        if ($this->_blocks[$block_name]->__remote_js !== null) {
+            foreach ($this->_blocks[$block_name]->__remote_js as $link => $settings) {
+                if (!empty($settings) AND isset($settings['position'])) {
                     $position = $settings['position'];
                     unset($settings['position']);
                 } else {
                     $position = Blocks::END;;
                 }
-                if(isset($settings['condition'])) {
+                if (isset($settings['condition'])) {
                     $condition = $settings['condition'];
                     unset($settings['condition']);
-                    $this->_files['.js'][$parent_block]['remote'][$position][] = '<!--[if '.$condition.']>'.HTML::script($link, $settings).'<![endif]-->';
+                    $this->_files['.js'][$parent_block]['remote'][$position][] = '<!--[if ' . $condition . ']>' . HTML::script($link, $settings) . '<![endif]-->';
                 } else {
                     $this->_files['.js'][$parent_block]['remote'][$position][] = HTML::script($link, $settings);
                 }
             }
         }
 
-        if($this->_blocks[$block_name]->__remote_css !== null) {
-            if(!isset($this->_files['.css'][$parent_block]['remote']))
+        if ($this->_blocks[$block_name]->__remote_css !== null) {
+            if (!isset($this->_files['.css'][$parent_block]['remote']))
                 $this->_files['.css'][$parent_block]['remote'] = [];
 
-            foreach($this->_blocks[$block_name]->__remote_css as $r_css => $r_options) {
+            foreach ($this->_blocks[$block_name]->__remote_css as $r_css => $r_options) {
                 $condition = isset($r_options['condition']) ? $r_options['condition'] : '';
                 $this->_files['.css'][$parent_block]['remote'][$condition][] = $r_css;
             }
         }
 
-        if(!empty($this->_blocks[$block_name]->__inline_js)) {
+        if (!empty($this->_blocks[$block_name]->__inline_js)) {
 
-            foreach($this->_blocks[$block_name]->__inline_js as $inline) {
+            foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
                 $position = (!empty($inline[1]) AND isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
-                if(!isset($this->_files['.js'][$parent_block]['inline'][$position]))
+                if (!isset($this->_files['.js'][$parent_block]['inline'][$position]))
                     $this->_files['.js'][$parent_block]['inline'][$position] = [];
                 $this->_files['.js'][$parent_block]['inline'][$position][] = $inline[0];
             }
         }
 
-        if(!empty($this->_blocks[$block_name]->__inline_css)) {
-            if(!isset($this->_files['.css'][$parent_block]['inline']))
+        if (!empty($this->_blocks[$block_name]->__inline_css)) {
+            if (!isset($this->_files['.css'][$parent_block]['inline']))
                 $this->_files['.css'][$parent_block]['inline'] = $this->_blocks[$block_name]->__inline_css;
             else
                 $this->_files['.css'][$parent_block]['inline'] = array_merge($this->_files['.css'][$parent_block]['inline'], $this->_blocks[$block_name]->__inline_css);
@@ -285,9 +280,8 @@ class Blocks extends Component
     }
 
 
-    private function _build_block(string $block_name, string $type, array $files) : void
-    {
-        $result_file_name = $block_name.crc32(implode('', array_keys($files)));
+    private function _build_block(string $block_name, string $type, array $files): void {
+        $result_file_name = $block_name . crc32(implode('', array_keys($files)));
 
         $is_css = ($type === '.css');
 
@@ -296,8 +290,8 @@ class Blocks extends Component
             $output = path('pub') . $web_output;
             $need_recompile = false;
 
-                foreach ($files as $name => $file) {
-                if (!is_file($output)||filemtime($output) < filemtime($file)) {
+            foreach ($files as $name => $file) {
+                if (!is_file($output) || filemtime($output) < filemtime($file)) {
                     $need_recompile = true;
                     break;
                 }
@@ -306,24 +300,24 @@ class Blocks extends Component
             if ($need_recompile) {
                 $tmp = '';
                 foreach ($files as $file) {
-                    $tmp .=  file_get_contents($file)."\n";
+                    $tmp .= file_get_contents($file) . "\n";
                 }
 
-                if($is_css) {
+                if ($is_css) {
                     $tmp = $this->_process_css($tmp);
                 }
 
                 $gz_output = gzencode($tmp, 6);
 
                 file_put_contents($output, $tmp);
-                file_put_contents($output.'.gz', $gz_output);
+                file_put_contents($output . '.gz', $gz_output);
             }
 
-            if($is_css) {
+            if ($is_css) {
                 $this->_css[] = '<link type="text/css" href="' . $web_output . '?' . filemtime($output) . '" rel="stylesheet">';
 
             } else {
-                $this->_js[Blocks::END][] = '<script src="'.$web_output . '?' . filemtime($output).'"></script>';
+                $this->_js[Blocks::END][] = '<script src="' . $web_output . '?' . filemtime($output) . '"></script>';
             }
 
             return;
@@ -334,9 +328,9 @@ class Blocks extends Component
 
         foreach ($files as $name => $file) {
 
-            $output = path('pub').'/'.$this->assets_pub_dir . '/' . $name;
+            $output = path('pub') . '/' . $this->assets_pub_dir . '/' . $name;
 
-            if (!is_file($output)||filemtime($output) < filemtime($file)) {
+            if (!is_file($output) || filemtime($output) < filemtime($file)) {
 
                 try {
                     copy($file, $output);
@@ -347,18 +341,17 @@ class Blocks extends Component
                     copy($file['path'], $output);
                 }
             }
-            if($is_css) {
+            if ($is_css) {
                 $this->_css[] = '<link type="text/css" href="' . $this->assets_pub_dir . '/' . $name . '?' . filemtime($output) . '" rel="stylesheet">';
             } else {
-                $this->_js[Blocks::END][] = '<script src="'.$this->assets_pub_dir . '/' . $name . '?' . filemtime($output).'"></script>';
+                $this->_js[Blocks::END][] = '<script src="' . $this->assets_pub_dir . '/' . $name . '?' . filemtime($output) . '"></script>';
             }
         }
     }
 
 
-    private function _process_css(string $content) : string
-    {
-        if($this->css_process_callback) {
+    private function _process_css(string $content): string {
+        if ($this->css_process_callback) {
             try {
                 $content = call_user_func($this->css_process_callback, $content);
             } catch (\Throwable $e) {
@@ -398,13 +391,12 @@ class Blocks extends Component
     }
 
 
-    private function _build_assets_dir(string $blockname, string $path) : void
-    {
+    private function _build_assets_dir(string $blockname, string $path): void {
 
-        $output = $this->assets_dir.'/'. $blockname ;
+        $output = $this->assets_dir . '/' . $blockname;
 
-        if($this->use_symlink) {
-            if(!is_link($output)) {
+        if ($this->use_symlink) {
+            if (!is_link($output)) {
                 symlink($path, $output);
             }
         } else {
@@ -418,12 +410,11 @@ class Blocks extends Component
 
         $dir = opendir($from);
         @mkdir($to);
-        while(false !== ( $file = readdir($dir)) ) {
-            if (( $file !== '.' ) && ( $file !== '..' )) {
-                if ( is_dir($from . '/' . $file) ) {
+        while (false !== ($file = readdir($dir))) {
+            if (($file !== '.') && ($file !== '..')) {
+                if (is_dir($from . '/' . $file)) {
                     $this->_copy_dir($from . '/' . $file, $to . '/' . $file);
-                }
-                else {
+                } else {
 
                     if (static::is_modified_later($to . '/' . $file, filemtime($from . '/' . $file))) {
                         copy($from . '/' . $file, $to . '/' . $file);

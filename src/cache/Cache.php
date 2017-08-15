@@ -5,7 +5,8 @@ namespace mii\cache;
 
 use mii\core\Component;
 
-abstract class Cache extends Component {
+abstract class Cache extends Component
+{
 
 
     protected $default_expire = 3600;
@@ -18,8 +19,7 @@ abstract class Cache extends Component {
      *
      * @return  void
      */
-    final public function __clone()
-    {
+    final public function __clone() {
         throw new CacheException('Cloning of Cache objects is forbidden');
     }
 
@@ -35,8 +35,8 @@ abstract class Cache extends Component {
      *     // Retrieve cache entry from memcache group
      *     $data = Cache::instance('memcache')->get('foo');
      *
-     * @param   string  $id       id of cache to entry
-     * @param   string  $default  default value to return if cache miss
+     * @param   string $id id of cache to entry
+     * @param   string $default default value to return if cache miss
      * @return  mixed
      * @throws  CacheException
      */
@@ -60,9 +60,9 @@ abstract class Cache extends Component {
      *          return
      *     }
      *
-     * @param   string   $id        id of cache entry
-     * @param   string   $data      data to set to cache
-     * @param   integer  $lifetime  lifetime in seconds
+     * @param   string $id id of cache entry
+     * @param   string $data data to set to cache
+     * @param   integer $lifetime lifetime in seconds
      * @return  boolean
      */
     abstract public function set($id, $data, $lifetime = 3600);
@@ -76,7 +76,7 @@ abstract class Cache extends Component {
      *     // Delete 'foo' entry from the memcache group
      *     Cache::instance('memcache')->delete('foo')
      *
-     * @param   string  $id  id to remove from cache
+     * @param   string $id id to remove from cache
      * @return  boolean
      */
     abstract public function delete($id);
@@ -104,12 +104,11 @@ abstract class Cache extends Component {
      *     // Sanitize a cache id
      *     $id = $this->_sanitize_id($id);
      *
-     * @param   string  $id  id of cache to sanitize
+     * @param   string $id id of cache to sanitize
      * @return  string
      */
-    protected function _sanitize_id($id) : string
-    {
+    protected function _sanitize_id($id): string {
         // Change slashes and spaces to underscores
-        return $this->prefix.str_replace(['/', '\\', ' '], '_', $id);
+        return $this->prefix . str_replace(['/', '\\', ' '], '_', $id);
     }
 }

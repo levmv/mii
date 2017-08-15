@@ -2,7 +2,8 @@
 
 namespace mii\web;
 
-class HttpException extends Exception {
+class HttpException extends Exception
+{
 
     public $status_code = 500;
 
@@ -16,8 +17,7 @@ class HttpException extends Exception {
     /**
      * @return string the user-friendly name of this exception
      */
-    public function get_name()
-    {
+    public function get_name() {
         if (isset(Response::$messages[$this->status_code])) {
             return Response::$messages[$this->status_code];
         } else {
@@ -25,4 +25,6 @@ class HttpException extends Exception {
         }
     }
 
-};
+}
+
+;

@@ -3,7 +3,8 @@
 namespace mii\web;
 
 
-class UploadedFile {
+class UploadedFile
+{
 
     /**
      * @var string the original name of the file being uploaded
@@ -35,14 +36,13 @@ class UploadedFile {
     public $error;
 
 
-    public function __toString()
-    {
+    public function __toString() {
         return $this->name;
     }
 
 
     public function __construct($config) {
-        foreach($config as $key => $value)
+        foreach ($config as $key => $value)
             $this->{$key} = $value;
     }
 
@@ -55,8 +55,7 @@ class UploadedFile {
      * If true, you will not be able to save the uploaded file again in the current request.
      * @return bool true whether the file is saved successfully
      */
-    public function save_as($file, $delete_tmp = true) : bool
-    {
+    public function save_as($file, $delete_tmp = true): bool {
         $file = \Mii::resolve($file);
 
         if ($this->error == UPLOAD_ERR_OK) {
@@ -69,21 +68,20 @@ class UploadedFile {
         return false;
     }
 
-    public function basename() : string {
+    public function basename(): string {
         return basename($this->name);
     }
 
-    public function has_error() : bool {
+    public function has_error(): bool {
         return $this->error !== UPLOAD_ERR_OK;
     }
 
-    public function is_uploaded_file() : bool {
+    public function is_uploaded_file(): bool {
         return is_uploaded_file($this->tmp_name);
     }
 
 
-    public function extension() : string
-    {
+    public function extension(): string {
         return strtolower(pathinfo($this->name, PATHINFO_EXTENSION));
     }
 

@@ -48,8 +48,7 @@ class Cookie
      * @param   mixed $default default value to return
      * @return  string
      */
-    public static function get($key, $default = null)
-    {
+    public static function get($key, $default = null) {
         if (!isset($_COOKIE[$key])) {
             // The cookie does not exist
             return $default;
@@ -91,8 +90,7 @@ class Cookie
      * @return  boolean
      * @uses    Cookie::salt
      */
-    public static function set($name, $value, $expiration = null)
-    {
+    public static function set($name, $value, $expiration = null) {
         if ($expiration === null) {
             // Use the default expiration
             $expiration = static::$expiration;
@@ -117,8 +115,7 @@ class Cookie
      * @param   string $name cookie name
      * @return  boolean
      */
-    public static function delete($name)
-    {
+    public static function delete($name) {
         // Remove the cookie
         unset($_COOKIE[$name]);
 
@@ -135,8 +132,7 @@ class Cookie
      * @param   string $value value of cookie
      * @return  string
      */
-    public static function salt($name, $value)
-    {
+    public static function salt($name, $value) {
         // Require a valid salt
         if (!static::$salt) {
             $config = Mii::$app->config('cookie');

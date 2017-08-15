@@ -15,8 +15,7 @@ class Controller
 
     public $interactive = true;
 
-    public function __construct(Request $request, Response $response)
-    {
+    public function __construct(Request $request, Response $response) {
         // Assign the request to the controller
         $this->request = $request;
 
@@ -26,14 +25,13 @@ class Controller
     }
 
 
-    protected function before()
-    {
+    protected function before() {
         return true;
     }
 
 
-
-    protected function after() {}
+    protected function after() {
+    }
 
 
     /**
@@ -50,8 +48,7 @@ class Controller
      * @throws  HTTP_Exception_404
      * @return  Response
      */
-    public function execute($params = [])
-    {
+    public function execute($params = []) {
         //$method = new \ReflectionMethod($this, $this->request->action());
 
         $this->before();
@@ -64,13 +61,11 @@ class Controller
 
     }
 
-    public function is_color_enabled($stream = \STDOUT)
-    {
+    public function is_color_enabled($stream = \STDOUT) {
         return $this->color === null ? Console::stream_supports_ansi_colors($stream) : $this->color;
     }
 
-    public function ansi_format($string)
-    {
+    public function ansi_format($string) {
         if ($this->is_color_enabled()) {
             $args = func_get_args();
             array_shift($args);
@@ -79,8 +74,7 @@ class Controller
         return $string;
     }
 
-    public function stdout($string)
-    {
+    public function stdout($string) {
         if ($this->is_color_enabled()) {
             $args = func_get_args();
             array_shift($args);
@@ -103,19 +97,19 @@ class Controller
 
     protected function info($msg, $options = []) {
         $msg = strtr($msg, $options);
-        $this->stdout($msg."\n", Console::FG_GREEN);
+        $this->stdout($msg . "\n", Console::FG_GREEN);
         \Mii::info($msg, 'console');
     }
 
     protected function warning($msg, $options = []) {
         $msg = strtr($msg, $options);
-        $this->stdout($msg."\n", Console::FG_PURPLE);
+        $this->stdout($msg . "\n", Console::FG_PURPLE);
         \Mii::warning(strtr($msg, $options), 'console');
     }
 
     protected function error($msg, $options = []) {
         $msg = strtr($msg, $options);
-        $this->stdout($msg."\n", Console::FG_RED);
+        $this->stdout($msg . "\n", Console::FG_RED);
         \Mii::error(strtr($msg, $options), 'console');
     }
 

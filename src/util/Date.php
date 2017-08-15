@@ -45,15 +45,15 @@ namespace mii\util;
 class Date
 {
     // Second amounts for various time increments
-    const YEAR   = 31556926;
-    const MONTH  = 2629744;
-    const WEEK   = 604800;
-    const DAY    = 86400;
-    const HOUR   = 3600;
+    const YEAR = 31556926;
+    const MONTH = 2629744;
+    const WEEK = 604800;
+    const DAY = 86400;
+    const HOUR = 3600;
     const MINUTE = 60;
 
     // Available formats for Date::months()
-    const MONTHS_LONG  = '%B';
+    const MONTHS_LONG = '%B';
     const MONTHS_SHORT = '%b';
 
     /**
@@ -79,13 +79,12 @@ class Date
      * <http://php.net/timezones>.
      *
      * @param string $remote timezone that to find the offset of
-     * @param string $local  timezone used as the baseline
-     * @param mixed  $now    UNIX timestamp or date string
+     * @param string $local timezone used as the baseline
+     * @param mixed $now UNIX timestamp or date string
      *
      * @return integer
      */
-    public static function offset($remote, $local = null, $now = null)
-    {
+    public static function offset($remote, $local = null, $now = null) {
         if ($local === null) {
             // Use the default timezone
             $local = date_default_timezone_get();
@@ -98,11 +97,11 @@ class Date
 
         // Create timezone objects
         $zone_remote = new \DateTimeZone($remote);
-        $zone_local  = new \DateTimeZone($local);
+        $zone_local = new \DateTimeZone($local);
 
         // Create date objects from timezones
         $time_remote = new \DateTime($now, $zone_remote);
-        $time_local  = new \DateTime($now, $zone_local);
+        $time_local = new \DateTime($now, $zone_local);
 
         // Find the offset
         $offset = $zone_remote->getOffset($time_remote) - $zone_local->getOffset($time_local);
@@ -116,15 +115,14 @@ class Date
      *
      *     $seconds = Date::seconds(); // 01, 02, 03, ..., 58, 59, 60
      *
-     * @param   integer $step   amount to increment each step by, 1 to 30
-     * @param   integer $start  start value
-     * @param   integer $end    end value
+     * @param   integer $step amount to increment each step by, 1 to 30
+     * @param   integer $start start value
+     * @param   integer $end end value
      * @return  array   A mirrored (foo => foo) array from 1-60.
      */
-    public static function seconds($step = 1, $start = 0, $end = 60)
-    {
+    public static function seconds($step = 1, $start = 0, $end = 60) {
         // Always integer
-        $step = (int) $step;
+        $step = (int)$step;
 
         $seconds = array();
         for ($i = $start; $i < $end; $i += $step) {
@@ -141,11 +139,10 @@ class Date
      *     $minutes = Date::minutes(); // 05, 10, 15, ..., 50, 55, 60
      *
      * @uses    Date::seconds
-     * @param   integer $step   amount to increment each step by, 1 to 30
+     * @param   integer $step amount to increment each step by, 1 to 30
      * @return  array   A mirrored (foo => foo) array from 1-60.
      */
-    public static function minutes($step = 5)
-    {
+    public static function minutes($step = 5) {
         // Because there are the same number of minutes as seconds in this set,
         // we choose to re-use seconds(), rather than creating an entirely new
         // function. Shhhh, it's cheating! ;) There are several more of these
@@ -159,13 +156,12 @@ class Date
      *
      *     $hours = Date::hours(); // 01, 02, 03, ..., 10, 11, 12
      *
-     * @param   integer $step   amount to increment each step by
-     * @param   boolean $long   use 24-hour time
-     * @param   integer $start  the hour to start at
+     * @param   integer $step amount to increment each step by
+     * @param   boolean $long use 24-hour time
+     * @param   integer $start the hour to start at
      * @return  array   A mirrored (foo => foo) array from start-12 or start-23.
      */
-    public static function hours($step = 1, $long = false, $start = null)
-    {
+    public static function hours($step = 1, $long = false, $start = null) {
         // Set the default start if none was specified.
         if (!$start) {
             $start = $long ? 0 : 1;
@@ -173,11 +169,11 @@ class Date
 
         // 24-hour time has 24 hours, instead of 12
         $size = $long ? 23 : 12;
-        $step = (int) $step;
+        $step = (int)$step;
 
         $hours = array();
         for ($i = $start; $i <= $size; $i += $step) {
-            $hours[$i] = (string) $i;
+            $hours[$i] = (string)$i;
         }
 
         return $hours;
@@ -189,13 +185,12 @@ class Date
      *     $type = Date::ampm(12); // PM
      *     $type = Date::ampm(1);  // AM
      *
-     * @param   integer $hour   number of the hour
+     * @param   integer $hour number of the hour
      * @return  string
      */
-    public static function ampm($hour)
-    {
+    public static function ampm($hour) {
         // Always integer
-        $hour = (int) $hour;
+        $hour = (int)$hour;
 
         return ($hour > 11) ? 'PM' : 'AM';
     }
@@ -205,13 +200,12 @@ class Date
      *
      *     $hour = Date::adjust(3, 'pm'); // 15
      *
-     * @param   integer $hour   hour to adjust
-     * @param   string  $ampm   AM or PM
+     * @param   integer $hour hour to adjust
+     * @param   string $ampm AM or PM
      * @return  string
      */
-    public static function adjust($hour, $ampm)
-    {
-        $hour = (int) $hour;
+    public static function adjust($hour, $ampm) {
+        $hour = (int)$hour;
         $ampm = strtolower($ampm);
 
         switch ($ampm) {
@@ -236,12 +230,11 @@ class Date
      *
      *     Date::days(4, 2010); // 1, 2, 3, ..., 28, 29, 30
      *
-     * @param   integer $month  number of month
-     * @param   integer $year   number of year to check month, defaults to the current year
+     * @param   integer $month number of month
+     * @param   integer $year number of year to check month, defaults to the current year
      * @return  array   A mirrored (foo => foo) array of the days.
      */
-    public static function days($month, $year = null)
-    {
+    public static function days($month, $year = null) {
         static $months;
 
         if (!isset($year)) {
@@ -250,8 +243,8 @@ class Date
         }
 
         // Always integers
-        $month = (int) $month;
-        $year  = (int) $year;
+        $month = (int)$month;
+        $year = (int)$year;
 
         // We use caching for months, because time functions are used
         if (empty($months[$year][$month])) {
@@ -260,7 +253,7 @@ class Date
 
             $months[$year][$month] = array();
             for ($i = 1; $i < $total; $i++) {
-                $months[$year][$month][$i] = (string) $i;
+                $months[$year][$month][$i] = (string)$i;
             }
         }
 
@@ -287,11 +280,10 @@ class Date
      *     // array(1 => 'Jan', 2 => 'Feb', ..., 12 => 'Dec')
      *
      * @uses    Date::hours
-     * @param   string  $format The format to use for months
+     * @param   string $format The format to use for months
      * @return  array   An array of months based on the specified format
      */
-    public static function months($format = null)
-    {
+    public static function months($format = null) {
         $months = array();
 
         if ($format === static::MONTHS_LONG || $format === static::MONTHS_SHORT) {
@@ -312,19 +304,18 @@ class Date
      *
      *     $years = Date::years(2000, 2010); // 2000, 2001, ..., 2009, 2010
      *
-     * @param   integer $start  starting year (default is current year - 5)
-     * @param   integer $end    ending year (default is current year + 5)
+     * @param   integer $start starting year (default is current year - 5)
+     * @param   integer $end ending year (default is current year + 5)
      * @return  array
      */
-    public static function years($start = false, $end = false)
-    {
+    public static function years($start = false, $end = false) {
         // Default values
-        $start = ($start === false) ? (date('Y') - 5) : (int) $start;
-        $end   = ($end   === false) ? (date('Y') + 5) : (int) $end;
+        $start = ($start === false) ? (date('Y') - 5) : (int)$start;
+        $end = ($end === false) ? (date('Y') + 5) : (int)$end;
 
         $years = array();
         for ($i = $start; $i <= $end; $i++) {
-            $years[$i] = (string) $i;
+            $years[$i] = (string)$i;
         }
 
         return $years;
@@ -339,15 +330,14 @@ class Date
      *     $span = Date::span(60, 182, 'minutes'); // 2
      *
      * @param   integer $remote timestamp to find the span of
-     * @param   integer $local  timestamp to use as the baseline
-     * @param   string  $output formatting string
+     * @param   integer $local timestamp to use as the baseline
+     * @param   string $output formatting string
      * @return  string   when only a single output is requested
      * @return  array    associative list of all outputs requested
      */
-    public static function span($remote, $local = null, $output = 'years,months,weeks,days,hours,minutes,seconds')
-    {
+    public static function span($remote, $local = null, $output = 'years,months,weeks,days,hours,minutes,seconds') {
         // Normalize output
-        $output = trim(strtolower((string) $output));
+        $output = trim(strtolower((string)$output));
 
         if (!$output) {
             // Invalid output
@@ -372,27 +362,27 @@ class Date
         $timespan = abs($remote - $local);
 
         if (isset($output['years'])) {
-            $timespan -= static::YEAR * ($output['years'] = (int) floor($timespan / static::YEAR));
+            $timespan -= static::YEAR * ($output['years'] = (int)floor($timespan / static::YEAR));
         }
 
         if (isset($output['months'])) {
-            $timespan -= static::MONTH * ($output['months'] = (int) floor($timespan / static::MONTH));
+            $timespan -= static::MONTH * ($output['months'] = (int)floor($timespan / static::MONTH));
         }
 
         if (isset($output['weeks'])) {
-            $timespan -= static::WEEK * ($output['weeks'] = (int) floor($timespan / static::WEEK));
+            $timespan -= static::WEEK * ($output['weeks'] = (int)floor($timespan / static::WEEK));
         }
 
         if (isset($output['days'])) {
-            $timespan -= static::DAY * ($output['days'] = (int) floor($timespan / static::DAY));
+            $timespan -= static::DAY * ($output['days'] = (int)floor($timespan / static::DAY));
         }
 
         if (isset($output['hours'])) {
-            $timespan -= static::HOUR * ($output['hours'] = (int) floor($timespan / static::HOUR));
+            $timespan -= static::HOUR * ($output['hours'] = (int)floor($timespan / static::HOUR));
         }
 
         if (isset($output['minutes'])) {
-            $timespan -= static::MINUTE * ($output['minutes'] = (int) floor($timespan / static::MINUTE));
+            $timespan -= static::MINUTE * ($output['minutes'] = (int)floor($timespan / static::MINUTE));
         }
 
         // Seconds ago, 1
@@ -420,13 +410,12 @@ class Date
      * however this parameter shouldn't be needed in normal usage and is only
      * included for unit tests
      *
-     * @param   integer $timestamp          "remote" timestamp
-     * @param   integer $local_timestamp    "local" timestamp, defaults to time()
+     * @param   integer $timestamp "remote" timestamp
+     * @param   integer $local_timestamp "local" timestamp, defaults to time()
      * @return  string
      */
-    public static function fuzzySpan($timestamp, $local_timestamp = null)
-    {
-        $local_timestamp = ($local_timestamp === null) ? time() : (int) $local_timestamp;
+    public static function fuzzySpan($timestamp, $local_timestamp = null) {
+        $local_timestamp = ($local_timestamp === null) ? time() : (int)$local_timestamp;
 
         // Determine the difference in seconds
         $offset = abs($local_timestamp - $timestamp);
@@ -489,11 +478,10 @@ class Date
      *
      *     $dos = Date::unix2dos($unix);
      *
-     * @param   integer $timestamp  UNIX timestamp
+     * @param   integer $timestamp UNIX timestamp
      * @return  integer
      */
-    public static function unix2dos($timestamp = null)
-    {
+    public static function unix2dos($timestamp = null) {
         $timestamp = getdate($timestamp);
 
         if ($timestamp['year'] < 1980) {
@@ -504,9 +492,9 @@ class Date
 
         // What voodoo is this? I have no idea... Geert can explain it though,
         // and that's good enough for me.
-        return ($timestamp['year']    << 25 | $timestamp['mon']     << 21 |
-            $timestamp['mday']    << 16 | $timestamp['hours']   << 11 |
-            $timestamp['minutes'] << 5  | $timestamp['seconds'] >> 1);
+        return ($timestamp['year'] << 25 | $timestamp['mon'] << 21 |
+            $timestamp['mday'] << 16 | $timestamp['hours'] << 11 |
+            $timestamp['minutes'] << 5 | $timestamp['seconds'] >> 1);
     }
 
     /**
@@ -516,16 +504,15 @@ class Date
      *
      *     $unix = Date::dos2unix($dos);
      *
-     * @param   integer $timestamp  DOS timestamp
+     * @param   integer $timestamp DOS timestamp
      * @return  integer
      */
-    public static function dos2unix($timestamp = false)
-    {
-        $sec  = 2 * ($timestamp & 0x1f);
-        $min  = ($timestamp >>  5) & 0x3f;
-        $hrs  = ($timestamp >> 11) & 0x1f;
-        $day  = ($timestamp >> 16) & 0x1f;
-        $mon  = ($timestamp >> 21) & 0x0f;
+    public static function dos2unix($timestamp = false) {
+        $sec = 2 * ($timestamp & 0x1f);
+        $min = ($timestamp >> 5) & 0x3f;
+        $hrs = ($timestamp >> 11) & 0x1f;
+        $day = ($timestamp >> 16) & 0x1f;
+        $mon = ($timestamp >> 21) & 0x0f;
         $year = ($timestamp >> 25) & 0x7f;
 
         return mktime($hrs, $min, $sec, $mon, $day, $year + 1980);
@@ -537,13 +524,12 @@ class Date
      *     $time = Date::formatted_time('5 minutes ago');
      *
      * @link    http://www.php.net/manual/\DateTime.construct
-     * @param   string  $\DateTime_str       \DateTime string
-     * @param   string  $timestamp_format   timestamp format
-     * @param   string  $timezone           timezone identifier
+     * @param   string $\DateTime_str       \DateTime string
+     * @param   string $timestamp_format timestamp format
+     * @param   string $timezone timezone identifier
      * @return  string
      */
-    public static function formattedTime($DateTime_str = 'now', $timestamp_format = null, $timezone = null)
-    {
+    public static function formattedTime($DateTime_str = 'now', $timestamp_format = null, $timezone = null) {
         if (!$timestamp_format) {
             $timestamp_format = static::$timestamp_format;
         }
@@ -552,7 +538,7 @@ class Date
             $timezone = static::$timezone;
         }
 
-        $tz   = new \DateTimeZone($timezone);
+        $tz = new \DateTimeZone($timezone);
         $time = new \DateTime($DateTime_str, $tz);
 
         if ($time->getTimeZone()->getName() !== $tz->getName()) {
@@ -563,9 +549,9 @@ class Date
     }
 
 
-    public static $ru_months = array('September' => 'сентября','November' => 'ноября','October' => 'октября','December' => 'декабря',
-                                     'January' => 'января','February' => 'февраля','March' => 'марта','April' => 'апреля',
-                                     'May' => 'мая','June' => 'июня','July' => 'июля','August' => 'августа');
+    public static $ru_months = array('September' => 'сентября', 'November' => 'ноября', 'October' => 'октября', 'December' => 'декабря',
+        'January' => 'января', 'February' => 'февраля', 'March' => 'марта', 'April' => 'апреля',
+        'May' => 'мая', 'June' => 'июня', 'July' => 'июля', 'August' => 'августа');
 
 
     static function strftime_rus($format, $date = FALSE) {
@@ -600,18 +586,42 @@ class Date
         $month_number = date('n', $timestamp);
 
         switch ($month_number) {
-            case 1: $rus = 'января'; break;
-            case 2: $rus = 'февраля'; break;
-            case 3: $rus = 'марта'; break;
-            case 4: $rus = 'апреля'; break;
-            case 5: $rus = 'мая'; break;
-            case 6: $rus = 'июня'; break;
-            case 7: $rus = 'июля'; break;
-            case 8: $rus = 'августа'; break;
-            case 9: $rus = 'сентября'; break;
-            case 10: $rus = 'октября'; break;
-            case 11: $rus = 'ноября'; break;
-            case 12: $rus = 'декабря'; break;
+            case 1:
+                $rus = 'января';
+                break;
+            case 2:
+                $rus = 'февраля';
+                break;
+            case 3:
+                $rus = 'марта';
+                break;
+            case 4:
+                $rus = 'апреля';
+                break;
+            case 5:
+                $rus = 'мая';
+                break;
+            case 6:
+                $rus = 'июня';
+                break;
+            case 7:
+                $rus = 'июля';
+                break;
+            case 8:
+                $rus = 'августа';
+                break;
+            case 9:
+                $rus = 'сентября';
+                break;
+            case 10:
+                $rus = 'октября';
+                break;
+            case 11:
+                $rus = 'ноября';
+                break;
+            case 12:
+                $rus = 'декабря';
+                break;
         }
 
         $rusformat = str_replace('%B2', $rus, $format);
@@ -619,72 +629,56 @@ class Date
         return strftime($rusformat, $timestamp);
     }
 
-    public static function formated($timestamp, $local_timestamp = NULL)
-    {
-        $local_timestamp = ($local_timestamp === NULL) ? time() : (int) $local_timestamp;
+    public static function formated($timestamp, $local_timestamp = NULL) {
+        $local_timestamp = ($local_timestamp === NULL) ? time() : (int)$local_timestamp;
 
         // Determine the difference in seconds
         $offset = abs($local_timestamp - $timestamp);
 
 
-
-        if ($offset <= Date::MINUTE)
-        {
+        if ($offset <= Date::MINUTE) {
             $span = 'только что';
-        }
+        } elseif ($offset < Date::HOUR) {
+            $minutes = round($offset / 60);
 
-        elseif ($offset < Date::HOUR)
-        {
-            $minutes = round($offset/60);
-
-            $span = $minutes.' '.Num::decl($minutes,array('минуту','минуты','минут')).' назад';
-        }elseif ($offset == Date::HOUR)
-        {
+            $span = $minutes . ' ' . Num::decl($minutes, array('минуту', 'минуты', 'минут')) . ' назад';
+        } elseif ($offset == Date::HOUR) {
             $span = 'час назад';
-        }
-        elseif ($offset < (Date::HOUR * 2))
-        {
+        } elseif ($offset < (Date::HOUR * 2)) {
             $span = 'два часа назад';
-        }
-        elseif ($offset < Date::DAY)
-        {
-            if(date('d', $timestamp) != date('d'))
-                $span = 'вчера в '.date('H:i', $timestamp);
+        } elseif ($offset < Date::DAY) {
+            if (date('d', $timestamp) != date('d'))
+                $span = 'вчера в ' . date('H:i', $timestamp);
             else
-                $span = 'сегодня в '.date('H:i', $timestamp);
-        }
-        elseif ($offset > Date::DAY)
-        {
-            if(date('Y', $timestamp) != date('Y'))
-                $span = Date::strftime_rus('%e %B2 %Y', $timestamp).' в '.date('H:i', $timestamp);
+                $span = 'сегодня в ' . date('H:i', $timestamp);
+        } elseif ($offset > Date::DAY) {
+            if (date('Y', $timestamp) != date('Y'))
+                $span = Date::strftime_rus('%e %B2 %Y', $timestamp) . ' в ' . date('H:i', $timestamp);
             else
-                $span = Date::strftime_rus('%e %B2', $timestamp).' в '.date('H:i', $timestamp);
+                $span = Date::strftime_rus('%e %B2', $timestamp) . ' в ' . date('H:i', $timestamp);
         }
 
 
-        if ($timestamp <= $local_timestamp)
-        {
+        if ($timestamp <= $local_timestamp) {
             // This is in the past
             return $span;
-        }
-        else
-        {
+        } else {
             // This in the future
-            return 'в '.$span;
+            return 'в ' . $span;
         }
     }
 
     public static function day_of_week($date = null, $ucfirst = true) {
         $days = [
-            'воскресенье' , 'понедельник' ,
-            'вторник' , 'среда' ,
-            'четверг' , 'пятница' , 'суббота'
+            'воскресенье', 'понедельник',
+            'вторник', 'среда',
+            'четверг', 'пятница', 'суббота'
         ];
 
         $uf_days = [
-            'Воскресенье' , 'Понедельник' ,
-            'Вторник' , 'Среда' ,
-            'Четверг' , 'Пятница' , 'Суббота'
+            'Воскресенье', 'Понедельник',
+            'Вторник', 'Среда',
+            'Четверг', 'Пятница', 'Суббота'
         ];
 
 
@@ -692,18 +686,18 @@ class Date
     }
 
     public static function month($date = null, $genitive = true) {
-        static $trans_table = ['September' => 'сентябрь','November' => 'ноябрь','October' => 'октябрь','December' => 'декабрь',
-            'January' => 'январь','February' => 'февраль','March' => 'март','April' => 'апрель',
-            'May' => 'май','June' => 'июнь','July' => 'июль','August' => 'август'];
+        static $trans_table = ['September' => 'сентябрь', 'November' => 'ноябрь', 'October' => 'октябрь', 'December' => 'декабрь',
+            'January' => 'январь', 'February' => 'февраль', 'March' => 'март', 'April' => 'апрель',
+            'May' => 'май', 'June' => 'июнь', 'July' => 'июль', 'August' => 'август'];
 
 
-        static $trans_table_g = ['September' => 'сентября','November' => 'ноября','October' => 'октября','December' => 'декабря',
-            'January' => 'января','February' => 'февраля','March' => 'марта','April' => 'апреля',
-            'May' => 'мая','June' => 'июня','July' => 'июля','August' => 'августа'];
+        static $trans_table_g = ['September' => 'сентября', 'November' => 'ноября', 'October' => 'октября', 'December' => 'декабря',
+            'January' => 'января', 'February' => 'февраля', 'March' => 'марта', 'April' => 'апреля',
+            'May' => 'мая', 'June' => 'июня', 'July' => 'июля', 'August' => 'августа'];
 
         $name = date('F', $date);
 
-        if($genitive) {
+        if ($genitive) {
             return isset($trans_table_g[$name]) ? $trans_table_g[$name] : $name;
         } else {
             return isset($trans_table[$name]) ? $trans_table[$name] : $name;

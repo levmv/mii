@@ -25,19 +25,18 @@ class App extends \mii\core\App
     public $maintenance;
     public $maintenance_message;
 
-    public function run()
-    {
+    public function run() {
 
-        if($this->maintenance) {
+        if ($this->maintenance) {
             $protocol = "HTTP/1.0";
-            if ( "HTTP/1.1" === $_SERVER["SERVER_PROTOCOL"] )
+            if ("HTTP/1.1" === $_SERVER["SERVER_PROTOCOL"])
                 $protocol = "HTTP/1.1";
-            header( "$protocol 503 Service Unavailable", true, 503 );
-            header( "Retry-After: 30" );
+            header("$protocol 503 Service Unavailable", true, 503);
+            header("Retry-After: 30");
 
             echo $this->maintenance_message
-            ? $this->maintenance_message
-            : 'На сайте технические работы, которые закончатся через несколько секунд. Пожалуйста, обновите страницу в браузере';
+                ? $this->maintenance_message
+                : 'На сайте технические работы, которые закончатся через несколько секунд. Пожалуйста, обновите страницу в браузере';
 
             die;
         }
@@ -63,7 +62,6 @@ class App extends \mii\core\App
             'error' => ['class' => 'mii\web\ErrorHandler']
         ];
     }
-
 
 
 }

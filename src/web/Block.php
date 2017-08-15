@@ -49,12 +49,10 @@ class Block
      * @param   string $file path to block php file
      * @return  void
      */
-    public function __construct(string $name, ?string $file = null)
-    {
+    public function __construct(string $name, ?string $file = null) {
         $this->__name = $name;
         $this->_file = $file;
     }
-
 
 
     /**
@@ -68,8 +66,7 @@ class Block
      * @param   string $key variable name
      * @return  mixed
      */
-    public function & __get($key)
-    {
+    public function & __get($key) {
         return $this->get($key);
     }
 
@@ -82,8 +79,7 @@ class Block
      * @param   mixed $value value
      * @return  void
      */
-    public function __set($key, $value)
-    {
+    public function __set($key, $value) {
         $this->set($key, $value);
     }
 
@@ -97,8 +93,7 @@ class Block
      * @param   string $key variable name
      * @return  boolean
      */
-    public function __isset(string $key) : bool
-    {
+    public function __isset(string $key): bool {
         return (isset($this->_data[$key]));
     }
 
@@ -110,8 +105,7 @@ class Block
      * @param   string $key variable name
      * @return  void
      */
-    public function __unset(string $key)
-    {
+    public function __unset(string $key) {
         unset($this->_data[$key]);
     }
 
@@ -120,8 +114,7 @@ class Block
      *
      * @return  string
      */
-    public function __toString() : string
-    {
+    public function __toString(): string {
         try {
 
             return $this->render();
@@ -132,8 +125,7 @@ class Block
         }
     }
 
-    public function depends(array $depends) : Block
-    {
+    public function depends(array $depends): Block {
         $this->_depends = array_unique(array_merge($this->_depends, $depends));
 
         foreach ($this->_depends as $depend) {
@@ -143,13 +135,18 @@ class Block
         return $this;
     }
 
-    public function name() : string {
+    public function name(): string {
         return $this->__name;
     }
 
 
+    public function path(): string {
+        return '/' . implode('/', explode('_', $this->__name));
+    }
+
+
     public function css(string $link, array $options = []) {
-        if($this->__remote_css === null)
+        if ($this->__remote_css === null)
             $this->__remote_css = [];
 
         $this->__remote_css[$link] = $options;
@@ -158,7 +155,7 @@ class Block
     }
 
     public function js(string $link, array $options = []) {
-        if($this->__remote_js === null)
+        if ($this->__remote_js === null)
             $this->__remote_js = [];
 
         $this->__remote_js[$link] = $options;
@@ -175,8 +172,7 @@ class Block
         return $this;
     }
 
-    public function get(string $key, $default = NULL)
-    {
+    public function get(string $key, $default = NULL) {
 
         if (array_key_exists($key, $this->_data)) {
             return $this->_data[$key];
@@ -205,8 +201,7 @@ class Block
      * @param   mixed $value value
      * @return  $this
      */
-    public function set($key, $value = NULL)
-    {
+    public function set($key, $value = NULL) {
         if (is_array($key)) {
             foreach ($key as $name => $value) {
                 $this->_data[$name] = $value;
@@ -233,23 +228,20 @@ class Block
      * @param   mixed $value referenced variable
      * @return  $this
      */
-    public function bind(string $key, & $value)
-    {
+    public function bind(string $key, & $value) {
         $this->_data[$key] =& $value;
 
         return $this;
     }
 
-    public function bind_global(string $key, & $value)
-    {
-        Block::$_global_data[$key] = & $value;
+    public function bind_global(string $key, & $value) {
+        Block::$_global_data[$key] = &$value;
 
         return $this;
     }
 
-    public function loaded() : bool
-    {
-        return (bool) $this->_loaded;
+    public function loaded(): bool {
+        return (bool)$this->_loaded;
     }
 
 
@@ -266,8 +258,7 @@ class Block
      * @return  string
      * @uses    Block::capture
      */
-    public function render(bool $force = false) : string
-    {
+    public function render(bool $force = false): string {
         if (!$this->_loaded AND !$force) {
             return '';
         }
@@ -298,8 +289,7 @@ class Block
      * @throws \Exception
      * @return  string
      */
-    protected function capture(string $block_filename) : string
-    {
+    protected function capture(string $block_filename): string {
 
         // Import the view variables to local namespace
         extract($this->_data, EXTR_OVERWRITE);

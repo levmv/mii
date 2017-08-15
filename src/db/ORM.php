@@ -81,12 +81,12 @@ class ORM
     /**
      * @return \mii\db\Result
      */
-    public static function all($value = null) : array {
-        if($value !== null) {
+    public static function all($value = null): array {
+        if ($value !== null) {
 
             assert(is_array($value) === true, 'Value must be an array or null');
 
-            if(!is_array($value[0])) {
+            if (!is_array($value[0])) {
                 return (new static)
                     ->select_query()
                     ->where('id', 'IN', $value)
@@ -108,7 +108,7 @@ class ORM
     /**
      * @return Query
      */
-    public static function find()  {
+    public static function find() {
         return (new static)->select_query();
     }
 
@@ -117,8 +117,8 @@ class ORM
      * @return $this|null
      */
 
-    public static function one($value = null)  {
-        if(is_array($value)) {
+    public static function one($value = null) {
+        if (is_array($value)) {
 
             assert(count($value[0]) === 3, "Wrong conditions array");
 
@@ -127,8 +127,8 @@ class ORM
                 ->where($value)
                 ->one();
 
-        } elseif(is_integer($value) || is_string($value)) {
-            return (new static)->select_query(false)->where('id', '=', (int) $value)->one();
+        } elseif (is_integer($value) || is_string($value)) {
+            return (new static)->select_query(false)->where('id', '=', (int)$value)->one();
         }
 
         return (new static)->select_query(true)->one();
@@ -139,9 +139,9 @@ class ORM
      * @param bool $with_order
      * @return Query
      */
-    public function select_query($with_order = true, Query $query = null) : Query {
+    public function select_query($with_order = true, Query $query = null): Query {
 
-        if($query === null)
+        if ($query === null)
             $query = new Query;
 
         $query->select($this->fields(), true)->from($this->get_table())->as_object(static::class, [[], true]);
@@ -155,7 +155,7 @@ class ORM
         return $query;
     }
 
-    public function raw_query() : Query {
+    public function raw_query(): Query {
         return new Query;
     }
 
@@ -164,7 +164,7 @@ class ORM
      *
      * @return array
      */
-    public function fields() : array {
+    public function fields(): array {
         $fields = [];
 
         $table = $this->get_table();
@@ -183,7 +183,7 @@ class ORM
      *
      * @return string
      */
-    public function get_table() : string {
+    public function get_table(): string {
         return static::$table;
     }
 
@@ -218,7 +218,7 @@ class ORM
     public function __set($key, $value) {
         if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
 
-            if($this->__loaded !== false) {
+            if ($this->__loaded !== false) {
                 if ($value !== $this->_data[$key]) {
                     $this->_changed[$key] = true;
                 }
@@ -270,7 +270,7 @@ class ORM
     }
 
 
-    public function set($values, $value = NULL) : ORM {
+    public function set($values, $value = NULL): ORM {
 
         if (is_object($values) AND $values instanceof \mii\web\Form) {
 
@@ -289,7 +289,7 @@ class ORM
                     if ($value !== $this->_data[$key]) {
                         $this->_changed[$key] = true;
                     }
-                    $this->_data[$key] =  $value;
+                    $this->_data[$key] = $value;
                 }
 
             } else {
@@ -315,8 +315,8 @@ class ORM
      *
      * @return array
      */
-    public function to_array(array $properties = []) : array {
-        if(empty($properties)) {
+    public function to_array(array $properties = []): array {
+        if (empty($properties)) {
             return $this->_data;
         }
 
@@ -330,7 +330,7 @@ class ORM
      * @return bool
      */
 
-    public function changed($field_name = null) : bool {
+    public function changed($field_name = null): bool {
         // For not loaded models there is no way to detect changes.
         if (!$this->loaded())
             return true;
@@ -367,7 +367,7 @@ class ORM
      */
     public function update() {
 
-        if($this->_serialize_fields !== null && !empty($this->_serialize_fields))
+        if ($this->_serialize_fields !== null && !empty($this->_serialize_fields))
             $this->_invalidate_serialize_cache();
 
         if (!(bool)$this->_changed)
@@ -382,10 +382,10 @@ class ORM
 
         $schema = $this->get_tables_schema();
 
-        foreach($data as $key => $value) {
+        foreach ($data as $key => $value) {
 
-            if(isset($schema[$key]) && $schema[$key]['type'] === 'int') {
-                $data[$key] = (int) $value;
+            if (isset($schema[$key]) && $schema[$key]['type'] === 'int') {
+                $data[$key] = (int)$value;
             }
         }
 
@@ -413,7 +413,7 @@ class ORM
      * @return int Inserted row id
      */
     public function create() {
-        if($this->_serialize_fields !== null && !empty($this->_serialize_fields))
+        if ($this->_serialize_fields !== null && !empty($this->_serialize_fields))
             $this->_invalidate_serialize_cache();
 
         if ($this->on_create() === false) {
@@ -423,13 +423,12 @@ class ORM
         $this->on_change();
 
 
-
         $schema = $this->get_tables_schema();
 
-        foreach($this->_data as $key => $value) {
+        foreach ($this->_data as $key => $value) {
 
-            if(isset($schema[$key]) && $schema[$key]['type'] === 'int') {
-                $this->_data[$key] = (int) $value;
+            if (isset($schema[$key]) && $schema[$key]['type'] === 'int') {
+                $this->_data[$key] = (int)$value;
             }
         }
 
@@ -472,34 +471,32 @@ class ORM
         throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
     }
 
-    protected function _invalidate_serialize_cache() : void {
-        if($this->_serialize_fields === null || empty($this->_serialize_cache))
+    protected function _invalidate_serialize_cache(): void {
+        if ($this->_serialize_fields === null || empty($this->_serialize_cache))
             return;
 
-        foreach($this->_serialize_fields as $key) {
+        foreach ($this->_serialize_fields as $key) {
 
             $value = isset($this->_serialize_cache[$key])
-                    ? $this->_serialize_value($this->_serialize_cache[$key])
-                    : $this->_serialize_value($this->_data[$key]);
+                ? $this->_serialize_value($this->_serialize_cache[$key])
+                : $this->_serialize_value($this->_data[$key]);
 
-            if($value !== $this->_data[$key]) {
+            if ($value !== $this->_data[$key]) {
                 $this->_data[$key] = $value;
 
-                if($this->__loaded)
+                if ($this->__loaded)
                     $this->_changed[$key] = true;
             }
 
         }
     }
 
-    protected function _serialize_value($value)
-    {
+    protected function _serialize_value($value) {
         return json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
-    protected function _unserialize_value($key)
-    {
-        if(!array_key_exists($key, $this->_serialize_cache)) {
+    protected function _unserialize_value($key) {
+        if (!array_key_exists($key, $this->_serialize_cache)) {
             assert(is_string($this->_data[$key]), 'Unserialized field must have a string value');
             $this->_serialize_cache[$key] = json_decode($this->_data[$key], TRUE);
         }
@@ -507,27 +504,26 @@ class ORM
     }
 
 
-    private function get_types() {
-
-        $schema = $this->get_tables_schema();
-
-
-    }
-
-
     private function convert_type_to_php($type) {
 
-        if($type === 'int' || $type === 'smallint' || $type === 'tinyint')
+        if ($type === 'int' || $type === 'smallint' || $type === 'tinyint')
             return 'int';
 
         return 'string';
-
     }
 
 
     private function get_tables_schema() {
 
-        if(null === ($columns = get_cached('1tb_schema_'.$this->get_table()))) {
+        static $table_infos = [];
+
+        $cache_id = 'db_schema_' . $this->get_table();
+
+        if(isset($table_infos[$cache_id]))
+            return $table_infos[$cache_id];
+
+
+        if (null === ($columns = get_cached($cache_id))) {
             $table_info = DB::select("SHOW FULL COLUMNS FROM " . $this->get_table())->to_array();
 
 
@@ -547,7 +543,6 @@ class ORM
                     $column['type'] = $this->convert_type_to_php(strtolower($matches[1]));
 
                     $type = strtolower($matches[1]);
-
 
 
                     if (!empty($matches[2])) {
@@ -572,7 +567,8 @@ class ORM
                 }
                 $columns[$column_name] = $column;
             }
-            cache('tb_schema_'.$this->get_table(), $columns, 3600);
+            cache($cache_id, $columns, 3600);
+            $table_infos[$cache_id] = $columns;
         }
 
         return $columns;

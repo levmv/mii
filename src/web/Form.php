@@ -61,9 +61,9 @@ class Form
      * @return bool
      */
 
-    public function load($data = null) : bool {
+    public function load($data = null): bool {
 
-        if($this->_loaded AND $data === null)
+        if ($this->_loaded AND $data === null)
             return true;
 
         if (is_object($data) AND $data instanceof ORM) {
@@ -71,11 +71,11 @@ class Form
             $data = $data->to_array();
         }
 
-        if(is_array($data) AND count($data)) {
+        if (is_array($data) AND count($data)) {
 
             $this->load_fields($data);
 
-        } elseif($this->posted()) {
+        } elseif ($this->posted()) {
             $data = \Mii::$app->request->post();
 
             $this->load_fields($data);
@@ -83,9 +83,9 @@ class Form
             // try to detect possible file fields and load them
 
             $unchanged = array_diff(array_keys($this->_fields), $this->_changed);
-            foreach($unchanged as $key) {
+            foreach ($unchanged as $key) {
                 $file = \Mii::$app->upload->get_file($key);
-                if($file !== null)
+                if ($file !== null)
                     $this->set($key, $file);
             }
         }
@@ -98,7 +98,7 @@ class Form
         return $this->_loaded;
     }
 
-    private function load_fields($data) : void {
+    private function load_fields($data): void {
         foreach (array_intersect_key($data, $this->_fields) as $key => $value) {
             $this->set($key, $value);
         }
@@ -120,15 +120,15 @@ class Form
     }
 
 
-    public function loaded() : bool {
+    public function loaded(): bool {
         return $this->_loaded;
     }
 
-    public function posted() : bool {
+    public function posted(): bool {
         return \Mii::$app->request->method() === Request::POST;
     }
 
-    public function rules() : array {
+    public function rules(): array {
         return [];
     }
 
@@ -198,8 +198,7 @@ class Form
         return $this->validation->errors($this->message_file);
     }
 
-    public function errors_values() : array
-    {
+    public function errors_values(): array {
         return $this->validation->errors_values();
     }
 
@@ -215,7 +214,7 @@ class Form
             !isset($attributes['method']) ||
             strcasecmp($attributes['method'], 'post') === 0;
 
-        if (\Mii::$app->request->сsrf_validation && $is_post) {
+        if (\Mii::$app->request->csrf_validation && $is_post) {
 
             $out .= HTML::hidden(\Mii::$app->request->csrf_token_name, \Mii::$app->request->csrf_token());
         }
@@ -260,7 +259,7 @@ class Form
 
 
     public function select($name, $data = null, $attributes = null): string {
-        if($data !== null)
+        if ($data !== null)
             $this->_select_data[$name] = $data;
         return $this->field('select', $name, $attributes);
     }
@@ -283,12 +282,19 @@ class Form
             case 'textarea':
                 return HTML::textarea($name, $this->_fields[$name], $attributes);
             case 'checkbox':
+                $uncheck = '0';
                 $hidden = '';
-                if(isset($attributes['uncheck'])) {
-                    $hidden = HTML::hidden($name, $attributes['uncheck']);
+
+                if (isset($attributes['uncheck'])) {
+                    $uncheck = $attributes['uncheck'];
                     unset($attributes['uncheck']);
                 }
-                return $hidden.HTML::checkbox($name, 1, (bool)$this->_fields[$name], $attributes);
+
+                if ($uncheck !== null && $uncheck !== false) {
+                    $hidden = HTML::hidden($name, $uncheck);
+                }
+
+                return $hidden . HTML::checkbox($name, 1, (bool)$this->_fields[$name], $attributes);
             case 'password':
                 return HTML::password($name, $this->_fields[$name], $attributes);
             case 'select':

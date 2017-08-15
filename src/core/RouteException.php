@@ -2,4 +2,6 @@
 
 namespace mii\core;
 
-class RouteException extends Exception {}
+class RouteException extends Exception
+{
+}

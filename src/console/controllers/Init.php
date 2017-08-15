@@ -4,7 +4,8 @@ namespace mii\console\controllers;
 
 use mii\console\Controller;
 
-class Init extends Controller {
+class Init extends Controller
+{
 
     public $description = 'Initialize application environments';
 
@@ -16,7 +17,7 @@ class Init extends Controller {
 
         $this->config = [
             'development' => [
-                'path' => path('root').'/environments/development',
+                'path' => path('root') . '/environments/development',
 
                 'rights' => [
                     'public/assets' => 0775,
@@ -27,7 +28,7 @@ class Init extends Controller {
                 ]
             ],
             'production' => [
-                'path' => path('root').'/environments/production',
+                'path' => path('root') . '/environments/production',
 
                 'rights' => [
                     'public/assets' => 0775,
@@ -41,7 +42,7 @@ class Init extends Controller {
 
         $envs = config('environments');
 
-        if(count($envs)) {
+        if (count($envs)) {
             $this->config = $envs;
         }
 
@@ -55,24 +56,24 @@ class Init extends Controller {
 
         $i = 1;
         $envs = [];
-        foreach($this->config as $name => $value) {
-            $this->stdout($i.'. '.$name."\n");
+        foreach ($this->config as $name => $value) {
+            $this->stdout($i . '. ' . $name . "\n");
             $envs[$i] = $name;
             $i++;
         }
 
         $in = $this->stdin();
-        if($in === 'q')
+        if ($in === 'q')
             return;
 
         $in = intVal($in);
 
-        if($in >= $i) {
-            $this->error('There is no environment under number '.$in);
+        if ($in >= $i) {
+            $this->error('There is no environment under number ' . $in);
             return;
         }
 
-        if(! $this->confirm("Are you sure you want to initialize the selected environment?")) {
+        if (!$this->confirm("Are you sure you want to initialize the selected environment?")) {
             return;
         }
 
@@ -81,7 +82,7 @@ class Init extends Controller {
         $this->env_copy($config['path'], path('root'));
 
 
-        if(isset($config['rights'])) {
+        if (isset($config['rights'])) {
             $this->set_rights($config['rights']);
         }
 
@@ -91,12 +92,12 @@ class Init extends Controller {
     protected function set_rights($paths) {
 
         $base_path = path('root');
-        foreach($paths as $path => $rights) {
-            if(!is_dir($path)) {
+        foreach ($paths as $path => $rights) {
+            if (!is_dir($path)) {
                 mkdir($path, $rights, true);
             }
-            $this->stdout("chmod ".decoct($rights)." ".$path."\n");
-            chmod($base_path.'/'.$path, $rights);
+            $this->stdout("chmod " . decoct($rights) . " " . $path . "\n");
+            chmod($base_path . '/' . $path, $rights);
         }
 
     }
@@ -111,13 +112,13 @@ class Init extends Controller {
 
         // Simple copy for a file
         if (is_file($from)) {
-            $this->stdout("Copying ".$from."\n");
+            $this->stdout("Copying " . $from . "\n");
             return copy($from, $to);
         }
 
         // Make destination directory
         if (!is_dir($to)) {
-            $this->stdout("mkdir ".$to."\n");
+            $this->stdout("mkdir " . $to . "\n");
             mkdir($to);
         }
 
@@ -129,7 +130,7 @@ class Init extends Controller {
             }
 
             // Deep copy directories
-            $this->env_copy($from."/".$entry, $to."/".$entry);
+            $this->env_copy($from . "/" . $entry, $to . "/" . $entry);
         }
 
         // Clean up

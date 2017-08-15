@@ -5,7 +5,8 @@ namespace mii\console;
 use mii\core\ErrorException;
 use mii\util\Console;
 
-class ErrorHandler extends \mii\core\ErrorHandler {
+class ErrorHandler extends \mii\core\ErrorHandler
+{
 
     public $memory_reserve_size = 262144;
 
@@ -28,7 +29,7 @@ class ErrorHandler extends \mii\core\ErrorHandler {
                 . ' with message ' . $this->formatMessage("'{$exception->getMessage()}'", [Console::BOLD]) //. "\n"
                 . "\n\nin " . dirname($exception->getFile()) . DIRECTORY_SEPARATOR . $this->formatMessage(basename($exception->getFile()), [Console::BOLD])
                 . ':' . $this->formatMessage($exception->getLine(), [Console::BOLD, Console::FG_YELLOW]) . "\n"
-                . "\n".$this->formatMessage("Stack trace:\n", [Console::BOLD]) . $exception->getTraceAsString();
+                . "\n" . $this->formatMessage("Stack trace:\n", [Console::BOLD]) . $exception->getTraceAsString();
         } else {
             $message = $this->formatMessage('Error: ') . $exception->getMessage();
         }
@@ -47,14 +48,13 @@ class ErrorHandler extends \mii\core\ErrorHandler {
      * @return string the colorized message.
      * @see Console::ansiFormat() for details on how to specify the message format.
      */
-    protected function formatMessage($message, $format = [Console::FG_RED, Console::BOLD])
-    {
+    protected function formatMessage($message, $format = [Console::FG_RED, Console::BOLD]) {
         $stream = (PHP_SAPI === 'cli') ? \STDERR : \STDOUT;
         // try controller first to allow check for --color switch
         //if (Yii::$app->controller instanceof \yii\console\Controller && Yii::$app->controller->isColorEnabled($stream)
 //            || Yii::$app instanceof \yii\console\Application && Console::streamSupportsAnsiColors($stream)) {
 
-        if(Console::stream_supports_ansi_colors($stream)) {
+        if (Console::stream_supports_ansi_colors($stream)) {
             $message = Console::ansi_format($message, $format);
         }
 

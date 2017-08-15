@@ -13,7 +13,8 @@ use mii\util\URL;
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license.html
  */
-class Pagination {
+class Pagination
+{
 
 
     protected $current_page_source = 'query_string';
@@ -72,15 +73,13 @@ class Pagination {
     /**
      * Creates a new Pagination object.
      *
-     * @param   array  configuration
      * @return  void
      */
-    public function __construct(array $config = [])
-    {
-        foreach($config as $key => $val)
+    public function __construct(array $config = []) {
+        foreach ($config as $key => $val)
             $this->$key = $val;
 
-        if(! $this->request)
+        if (!$this->request)
             $this->request = \Mii::$app->request;
 
 
@@ -92,46 +91,43 @@ class Pagination {
      * Loads configuration settings into the object and (re)calculates pagination if needed.
      * Allows you to update config settings after a Pagination object has been constructed.
      *
-     * @param   array $config  configuration
+     * @param   array $config configuration
      * @return  object  Pagination
      */
-    public function calculate(array $config = [])
-    {
-        foreach($config as $key => $val)
+    public function calculate(array $config = []) {
+        foreach ($config as $key => $val)
             $this->$key = $val;
 
-        if($this->current_page === null)
-        {
+        if ($this->current_page === null) {
             $query_key = $this->current_page_source_key;
 
-            switch ($this->current_page_source)
-            {
+            switch ($this->current_page_source) {
                 case 'query_string':
                 case 'mixed':
 
-                    $this->current_page = (int) $this->request->get($query_key, 1);
+                    $this->current_page = (int)$this->request->get($query_key, 1);
                     break;
 
                 case 'route':
 
-                    $this->current_page = (int) $this->request->param($query_key, 1);
+                    $this->current_page = (int)$this->request->param($query_key, 1);
 
                     break;
             }
         }
 
         // Calculate and clean all pagination variables
-        $this->total_items        = (int) max(0, $this->total_items);
-        $this->items_per_page     = (int) max(1, $this->items_per_page);
-        $this->total_pages        = (int) ceil($this->total_items / $this->items_per_page);
-        $this->current_page       = (int) min(max(1, $this->current_page), max(1, $this->total_pages));
-        $this->current_first_item = (int) min((($this->current_page - 1) * $this->items_per_page) + 1, $this->total_items);
-        $this->current_last_item  = (int) min($this->current_first_item + $this->items_per_page - 1, $this->total_items);
-        $this->previous_page      = ($this->current_page > 1) ? $this->current_page - 1 : FALSE;
-        $this->next_page          = ($this->current_page < $this->total_pages) ? $this->current_page + 1 : FALSE;
-        $this->first_page         = ($this->current_page === 1) ? FALSE : 1;
-        $this->last_page          = ($this->current_page >= $this->total_pages) ? FALSE : $this->total_pages;
-        $this->offset             = (int) (($this->current_page - 1) * $this->items_per_page);
+        $this->total_items = (int)max(0, $this->total_items);
+        $this->items_per_page = (int)max(1, $this->items_per_page);
+        $this->total_pages = (int)ceil($this->total_items / $this->items_per_page);
+        $this->current_page = (int)min(max(1, $this->current_page), max(1, $this->total_pages));
+        $this->current_first_item = (int)min((($this->current_page - 1) * $this->items_per_page) + 1, $this->total_items);
+        $this->current_last_item = (int)min($this->current_first_item + $this->items_per_page - 1, $this->total_items);
+        $this->previous_page = ($this->current_page > 1) ? $this->current_page - 1 : FALSE;
+        $this->next_page = ($this->current_page < $this->total_pages) ? $this->current_page + 1 : FALSE;
+        $this->first_page = ($this->current_page === 1) ? FALSE : 1;
+        $this->last_page = ($this->current_page >= $this->total_pages) ? FALSE : $this->total_pages;
+        $this->offset = (int)(($this->current_page - 1) * $this->items_per_page);
 
 
         // Chainable method
@@ -144,29 +140,26 @@ class Pagination {
      * @param   integer  page number
      * @return  string   page URL
      */
-    public function url($page = 1)
-    {
+    public function url($page = 1) {
         // Clean the page number
-        $page = max(1, (int) $page);
+        $page = max(1, (int)$page);
 
         // No page number in URLs to first page
-        if ($page === 1 AND ! $this->first_page_in_url)
-        {
+        if ($page === 1 AND !$this->first_page_in_url) {
             $page = NULL;
         }
 
-        switch ($this->current_page_source)
-        {
+        switch ($this->current_page_source) {
             case 'query_string':
             case 'mixed':
 
-                return URL::site($this->request->uri().
+                return URL::site($this->request->uri() .
                     $this->query([$this->current_page_source_key => $page]));
 
             case 'route':
 
                 return URL::site($this->route->url(array_merge($this->route_params,
-                        array($this->current_page_source_key => $page))).$this->query());
+                        array($this->current_page_source_key => $page))) . $this->query());
         }
 
         return '#';
@@ -175,11 +168,10 @@ class Pagination {
     /**
      * Checks whether the given page number exists.
      *
-     * @param   integer  $page page number
+     * @param   integer $page page number
      * @return  boolean
      */
-    public function valid_page(int $page) : bool
-    {
+    public function valid_page(int $page): bool {
         return $page > 0 AND $page <= $this->total_pages;
     }
 
@@ -189,20 +181,17 @@ class Pagination {
      * @param   mixed   string of the block name to use, or a block object
      * @return  string  pagination output (HTML)
      */
-    public function render($block = null)
-    {
+    public function render($block = null) {
         // Automatically hide pagination whenever it is superfluous
         if ($this->auto_hide === true AND $this->total_pages <= 1)
             return '';
 
-        if ($block === null)
-        {
+        if ($block === null) {
             // Use the view from config
             $block = $this->block;
         }
 
-        if ( ! $block instanceof Block)
-        {
+        if (!$block instanceof Block) {
             // Load the view file
             $block = block($block);
         }
@@ -219,17 +208,15 @@ class Pagination {
         return $this->items_per_page;
     }
 
-    public function next_page()
-    {
+    public function next_page() {
         return $this->next_page;
     }
 
-    public function prev_page()
-    {
+    public function prev_page() {
         return $this->previous_page;
     }
 
-    public function links() : array {
+    public function links(): array {
         $links = [];
         if ($this->next_page()) {
             $links[] = [
@@ -251,24 +238,19 @@ class Pagination {
     /**
      * URL::query() replacement for Pagination use only
      *
-     * @param	array	Parameters to override
-     * @return	string
+     * @param    array    Parameters to override
+     * @return    string
      */
-    public function query(array $params = NULL)
-    {
-        if ($params === NULL)
-        {
+    public function query(array $params = NULL) {
+        if ($params === NULL) {
             // Use only the current parameters
             $params = $this->request->get();
-        }
-        else
-        {
+        } else {
             // Merge the current and new parameters
             $params = array_merge($this->request->get(), $params);
         }
 
-        if (empty($params))
-        {
+        if (empty($params)) {
             // No query parameters
             return '';
         }
@@ -277,7 +259,7 @@ class Pagination {
         $query = http_build_query($params, '', '&');
 
         // Don't prepend '?' to an empty string
-        return ($query === '') ? '' : ('?'.$query);
+        return ($query === '') ? '' : ('?' . $query);
     }
 
     /**
@@ -285,14 +267,10 @@ class Pagination {
      *
      * @return  string  pagination output (HTML)
      */
-    public function __toString()
-    {
-        try
-        {
+    public function __toString() {
+        try {
             return $this->render();
-        }
-        catch(\Throwable $e)
-        {
+        } catch (\Throwable $e) {
             ErrorHandler::convert_to_error($e);
             return '';
         }
@@ -301,11 +279,10 @@ class Pagination {
     /**
      * Returns a Pagination property.
      *
-     * @param   string  $key property name
+     * @param   string $key property name
      * @return  mixed   Pagination property; NULL if not found
      */
-    public function __get(string $key)
-    {
+    public function __get(string $key) {
         return isset($this->$key) ? $this->$key : NULL;
     }
 
@@ -313,11 +290,10 @@ class Pagination {
      * Updates a single config setting, and recalculates pagination if needed.
      *
      * @param   string $key config key
-     * @param   mixed  $value config value
+     * @param   mixed $value config value
      * @return  void
      */
-    public function __set(string $key, $value)
-    {
+    public function __set(string $key, $value) {
         $this->setup(array($key => $value));
     }
 
