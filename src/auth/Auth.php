@@ -168,7 +168,7 @@ class Auth extends Component
      * Check if there is an active session. Optionally allows checking for a
      * specific role. By default checking for «login» role.
      */
-    public function logged_in(?string $role = 'login'): bool {
+    public function logged_in($role = 'login'): bool {
         // Get the user from the session
         $user = $this->get_user();
 
