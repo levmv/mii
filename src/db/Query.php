@@ -541,13 +541,15 @@ class Query
     public function order_by($column, $direction = null) {
         if (is_array($column) AND $direction === null) {
             $this->_order_by = $column;
-        } else {
+        } elseif($column !== null) {
             $this->_order_by[] = [$column, $direction];
-
+        } else {
+            $this->_order_by = [];
         }
 
         return $this;
     }
+
 
     /**
      * Return up to "LIMIT ..." results

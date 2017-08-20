@@ -119,6 +119,31 @@ class Mii
     }
 }
 
+function app($component = null) {
+    if($component === null)
+        return Mii::$app;
+
+    return Mii::$app->get($component);
+}
+
+
+function abort($code, $message = '')
+{
+    if ($code == 404) {
+        throw new \mii\web\NotFoundHttpException();
+    }
+    throw new \mii\web\HttpException($code, $message);
+}
+
+function session($key = null, $default = null)
+{
+    if (is_null($key)) {
+        return app('session');
+    }
+
+    return app('session')->get($key, $default);
+}
+
 
 function url(string $name, array $params = []): string {
     return Mii::$app->router->url($name, $params);

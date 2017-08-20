@@ -117,21 +117,27 @@ class ORM
      * @return $this|null
      */
 
-    public static function one($value = null) {
+    public static function one($value = null, $find_or_fail = false) {
+        $result = null;
         if (is_array($value)) {
 
             assert(count($value[0]) === 3, "Wrong conditions array");
 
-            return (new static)
+            $result =  (new static)
                 ->select_query(false)
                 ->where($value)
                 ->one();
 
         } elseif (is_integer($value) || is_string($value)) {
-            return (new static)->select_query(false)->where('id', '=', (int)$value)->one();
+            $result =  (new static)->select_query(false)->where('id', '=', (int)$value)->one();
+        } else {
+            $result = (new static)->select_query(true)->one();
         }
 
-        return (new static)->select_query(true)->one();
+        if($find_or_fail && $result === null)
+            throw new ModelNotFoundException;
+
+        return $result;
     }
 
 

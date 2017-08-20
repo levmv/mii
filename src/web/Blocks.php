@@ -72,7 +72,7 @@ class Blocks extends Component
         $this->load_set('default');
     }
 
-    public function load_set($set) : void {
+    public function load_set($set): void {
 
         $default_set = [
             'libraries' => $this->libraries,
@@ -80,11 +80,11 @@ class Blocks extends Component
             'base_path' => null
         ];
 
-        if(!is_array($set)) {
-            if(!isset($this->sets[$set]) && $set === 'default') {
+        if (!is_array($set)) {
+            if (!isset($this->sets[$set]) && $set === 'default') {
                 $set = [];
                 $default_set['base_path'] = $this->base_path;
-            } elseif(isset($this->sets[$set])) {
+            } elseif (isset($this->sets[$set])) {
                 $set = $this->sets[$set];
             } else {
                 throw new ErrorException("Unknow blocks set name: $set");
@@ -93,7 +93,7 @@ class Blocks extends Component
 
         $set = array_replace_recursive($default_set, $set);
 
-        foreach($set as $key => $value)
+        foreach ($set as $key => $value)
             $this->$key = $value;
 
 
@@ -108,8 +108,8 @@ class Blocks extends Component
             $this->base_path = Mii::resolve($this->base_path);
         }
 
-        if(!$this->use_static) {
-            if(!is_dir($this->base_path))
+        if (!$this->use_static) {
+            if (!is_dir($this->base_path))
                 mkdir($this->base_path, 0777, true);
         }
 
@@ -133,7 +133,7 @@ class Blocks extends Component
     }
 
 
-    public function get_block_php_file(string $name) : ?string {
+    public function get_block_php_file(string $name): ?string {
 
         $block_file = null;
         $block_path = $this->get_block_path($name);
@@ -151,7 +151,7 @@ class Blocks extends Component
         return null;
     }
 
-    public function get_block_path(string $name) : ?string {
+    public function get_block_path(string $name): ?string {
         return '/' . implode('/', explode('_', $name)) . '/';
     }
 
@@ -183,13 +183,13 @@ class Blocks extends Component
 
     public function render(): void {
 
-        if($this->use_static) {
+        if ($this->use_static) {
 
             $this->static_render();
             return;
 
         }
-dd(1);
+        dd(1);
         foreach ($this->_blocks as $block_name => $block) {
 
             if ($block->__has_parent)
@@ -198,18 +198,17 @@ dd(1);
         }
 
 
-
         foreach ($this->_files as $type => $blocks) {
             foreach ($blocks as $block_name => $block) {
 
                 if (isset($block['files']))
-                    if($this->use_static) {
-                        foreach($block['files'] as $file => $crap) {
+                    if ($this->use_static) {
+                        foreach ($block['files'] as $file => $crap) {
 
-                            $web_output = $this->base_url . '/' .$this->revision . '/' . $file .'.' . $type;
+                            $web_output = $this->base_url . '/' . $this->revision . '/' . $file . '.' . $type;
 
-                            if($type === 'css') {
-                                $this->_css[] = '<link type="text/css" href="' . $web_output .  '" rel="stylesheet">';
+                            if ($type === 'css') {
+                                $this->_css[] = '<link type="text/css" href="' . $web_output . '" rel="stylesheet">';
                             } else {
                                 $this->_js[Blocks::END][] = '<script src="' . $web_output . '"></script>';
                             }
@@ -273,7 +272,7 @@ dd(1);
 
         $block_path = $this->get_block_path($block_name);
 
-        if (! $this->use_static && $this->process_assets) {
+        if (!$this->use_static && $this->process_assets) {
             foreach ($this->libraries as $base_path) {
                 if (is_dir($base_path . $block_path . 'assets')) {
                     $this->_build_assets_dir($block_name, $base_path . $block_path . 'assets');
@@ -295,27 +294,27 @@ dd(1);
         }
         $types = ['css', 'js'];
 
-        if($this->use_static) {
+        if ($this->use_static) {
             $not_found = true;
-            foreach(['css', 'js'] as $type) {
-                if(isset($this->_reverse[$type][$block_name]) && !isset($this->_used_files[$this->_reverse[$type][$block_name]])) {
+            foreach (['css', 'js'] as $type) {
+                if (isset($this->_reverse[$type][$block_name]) && !isset($this->_used_files[$this->_reverse[$type][$block_name]])) {
                     $name = $this->_reverse[$type][$block_name];
-                    echo '.... to '.$parent_block.' set of reversed: '.$name.'<br>';
+                    echo '.... to ' . $parent_block . ' set of reversed: ' . $name . '<br>';
                     $this->_files[$type][$parent_block]['files'][$name] = true;
                     $not_found = false;
 
                     $this->_used_files[$name] = true;
                 }
             }
-            if($not_found && $block_name !== 'index') {
+            if ($not_found && $block_name !== 'index') {
                 Mii::warning("Block $block_name not specified in statics list");
             }
         } else {
             foreach ($types as $type) {
                 foreach ($this->libraries as $base_path) {
 
-                    if (is_file($base_path . $block_path . $block_name . '.'.$type)) {
-                        $this->_files[$type][$parent_block]['files'][$block_name . '.'.$type] = $base_path . $block_path . $block_name . '.'.$type;
+                    if (is_file($base_path . $block_path . $block_name . '.' . $type)) {
+                        $this->_files[$type][$parent_block]['files'][$block_name . '.' . $type] = $base_path . $block_path . $block_name . '.' . $type;
                         break;
                     }
                 }
@@ -375,14 +374,14 @@ dd(1);
         $result_file_name = $block_name . crc32(implode('', array_keys($files)));
 
         if (config('debug')) {
-            $benchmark = \mii\util\Profiler::start('Assets', $result_file_name.'.'.$type);
+            $benchmark = \mii\util\Profiler::start('Assets', $result_file_name . '.' . $type);
         }
 
         $is_css = ($type === 'css');
 
         if ($this->merge) {
-            $web_output = $this->base_url . '/' . $result_file_name . '.'. $type;
-            $output = $this->base_path . '/' . $result_file_name . '.'. $type;
+            $web_output = $this->base_url . '/' . $result_file_name . '.' . $type;
+            $output = $this->base_path . '/' . $result_file_name . '.' . $type;
 
             $need_recompile = false;
 
@@ -528,18 +527,17 @@ dd(1);
     }
 
 
-
     private function static_render() {
 
 
-        foreach($this->{$this->static_source} as $name => $block) {
-            foreach(['css', 'js'] as $type) {
-                if(isset($block[$type])) {
-                    if(! is_array($block[$type]))
-                        $block[$type] = (array) $block[$type];
+        foreach ($this->{$this->static_source} as $name => $block) {
+            foreach (['css', 'js'] as $type) {
+                if (isset($block[$type])) {
+                    if (!is_array($block[$type]))
+                        $block[$type] = (array)$block[$type];
 
-                    foreach($block[$type] as $child_block) {
-                        if(!isset($this->_reverse[$type][$child_block]))
+                    foreach ($block[$type] as $child_block) {
+                        if (!isset($this->_reverse[$type][$child_block]))
                             $this->_reverse[$type][$child_block] = $name;
                     }
                 }
@@ -560,12 +558,12 @@ dd(1);
 
                 if (isset($include['files']))
 
-                    foreach($include['files'] as $file) {
+                    foreach ($include['files'] as $file) {
 
-                        $web_output = $this->base_url . '/' .$this->revision . '/' . $file .'.' . $type;
+                        $web_output = $this->base_url . '/' . $this->revision . '/' . $file . '.' . $type;
 
-                        if($type === 'css') {
-                            $this->_css[] = '<link type="text/css" href="' . $web_output .  '" rel="stylesheet">';
+                        if ($type === 'css') {
+                            $this->_css[] = '<link type="text/css" href="' . $web_output . '" rel="stylesheet">';
                         } else {
                             $this->_js[Blocks::END][] = '<script src="' . $web_output . '"></script>';
                         }
@@ -621,7 +619,7 @@ dd(1);
 
         $block_path = $this->get_block_path($block_name);
 
-        if (! $this->use_static && $this->process_assets) {
+        if (!$this->use_static && $this->process_assets) {
             foreach ($this->libraries as $base_path) {
                 if (is_dir($base_path . $block_path . 'assets')) {
                     $this->_build_assets_dir($block_name, $base_path . $block_path . 'assets');
@@ -643,9 +641,9 @@ dd(1);
         ];
 
         $not_found = true;
-        foreach(['css', 'js'] as $type) {
-            if(isset($this->_reverse[$type][$block_name])) {
-                if(isset($this->_used_files[$type][$this->_reverse[$type][$block_name]])) {
+        foreach (['css', 'js'] as $type) {
+            if (isset($this->_reverse[$type][$block_name])) {
+                if (isset($this->_used_files[$type][$this->_reverse[$type][$block_name]])) {
                     $not_found = false;
                 } else {
                     $name = $this->_reverse[$type][$block_name];
@@ -655,7 +653,7 @@ dd(1);
                 }
             }
         }
-        if($not_found && $block_name !== 'index') {
+        if ($not_found && $block_name !== 'index') {
             Mii::warning("Block $block_name not specified in statics list");
         }
 
@@ -704,10 +702,10 @@ dd(1);
                 $include['css']['inline'] = array_merge($this->_files['.css'][$parent_block]['inline'], $this->_blocks[$block_name]->__inline_css);
         }
 
-        if(!empty($include['css']))
+        if (!empty($include['css']))
             $this->_files['css'][] = $include['css'];
 
-        if(!empty($include['js']))
+        if (!empty($include['js']))
             $this->_files['js'][] = $include['js'];
     }
 }
