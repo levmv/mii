@@ -264,7 +264,11 @@ class Block
         }
 
         if (empty($this->_file)) {
-            throw new Exception('Block :block does not have a php file', [':block' => $this->__name]);
+
+            $this->_file = Mii::$app->blocks->get_block_php_file($this->__name);
+
+            if($this->_file === null)
+                throw new Exception('Block :block does not have a php file', [':block' => $this->__name]);
         }
 
         $benchmark = false;

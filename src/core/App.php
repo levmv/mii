@@ -162,7 +162,10 @@ abstract class App
         return false;
     }
 
-    public function inner_set($id): void {
+    public function inner_set($id, $definition = null): void {
+
+        if($definition !== null)
+            $this->_config['components'][$id] = $definition;
 
         if (is_array($this->_config['components'][$id])) {
             // a configuration array
@@ -179,12 +182,18 @@ abstract class App
         } elseif (is_object($this->_config['components'][$id]) AND $this->_config['components'][$id] instanceof \Closure) {
             $this->_components[$id] = true;
         } else {
-            throw new \Exception("Unexpected configuration type for the \"$id\" component: " . gettype($definition));
+            throw new \Exception("Unexpected configuration type for the \"$id\" component: " . gettype($this->_config['components'][$id]));
         }
 
     }
 
     public function set($id, $definition): void {
+
+        if ($this->container === null) {
+            $this->inner_set($id, $definition);
+            return;
+        }
+
 
         if ($definition === null) {
             unset($this->_components[$id]);
