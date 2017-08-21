@@ -189,7 +189,7 @@ class Blocks extends Component
             return;
 
         }
-        dd(1);
+
         foreach ($this->_blocks as $block_name => $block) {
 
             if ($block->__has_parent)
