@@ -75,7 +75,7 @@ class Blocks extends Component
     public function load_set($set): void {
 
         $default_set = [
-            'libraries' => $this->libraries,
+            'libraries' => [],
             'base_url' => $this->base_url,
             'base_path' => null
         ];
@@ -83,6 +83,7 @@ class Blocks extends Component
         if (!is_array($set)) {
             if (!isset($this->sets[$set]) && $set === 'default') {
                 $set = [];
+                $default_set['libraries'] = $this->libraries;
                 $default_set['base_path'] = $this->base_path;
             } elseif (isset($this->sets[$set])) {
                 $set = $this->sets[$set];

@@ -82,17 +82,31 @@ class Assets extends Controller
     }
 
 
-    public function index() {
+
+    public function test() {
+
+        if(count($this->sets)) {
+
+            foreach($this->sets as $name => $set) {
+                $this->test_set($name);
+            }
+        } else {
+            $this->test_set('default');
+        }
+
+    }
+
+    public function build() {
 
         $this->update_revision();
 
         if(count($this->sets)) {
 
             foreach($this->sets as $name => $set) {
-                $this->process_set($name);
+                $this->build_set($name);
             }
         } else {
-            $this->process_set('default');
+            $this->build_set('default');
         }
 
         $this->info(':N css and :M js files compiled. Start post processing...', [
@@ -109,12 +123,100 @@ class Assets extends Controller
     }
 
 
-    protected function process_set($set_name) {
+    protected function test_set($set_name) {
+        $this->init_set($set_name);
+
+        $this->info("==========================");
+        $this->info("Testing of set «:name»", [":name" => $set_name]);
+        $this->info("==========================");
+
+        $blocks = [];
+
+        foreach($this->libraries as $library) {
+
+            $directory = new \RecursiveDirectoryIterator($library);
+            $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
+                // Skip hidden files and directories.
+                if ($current->getFilename()[0] === '.') {
+                    return FALSE;
+                }
+                if ($current->isDir()) {
+                    // Only recurse into intended subdirectories.
+                    return $current->getFilename() !== 'assets';
+                }
+
+                return $current->getExtension() !== 'php';
+            });
+            $iterator = new \RecursiveIteratorIterator($filter);
+
+            foreach ($iterator as $info) {
+
+                $type = $info->getExtension();
+                $path = trim(substr( $info->getPath(),strlen($library)), '/');
+                $block_name = implode('_', explode('/', $path));
+                if(!isset($blocks[$block_name])) {
+                    $blocks[$block_name] = ['css' => false, 'js' => false, 'path' => []];
+                }
+                $blocks[$block_name][$type] = true;
+                $blocks[$block_name]['path'][] = $info->getPath();
+            }
+        }
+
+        $reverse = ['css' => [], 'js' => []];
+
+        foreach ($this->{$this->static_source} as $name => $file) {
+            foreach (['css', 'js'] as $type) {
+                if (isset($file[$type])) {
+                    if (!is_array($file[$type]))
+                        $file[$type] = (array)$file[$type];
+
+                    foreach ($file[$type] as $block) {
+
+                        if (isset($reverse[$type][$block])) {
+                            $this->error('Double declaration of :b (in «:f1» and «:f2» files)', [
+                                ':b' => $block,
+                                ':f1' => $reverse[$type][$block],
+                                ':f2' => $name
+                            ]);
+                        }
+                        $reverse[$type][$block] = $name;
+                    }
+                }
+            }
+        }
+
+
+        $forget = [];
+        foreach ($blocks as $block_name => $block) {
+            foreach (['css', 'js'] as $type) {
+                if($block[$type] && !isset($reverse[$type][$block_name])) {
+                    $forget[$block_name][] = "'".$type . "' => '" . $block_name ."'";
+                }
+            }
+        }
+
+        if(count($forget)) {
+            $this->warning('May be you forget these:');
+            foreach($forget as $name => $block) {
+                $out = "'$name' => [";
+
+                $out .= implode(',',  $block);
+
+
+                $this->stdout("$out]\n");
+            }
+
+        }
+    }
+
+
+    protected function init_set($set_name) {
 
         $this->base_path = null;
+        $this->libraries = [];
 
         $default_set = [
-            'libraries' => $this->libraries,
+            'libraries' => [],
             'base_url' => $this->base_url,
             'base_path' => $this->base_path
         ];
@@ -153,11 +255,16 @@ class Assets extends Controller
         if(!isset($this->{$this->static_source})) {
             $this->error('Static source «'.$this->static_source.'» does not exist');
         }
+    }
 
+
+    protected function build_set($set_name) {
+        $this->init_set($set_name);
         foreach($this->{$this->static_source} as $name => $block) {
             $this->build_block($name, $block);
         }
     }
+
 
     protected function build_block($name, $data) {
 
