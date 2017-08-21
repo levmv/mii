@@ -127,7 +127,7 @@ function app($component = null) {
 }
 
 
-function abort($code, $message = '')
+function abort($code = 404, $message = '')
 {
     if ($code == 404) {
         throw new \mii\web\NotFoundHttpException();
