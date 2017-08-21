@@ -113,6 +113,9 @@ class Controller
     protected function after($content = null): Response {
         if ($this->render_layout AND $this->response->format === Response::FORMAT_HTML AND !$this->request->is_ajax()) {
 
+            if ($content !== null)
+                $this->content = $content;
+
             $this->setup_index();
 
             if (!$this->layout) {

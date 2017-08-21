@@ -376,8 +376,12 @@ class Blocks extends Component
                     $tmp .= file_get_contents($file) . "\n";
                 }
 
-                if ($is_css) {
-                    $tmp = $this->_process_css($tmp);
+                if ($is_css && $this->css_process_callback) {
+                    try {
+                        $tmp = call_user_func($this->css_process_callback, $tmp);
+                    } catch (\Throwable $e) {
+                        Mii::error('CSS user processing failed', 'mii');
+                    }
                 }
 
                 $gz_output = gzencode($tmp, 6);
@@ -402,12 +406,9 @@ class Blocks extends Component
             return;
         }
 
-        // TODO
-        $out = [];
-
         foreach ($files as $name => $file) {
 
-            $output = path('pub') . '/' . $this->base_url . '/' . $name;
+            $output = $this->base_path . '/' . $name;
 
             if (!is_file($output) || filemtime($output) < filemtime($file)) {
 
@@ -429,52 +430,11 @@ class Blocks extends Component
     }
 
 
-    private function _process_css(string $content): string {
-        if ($this->css_process_callback) {
-            try {
-                $content = call_user_func($this->css_process_callback, $content);
-            } catch (\Throwable $e) {
-                Mii::error('CSS user processing failed', 'mii');
-            }
-            return $content;
-        }
-
-        // https://github.com/matthiasmullie/minify
-
-        // strip comments
-        $content = preg_replace('/\/\*.*?\*\//s', '', $content);
-
-        // remove leading & trailing whitespace
-        $content = preg_replace('/^\s*/m', '', $content);
-        $content = preg_replace('/\s*$/m', '', $content);
-        // replace newlines with a single space
-        $content = preg_replace('/\s+/', ' ', $content);
-        // remove whitespace around meta characters
-        // inspired by stackoverflow.com/questions/15195750/minify-compress-css-with-regex
-        $content = preg_replace('/\s*([\*$~^|]?+=|[{};,>~]|!important\b)\s*/', '$1', $content);
-        $content = preg_replace('/([\[(:])\s+/', '$1', $content);
-        $content = preg_replace('/\s+([\]\)])/', '$1', $content);
-        $content = preg_replace('/\s+(:)(?![^\}]*\{)/', '$1', $content);
-        // whitespace around + and - can only be stripped in selectors, like
-        // :nth-child(3+2n), not in things like calc(3px + 2px) or shorthands
-        // like 3px -2px
-        $content = preg_replace('/\s*([+-])\s*(?=[^}]*{)/', '$1', $content);
-        // remove semicolon/whitespace followed by closing bracket
-        $content = trim(preg_replace('/;}/', '}', $content));
-
-        // Shorthand hex color codes.
-        $content = preg_replace('/(?<![\'"])#([0-9a-z])\\1([0-9a-z])\\2([0-9a-z])\\3(?![\'"])/i', '#$1$2$3', $content);
-
-
-        return $content;
-    }
-
-
     private function _build_assets_dir(string $blockname, string $path): void {
 
         $output = $this->base_path . '/' . $blockname;
 
-        if ($this->use_symlink) {
+        if (true || $this->use_symlink) {
             if (!is_link($output)) {
                 symlink($path, $output);
             }
@@ -507,7 +467,6 @@ class Blocks extends Component
 
     private function static_render() {
 
-
         foreach ($this->{$this->static_source} as $name => $block) {
             foreach (['css', 'js'] as $type) {
                 if (isset($block[$type])) {
@@ -521,7 +480,6 @@ class Blocks extends Component
                 }
             }
         }
-
 
         foreach ($this->_blocks as $block_name => $block) {
 
@@ -545,7 +503,6 @@ class Blocks extends Component
                         } else {
                             $this->_js[Blocks::END][] = '<script src="' . $web_output . '"></script>';
                         }
-
                     }
 
                 if (isset($include['remote'])) {
@@ -578,11 +535,10 @@ class Blocks extends Component
                         $this->_css[] = '<link type="text/css" href="' . $content . '" rel="stylesheet" />';
                     }
                 }
-
             }
         }
-        $this->_rendered = true;
 
+        $this->_rendered = true;
     }
 
     /**
