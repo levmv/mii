@@ -264,15 +264,12 @@ class Blocks extends Component
      */
     public function process_block_assets($block_name, $parent_block, $depends): void {
 
-        echo "<br>..processing $block_name <br>";
-        if (isset($this->_used_blocks[$block_name])) {
-            echo '...its used<br>';
+        if (isset($this->_used_blocks[$block_name]))
             return;
-        }
 
         $block_path = $this->get_block_path($block_name);
 
-        if (!$this->use_static && $this->process_assets) {
+        if ( $this->process_assets) {
             foreach ($this->libraries as $base_path) {
                 if (is_dir($base_path . $block_path . 'assets')) {
                     $this->_build_assets_dir($block_name, $base_path . $block_path . 'assets');
@@ -282,10 +279,8 @@ class Blocks extends Component
         }
 
         if (!empty($depends)) {
-            echo '...not empty depends<br>';
             foreach ($depends as $depend) {
                 if (isset($this->_used_blocks[$depend])) {
-                    echo ".... $depend - its used depend. skip it.<br>";
                     continue;
                 }
                 $this->process_block_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
@@ -294,29 +289,12 @@ class Blocks extends Component
         }
         $types = ['css', 'js'];
 
-        if ($this->use_static) {
-            $not_found = true;
-            foreach (['css', 'js'] as $type) {
-                if (isset($this->_reverse[$type][$block_name]) && !isset($this->_used_files[$this->_reverse[$type][$block_name]])) {
-                    $name = $this->_reverse[$type][$block_name];
-                    echo '.... to ' . $parent_block . ' set of reversed: ' . $name . '<br>';
-                    $this->_files[$type][$parent_block]['files'][$name] = true;
-                    $not_found = false;
+        foreach ($types as $type) {
+            foreach ($this->libraries as $base_path) {
 
-                    $this->_used_files[$name] = true;
-                }
-            }
-            if ($not_found && $block_name !== 'index') {
-                Mii::warning("Block $block_name not specified in statics list");
-            }
-        } else {
-            foreach ($types as $type) {
-                foreach ($this->libraries as $base_path) {
-
-                    if (is_file($base_path . $block_path . $block_name . '.' . $type)) {
-                        $this->_files[$type][$parent_block]['files'][$block_name . '.' . $type] = $base_path . $block_path . $block_name . '.' . $type;
-                        break;
-                    }
+                if (is_file($base_path . $block_path . $block_name . '.' . $type)) {
+                    $this->_files[$type][$parent_block]['files'][$block_name . '.' . $type] = $base_path . $block_path . $block_name . '.' . $type;
+                    break;
                 }
             }
         }
@@ -640,21 +618,13 @@ class Blocks extends Component
             'js' => []
         ];
 
-        $not_found = true;
         foreach (['css', 'js'] as $type) {
-            if (isset($this->_reverse[$type][$block_name])) {
-                if (isset($this->_used_files[$type][$this->_reverse[$type][$block_name]])) {
-                    $not_found = false;
-                } else {
-                    $name = $this->_reverse[$type][$block_name];
-                    $include[$type]['files'][] = $name;
-                    $not_found = false;
-                    $this->_used_files[$type][$name] = true;
-                }
+            if (isset($this->_reverse[$type][$block_name]) && !$this->_used_files[$type][$this->_reverse[$type][$block_name]]) {
+                $name = $this->_reverse[$type][$block_name];
+                $include[$type]['files'][] = $name;
+
+                $this->_used_files[$type][$name] = true;
             }
-        }
-        if ($not_found && $block_name !== 'index') {
-            Mii::warning("Block $block_name not specified in statics list");
         }
 
         if ($this->_blocks[$block_name]->__remote_js !== null) {
