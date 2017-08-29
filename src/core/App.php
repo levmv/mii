@@ -102,6 +102,7 @@ abstract class App
             'log' => ['class' => 'mii\log\Logger'],
             'blocks' => ['class' => 'mii\web\Blocks'],
             'auth' => ['class' => 'mii\auth\Auth'],
+            'router' => ['class' => 'mii\core\Router'],
             'db' => ['class' => 'mii\db\Database'],
             'cache' => ['class' => 'mii\cache\Apcu'],
             'mailer' => ['class' => 'mii\email\PHPMailer']

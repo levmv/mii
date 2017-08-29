@@ -468,15 +468,17 @@ class Blocks extends Component
 
     private function static_render() {
 
-        foreach ($this->{$this->static_source} as $name => $block) {
-            foreach (['css', 'js'] as $type) {
-                if (isset($block[$type])) {
-                    if (!is_array($block[$type]))
-                        $block[$type] = (array)$block[$type];
+        if(empty($this->_reverse)) {
+            foreach ($this->{$this->static_source} as $name => $block) {
+                foreach (['css', 'js'] as $type) {
+                    if (isset($block[$type])) {
+                        if (!is_array($block[$type]))
+                            $block[$type] = (array)$block[$type];
 
-                    foreach ($block[$type] as $child_block) {
-                        if (!isset($this->_reverse[$type][$child_block]))
-                            $this->_reverse[$type][$child_block] = $name;
+                        foreach ($block[$type] as $child_block) {
+                            if (!isset($this->_reverse[$type][$child_block]))
+                                $this->_reverse[$type][$child_block] = $name;
+                        }
                     }
                 }
             }
@@ -497,7 +499,7 @@ class Blocks extends Component
 
                     foreach ($include['files'] as $file) {
 
-                        $web_output = $this->base_url . '/' . $this->revision . '/' . $file . '.' . $type;
+                        $web_output = $this->base_url . '/'  . $file . '.' . $type;
 
                         if ($type === 'css') {
                             $this->_css[] = '<link type="text/css" href="' . $web_output . '" rel="stylesheet">';
@@ -575,9 +577,15 @@ class Blocks extends Component
             'js' => []
         ];
 
+
         foreach (['css', 'js'] as $type) {
-            if (isset($this->_reverse[$type][$block_name]) && !$this->_used_files[$type][$this->_reverse[$type][$block_name]]) {
+            if (isset($this->_reverse[$type][$block_name])) {
+
                 $name = $this->_reverse[$type][$block_name];
+
+                if(isset($this->_used_files[$type][$name]))
+                    continue;
+
                 $include[$type]['files'][] = $name;
 
                 $this->_used_files[$type][$name] = true;

@@ -6,6 +6,7 @@ namespace mii\console\controllers;
 use Mii;
 use mii\console\CliException;
 use mii\console\Controller;
+use mii\util\Console;
 
 class Assets extends Controller
 {
@@ -15,11 +16,12 @@ class Assets extends Controller
     private $blocks;
     private $libraries;
 
-    private $revision;
     private $base_path;
     private $base_url = '/assets';
 
     protected $static_source = 'static';
+
+    private $results = [];
 
     private $processed = [
         'css' => [],
@@ -36,15 +38,23 @@ class Assets extends Controller
 
         $this->sets = config('components.blocks.sets');
 
-        $this->static = config('components.blocks.static');
+        if(!file_exists(path('app').'/config/assets.php')) {
+            $this->error('Config app/config/assets.php does not exist.');
+            exit(1);
+        }
+
+        $assets_config = require(path('app').'/config/assets.php');
+        foreach($assets_config as $static_source_name => $static_source)
+            $this->$static_source_name = $static_source;
 
         $this->blocks = config('components.blocks.blocks');
         $this->libraries = config('components.blocks.libraries',
             [path('app') . '/blocks']
         );
-        $this->revision = config('components.blocks.revision', 1);
 
         $this->pubdir = config('components.blocks.base_url');
+
+        $this->gen_config_path = path('root').'/assets.compiled';
 
         $this->default_set = [
             'libraries' => [
@@ -56,31 +66,16 @@ class Assets extends Controller
 
     }
 
-
-    private function update_revision() {
-        $filename = path('root').'/revision.php';
-
-        if(is_file($filename)) {
-            $file = file_get_contents($filename);
-
-            preg_match('/(return\s+)(?P<rev>\d+)/i', $file, $matches);
-
-            if(!isset($matches['rev']))
-                return false;
-
-            $rev = (int) $matches['rev'] + 1;
-
-            $file = preg_replace('/(return[\s+])(\d+)/m', '${1}'.$rev, $file );
-
-            file_put_contents($filename, $file);
-
-            $this->warning("Revision was auto incremented to $rev\n");
-
-            $this->revision = $rev;
-            config_set('components.blocks.revision', $rev);
-        }
+    public function index() {
+        $this->stdout(
+            "\nUsage: ./mii assets (build|test|gen-config) [options]\n\n" .
+            "Options:\n" .
+            " ——config=<path>\tPath to configuration file. By default it's «@app/config/assets.php»\n" .
+            "\n\n",
+            Console::FG_YELLOW
+        );
+        return;
     }
-
 
 
     public function test() {
@@ -98,7 +93,6 @@ class Assets extends Controller
 
     public function build() {
 
-        $this->update_revision();
 
         if(count($this->sets)) {
 
@@ -109,12 +103,30 @@ class Assets extends Controller
             $this->build_set('default');
         }
 
-        $this->info(':N css and :M js files compiled. Start post processing...', [
+        $this->info(':N css and :M js files compiled.', [
             ':N' => count($this->processed['css']),
             ':M' => count($this->processed['js'])
         ]);
 
-        $this->post_process();
+        if(count($this->processed['css']) || count($this->processed['js']) ){
+            $this->info('Start post processing...');
+            $this->post_process();
+
+
+            foreach($this->results as $source => $list) {
+                file_put_contents(
+                    path('root')."/".$source.'.assets',
+                        "<?php return ".var_export($list, true).';'
+                    );
+            }
+
+
+
+        } else {
+
+            $this->info('No recompiled files. No need to regenerate config');
+        }
+
 
         $this->info('All done. Spent :Ts and :MMb', [
             ':T' => number_format(microtime(true) - $this->_time, 1),
@@ -124,15 +136,20 @@ class Assets extends Controller
 
 
     protected function test_set($set_name) {
-        $this->init_set($set_name);
-
         $this->info("==========================");
         $this->info("Testing of set «:name»", [":name" => $set_name]);
         $this->info("==========================");
 
+        $this->init_set($set_name);
+
         $blocks = [];
 
         foreach($this->libraries as $library) {
+
+            if(!is_dir($library)) {
+                $this->error('Library path «'.$library.'» does not exist');
+                return;
+            }
 
             $directory = new \RecursiveDirectoryIterator($library);
             $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
@@ -163,6 +180,11 @@ class Assets extends Controller
         }
 
         $reverse = ['css' => [], 'js' => []];
+
+        if(!isset($this->{$this->static_source})) {
+            $this->error('Source list with name «'.$this->static_source.'» does not exist');
+            return;
+        }
 
         foreach ($this->{$this->static_source} as $name => $file) {
             foreach (['css', 'js'] as $type) {
@@ -231,9 +253,6 @@ class Assets extends Controller
 
         $set = array_replace_recursive($default_set, $set);
 
-        if(isset($set['static_source']))
-            $this->{$set['static_source']} = config('components.blocks.'.$set['static_source']);
-
         foreach($set as $key => $value)
             $this->$key = $value;
 
@@ -260,13 +279,16 @@ class Assets extends Controller
 
     protected function build_set($set_name) {
         $this->init_set($set_name);
+
+        $this->results[$set_name] = [];
+
         foreach($this->{$this->static_source} as $name => $block) {
-            $this->build_block($name, $block);
+            $this->build_block($set_name, $name, $block);
         }
     }
 
 
-    protected function build_block($name, $data) {
+    protected function build_block($set_name, $name, $data) {
 
         foreach (['css', 'js'] as $type) {
             if(isset($data[$type])) {
@@ -276,8 +298,8 @@ class Assets extends Controller
                 if(!is_array($data[$type]))
                     $data[$type] = (array) $data[$type];
 
-                $outpath = $this->base_path .'/'. $this->revision .'/';
-                $outname = $name.'.'.$type;
+                $outpath = $this->base_path .'/';
+                $names = [];
 
                 foreach($data[$type] as $block_name) {
 
@@ -290,6 +312,9 @@ class Assets extends Controller
 
                         if (is_file($library_path . $block_file . '.' . $type)) {
                             $files[] = $library_path . $block_file . '.' . $type;
+
+                            $names[] = $block_name .
+                                        filemtime($library_path . $block_file . '.' . $type);
                             break;
                         }
                     }
@@ -309,10 +334,30 @@ class Assets extends Controller
                     }
                 }
 
-                $this->processed[$type][] = $this->process_files($files, $outpath, $outname);
+                $outname = $name.$this->hash(implode(',', $names));
+
+
+                foreach($data[$type] as $block_name) {
+                    $this->results[$set_name][$type][$block_name] = $outname;
+                }
+
+                if(!file_exists($outpath.$outname.'.'.$type)) {
+                    $this->processed[$type][] = $this->process_files($files, $outpath, $outname .'.'.$type);
+                }
+
             }
         }
+
     }
+
+
+
+    protected function hash(string $str) : string {
+
+        return substr(md5($str), 0,5).
+                substr(sha1($str), 0,6);
+    }
+
 
     protected function process_files($files, $path, $filename) {
 
@@ -330,14 +375,17 @@ class Assets extends Controller
 
         $this->info(':block compiled.', [':block' => $path.$filename]);
 
+
         return $path.$filename;
     }
 
 
     protected function post_process() {
 
-        if(!is_file(path('root') . '/assets.js'))
+        if(!is_file(path('root') . '/assets.js')) {
+            $this->warning('File @root/assets.js does not exist. Cancel post-processing.');
             return;
+        }
 
         $nodejs = proc_open('node ' . path('root') . '/assets.js',
             array(array('pipe', 'r'), array('pipe', 'w')),
