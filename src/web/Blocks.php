@@ -624,8 +624,6 @@ class Blocks extends Component
 
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
                 $position = (!empty($inline[1]) AND isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
-                if (!isset($this->_files['js'][$parent_block]['inline'][$position]))
-                    $include['js']['inline'][$position] = [];
                 $include['js']['inline'][$position][] = $inline[0];
             }
         }
