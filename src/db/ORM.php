@@ -389,9 +389,22 @@ class ORM
         $schema = $this->get_tables_schema();
 
         foreach ($data as $key => $value) {
+            if (!isset($schema[$key]))
+                continue;
 
-            if (isset($schema[$key]) && $schema[$key]['type'] === 'int') {
-                $data[$key] = (int)$value;
+            switch($schema[$key]['type']){
+                case 'int':
+                    $this->_data[$key] = (int)$value;
+                    break;
+                case 'bigint':
+                    if(!$value)
+                        $this->_data[$key] = 0;
+                    break;
+                case 'double':
+                case 'float':
+                    if(!$value)
+                        $this->_data[$key] = 0.0;
+                    break;
             }
         }
 
@@ -441,11 +454,12 @@ class ORM
                     break;
                 case 'bigint':
                     if(!$value)
-                        $value = 0;
+                        $this->_data[$key] = 0;
                     break;
                 case 'double':
+                case 'float':
                     if(!$value)
-                        $value = 0.0;
+                        $this->_data[$key] = 0.0;
                     break;
             }
         }
@@ -527,6 +541,12 @@ class ORM
         if ($type === 'int' || $type === 'smallint' || $type === 'tinyint')
             return 'int';
 
+        if($type === 'bigint')
+            return 'bigint';
+
+        if($type === 'double' || $type === 'float')
+            return 'float';
+
         return 'string';
     }
 
@@ -535,7 +555,7 @@ class ORM
 
         static $table_infos = [];
 
-        $cache_id = 'db_schema_' . $this->get_table();
+        $cache_id = 'db_schema_140' . $this->get_table();
 
         if(isset($table_infos[$cache_id]))
             return $table_infos[$cache_id];
@@ -585,6 +605,7 @@ class ORM
                 }
                 $columns[$column_name] = $column;
             }
+
             cache($cache_id, $columns, 3600);
             $table_infos[$cache_id] = $columns;
         }
