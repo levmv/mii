@@ -432,9 +432,21 @@ class ORM
         $schema = $this->get_tables_schema();
 
         foreach ($this->_data as $key => $value) {
+            if (!isset($schema[$key]))
+                continue;
 
-            if (isset($schema[$key]) && $schema[$key]['type'] === 'int') {
-                $this->_data[$key] = (int)$value;
+            switch($schema[$key]['type']){
+                case 'int':
+                    $this->_data[$key] = (int)$value;
+                    break;
+                case 'bigint':
+                    if(!$value)
+                        $value = 0;
+                    break;
+                case 'double':
+                    if(!$value)
+                        $value = 0.0;
+                    break;
             }
         }
 
