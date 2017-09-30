@@ -30,38 +30,12 @@ class Request extends Component
     const CSRF_HEADER = 'X-CSRF-Token';
 
     /**
-     * @var  boolean
-     */
-    protected $_secure = false;
-
-    /**
-     * @var  string  referring URL
-     */
-    protected $_referrer;
-
-    /**
-     * @var  string the body
-     */
-    protected $_body;
-
-
-    /**
      * @var  string  the URI of the request
      */
     protected $_uri;
 
 
     protected $_hostname;
-
-    /**
-     * @var array    query parameters
-     */
-    protected $_get = [];
-
-    /**
-     * @var array    post parameters
-     */
-    protected $_post = [];
 
 
     public $csrf_validation = true;
@@ -71,6 +45,7 @@ class Request extends Component
 
 
     public $csrf_token_name = 'csrf_token';
+
 
     protected $_csrf_token;
 
@@ -150,14 +125,6 @@ class Request extends Component
             // Use the server request method
             $this->method($_SERVER['REQUEST_METHOD']);
         }
-
-        if (!empty($_SERVER['HTTPS']) AND filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN)) {
-            // This request is secure
-            $this->_secure = true;
-        }
-
-        $this->_get = &$_GET;
-        $this->_post = &$_POST;
     }
 
 
@@ -172,7 +139,16 @@ class Request extends Component
 
             $response = new Response;
 
+            $benchmark = false;
+            if (config('debug')) {
+                $benchmark = \mii\util\Profiler::start('Router match', $uri);
+            }
+
             $params = \Mii::$app->router->match($this->uri($uri));
+
+            if ($benchmark) {
+                \mii\util\Profiler::stop($benchmark);
+            }
 
             if ($params === false) {
                 throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
@@ -301,10 +277,10 @@ class Request extends Component
      */
     public function get($key = null, $default = null) {
         if ($key) {
-            return isset($this->_get[$key]) ? $this->_get[$key] : $default;
+            return isset($_GET[$key]) ? $_GET[$key] : $default;
         }
 
-        return $this->_get;
+        return $_GET;
     }
 
     public function param($key, $default = null) {
@@ -384,10 +360,10 @@ class Request extends Component
      */
     public function post($key = null, $default = null) {
         if ($key === null) {
-            return $this->_post;
+            return $_POST;
         }
 
-        return isset($this->_post[$key]) ? $this->_post[$key] : $default;
+        return isset($_POST[$key]) ? $_POST[$key] : $default;
     }
 
     /**

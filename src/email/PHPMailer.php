@@ -2,10 +2,11 @@
 
 namespace mii\email;
 
+use mii\core\Component;
 use mii\web\Block;
 use PHPMailer\PHPMailer\PHPMailer as Mailer;
 
-class PHPMailer
+class PHPMailer extends Component
 {
 
     /**

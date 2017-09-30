@@ -15,7 +15,6 @@ use Mii;
 abstract class App
 {
 
-
     public $charset = 'UTF-8';
 
     public $locale; //'ru_RU.UTF-8';
@@ -122,14 +121,8 @@ abstract class App
         return false;
     }
 
-    public function has(string $id, $instantiated = false) {
-        if ($this->container === null) {
-            return isset($this->_components[$id]);
-        }
-
-        return $instantiated
-            ? isset($this->_components[$id]) AND \Mii::$container->has($this->_components[$id])
-            : isset($this->_components[$id]);
+    public function has(string $id): bool {
+        return isset($this->_components[$id]);
     }
 
 
@@ -157,15 +150,12 @@ abstract class App
     }
 
     public function __isset($name) {
-        if ($this->has($name, true)) {
-            return true;
-        }
-        return false;
+        return $this->has($name);
     }
 
     public function inner_set($id, $definition = null): void {
 
-        if($definition !== null)
+        if ($definition !== null)
             $this->_config['components'][$id] = $definition;
 
         if (is_array($this->_config['components'][$id])) {
@@ -183,7 +173,7 @@ abstract class App
         } elseif (is_object($this->_config['components'][$id]) AND $this->_config['components'][$id] instanceof \Closure) {
             $this->_components[$id] = true;
         } else {
-            throw new \Exception("Unexpected configuration type for the \"$id\" component: " . gettype($this->_config['components'][$id]));
+            throw new \Exception("Unexpected configuration type for the $id component: " . gettype($this->_config['components'][$id]));
         }
 
     }
@@ -194,7 +184,6 @@ abstract class App
             $this->inner_set($id, $definition);
             return;
         }
-
 
         if ($definition === null) {
             unset($this->_components[$id]);

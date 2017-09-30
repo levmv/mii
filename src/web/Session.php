@@ -7,11 +7,6 @@ use mii\core\Component;
 
 class Session extends Component
 {
-
-    /**
-     * @var  array  session instances
-     */
-    public static $_instance = NULL;
     /**
      * @var  string  cookie name
      */
@@ -20,10 +15,7 @@ class Session extends Component
      * @var  int  cookie lifetime
      */
     protected $_lifetime = 0;
-    /**
-     * @var  bool  encrypt session data?
-     */
-    protected $_encrypted = false;
+
     /**
      * @var  array  session data
      */
@@ -40,16 +32,6 @@ class Session extends Component
         if (isset($config['lifetime'])) {
             // Cookie lifetime
             $this->_lifetime = (int)$config['lifetime'];
-        }
-
-        if (isset($config['encrypted'])) {
-            if ($config['encrypted'] === true) {
-                // Use the default Encrypt instance
-                $config['encrypted'] = 'default';
-            }
-
-            // Enable or disable encryption of data
-            $this->_encrypted = $config['encrypted'];
         }
     }
 
@@ -276,6 +258,4 @@ class Session extends Component
             unset($this->_data[$this->_flash]);
         }
     }
-
-
 }

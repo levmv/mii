@@ -76,7 +76,6 @@ class Controller
 
     public $csrf_validation = true;
 
-
     /**
      * Creates a new controller instance. Each controller must be constructed
      * with the request object that created it.
@@ -170,9 +169,7 @@ class Controller
         $this->access_rules();
 
         if (\Mii::$app->session->check_cookie()) {
-
             $this->user = Mii::$app->user = Mii::$app->auth->get_user();
-
         }
         $this->user = Mii::$app->user = Mii::$app->auth->get_user();
 

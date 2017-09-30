@@ -8,8 +8,6 @@ use mii\core\Component;
 class Response extends Component
 {
 
-    public $exit_status = 0;
-
     // HTTP status codes and messages
     public static $messages = [
         // Informational 1xx
@@ -21,11 +19,9 @@ class Response extends Component
         200 => 'OK',
         201 => 'Created',
         202 => 'Accepted',
-        203 => 'Non-Authoritative Information',
         204 => 'No Content',
         205 => 'Reset Content',
         206 => 'Partial Content',
-        207 => 'Multi-Status',
 
         // Redirection 3xx
         300 => 'Multiple Choices',
@@ -33,41 +29,30 @@ class Response extends Component
         302 => 'Found', // 1.1
         303 => 'See Other',
         304 => 'Not Modified',
-        305 => 'Use Proxy',
-        // 306 is deprecated but reserved
         307 => 'Temporary Redirect',
 
         // Client Error 4xx
         400 => 'Bad Request',
         401 => 'Unauthorized',
-        402 => 'Payment Required',
         403 => 'Forbidden',
         404 => 'Not Found',
         405 => 'Method Not Allowed',
-        406 => 'Not Acceptable',
-        407 => 'Proxy Authentication Required',
         408 => 'Request Timeout',
         409 => 'Conflict',
         410 => 'Gone',
         411 => 'Length Required',
         412 => 'Precondition Failed',
         413 => 'Request Entity Too Large',
-        414 => 'Request-URI Too Long',
-        415 => 'Unsupported Media Type',
-        416 => 'Requested Range Not Satisfiable',
-        417 => 'Expectation Failed',
+        418 => 'Im a teapot',
         422 => 'Unprocessable Entity',
-        423 => 'Locked',
-        424 => 'Failed Dependency',
+        429 => 'Too many requests',
         // Server Error 5xx
         500 => 'Internal Server Error',
         501 => 'Not Implemented',
         502 => 'Bad Gateway',
         503 => 'Service Unavailable',
         504 => 'Gateway Timeout',
-        505 => 'HTTP Version Not Supported',
-        507 => 'Insufficient Storage',
-        509 => 'Bandwidth Limit Exceeded'
+        505 => 'HTTP Version Not Supported'
     ];
 
 
@@ -79,20 +64,20 @@ class Response extends Component
 
     public $format = self::FORMAT_HTML;
 
+    public $version;
+
     /**
      * @var  integer     The response http status
      */
-    protected $_status = 200;
+    public $status = 200;
+
+    public $status_message = '';
+
 
     /**
      * @var  string      The response body
      */
     protected $_content = '';
-
-    /**
-     * @var  string      The response protocol
-     */
-    protected $_protocol;
 
 
     protected $_content_type = 'text/html';
@@ -137,14 +122,16 @@ class Response extends Component
             $this->set_header('content-type', $this->_content_type . '; charset=UTF-8');
         }
 
-        //$statusCode = $this->getStatusCode();
-        //header("HTTP/{$this->version} $statusCode {$this->statusText}");
-
-        $protocol = $this->protocol();
-        $status = $this->status();
+        if ($this->version === null) {
+            if (isset($_SERVER['SERVER_PROTOCOL']) && $_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.0') {
+                $this->version = '1.0';
+            } else {
+                $this->version = '1.1';
+            }
+        }
 
         // Create the response header
-        header($protocol . ' ' . $status . ' ' . Response::$messages[$status]);
+        header("HTTP/{$this->version} {$this->status} {$this->status_message}");
 
         if ($this->_headers) {
             foreach ($this->_headers as $name => $values) {
@@ -185,22 +172,16 @@ class Response extends Component
     /**
      * Sets or gets the HTTP status from this response.
      *
-     *      // Set the HTTP status to 404 Not Found
-     *      $response = Response::factory()
-     *              ->status(404);
-     *
-     *      // Get the current status
-     *      $status = $response->status();
-     *
      * @param   integer $status Status to set to this response
      * @return  mixed
      */
     public function status($status = NULL) {
 
         if ($status === NULL) {
-            return $this->_status;
+            return $this->status;
         } elseif (array_key_exists($status, Response::$messages)) {
-            $this->_status = (int)$status;
+            $this->status = (int) $status;
+            $this->status_message = Response::$messages[$this->status];
             return $this;
         } else {
             throw new Exception(__METHOD__ . ' unknown status value : :value', array(':value' => $status));
@@ -246,8 +227,6 @@ class Response extends Component
             case self::FORMAT_XML:
                 $this->set_header('content-type', 'application/xml; charset=UTF-8');
                 break;
-
-
         }
 
         $this->send_headers();
