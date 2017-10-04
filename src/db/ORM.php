@@ -386,27 +386,7 @@ class ORM
 
         $data = array_intersect_key($this->_data, $this->_changed);
 
-        $schema = $this->get_tables_schema();
-
-        foreach ($data as $key => $value) {
-            if (!isset($schema[$key]))
-                continue;
-
-            switch($schema[$key]['type']){
-                case 'int':
-                    $this->_data[$key] = (int)$value;
-                    break;
-                case 'bigint':
-                    if(!$value)
-                        $this->_data[$key] = 0;
-                    break;
-                case 'double':
-                case 'float':
-                    if(!$value)
-                        $this->_data[$key] = 0.0;
-                    break;
-            }
-        }
+        $this->cast_types($data);
 
         $this->raw_query()
             ->update($this->get_table())
@@ -441,29 +421,7 @@ class ORM
 
         $this->on_change();
 
-
-        $schema = $this->get_tables_schema();
-
-        foreach ($this->_data as $key => $value) {
-            if (!isset($schema[$key]))
-                continue;
-
-            switch($schema[$key]['type']){
-                case 'int':
-                    $this->_data[$key] = (int)$value;
-                    break;
-                case 'bigint':
-                    if(!$value)
-                        $this->_data[$key] = 0;
-                    break;
-                case 'double':
-                case 'float':
-                    if(!$value)
-                        $this->_data[$key] = 0.0;
-                    break;
-            }
-        }
-
+        $this->cast_types($this->_data);
 
         $columns = array_keys($this->_data);
         $this->raw_query()
@@ -488,13 +446,12 @@ class ORM
      * Deletes the current object's associated database row.
      * The object will still contain valid data until it is destroyed.
      *
-     * @return integer
      */
-    public function delete() {
+    public function delete() : void {
         if ($this->loaded()) {
             $this->__loaded = false;
 
-            return $this->raw_query()
+            $this->raw_query()
                 ->delete($this->get_table())
                 ->where('id', '=', $this->_data['id'])
                 ->execute();
@@ -535,8 +492,31 @@ class ORM
         return $this->_serialize_cache[$key];
     }
 
+    private function cast_types(array &$data) : void {
+        $schema = $this->get_tables_schema();
 
-    private function convert_type_to_php($type) {
+        foreach ($data as $key => $value) {
+            if (!isset($schema[$key]))
+                continue;
+
+            switch($schema[$key]['type']){
+                case 'int':
+                    $data[$key] = (int)$value;
+                    break;
+                case 'bigint':
+                    if(!$value)
+                        $data[$key] = 0;
+                    break;
+                case 'double':
+                case 'float':
+                    if(!$value)
+                        $data[$key] = 0.0;
+                    break;
+            }
+        }
+    }
+
+    private function convert_type_names($type) {
 
         if ($type === 'int' || $type === 'smallint' || $type === 'tinyint')
             return 'int';
@@ -578,7 +558,7 @@ class ORM
 
                 if (preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $info['type'], $matches)) {
 
-                    $column['type'] = $this->convert_type_to_php(strtolower($matches[1]));
+                    $column['type'] = $this->convert_type_names(strtolower($matches[1]));
 
                     $type = strtolower($matches[1]);
 
