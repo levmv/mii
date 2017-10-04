@@ -43,7 +43,7 @@ class App extends \mii\core\App
         $this->request->execute()->send();
     }
 
-    public function default_components() {
+    public function default_components() : array {
         return [
             'log' => ['class' => 'mii\log\Logger'],
             'blocks' => ['class' => 'mii\web\Blocks'],

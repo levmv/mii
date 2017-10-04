@@ -96,7 +96,7 @@ abstract class App
 
     abstract function run();
 
-    public function default_components() {
+    public function default_components() : array {
         return [
             'log' => ['class' => 'mii\log\Logger'],
             'blocks' => ['class' => 'mii\web\Blocks'],
@@ -218,11 +218,11 @@ abstract class App
         $class = $this->_components[$id];
 
         if (is_string($class)) {
-            $ref = new \ReflectionClass($class);
-            if (!empty($this->_config['components'][$id]))
-                return $ref->newInstanceArgs([$this->_config['components'][$id], $id]);
 
-            return $ref->newInstanceArgs([[], $id]);
+            if (!empty($this->_config['components'][$id]))
+                return new $class($this->_config['components'][$id]);
+
+            return new $class();
         }
 
         if (is_object($class) && $class instanceof \Closure) {

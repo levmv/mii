@@ -6,12 +6,8 @@ namespace mii\core;
 class Component
 {
 
-    protected $component_id = '';
-
-    public function __construct($config = [], $id = null) {
+    public function __construct(array $config = []) {
         $this->init($config);
-
-        $this->component_id = $id;
     }
 
 
