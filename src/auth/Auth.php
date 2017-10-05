@@ -299,7 +299,8 @@ class Auth extends Component
                 }
 
                 // Token is invalid
-                $token->delete();
+                if($token->loaded())
+                    $token->delete();
             } else {
 
                 // Token is invalid
