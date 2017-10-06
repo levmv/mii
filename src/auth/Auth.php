@@ -5,7 +5,6 @@ namespace mii\auth;
 use Mii;
 use mii\core\Component;
 use mii\db\Query;
-use mii\web\Exception;
 
 /**
  * User authorization library. Handles user login and logout, as well as secure
@@ -19,8 +18,6 @@ class Auth extends Component
     protected $_user;
 
     protected $user_model = 'app\models\User';
-
-    protected $hash_method = 'bcrypt';
 
     protected $hash_cost = 8;
 
@@ -180,36 +177,16 @@ class Auth extends Component
 
     /**
      *
-     * Uses hash_hmac for legacy projects
-     *
      * @param   string $password password to hash
      * @return  string
      */
     public function hash(string $password): string {
-        if ($this->hash_method === 'bcrypt') {
-
-            $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->hash_cost]);
-
-        } else {
-            if ($this->hash_key === null)
-                throw new Exception('A valid hash key must be set in your auth config.');
-
-            $hash = hash_hmac($this->hash_method, $password, $this->hash_key);
-        }
-
-        return $hash;
+        return password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->hash_cost]);
     }
 
 
     public function verify_password($password, $hash) {
-        if ($this->hash_method === 'bcrypt') {
-
-            return password_verify($password, $hash);
-
-        } else {
-
-            return $this->hash($password) === $hash;
-        }
+        return password_verify($password, $hash);
     }
 
 
@@ -272,9 +249,12 @@ class Auth extends Component
     public function auto_login(): ?User {
         if ($token = Mii::$app->request->get_cookie($this->token_cookie)) {
             // Load the token and user
-            $token = Token::find()->where('token', '=', $token)->one();
+            $token = Token::one([
+                ['token', '=', $token]
+            ]);
 
-            if ($token) {
+            if ($token !== null) {
+
                 if ($token->user_agent === sha1(Mii::$app->request->get_user_agent())) {
                     $new_token = (new Token)->set([
                         'user_id' => $token->user_id,
@@ -299,7 +279,7 @@ class Auth extends Component
                 }
 
                 // Token is invalid
-                if($token->loaded())
+                if ($token->loaded())
                     $token->delete();
             } else {
 

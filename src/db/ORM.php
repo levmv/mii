@@ -455,6 +455,8 @@ class ORM
                 ->delete($this->get_table())
                 ->where('id', '=', $this->_data['id'])
                 ->execute();
+
+            return;
         }
 
         throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
