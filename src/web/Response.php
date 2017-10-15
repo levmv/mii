@@ -115,9 +115,8 @@ class Response extends Component
 
 
     public function send_headers() {
-        if (headers_sent()) {
-            return $this;
-        }
+        assert(headers_sent() === false, "Headers were already sent");
+
         if (!isset($this->_headers['content-type'])) {
             $this->set_header('content-type', $this->_content_type . '; charset=UTF-8');
         }
@@ -148,26 +147,6 @@ class Response extends Component
         return $this;
     }
 
-
-    /**
-     * Gets or sets the HTTP protocol. The standard protocol to use
-     * is `HTTP/1.1`.
-     *
-     * @param   string $protocol Protocol to set to the request/response
-     * @return  mixed
-     */
-    public function protocol($protocol = NULL) {
-        if ($protocol) {
-            $this->_protocol = strtoupper($protocol);
-            return $this;
-        }
-
-        if ($this->_protocol === NULL) {
-            $this->_protocol = 'HTTP/1.1';
-        }
-
-        return $this->_protocol;
-    }
 
     /**
      * Sets or gets the HTTP status from this response.

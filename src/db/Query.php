@@ -3,6 +3,7 @@
 namespace mii\db;
 
 use mii\valid\Rules;
+use mii\web\Pagination;
 
 /**
  * Database Query Builder
@@ -87,6 +88,9 @@ class Query
     protected $_index_by;
 
     protected $_last_condition_where;
+
+
+    protected $_pagination;
 
     /**
      * Creates a new SQL query of the specified type.
@@ -365,6 +369,20 @@ class Query
         return $this;
     }
 
+    public function paginate($count = 100) {
+
+        $this->_pagination = new Pagination([
+            'block' => 'pagination',
+            'total_items' => $this->count(),
+            'items_per_page' => $count
+        ]);
+
+        $this
+            ->offset($this->_pagination->get_offset())
+            ->limit($this->_pagination->get_limit());
+
+        return $this;
+    }
 
 
     /***** WHERE ****/
@@ -1147,6 +1165,9 @@ class Query
 
         if ($this->_index_by)
             $result->index_by($this->_index_by);
+
+        if($this->_pagination)
+            $result->set_pagination($this->_pagination);
 
         return $result;
     }

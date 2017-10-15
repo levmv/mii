@@ -141,7 +141,7 @@ abstract class App
 
         } else {
             if (isset($this->_components[$id])) {
-                return Mii::$container->get($id);
+                return $this->container->get($id);
             }
         }
 
@@ -187,7 +187,7 @@ abstract class App
 
         if ($definition === null) {
             unset($this->_components[$id]);
-            \Mii::$container->clear($id);
+            $this->container->clear($id);
             return;
         }
         if (is_array($definition)) {
@@ -197,13 +197,13 @@ abstract class App
                 unset($definition['class']);
                 $params = (empty($definition)) ? [] : [$definition];
 
-                \Mii::$container->share($id, $this->_components[$id], $params);
+                $this->container->share($id, $this->_components[$id], $params);
             } else {
                 throw new \Exception("The configuration for the \"$id\" component must contain a \"class\" element.");
             }
 
         } elseif (is_string($definition)) {
-            \Mii::$container->share($id, $definition);
+            $this->container->share($id, $definition);
             $this->_components[$id] = true;
 
         } elseif (is_callable($definition, true)) {

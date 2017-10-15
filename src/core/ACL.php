@@ -15,12 +15,11 @@ class ACL
      * Add "allow" access to a role or roles.
      *
      * @param mixed $role single role or array of roles
-     * @param string $object
      * @param string $action
      * @return $this
      */
-    public function allow($role, $object = '*', $action = '*') {
-        $this->add_rule(true, $role, $object, $action);
+    public function allow($role, $action = '*') {
+        $this->add_rule(true, $role, $action);
 
         return $this;
     }
@@ -29,12 +28,11 @@ class ACL
      * Add "deny" access to a role or roles.
      *
      * @param mixed $role single role or array of roles
-     * @param string $object
      * @param string $action
      * @return $this
      */
-    public function deny($role, $object = '*', $action = '*') {
-        $this->add_rule(false, $role, $object, $action);
+    public function deny($role, $action = '*') {
+        $this->add_rule(false, $role, $action);
 
         return $this;
     }
@@ -55,69 +53,62 @@ class ACL
      *
      * @param bool $access
      * @param mixed $role single role or array of roles
-     * @param string $object
      * @param string $action
      */
-    public function add_rule($access, $role, $object, $action): void {
+    public function add_rule($access, $role, $action): void {
         $roles = (array)$role;
 
         foreach ($roles as $r) {
             $action = (array)$action;
             foreach ($action as $a) {
-                $this->_rules[$r][$object][$a] = $access;
+                $this->_rules[$r][$a] = $access;
             }
         }
     }
 
     /**
-     * Check if a role (or one of roles) is allowed to an action on an object.
+     * Check if a role (or one of roles) is allowed to an action.
      *
      * @param mixed $role single role or array of roles
-     * @param string $object
      * @param string $action
      * @return bool
      */
-    public function check($role, $object = '*', $action = '*'): bool {
+    public function check($role, $action = '*'): bool {
         if (is_array($role)) {
             foreach ($role as $r) {
-                if ($this->match($r, $object, $action))
+                if ($this->match($r, $action))
                     return true;
             }
 
             return false;
         }
 
-        return $this->match($role, $object, $action);
+        return $this->match($role, $action);
     }
 
     /**
-     * Check if a role is allowed to an action on an object.
+     * Check if a role is allowed to an action.
      *
      * @param $role
-     * @param $object
      * @param $action
      * @return bool
      */
-    protected function match($role, $object, $action): bool {
-        $roles = $objects = $actions = ['*'];
+    protected function match($role, $action): bool {
+        $roles = $actions = ['*'];
 
         $allow = false;
 
         if ($role != '*')
             array_unshift($roles, $role);
-        if ($object != '*')
-            array_unshift($objects, $object);
         if ($action != '*')
             array_unshift($actions, $action);
 
         // Ищем наиболее подходящее правило. Идем от частного к общему.
         foreach ($roles as $_role) {
-            foreach ($objects as $_object) {
-                foreach ($actions as $_action) {
-                    if (isset($this->_rules[$_role][$_object][$_action])) {
-                        $allow = $this->_rules[$_role][$_object][$_action];
-                        break 3;
-                    }
+            foreach ($actions as $_action) {
+                if (isset($this->_rules[$_role][$_action])) {
+                    $allow = $this->_rules[$_role][$_action];
+                    break 2;
                 }
             }
         }

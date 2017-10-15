@@ -706,11 +706,11 @@ class HTML
 
 
     public static function crsf_meta() {
-
-        $request = \Mii::$app->request;
-        if ($request->csrf_validation) {
-            return static::tag('meta', '', ['name' => 'csrf-token-name', 'content' => $request->csrf_token_name]) . "\n    "
-                . static::tag('meta', '', ['name' => 'csrf-token', 'content' => $request->csrf_token()]) . "\n";
+        $request = \Mii::$app->get('request');
+        if ($request->csrf_validation && \Mii::$app->controller && \Mii::$app->controller->csrf_validation) {
+            $token = $request->csrf_token();
+            $name = $request->csrf_token_name;
+            return "<meta name='csrf-token-name' content='$name'>\n<meta name='csrf-token' content='$token'>";
         } else {
             return '';
         }

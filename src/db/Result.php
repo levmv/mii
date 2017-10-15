@@ -28,6 +28,8 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     protected $_index_by;
 
+    protected $_pagination;
+
     /**
      * Sets the total number of rows and stores the result locally.
      *
@@ -225,6 +227,24 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         return $default;
     }
 
+    public function column_values($name) {
+        $result = [];
+
+        if ($this->_as_object) {
+            foreach ($this as $row) {
+                $result[] = $row->$name;
+            }
+            return $result;
+        }
+
+        foreach ($this as $row) {
+            $result[] = $row[$name];
+        }
+
+        return $result;
+
+    }
+
     /**
      * Implements [Countable::count], returns the total number of rows.
      *
@@ -351,5 +371,13 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         return $this->offsetExists($this->_current_row);
     }
 
+
+    public function set_pagination($pagination) {
+        $this->_pagination = $pagination;
+    }
+
+    public function pagination() {
+        return $this->_pagination;
+    }
 
 }

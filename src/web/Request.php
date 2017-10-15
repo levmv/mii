@@ -129,87 +129,6 @@ class Request extends Component
 
 
     /**
-     * Processes the request, executing the controller action that handles this
-     * request, determined by the [Route].
-     *
-     * @return  Response
-     */
-    public function execute(string $uri = null): Response {
-        try {
-
-            $response = new Response;
-
-            $benchmark = false;
-            if (config('debug')) {
-                $benchmark = \mii\util\Profiler::start('Router match', $uri);
-            }
-
-            $params = \Mii::$app->router->match($this->uri($uri));
-
-            if ($benchmark) {
-                \mii\util\Profiler::stop($benchmark);
-            }
-
-            if ($params === false) {
-                throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
-                    ':uri' => $this->uri()]);
-            }
-
-            $this->controller = $params['controller'];
-
-            $this->action = $params['action'];
-
-            // These are accessible as public vars and can be overloaded
-            unset($params['controller'], $params['action']);
-
-            // Params cannot be changed once matched
-            $this->params = $params;
-
-            assert($this->controller && class_exists($this->controller), "Controller class " . $this->controller . " doesn't exist.");
-
-            if ($this->action === 'execute') {
-                throw new \InvalidArgumentException('Action name can not be "execute"');
-            }
-
-            // Create a new instance of the controller
-
-            if (\Mii::$app->container === null) {
-                $class = new \ReflectionClass($this->controller);
-                \Mii::$app->controller = $controller = $class->newInstanceArgs([$this, $response]);
-            } else {
-                \Mii::$app->controller = $controller = \Mii::$container->get($this->controller, [$this, $response]);
-            }
-
-            // Run the controller's execute() method
-            $response = $controller->execute($params);
-
-            if (!$response instanceof Response) {
-                // Controller failed to return a Response.
-                throw new Exception('Controller failed to return a Response');
-            }
-        } catch (RedirectHttpException $e) {
-
-            $response->redirect($e->url);
-
-        } catch (InvalidRouteException $e) {
-            if (config('debug')) {
-                throw $e;
-            } else {
-                throw new NotFoundHttpException();
-            }
-        } catch (ForbiddenHttpException $e) {
-            if (config('debug')) {
-                throw $e;
-            } else {
-                throw new NotFoundHttpException();
-            }
-        }
-
-        return $response;
-    }
-
-
-    /**
      * Sets and gets the uri from the request.
      *
      * @param   string $uri
@@ -290,28 +209,6 @@ class Request extends Component
         return $default;
     }
 
-    public function get_csrf_from_header() {
-        // must be like self::CSRF_HEADER
-        return isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : null;
-    }
-
-    public function check_csrf_token($token = false) {
-
-        if (!$token) {
-
-            if (isset($_POST[$this->csrf_token_name])) {
-
-                $token = $_POST[$this->csrf_token_name];
-
-            } elseif (null !== ($token = $this->get_csrf_from_header())) {
-
-            } else {
-                \Mii::error('crsf_token not found', 'mii');
-            }
-        }
-        return $this->csrf_token() === $token;
-    }
-
 
     public function validate_csrf_token() {
 
@@ -319,7 +216,21 @@ class Request extends Component
             return true;
         }
 
-        return $this->check_csrf_token();
+        $token = '';
+
+        if (isset($_POST[$this->csrf_token_name])) {
+
+            $token = $_POST[$this->csrf_token_name];
+
+        } elseif (isset($_SERVER['HTTP_X_CSRF_TOKEN'])) { // must be like self::CSRF_HEADER
+
+            $token = $_SERVER['HTTP_X_CSRF_TOKEN'];
+
+        } else {
+            \Mii::error('crsf_token not found', 'mii');
+        }
+
+        return $this->csrf_token() === $token;
     }
 
 
@@ -328,7 +239,7 @@ class Request extends Component
         if ($this->_csrf_token === null || $new) {
             if ($new || ($this->_csrf_token = $this->load_csrf_token()) === null) {
                 // Generate a new unique token
-                $this->_csrf_token = sha1(uniqid(NULL, TRUE));
+                $this->_csrf_token = bin2hex(random_bytes(20));
 
                 // Store the new token
                 if ($this->enable_csrf_cookie) {

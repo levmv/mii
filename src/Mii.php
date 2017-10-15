@@ -1,6 +1,6 @@
 <?php
 
-use mii\Log\Logger;
+use mii\log\Logger;
 
 defined('MII_START_TIME') or define('MII_START_TIME', microtime(true));
 defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
@@ -9,19 +9,13 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 class Mii
 {
 
-    const VERSION = '1.2.9';
-
-    const CODENAME = 'τ Ceti';
+    const VERSION = '1.4.0';
 
     /**
      * @var \mii\web\App|\mii\console\App;
      */
     public static $app;
 
-    /**
-     * @var \mii\core\Container
-     */
-    public static $container;
 
     public static $paths = [
         'mii' => __DIR__

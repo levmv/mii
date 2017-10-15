@@ -34,7 +34,7 @@ class Cookie
     /**
      * @var  boolean  Only transmit cookies over HTTP, disabling Javascript access
      */
-    public static $httponly = false;
+    public static $httponly = true;
 
     /**
      * Gets the value of a signed cookie. Cookies without signatures will not
@@ -53,7 +53,6 @@ class Cookie
             // The cookie does not exist
             return $default;
         }
-
 
         // Get the cookie value
         $cookie = $_COOKIE[$key];;

@@ -5,6 +5,7 @@ namespace mii\core;
 
 use mii\util\Arr;
 use mii\util\URL;
+use mii\web\Response;
 
 class Router extends Component
 {
@@ -238,6 +239,9 @@ class Router extends Component
                 $callback = $route[static::R_CALLBACK];
             }
             $params = call_user_func($callback, $matches);
+
+            if($params instanceof Response)
+                return $params;
 
             $params['controller'] = $namespace . '\\' . $params['controller'];
 

@@ -2,6 +2,7 @@
 
 namespace mii\web;
 
+use mii\db\Query;
 use mii\util\URL;
 
 /**
@@ -75,7 +76,7 @@ class Pagination
      *
      * @return  void
      */
-    public function __construct(array $config = []) {
+    public function __construct(array $config = [], Query &$query = null) {
         foreach ($config as $key => $val)
             $this->$key = $val;
 
@@ -85,6 +86,10 @@ class Pagination
 
         // Pagination setup
         $this->calculate();
+
+        if($query) {
+
+        }
     }
 
     /**

@@ -497,4 +497,11 @@ class Rules
         return ($file->size <=> $size) === $dir;
     }
 
+    public static function recaptcha() {
+        $recaptcha = new \ReCaptcha\ReCaptcha(config('google.recaptcha.secret'));
+        $response = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
+        return $response->isSuccess();
+
+    }
+
 }
