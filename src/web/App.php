@@ -4,6 +4,7 @@ namespace mii\web;
 
 use mii\core\InvalidRouteException;
 use mii\core\Router;
+use mii\db\ModelNotFoundException;
 
 /**
  * Class App
@@ -83,18 +84,11 @@ class App extends \mii\core\App
 
             $this->controller->execute($this->request->action, $params);
 
-
         } catch (RedirectHttpException $e) {
 
             $this->response->redirect($e->url);
 
-        } catch (InvalidRouteException $e) {
-            if (config('debug')) {
-                throw $e;
-            } else {
-                throw new NotFoundHttpException();
-            }
-        } catch (ForbiddenHttpException $e) {
+        } catch (InvalidRouteException | ForbiddenHttpException | ModelNotFoundException $e) {
             if (config('debug')) {
                 throw $e;
             } else {
@@ -104,6 +98,7 @@ class App extends \mii\core\App
 
         $this->response->send();
     }
+
 
 
     public function default_components() : array {
