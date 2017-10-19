@@ -131,6 +131,7 @@ class ORM
         } elseif (is_integer($value) || is_string($value)) {
             $result =  (new static)->select_query(false)->where('id', '=', (int)$value)->one();
         } else {
+            assert($find_or_fail === false, 'You passed null as value: ORM::one(null, true). Its probably a bug');
             $result = (new static)->select_query(true)->one();
         }
 
