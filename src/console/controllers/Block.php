@@ -16,6 +16,8 @@ class Block extends Controller
 
     protected $output_path;
 
+    protected $check_mtime = false;
+
     public function before() {
 
         $this->input_path = path('vendor') . '/bower/';
@@ -29,14 +31,15 @@ class Block extends Controller
         return [
             path('app') . '/blocks' => [
                 'i_jquery' => 'do_jquery',
-                'i_chosen' => 'do_chosen',
                 'i_fancybox' => 'do_fancybox'
             ],
         ];
     }
 
 
-    public function index() {
+    public function index($argv)
+    {
+        $this->check_mtime = isset($argv['check_mtime']) ? true : false;
 
         foreach ($this->blocks as $output_path => $blocks) {
             foreach ($blocks as $block => $func) {
@@ -156,7 +159,8 @@ class Block extends Controller
     }
 
 
-    protected function to_block($from, $block_name, $ext, $callback = null) {
+    protected function to_block($from, $block_name, $ext, $callback = null)
+    {
         if (!is_array($from))
             $from = array($from);
 
@@ -171,12 +175,19 @@ class Block extends Controller
             }
         }
 
+        $to = $dir . '/' . $block_name . '.' . $ext;
+        $exist = file_exists($to);
+
         $out = '';
+        $same = true;
 
         foreach ($from as $f) {
 
             if (!file_exists($this->input_path . '/' . $f))
                 throw new CliException('Source for :block not found. Skip.', [':block' => $block_name]);
+
+            if ($exist AND filemtime($this->input_path . '/' . $f) > filemtime($to))
+                $same = false;
 
             $text = file_get_contents($this->input_path . '/' . $f);
 
@@ -186,7 +197,8 @@ class Block extends Controller
             $out .= $text . "\n";
         }
 
-        file_put_contents($dir . '/' . $block_name . '.' . $ext, $out);
+        if (!$same OR !$this->check_mtime)
+            file_put_contents($to, $out);
     }
 
     protected function to_assets($from, $block_name, $callback = null) {
