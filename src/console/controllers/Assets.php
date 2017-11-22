@@ -400,8 +400,9 @@ class Assets extends Controller
             );
         fclose($pipes[0]);
         $output = stream_get_contents($pipes[1]);
+        if($output)
+            $this->warning($output);
 
-        $output = json_decode($output, true);
         fclose($pipes[1]);
         proc_close($nodejs);
 
