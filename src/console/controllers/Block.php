@@ -9,24 +9,57 @@ use mii\console\Controller;
 
 class Block extends Controller
 {
-
     public $description = 'Blocks builder';
 
     protected $input_path;
 
     protected $output_path;
 
+    protected $blocks = [];
+
     protected $check_mtime = false;
 
     public function before() {
 
-        $this->input_path = path('vendor') . '/bower/';
-        $this->output_path = path('app') . '/blocks';
+        $list = config('console.block.rules', []);
 
-        $this->blocks = $this->block_rules();
 
+        if (empty($list)) {
+            // Old way: list of blocks returned by method block_rules();
+            $this->warning('Warning: block_rules() method is deprecated. Please, use config(console.block.rules)');
+            $this->blocks = $this->block_rules();
+        } else {
+            // New way - get from the config
+
+            foreach ($list as $namespace => $blocks) {
+                if (!isset($this->blocks[$namespace]))
+                    $this->blocks[$namespace] = [];
+
+                foreach ($blocks as $index => $value) {
+                    // Block can be defined either by simply name or by name => func_name
+
+                    if (is_int($index)) {
+                        $index = $value;
+
+                        // Drop 'i_' prefix.
+                        if (strpos($value, 'i_') === 0) {
+                            $index = substr($index, 2);
+                        }
+                        $value = 'do_' . str_replace('-', '_', $index);
+                    }
+
+                    $this->blocks[$namespace][$index] = $value;
+                }
+            }
+        }
+
+        $this->input_path = Mii::resolve(config('console.block.input_path', '@root/node_modules/'));
     }
 
+    /**
+     * @deprecated
+     * @return array
+     */
     public function block_rules() {
         return [
             path('app') . '/blocks' => [
@@ -37,20 +70,26 @@ class Block extends Controller
     }
 
 
-    public function index($argv)
-    {
+    public function index($argv) {
         $this->check_mtime = isset($argv['check_mtime']) ? true : false;
 
         foreach ($this->blocks as $output_path => $blocks) {
+
+            $this->info("\n# Processing $output_path");
+
             foreach ($blocks as $block => $func) {
 
                 $this->output_path = Mii::resolve($output_path);
 
-                try {
-                    $this->{$func}($block);
-                    $this->info(':block compiled.', [':block' => $block]);
-                } catch (CliException $e) {
-                    $this->error($e->getMessage());
+                if (!method_exists($this, $func)) {
+                    $this->error("Method $func doesnt exist");
+                } else {
+                    try {
+                        $this->{$func}($block);
+                        $this->info(':block compiled.', [':block' => $block]);
+                    } catch (CliException $e) {
+                        $this->error($e->getMessage());
+                    }
                 }
             }
 
@@ -60,6 +99,90 @@ class Block extends Controller
 
     protected function do_jquery($block) {
         $this->to_block('jquery/dist/jquery.min.js', $block, 'js');
+    }
+
+
+    protected function do_m1k($block) {
+        $this->to_block([
+            'jquery-m1k/jquery.m1k.min.js'
+        ], $block, 'js');
+
+        $this->to_block([
+            'jquery-m1k/jquery.m1k.min.css'
+        ], $block, 'css');
+    }
+
+
+    protected function do_jcrop($block) {
+        $this->to_block('Jcrop/js/Jcrop.min.js', $block, 'js');
+        $this->to_block('Jcrop/css/Jcrop.min.css', $block, 'css', function ($text) use ($block) {
+            return str_replace('url(', 'url(/assets/' . $block . '/', $text);
+        });
+        $this->to_assets('Jcrop/css/Jcrop.gif', $block);
+    }
+
+
+    protected function do_timeago($block) {
+        $this->to_block('timeago/jquery.timeago.js', $block, 'js', function ($text) {
+            return $text . file_get_contents($this->input_path . '/timeago/locales/jquery.timeago.ru.js');
+        });
+    }
+
+    protected function do_dot($block) {
+        $this->to_block('doT/doT.min.js', $block, 'js');
+    }
+
+
+    protected function do_blueimp($block) {
+        $this->to_block([
+            'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
+            'blueimp-file-upload/js/jquery.iframe-transport.js',
+            'blueimp-file-upload/js/jquery.fileupload.js',
+        ], $block, 'js');
+
+        $this->to_block([
+            'blueimp-file-upload/css/jquery.fileupload.css'
+        ], $block, 'css');
+    }
+
+
+    protected function do_tinymce($block) {
+        $this->to_block(
+            [
+                'tinymce/tinymce.min.js',
+                'tinymce/themes/modern/theme.min.js',
+
+                'tinymce/plugins/autoresize/plugin.min.js',
+                'tinymce/plugins/link/plugin.min.js',
+                'tinymce/plugins/code/plugin.min.js',
+                'tinymce/plugins/image/plugin.min.js',
+                'tinymce/plugins/wordcount/plugin.min.js',
+                'tinymce/plugins/media/plugin.min.js',
+                'tinymce/plugins/paste/plugin.min.js',
+                'tinymce/plugins/table/plugin.min.js',
+                'tinymce/plugins/hr/plugin.min.js',
+                'tinymce/plugins/lists/plugin.min.js'
+            ],
+            $block,
+            'js'
+        );
+
+        $this->to_assets(
+            [
+                'tinymce/skins/lightgray/skin.min.css',
+                'tinymce/skins/lightgray/content.min.css'
+            ],
+            $block,
+            function ($text) use ($block) {
+                return str_replace('fonts', '/assets/a/' . $block, $text);
+            }
+        );
+
+        $this->to_assets([
+            'tinymce-i18n/langs/ru.js',
+            'tinymce/skins/lightgray/fonts/tinymce.woff',
+            'tinymce/skins/lightgray/fonts/tinymce.ttf'
+        ], $block);
     }
 
     protected function do_chosen($block) {
@@ -129,18 +252,28 @@ class Block extends Controller
 
     }
 
+    protected function do_jquery_ui($block) {
+        $this->to_block([
+            'jquery-ui/ui/data.js',
+            'jquery-ui/ui/scroll-parent.js',
+            'jquery-ui/ui/widget.js',
+            'jquery-ui/ui/widgets/mouse.js',
+            'jquery-ui/ui/widgets/sortable.js',
+            'jquery-ui/ui/widgets/datepicker.js'
+        ], $block, 'js');
 
-    protected function do_jqueryui($block) {
-        $this->to_block('jquery-ui/jquery-ui.min.js', $block, 'js');
-        $this->to_block('jquery-ui/themes/ui-lightness/jquery-ui.min.css', $block, 'css',
+        $this->to_block([
+            'jquery-ui/themes/base/datepicker.css',
+            'jquery-ui/themes/base/sortable.css',
+            'jquery-ui/themes/base/theme.css'
+        ], $block, 'css',
             function ($text) use ($block) {
-                return str_replace('url("images', 'url("assets/' . $block, $text);
+                return str_replace('url("images', 'url("/assets/a/' . $block, $text);
             });
 
-        $this->iterate_dir('jquery-ui/themes/ui-lightness/images', function ($file) use ($block) {
-            $this->to_assets('jquery-ui/themes/ui-lightness/images/' . $file, $block);
+        $this->iterate_dir('jquery-ui/themes/base/images', function ($file) use ($block) {
+            $this->to_assets('jquery-ui/themes/base/images/' . $file, $block);
         });
-
     }
 
     protected function do_spinjs($block) {
@@ -159,8 +292,7 @@ class Block extends Controller
     }
 
 
-    protected function to_block($from, $block_name, $ext, $callback = null)
-    {
+    protected function to_block($from, $block_name, $ext, $callback = null) {
         if (!is_array($from))
             $from = array($from);
 
@@ -188,7 +320,13 @@ class Block extends Controller
 
             if ($exist AND filemtime($this->input_path . '/' . $f) > filemtime($to))
                 $same = false;
+        }
 
+        if (!$same OR !$this->check_mtime) {
+            return;
+        }
+
+        foreach ($from as $f) {
             $text = file_get_contents($this->input_path . '/' . $f);
 
             if ($callback)
@@ -197,8 +335,7 @@ class Block extends Controller
             $out .= $text . "\n";
         }
 
-        if (!$same OR !$this->check_mtime)
-            file_put_contents($to, $out);
+        file_put_contents($to, $out);
     }
 
     protected function to_assets($from, $block_name, $callback = null) {
