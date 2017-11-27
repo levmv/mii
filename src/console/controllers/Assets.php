@@ -120,8 +120,6 @@ class Assets extends Controller
                     );
             }
 
-
-
         } else {
 
             $this->info('No recompiled files. No need to regenerate config');
@@ -206,7 +204,6 @@ class Assets extends Controller
                 }
             }
         }
-
 
         $forget = [];
         foreach ($blocks as $block_name => $block) {
@@ -337,19 +334,19 @@ class Assets extends Controller
                 $outname = $name.$this->hash(implode(',', $names));
 
 
-                foreach($data[$type] as $block_name) {
-                    $this->results[$set_name][$type][$block_name] = $outname;
-                }
+                if(!empty($files)) {
+                    if(!file_exists($outpath.$outname.'.'.$type)) {
+                        $this->processed[$type][] = $this->process_files($files, $outpath, $outname .'.'.$type);
+                    }
 
-                if(!file_exists($outpath.$outname.'.'.$type)) {
-                    $this->processed[$type][] = $this->process_files($files, $outpath, $outname .'.'.$type);
+                    foreach($data[$type] as $block_name) {
+                        $this->results[$set_name][$type][$block_name] = $outname;
+                    }
                 }
-
             }
         }
 
     }
-
 
 
     protected function hash(string $str) : string {
