@@ -43,9 +43,9 @@ class Block extends Controller
 
                         // Drop 'i_' prefix.
                         if (strpos($value, 'i_') === 0) {
-                            $index = substr($index, 2);
+                            $name = substr($index, 2);
                         }
-                        $value = 'do_' . str_replace('-', '_', $index);
+                        $value = 'do_' . str_replace('-', '_', $name);
                     }
 
                     $this->blocks[$namespace][$index] = $value;
