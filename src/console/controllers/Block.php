@@ -92,7 +92,6 @@ class Block extends Controller
                     }
                 }
             }
-
         }
     }
 
@@ -103,6 +102,7 @@ class Block extends Controller
 
 
     protected function do_m1k($block) {
+
         $this->to_block([
             'jquery-m1k/jquery.m1k.min.js'
         ], $block, 'js');
@@ -318,11 +318,11 @@ class Block extends Controller
             if (!file_exists($this->input_path . '/' . $f))
                 throw new CliException('Source for :block not found. Skip.', [':block' => $block_name]);
 
-            if ($exist AND filemtime($this->input_path . '/' . $f) > filemtime($to))
+            if (!$exist OR filemtime($this->input_path . '/' . $f) > filemtime($to))
                 $same = false;
         }
 
-        if (!$same OR !$this->check_mtime) {
+        if ($same AND !$this->check_mtime) {
             return;
         }
 
