@@ -192,12 +192,11 @@ class Blocks extends Component
         }
 
         foreach ($this->_blocks as $block_name => $block) {
-
             if ($block->__has_parent)
                 continue;
+
             $this->process_block_assets($block_name, $block_name, $block->_depends);
         }
-
 
         foreach ($this->_files as $type => $blocks) {
             foreach ($blocks as $block_name => $block) {
@@ -271,11 +270,13 @@ class Blocks extends Component
         $block_path = $this->get_block_path($block_name);
 
         if ( $this->process_assets) {
+
             foreach ($this->libraries as $base_path) {
+
                 if (is_dir($base_path . $block_path . 'assets')) {
                     $this->_build_assets_dir($block_name, $base_path . $block_path . 'assets');
+                    break;
                 }
-                break;
             }
         }
 
