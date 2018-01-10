@@ -502,6 +502,9 @@ class ORM
             if (!isset($schema[$key]))
                 continue;
 
+            if($schema[$key]['allow_null'] && $value === null)
+                continue;
+
             switch($schema[$key]['type']){
                 case 'int':
                     $data[$key] = (int)$value;
