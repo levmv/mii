@@ -348,6 +348,18 @@ class Blocks extends Component
         }
     }
 
+    public function assets_path_by_name($block_name) {
+        $block_path = $this->get_block_path($block_name);
+
+        foreach ($this->libraries as $base_path) {
+
+            if (is_dir($base_path . $block_path . 'assets')) {
+                return $base_path . $block_path . 'assets';
+            }
+        }
+        return false;
+    }
+
 
     private function _build_block(string $block_name, string $type, array $files): void {
 

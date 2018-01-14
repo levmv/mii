@@ -57,10 +57,9 @@ class PHPMailer extends Component
 
             if ($body instanceof Block) {
                 $html = $body->render(true);
-                $path = \Mii::$app->blocks->assets_dir . $body->path() . '/';
+                $path = \Mii::$app->blocks->assets_path_by_name($body->name());
                 $this->mailer->msgHTML($html, $path);
             } else {
-
                 $this->mailer->Body = $body;
             }
 
