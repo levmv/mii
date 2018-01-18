@@ -395,6 +395,8 @@ class ORM
             ->where('id', '=', $this->_data['id'])
             ->execute();
 
+        $this->_changed = [];
+
         return \Mii::$app->db->affected_rows();
     }
 
@@ -434,6 +436,8 @@ class ORM
         $this->__loaded = true;
 
         $this->_data['id'] = \Mii::$app->db->inserted_id();
+
+        $this->_changed = [];
 
         return $this->_data['id'];
     }
