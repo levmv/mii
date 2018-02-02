@@ -185,6 +185,10 @@ class Block extends Controller
         ], $block);
     }
 
+    /**
+     * @param $block
+     * @throws CliException
+     */
     protected function do_chosen($block) {
 
         $this->to_block('chosen/chosen.jquery.min.js', $block, 'js');
@@ -291,7 +295,13 @@ class Block extends Controller
         });
     }
 
-
+    /**
+     * @param $from
+     * @param $block_name
+     * @param $ext
+     * @param null $callback
+     * @throws CliException
+     */
     protected function to_block($from, $block_name, $ext, $callback = null) {
         if (!is_array($from))
             $from = array($from);
@@ -322,7 +332,7 @@ class Block extends Controller
                 $same = false;
         }
 
-        if ($same AND !$this->check_mtime) {
+        if ($same AND $this->check_mtime) {
             return;
         }
 
