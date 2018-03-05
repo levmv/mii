@@ -202,9 +202,14 @@ class Block extends Controller
     }
 
 
-    protected function do_select2($block) {
-        $this->to_block('select2/dist/js/select2.full.min.js', $block, 'js');
-        $this->to_block('select2/dist/js/i18n/ru.js', $block . '_ru', 'js');
+    protected function do_select2($block)
+    {
+        $this->to_block(
+            [
+                'select2/dist/js/select2.full.min.js',
+                'select2/dist/js/i18n/ru.js'
+            ],
+            $block, 'js');
 
         $this->to_block('select2/dist/css/select2.min.css', $block, 'css');
     }
