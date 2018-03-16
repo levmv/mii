@@ -89,7 +89,7 @@ class Migrate extends Controller
 
         $custom_name = false;
 
-        if (count($argv)) {
+        if ($argv && count($argv)) {
 
             $custom_name = mb_strtolower($argv[0], 'utf-8');
         }

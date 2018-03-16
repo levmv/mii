@@ -46,7 +46,7 @@ class Form
             $data = $data->to_array();
         }
 
-        if (count($data)) {
+        if (is_array($data)) {
             foreach (array_intersect_key($data, $this->_fields) as $key => $value) {
                 $this->set($key, $value);
             }
