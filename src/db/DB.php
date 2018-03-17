@@ -52,6 +52,14 @@ class DB
      * @param string $q
      * @return int
      */
+    static function alter(string $q, array $params = []): int {
+        return static::query(Database::UPDATE, $q, $params);
+    }
+
+    /**
+     * @param string $q
+     * @return int
+     */
     static function update(string $q, array $params = []): int {
         return static::query(Database::UPDATE, $q, $params);
     }
