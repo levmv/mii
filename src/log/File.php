@@ -32,7 +32,7 @@ class File extends Target
         if (!($this->levels & $level))
             return;
 
-        if (count($category) AND $this->category AND !in_array($category, $this->category))
+        if (is_array($category) AND $this->category AND !in_array($category, $this->category))
             return;
 
 

@@ -92,7 +92,7 @@ class File extends Cache
         }
         $error = error_get_last();
 
-        \Mii::warning("Unable to write cache file '{$filename}': {$error['message']}", __METHOD__);
+        \Mii::warning("Unable to write cache file '{$filename}': {$error['message']}", 'mii');
         return false;
 
     }
@@ -115,8 +115,31 @@ class File extends Cache
      *
      */
     public function delete_all(): bool {
-        return \apcu_clear_cache();
+        return $this->recursive_remove($this->path);
     }
+
+
+    private function recursive_remove($path) {
+        $result = true;
+        try {
+            foreach ((new \DirectoryIterator($path)) as $fi) {
+                if ($fi->isDir() && !$fi->isDot()) {
+                    $result = $this->recursive_remove($fi->getPathname());
+                    rmdir($fi->getPathname());
+                }
+
+                if ($fi->isFile()) {
+                    unlink($fi->getPathname());
+                }
+            }
+        } catch (\Throwable $t) {
+
+            \Mii::warning("Unable to clear cache: {$t->getMessage()}", 'mii');
+            return false;
+        }
+        return $result;
+    }
+
 
     /**
      * Increments a given value by the step value supplied.
