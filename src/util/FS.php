@@ -9,6 +9,8 @@ class FS
 
     static public function mkdir($path, $mode = 0775, $recursive = true)
     {
+        $path = \Mii::resolve($path);
+
         if (is_dir($path)) {
             return true;
         }
