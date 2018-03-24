@@ -10,23 +10,28 @@ class Help extends Controller
 
     public function index($argv) {
 
-        $dirs = config('console.dirs', [
-            'app' => [
-                'path' => path('app') . '/console',
-                'namespace' => config('console.namespace', 'app\\console')
-            ],
-            'mii' => [
-                'path' => __DIR__,
-                'namespace' => 'mii\\console\\controllers'
-            ]
+        $paths = array_replace([
+            'app\\console' => '@app/console',
+            'mii\\console\\controllers' => __DIR__
+        ], config('console.ns_paths', []));
+
+
+        $namespaces = config('console.namespaces', [
+            'app\\console',
+            'mii\\console\\controllers'
         ]);
 
         $list = [];
-        foreach ($dirs as $name => $dir) {
-            $this->find_controllers($dir['namespace'], $dir['path'], $list);
-        }
+        foreach ($namespaces as $namespace) {
 
-        $help = [];
+            if(!isset($paths[$namespace])) {
+
+                $this->error("Dont know path for $namespace. Skip");
+                continue;
+            }
+
+            $this->find_controllers($namespace, \Mii::resolve($paths[$namespace]), $list);
+        }
 
         $this->stdout("\n");
         foreach ($list as $controller) {
@@ -36,7 +41,7 @@ class Help extends Controller
 
             $class = new $controller['class']($this->request, $this->response);
 
-            $desc = ($class->description) ? " [" . $class->description . "]" : '';
+            $desc = ($class->description) ? " " . $class->description . " " : '';
             $this->stdout($controller['command'], Console::FG_GREEN);
             $this->stdout($desc . "\n\n", Console::FG_GREY);
 
