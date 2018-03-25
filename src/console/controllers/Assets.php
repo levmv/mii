@@ -219,10 +219,10 @@ class Assets extends Controller
             foreach($forget as $name => $block) {
                 $out = "'$name' => [";
 
-                $out .= implode(',',  $block).',';
+                $out .= implode(',',  $block);
 
 
-                $this->stdout("$out]\n");
+                $this->stdout("$out],\n");
             }
 
         }
