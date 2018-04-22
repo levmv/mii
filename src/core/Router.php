@@ -25,6 +25,7 @@ class Router extends Component
     const R_NAMESPACE = 3;
     const R_VALUES = 4;
     const R_CALLBACK = 5;
+    const R_METHOD = 6;
 
 
     protected $default_parameters = [
@@ -38,6 +39,8 @@ class Router extends Component
     protected $cache_id = 'mii_core_router_routes';
 
     protected $cache_lifetime = 86400;
+
+    protected $rest_mode = false;
 
     protected $routes;
 
@@ -89,12 +92,27 @@ class Router extends Component
 
             foreach ($group as $pattern => $value) {
 
+                $pattern = mb_strtolower($pattern, 'utf-8');
+                $method = false;
+
+                if($this->rest_mode) {
+                    preg_match('/^(get|post|put|delete):/', $pattern, $matches);
+                    if(count($matches)) {
+                        $method = $matches[1];
+                        $pattern = preg_replace('/^(get|post|put|delete):/', '', $pattern);
+                    }
+                }
+
                 $result = [
                     static::R_COMPILED => '',
-                    static::R_PATTERN => (string) $pattern,
+                    static::R_PATTERN => $pattern,
                     static::R_PATH => ''
                     //static::R_NAMESPACE => $namespace_index
                 ];
+
+                if($this->rest_mode) {
+                    $result[static::R_METHOD] = $method;
+                }
 
                 if($namespace_index !== 0)
                     $result[static::R_NAMESPACE] = $namespace_index;
@@ -126,6 +144,9 @@ class Router extends Component
                     if (isset($value['values'])) {
                         $result[static::R_VALUES] = $value['values'];
                     }
+
+                    if(isset($value['method']))
+                        $result[static::R_METHOD] = $value['method'];
 
                 } elseif (is_string($value)) {
                     $result[static::R_PATH] = $value;
@@ -212,6 +233,11 @@ class Router extends Component
 
         } else {
             if (!preg_match($route[static::R_COMPILED], $uri, $matches))
+                return false;
+        }
+
+        if($this->rest_mode AND isset($route[static::R_METHOD]) AND $route[static::R_METHOD] !== false) {
+            if(strtolower(\Mii::$app->request->method()) !== $route[static::R_METHOD])
                 return false;
         }
 
