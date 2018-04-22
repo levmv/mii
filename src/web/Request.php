@@ -125,6 +125,10 @@ class Request extends Component
             // Use the server request method
             $this->method($_SERVER['REQUEST_METHOD']);
         }
+
+        if($this->_method === 'PUT') {
+            parse_str($this->raw_body(), $_POST);
+        }
     }
 
 
@@ -208,6 +212,7 @@ class Request extends Component
 
         return $default;
     }
+
 
 
     public function validate_csrf_token() {
