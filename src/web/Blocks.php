@@ -57,7 +57,6 @@ class Blocks extends Component
         ],
     ];
 
-
     protected $blocks = [];
     protected $_reverse = [];
 
@@ -66,7 +65,7 @@ class Blocks extends Component
         parent::init($config);
 
         $this->libraries = [
-            path('app') . '/blocks'
+            '@app/blocks'
         ];
 
         $this->load_set('default');
@@ -97,17 +96,17 @@ class Blocks extends Component
         foreach ($set as $key => $value)
             $this->$key = $value;
 
-
         for ($i = 0; $i < count($this->libraries); $i++)
             $this->libraries[$i] = Mii::resolve($this->libraries[$i]);
 
         $this->base_url = Mii::resolve($this->base_url);
 
         if ($this->base_path === null) {
-            $this->base_path = path('pub') . $this->base_url;
-        } else {
-            $this->base_path = Mii::resolve($this->base_path);
+            $this->base_path = '@pub' . $this->base_url;
         }
+
+        $this->base_path = Mii::resolve($this->base_path);
+
 
         if (!$this->use_static) {
             if (!is_dir($this->base_path))
