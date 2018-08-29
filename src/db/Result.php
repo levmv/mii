@@ -245,6 +245,11 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     }
 
+    public function scalar() {
+        $value = $this->_result->fetch_array(MYSQLI_NUM);
+        return is_array($value) ? $value[0] : "";
+    }
+
     /**
      * Implements [Countable::count], returns the total number of rows.
      *

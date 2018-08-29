@@ -405,6 +405,29 @@ class Database extends Component
         return (bool)$this->_connection->query('ROLLBACK');
     }
 
+
+    public function get_lock($name, $timeout = 0) {
+
+        return (bool) $this->query(
+            static::SELECT,
+            strtr('SELECT GET_LOCK(:name, :timeout)',  [
+                ':name' => $this->quote($name),
+                ':timeout' => (int) $timeout
+            ])
+        )->scalar();
+    }
+
+
+    public function release_lock($name) {
+        return (bool) $this->query(
+            static::SELECT,
+            strtr('SELECT RELEASE_LOCK(:name)',  [
+                ':name' => $this->quote($name)
+            ])
+        )->scalar();
+    }
+
+
     /**
      * Quote a database column name and add the table prefix if needed.
      *
