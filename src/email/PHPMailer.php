@@ -3,10 +3,10 @@
 namespace mii\email;
 
 use mii\core\Component;
+use mii\core\Exception;
 use mii\web\Block;
-use PHPMailer\PHPMailer\PHPMailer as Mailer;
 
-class PHPMailer extends Component
+class PHPMailer extends \mii\email\Mailer
 {
 
     /**
@@ -23,17 +23,11 @@ class PHPMailer extends Component
 
     public function init(array $config = []): void {
 
-        foreach ($config as $key => $value) {
-            $this->$key = $value;
-        }
+        parent::init($config);
 
-        $this->mailer = new Mailer(true);
+        $this->mailer = new PHPMailer\PHPMailer\PHPMailer(true);
 
         $this->mailer->CharSet = 'UTF-8';
-        if ($this->from_mail) {
-            $this->mailer->setFrom($this->from_mail, $this->from_name);
-        }
-
 
         if ($this->transport === 'sendmail') {
             $this->mailer->isSendmail();
@@ -49,18 +43,21 @@ class PHPMailer extends Component
     }
 
 
-    public function send($to, $name, $subject, $body) {
+    public function send($to = null, $name = null, $subject = null, $body = null) {
+
+        parent::send($to, $name, $subject, $body);
 
         try {
-            $this->mailer->addAddress($to, $name);
-            $this->mailer->Subject = $subject;
+            foreach($this->to as $address) {
+                $this->mailer->addAddress($address[0], $address[1]);
+            }
 
-            if ($body instanceof Block) {
-                $html = $body->render(true);
-                $path = \Mii::$app->blocks->assets_path_by_name($body->name());
-                $this->mailer->msgHTML($html, $path);
+            $this->mailer->Subject = $this->subject;
+
+            if($this->is_html){
+                $this->mailer->msgHTML($this->body, $this->assets_path);
             } else {
-                $this->mailer->Body = $body;
+                $this->mailer->Body = $this->body;
             }
 
             $result = $this->mailer->send();
@@ -68,12 +65,11 @@ class PHPMailer extends Component
             $this->mailer->clearAllRecipients();
 
         } catch (\Throwable $t) {
-
+            \Mii::error(Exception::text($t));
             $result = false;
         }
 
         return $result;
-
     }
 
 }
