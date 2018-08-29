@@ -22,17 +22,10 @@ class App extends \mii\core\App
 {
     public $user;
 
-    public $request;
-
-    public $response;
-
     public $maintenance;
     public $maintenance_message;
 
     public function run() {
-
-        $this->request = $this->get('request');
-        $this->response = $this->get('response');
 
         if ($this->maintenance) {
 

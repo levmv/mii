@@ -67,13 +67,15 @@ abstract class App
 
         $components = $this->default_components();
 
-        if (isset($this->_config['components'])) {
-            foreach ($components as $name => $component) {
-                if (!isset($this->_config['components'][$name])) {
-                    $this->_config['components'][$name] = $component;
-                } elseif (is_array($this->_config['components'][$name]) && !isset($this->_config['components'][$name]['class'])) {
-                    $this->_config['components'][$name]['class'] = $component['class'];
-                }
+        if (!isset($this->_config['components'])) {
+            $this->_config['components'] = [];
+        }
+
+        foreach ($components as $name => $component) {
+            if (!isset($this->_config['components'][$name])) {
+                $this->_config['components'][$name] = $component;
+            } elseif (is_array($this->_config['components'][$name]) && !isset($this->_config['components'][$name]['class'])) {
+                $this->_config['components'][$name]['class'] = $component['class'];
             }
         }
 
