@@ -6,8 +6,7 @@
   "license": "MIT",
   "minimum-stability": "dev",
   "require": {
-    "php": ">=7.1",
-    "ext-mysqli": "*"
+    "php": ">=7.1"
   },
   "require-dev": {
     "phpunit/phpunit": "^7"
