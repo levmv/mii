@@ -50,6 +50,8 @@ class Query
     // SELECT ...
     protected $_select = [];
 
+    protected $_for_update = false;
+
     protected $_quoted_select = [];
 
     // DISTINCT
@@ -181,6 +183,12 @@ class Query
         return $this;
     }
 
+
+    public function for_update($enable = true) {
+        $this->_for_update = $enable;
+
+        return $this;
+    }
 
     /**
      * Enables or disables selecting only unique columns using "SELECT DISTINCT"
@@ -669,6 +677,7 @@ class Query
         $this->_order_by =
         $this->_union = [];
 
+        $this->_for_update = false;
         $this->_distinct = false;
 
         $this->_limit =
@@ -902,6 +911,10 @@ class Query
                 }
                 $query .= '(' . $u['select']->compile_select() . ')';
             }
+        }
+
+        if($this->_for_update) {
+            $query .= ' FOR UPDATE';
         }
 
         $this->_sql = $query;
