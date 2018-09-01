@@ -10,7 +10,7 @@ class Request extends Component
     /**
      * @var  array   parameters from the route
      */
-    public $_params = [];
+    public $params = [];
 
 
     /**
@@ -121,6 +121,11 @@ class Request extends Component
 
         return $response;
 
+    }
+
+
+    public function param($name, $default = null) {
+        return $this->params[$name] ?? $default;
     }
 
 
