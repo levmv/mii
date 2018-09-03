@@ -10,16 +10,17 @@ class Help extends Controller
 
     public function index($argv) {
 
-        $paths = array_replace([
-            'app\\console' => '@app/console',
-            'mii\\console\\controllers' => __DIR__
-        ], config('console.ns_paths', []));
-
 
         $namespaces = config('console.namespaces', [
             'app\\console',
             'mii\\console\\controllers'
         ]);
+
+        $paths = array_replace([
+            'app\\console' => '@app/console',
+            'mii\\console\\controllers' => __DIR__
+        ], config('console.ns_paths', $this->get_paths_from_composer($namespaces)));
+
 
         $list = [];
         foreach ($namespaces as $namespace) {
@@ -45,6 +46,49 @@ class Help extends Controller
             $this->stdout($controller['command'], Console::FG_GREEN);
             $this->stdout($desc . "\n\n", Console::FG_GREY);
 
+        }
+    }
+
+
+    private function get_paths_from_composer($namespaces) {
+
+        try {
+            $loader = new \Composer\Autoload\ClassLoader();
+
+            $map = require path('vendor') . '/composer/autoload_namespaces.php';
+            foreach ($map as $namespace => $path) {
+                $loader->set($namespace, $path);
+            }
+
+            $map = require path('vendor') . '/composer/autoload_psr4.php';
+
+            foreach ($map as $namespace => $path) {
+                $loader->setPsr4($namespace, $path);
+            }
+
+            $classMap = require path('vendor') . '/composer/autoload_classmap.php';
+            if ($classMap) {
+                $loader->addClassMap($classMap);
+            }
+
+            $data = $loader->getPrefixesPsr4();
+            $paths = [];
+
+
+            foreach($namespaces as $ns) {
+
+                foreach($data as $prefix => $path) {
+                    if(strpos($ns, $prefix) === 0) {
+
+                        $path[0] .= str_replace('\\', '/', substr($ns, strlen($prefix)-1));
+                        $paths[$ns] = $path[0];
+                    }
+                }
+            }
+
+            return $paths;
+        } catch (\Throwable $t) {
+            return [];
         }
     }
 
