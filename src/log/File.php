@@ -23,7 +23,7 @@ class File extends Target
 
     public function process(array $messages)
     {
-        $text = implode("\n", array_map([$this, 'format_message'], $this->messages)) . "\n";
+        $text = implode("\n", array_map([$this, 'format_message'], $messages)) . "\n";
 
         if (($fp = @fopen($this->file, 'a')) === false) {
             throw new ErrorException("Unable to append to log file: {$this->file}");
