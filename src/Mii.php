@@ -17,6 +17,9 @@ class Mii
     public static $app;
 
 
+    public static $log_component_name = 'log';
+
+
     public static $paths = [
         'mii' => __DIR__
     ];
@@ -68,8 +71,8 @@ class Mii
     }
 
     public static function log($level, $msg, $category) {
-        if (static::$app->has('log'))
-            static::$app->get('log')->log($level, $msg, $category);
+        if (static::$app->has(static::$log_component_name))
+            static::$app->get(static::$log_component_name)->log($level, $msg, $category);
     }
 
     public static function message(string $file, string $path = null, $default = null) {

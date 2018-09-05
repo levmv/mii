@@ -4,55 +4,26 @@ namespace mii\log;
 
 use Mii;
 use mii\core\ErrorException;
-use mii\core\Exception;
+use mii\util\FS;
 
 class File extends Target
 {
-
-
     protected $base_path;
     protected $file = '';
-    protected $levels = Logger::ALL;
-    protected $category;
 
-    protected $is_init = false;
+    public function init(array $config = []): void
+    {
+        parent::init($config);
 
-    protected $messages = [];
+        $this->file = Mii::resolve($this->file);
 
-
-    public function __construct($params) {
-        $this->file = Mii::resolve($params['file']);
-        $this->levels = isset($params['levels']) ? $params['levels'] : Logger::ALL;
-        $this->category = isset($params['category']) ? $params['category'] : [];
+        FS::mkdir(dirname($this->file));
     }
 
 
-    public function log($level, $message, $category) {
-
-        if (!($this->levels & $level))
-            return;
-
-        if (is_array($category) AND $this->category AND !in_array($category, $this->category))
-            return;
-
-
-        $this->messages[] = [$message, $level, $category, time()];
-
-    }
-
-
-    public function flush() {
-
-        if (!count($this->messages))
-            return;
-
-        $path = dirname($this->file);
-        if (!is_dir($path)) {
-            mkdir($path, 0777, true);
-        }
-
+    public function process(array $messages)
+    {
         $text = implode("\n", array_map([$this, 'format_message'], $this->messages)) . "\n";
-        $this->messages = [];
 
         if (($fp = @fopen($this->file, 'a')) === false) {
             throw new ErrorException("Unable to append to log file: {$this->file}");
@@ -65,20 +36,4 @@ class File extends Target
     }
 
 
-    public function format_message($message) {
-        list($text, $level, $category, $timestamp) = $message;
-
-        $level = Logger::$level_names[$level];
-        if (!is_string($text)) {
-
-            if ($text instanceof \Exception || $text instanceof \Throwable || $text instanceof Exception) {
-                $text = (string)$text;
-            } else {
-                $text = var_export($text);
-            }
-        }
-        //$prefix = $this->getMessagePrefix($message);
-        return date('Y-m-d H:i:s', $timestamp) . " [$level][" . $category . "] $text";
-
-    }
 }

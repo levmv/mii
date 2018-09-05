@@ -11,23 +11,15 @@ class Log extends File
 
     protected $controllers;
 
-    public function log($level, $message, $category) {
-
-        if (!($this->levels & $level))
-            return;
-
-        if ($this->category AND !in_array($category, $this->category))
-            return;
-
-        $this->messages[] = [$message, $level, $category, time()];
-
-        if (!is_string($message)) {
-
-            if ($message instanceof \Exception) {
-                $message = (string)$message;
-            }
+    public function process(array $messages)
+    {
+        foreach ($messages as $message) {
+            $this->print_error($message[1], $message[0]);
         }
+    }
 
+    private function print_error($level, $message)
+    {
         $params = [];
 
         switch ($level) {
@@ -46,7 +38,6 @@ class Log extends File
             $message = Console::ansi_format($message, $params);
 
         Console::stdout($message . "\n");
-
     }
 
 

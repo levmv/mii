@@ -428,7 +428,6 @@ class Blocks extends Component
                 try {
                     copy($file, $output);
                 } catch (\Exception $e) {
-                    Mii::error("Cant copy file $output", 'mii');
                     $dir = dirname($output);
                     mkdir($dir, 0777, true);
                     copy($file['path'], $output);

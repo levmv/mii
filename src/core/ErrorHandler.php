@@ -41,8 +41,7 @@ class ErrorHandler extends Component
 
 
     public function report($exception) {
-
-        \Mii::error(Exception::text($exception), 'mii');
+        \Mii::error(Exception::text($exception), get_class($exception));
     }
 
 
