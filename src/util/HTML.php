@@ -705,7 +705,7 @@ class HTML
     }
 
 
-    public static function crsf_meta() {
+    public static function csrf_meta() {
         $request = \Mii::$app->get('request');
         if ($request->csrf_validation && \Mii::$app->controller && \Mii::$app->controller->csrf_validation) {
             $token = $request->csrf_token();
