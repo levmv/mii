@@ -100,23 +100,12 @@ class Request extends Component
         foreach ($config as $key => $value)
             $this->$key = $value;
 
-        $uri = $_SERVER['REQUEST_URI'];
+        $uri = parse_url('http://domain.com'.$_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        if ($uri !== '' && $uri[0] !== '/') {
-            $uri = preg_replace('/^(http|https):\/\/[^\/]+/i', '', $uri);
-        }
 
-        if ($request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) {
-            // Valid URL path found, set it.
-            $uri = $request_uri;
-        }
-        // Decode the request URI
-        $uri = rawurldecode($uri);
-
-        $base_url = parse_url(\Mii::$app->base_url, PHP_URL_PATH);
-        if (strpos($uri, $base_url) === 0) {
+        if (\Mii::$app->base_url && strpos($uri, \Mii::$app->base_url) === 0) {
             // Remove the base URL from the URI
-            $uri = (string)substr($uri, strlen($base_url));
+            $uri = (string) substr($uri, strlen(\Mii::$app->base_url));
         }
 
         $this->uri($uri);
@@ -214,7 +203,6 @@ class Request extends Component
     }
 
 
-
     public function validate_csrf_token() {
 
         if (!$this->csrf_validation || in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
@@ -232,7 +220,7 @@ class Request extends Component
             $token = $_SERVER['HTTP_X_CSRF_TOKEN'];
 
         } else {
-            \Mii::error('crsf_token not found', 'mii');
+            \Mii::error('csrf_token not found', 'mii');
         }
 
         return $this->csrf_token() === $token;
