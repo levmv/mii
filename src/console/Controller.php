@@ -4,6 +4,7 @@ namespace mii\console;
 
 use mii\util\Console;
 
+
 class Controller
 {
 
@@ -21,7 +22,6 @@ class Controller
 
         // Assign a response to the controller
         $this->response = $response;
-
     }
 
 
@@ -83,6 +83,15 @@ class Controller
         return Console::stdout($string);
     }
 
+    public function stderr($string) {
+        if ($this->is_color_enabled(\STDERR)) {
+            $args = func_get_args();
+            array_shift($args);
+            $string = Console::ansi_format($string, $args);
+        }
+        return Console::stderr($string);
+    }
+
     public function stdin() {
         return Console::stdin();
     }
@@ -109,7 +118,7 @@ class Controller
 
     protected function error($msg, $options = []) {
         $msg = strtr($msg, $options);
-        $this->stdout($msg . "\n", Console::FG_RED);
+        $this->stderr($msg . "\n", Console::FG_RED);
         \Mii::error(strtr($msg, $options), 'console');
     }
 
