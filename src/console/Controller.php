@@ -4,7 +4,6 @@ namespace mii\console;
 
 use mii\util\Console;
 
-
 class Controller
 {
 
@@ -22,6 +21,7 @@ class Controller
 
         // Assign a response to the controller
         $this->response = $response;
+
     }
 
 
@@ -30,9 +30,38 @@ class Controller
     }
 
 
-    protected function after() {
+    protected function after()
+    {
+
     }
 
+    public function index($argv)
+    {
+        $this->help();
+    }
+
+    protected function help()
+    {
+        $class = new \ReflectionClass($this);
+        $public_methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        $methods = [];
+
+        foreach ($public_methods as $m) {
+            if ($m->class != static::class)
+                continue;
+            $methods[] = $m->name;
+        }
+
+        foreach ($methods as $method) {
+            $comment = $class->getMethod($method)->getDocComment();
+            if ($comment)
+                $this->stdout("\n    $comment");
+            $this->info("\n    $method");
+        }
+
+        $this->stdout("\n");
+    }
 
     /**
      * Executes the given action and calls the [Controller::before] and [Controller::after] methods.
