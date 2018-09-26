@@ -43,8 +43,12 @@ class Controller
     protected function help()
     {
         $class = new \ReflectionClass($this);
-        $public_methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
 
+        $description = $class->getProperty('description')->getValue($this);
+        if ($description)
+            $this->stdout("\n  $description\n", Console::FG_GREEN);
+
+        $public_methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
         $methods = [];
 
         foreach ($public_methods as $m) {
@@ -53,14 +57,25 @@ class Controller
             $methods[] = $m->name;
         }
 
+        if (count($methods))
+            $this->stdout("\n  Commands:");
+
         foreach ($methods as $method) {
-            $comment = $class->getMethod($method)->getDocComment();
+
+            $this->stdout("\n\n    $method", Console::FG_YELLOW);
+
+            $string = $class->getMethod($method)->getDocComment();
+            $string = trim(str_replace(['/**', '*/'], '', $string));
+            $array = explode("\n", $string);
+            $comment = $array[0];
+            if (strpos($comment, '*') === 0)
+                $comment = trim(substr($comment, 1));
+
             if ($comment)
-                $this->stdout("\n    $comment");
-            $this->info("\n    $method");
+                $this->stdout("\t$comment");
         }
 
-        $this->stdout("\n");
+        $this->stdout("\n\n");
     }
 
     /**
