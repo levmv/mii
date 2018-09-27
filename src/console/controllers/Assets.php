@@ -66,7 +66,7 @@ class Assets extends Controller
 
     }
 
-    public function index() {
+    public function index($argv) {
         $this->stdout(
             "\nUsage: ./mii assets (build|test|gen-config) [options]\n\n" .
             "Options:\n" .
