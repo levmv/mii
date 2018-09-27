@@ -64,11 +64,16 @@ class Blocks extends Component
     public function init(array $config = []): void {
         parent::init($config);
 
-        $this->libraries = [
-            '@app/blocks'
-        ];
+        if(empty($this->sets)) {
+            $this->sets[] = [
+                'libraries' => [
+                    '@app/blocks'
+                ],
+                'base_url' => '/assets'
+            ];
+        }
 
-        $this->load_set('default');
+        $this->load_set(key($this->sets));
     }
 
     public function load_set($set): void {
@@ -80,11 +85,7 @@ class Blocks extends Component
         ];
 
         if (!is_array($set)) {
-            if (!isset($this->sets[$set]) && $set === 'default') {
-                $set = [];
-                $default_set['libraries'] = $this->libraries;
-                $default_set['base_path'] = $this->base_path;
-            } elseif (isset($this->sets[$set])) {
+            if(isset($this->sets[$set])) {
                 $set = $this->sets[$set];
             } else {
                 throw new ErrorException("Unknow blocks set name: $set");
@@ -112,7 +113,6 @@ class Blocks extends Component
             if (!is_dir($this->base_path))
                 mkdir($this->base_path, 0777, true);
         }
-
     }
 
     /**
