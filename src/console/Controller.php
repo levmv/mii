@@ -21,7 +21,6 @@ class Controller
 
         // Assign a response to the controller
         $this->response = $response;
-
     }
 
 
@@ -37,10 +36,10 @@ class Controller
 
     public function index($argv)
     {
-        $this->help();
+        $this->_autogenerate_help();
     }
 
-    protected function help()
+    protected function _autogenerate_help()
     {
         $class = new \ReflectionClass($this);
 
