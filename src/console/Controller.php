@@ -15,6 +15,8 @@ class Controller
 
     public $interactive = true;
 
+    public $auto_params = false;
+
     public function __construct(Request $request, Response $response) {
         // Assign the request to the controller
         $this->request = $request;
@@ -77,6 +79,45 @@ class Controller
         $this->stdout("\n\n");
     }
 
+    protected function execute_action($action, $params)
+    {
+        $method = new \ReflectionMethod($this, $action);
+
+        if (!$method->isPublic())
+            throw new CliException("Cannot access not public method");
+
+        $args = [];
+        $missing = [];
+        $action_params = [];
+        foreach ($method->getParameters() as $param) {
+            $name = $param->getName();
+            if (array_key_exists($name, $params)) {
+                if ($param->isArray()) {
+                    $args[] = $action_params[$name] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
+                } elseif (!is_array($params[$name])) {
+                    $args[] = $action_params[$name] = $params[$name];
+                } else {
+                    throw new CliException('Invalid data received for parameter ":param".', [
+                        ':param' => $name,
+                    ]);
+                }
+                unset($params[$name]);
+            } elseif ($param->isDefaultValueAvailable()) {
+                $args[] = $action_params[$name] = $param->getDefaultValue();
+            } else {
+                $missing[] = $name;
+            }
+        }
+        if (!empty($missing)) {
+            throw new CliException( 'Missing required parameters: ":params"', [
+                ':params' => implode(', ', $missing),
+            ]);
+        }
+        $this->action_params = $action_params;
+
+        return call_user_func_array([$this, $action], $args);
+    }
+
     /**
      * Executes the given action and calls the [Controller::before] and [Controller::after] methods.
      *
@@ -88,15 +129,19 @@ class Controller
      * 3. After the controller action is called, the [Controller::after] method
      * will be called.
      *
-     * @throws  HTTP_Exception_404
+     * @throws  CliException
      * @return  Response
      */
-    public function execute($params = []) {
+    public function execute()
+    {
         //$method = new \ReflectionMethod($this, $this->request->action());
 
         $this->before();
 
-        call_user_func([$this, $this->request->action], $this->request->params);
+        if($this->auto_params)
+            $this->execute_action($this->request->action, $this->request->params);
+        else
+            call_user_func([$this, $this->request->action], $this->request->params);
 
         $this->after();
 
