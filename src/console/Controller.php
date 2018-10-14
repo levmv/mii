@@ -110,7 +110,7 @@ class Controller
         }
         if (!empty($missing)) {
             if($missing[0] === 'argv' AND $action === 'index') {
-                $args = $params; // Emulate old behavior for backwards compatibility
+                $args = [$params]; // Emulate old behavior for backwards compatibility
             } else {
                 throw new CliException( 'Missing required parameters: ":params"', [
                     ':params' => implode(', ', $missing),
