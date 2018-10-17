@@ -77,6 +77,10 @@ class Session extends Component
         if ($this->is_active())
             return;
 
+        if($this->lifetime > 0) {
+            ini_set('session.gc_maxlifetime', $this->lifetime);
+        }
+
         // Sync up the session cookie with Cookie parameters
         session_set_cookie_params($this->lifetime,
             \Mii::$app->request->cookie_path,
