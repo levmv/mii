@@ -130,7 +130,7 @@ class Router extends Component
 
                     if (isset($value['callback'])) {
                         if($value['callback'] instanceof \Closure) {
-                            assert($this->cache === false, "Closure routes not allowed with enabled cache");
+                            assert($this->cache === false, "Closure routes not recommended with enabled cache");
                             $result[static::R_CALLBACK] = true;
                         } else {
                             $result[static::R_CALLBACK] = $value['callback'];
@@ -260,7 +260,7 @@ class Router extends Component
         if (isset($route[static::R_CALLBACK])) {
             if ($route[static::R_CALLBACK] === true) { // mean its closure
                 $original_route = $this->routes[$namespace][$route[static::R_PATTERN]];
-                $callback = is_array($original_route) ? $original_route[static::R_CALLBACK] : $original_route;
+                $callback = is_array($original_route) ? $original_route['callback'] : $original_route;
             } else {
                 $callback = $route[static::R_CALLBACK];
             }
