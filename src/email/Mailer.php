@@ -94,6 +94,7 @@ abstract class Mailer extends Component
         $this->attachments = [];
         $this->assets_path = '';
 
+        return $this;
     }
 
     public function send($to = null, $name = null, $subject = null, $body = null) {

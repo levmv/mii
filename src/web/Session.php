@@ -10,11 +10,11 @@ class Session extends Component
     /**
      * @var  string  cookie name
      */
-    protected $_name = 'session';
+    protected $name = 'session';
     /**
      * @var  int  cookie lifetime
      */
-    protected $_lifetime = 0;
+    protected $lifetime = 0;
 
     /**
      * @var  array  session data
@@ -27,14 +27,6 @@ class Session extends Component
 
     protected $_flash = '__flash';
 
-
-    public function init(array $config = []): void {
-        if (isset($config['lifetime'])) {
-            // Cookie lifetime
-            $this->_lifetime = (int)$config['lifetime'];
-        }
-    }
-
     /**
      *
      * Checks for session cookie without starting session itself
@@ -43,7 +35,7 @@ class Session extends Component
      */
 
     public function check_cookie() {
-        return isset($_COOKIE[$this->_name]);
+        return isset($_COOKIE[$this->name]);
     }
 
     /**
@@ -54,7 +46,7 @@ class Session extends Component
      * @return  string
      */
     public function name() {
-        return $this->_name;
+        return $this->name;
     }
 
     /**
@@ -85,8 +77,12 @@ class Session extends Component
         if ($this->is_active())
             return;
 
+        if($this->lifetime > 0) {
+            ini_set('session.gc_maxlifetime', $this->lifetime);
+        }
+
         // Sync up the session cookie with Cookie parameters
-        session_set_cookie_params($this->_lifetime,
+        session_set_cookie_params($this->lifetime,
             \Mii::$app->request->cookie_path,
             \Mii::$app->request->cookie_domain,
             \Mii::$app->request->cookie_secure,
@@ -96,7 +92,7 @@ class Session extends Component
         session_cache_limiter(false);
 
         // Set the session cookie name
-        session_name($this->_name);
+        session_name($this->name);
 
         if ($id) {
             // Set the session id
@@ -224,7 +220,7 @@ class Session extends Component
             $this->_data = [];
 
             // Make sure the session cannot be restarted
-            Cookie::delete($this->_name);
+            Cookie::delete($this->name);
         }
     }
 
