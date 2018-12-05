@@ -44,7 +44,7 @@ class Mii
         }
 
         $pos = strpos($path, '/');
-        $alias = $pos === false ? $path : substr($path, 1, $pos - 1);
+        $alias = $pos === false ? substr($path, 1) : substr($path, 1, $pos - 1);
 
         if (isset(static::$paths[$alias])) {
             return $pos === false ? static::$paths[$alias] : static::$paths[$alias] . substr($path, $pos);
