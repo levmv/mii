@@ -5,9 +5,6 @@ namespace mii\util;
 /**
  * Contains debugging and dumping tools.
  *
- * @package    Kohana
- * @category   Base
- * @author     Kohana Team
  * @copyright  (c) 2008-2012 Kohana Team
  * @license    http://kohanaphp.com/license
  */
@@ -188,12 +185,9 @@ class Debug
     }
 
     /**
-     * Removes application, system, modpath, or docroot from a filename,
-     * replacing them with the plain text equivalents. Useful for debugging
+     * Removes standart paths (Mii::$paths) from a filename,
+     * replacing them with the aliases. Useful for debugging
      * when you want to display a shorter path.
-     *
-     *     // Displays SYSPATH/classes/kohana.php
-     *     echo Debug::path(Kohana::find_file('classes', 'kohana'));
      *
      * @param   string $file path to debug
      * @return  string
@@ -285,9 +279,9 @@ class Debug
         }
 
         // Non-standard function calls
-        $statements = array('include', 'include_once', 'require', 'require_once');
+        $statements = ['include', 'include_once', 'require', 'require_once'];
 
-        $output = array();
+        $output = [];
         foreach ($trace as $step) {
             if (!isset($step['function'])) {
                 // Invalid trace step
@@ -367,6 +361,15 @@ class Debug
         }
 
         return $output;
+    }
+
+
+    public static function short_text_trace(array $trace = null) {
+        $trace = static::trace($trace);
+
+        return implode("\n", array_map(function ($row) {
+            return Debug::path($row['file']) . ": " . $row['function'] . "(" . $row['args'] . ")";
+        }, $trace));
     }
 
 }

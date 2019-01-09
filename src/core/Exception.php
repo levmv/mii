@@ -46,7 +46,7 @@ abstract class Exception extends \Exception
      * @return  string
      */
     public function __toString() {
-        return Exception::text($this);
+        return static::text($this);
     }
 
 
@@ -69,4 +69,4 @@ abstract class Exception extends \Exception
     }
 
 
-} // End Kohana_Exception
+}

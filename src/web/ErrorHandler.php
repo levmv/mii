@@ -5,6 +5,7 @@ namespace mii\web;
 use mii\core\ErrorException;
 use mii\core\Exception;
 use mii\core\UserException;
+use mii\util\Debug;
 
 class ErrorHandler extends \mii\core\ErrorHandler
 {
@@ -24,7 +25,8 @@ class ErrorHandler extends \mii\core\ErrorHandler
             \Mii::$app->request->uri($this->route);
             try {
                 \Mii::$app->run();
-            } catch (\Throwable $t) {}
+            } catch (\Throwable $t) {
+            }
             return;
 
 
@@ -61,6 +63,24 @@ class ErrorHandler extends \mii\core\ErrorHandler
         $response->send();
 
     }
+
+
+    public function report($exception) {
+        try {
+            $context = sprintf(' %s%s: %s',
+                \Mii::$app->request->method(),
+                \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
+                $_SERVER['REQUEST_URI']
+            );
+        } catch (\Throwable $t) {
+            $context = '';
+        }
+
+        $trace = Debug::short_text_trace($exception->getTrace());
+
+        \Mii::error(Exception::text($exception) . $context . $trace, get_class($exception));
+    }
+
 
     public function render_file($__file, $__params) {
         $__params['handler'] = $this;

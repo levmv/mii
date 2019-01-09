@@ -13,7 +13,6 @@ class ErrorHandler extends Component
      * when an out-of-memory issue occurs, the error handler is able to handle the error with
      * the help of this reserved memory. If you set this value to be 0, no memory will be reserved.
      * Defaults to 0;
-     * Copyright (c) 2008 Yii Software LLC
      */
     public $memory_reserve_size = 0;
 
@@ -69,13 +68,10 @@ class ErrorHandler extends Component
 
             $this->render($e);
 
-            exit(1);
-
         } catch (\Throwable $e) {
             echo Exception::text($e);
-            exit(1);
         }
-
+        exit(1);
     }
 
 
@@ -106,9 +102,7 @@ class ErrorHandler extends Component
 
 
     public function handle_fatal_error() {
-
         unset($this->_memory_reserve);
-
 
         // is it fatal ?
         if ($error = error_get_last() AND in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING])) {
@@ -118,7 +112,8 @@ class ErrorHandler extends Component
             $this->report($exception);
             $this->render($exception);
 
-            \Mii::$app->log && \Mii::$app->log->flush();
+            if (\Mii::$app->has(\Mii::$log_component_name))
+                \Mii::$app->get(\Mii::$log_component_name)->flush();
 
             // Shutdown now to avoid a "death loop"
             exit(1);
