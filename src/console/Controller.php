@@ -61,6 +61,14 @@ class Controller
         if (count($methods))
             $this->stdout("\n  Commands:");
 
+
+        $max = 0;
+        foreach($methods as $method) {
+            $max = max(strlen($method), $max);
+        }
+
+        $max = min($max, 30); // limit our max length to 30
+
         foreach ($methods as $method) {
 
             $this->stdout("\n\n    $method", Console::FG_YELLOW);
@@ -72,8 +80,9 @@ class Controller
             if (strpos($comment, '*') === 0)
                 $comment = trim(substr($comment, 1));
 
-            if ($comment)
-                $this->stdout("\t$comment");
+            if ($comment) {
+                $this->stdout(str_pad(" ", $max-strlen($method), " ")."\t$comment");
+            }
         }
 
         $this->stdout("\n\n");

@@ -10,7 +10,6 @@ class Help extends Controller
 
     public function index($argv) {
 
-
         $namespaces = config('console.namespaces', [
             'app\\console',
             'mii\\console\\controllers'
@@ -35,6 +34,7 @@ class Help extends Controller
         }
 
         $this->stdout("\n");
+
         foreach ($list as $controller) {
 
             if ($controller['class'] == static::class)
@@ -44,7 +44,8 @@ class Help extends Controller
 
             $desc = ($class->description) ? " " . $class->description . " " : '';
             $this->stdout($controller['command'], Console::FG_GREEN);
-            $this->stdout($desc . "\n\n", Console::FG_GREY);
+            $padding = max(1, 12-strlen($controller['command']));
+            $this->stdout(str_pad(" ", $padding, " ").$desc . "\n\n", Console::FG_GREY);
 
         }
     }
@@ -100,9 +101,7 @@ class Help extends Controller
                 continue;
             }
 
-
             $info = pathinfo($path . '/' . $entry);
-
 
             if (!isset($info['extension']) || $info['extension'] !== 'php') {
                 continue;

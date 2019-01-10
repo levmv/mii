@@ -3,6 +3,8 @@
 namespace mii\core;
 
 
+use mii\util\Debug;
+
 class ErrorHandler extends Component
 {
 
@@ -15,6 +17,8 @@ class ErrorHandler extends Component
      * Defaults to 0;
      */
     public $memory_reserve_size = 0;
+
+    public $report_trace = true;
 
     /**
      * @var string Used to reserve memory for fatal error handler.
@@ -39,8 +43,15 @@ class ErrorHandler extends Component
     }
 
 
-    public function report($exception) {
-        \Mii::error(Exception::text($exception), get_class($exception));
+    public function report($exception, $context = '') {
+
+        if($this->report_trace) {
+            $trace = "\n".Debug::short_text_trace($exception->getTrace());
+        } else {
+            $trace = '';
+        }
+
+        \Mii::error(Exception::text($exception) . $context . $trace, get_class($exception));
     }
 
 

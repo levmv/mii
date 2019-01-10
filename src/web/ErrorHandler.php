@@ -23,6 +23,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         if ($this->route && $response->format === Response::FORMAT_HTML && !config('debug')) {
 
             \Mii::$app->request->uri($this->route);
+
             try {
                 \Mii::$app->run();
             } catch (\Throwable $t) {
@@ -65,7 +66,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
     }
 
 
-    public function report($exception) {
+    public function report($exception, $context = '') {
         try {
             $context = sprintf(' %s%s: %s',
                 \Mii::$app->request->method(),
@@ -75,10 +76,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         } catch (\Throwable $t) {
             $context = '';
         }
-
-        $trace = Debug::short_text_trace($exception->getTrace());
-
-        \Mii::error(Exception::text($exception) . $context . $trace, get_class($exception));
+        parent::report($exception, $context);
     }
 
 

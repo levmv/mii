@@ -23,11 +23,6 @@ abstract class App
 
     public $timezone;
 
-    /**
-     * @var \mii\core\Container
-     */
-    public $container;
-
     public $controller;
 
     public $_config;
@@ -51,15 +46,6 @@ abstract class App
         if ($this->timezone)
             date_default_timezone_set($this->timezone);
 
-        if ($this->container !== null) {
-            if ($this->container === true) {
-                $this->container = new Container();
-            } elseif (is_string($this->container)) {
-                $class = $this->container;
-                $this->container = new $class;
-            }
-        }
-
         $default_components = $this->default_components();
 
         if (!isset($this->_config['components'])) {
@@ -81,7 +67,7 @@ abstract class App
 
     abstract function run();
 
-    public function default_components() : array {
+    public function default_components(): array {
         return [
             'log' => 'mii\log\Logger',
             'blocks' => 'mii\web\Blocks',
@@ -93,17 +79,14 @@ abstract class App
         ];
     }
 
-
-    private $_components = [];
     private $_instances = [];
-
 
     public function __get($name) {
         return $this->get($name);
     }
 
     public function has(string $id): bool {
-        return isset($this->_components[$id]) || isset($this->_config['components'][$id]);
+        return isset($this->_instances[$id]) || isset($this->_config['components'][$id]);
     }
 
 
@@ -124,7 +107,7 @@ abstract class App
 
         $params = [];
 
-        if(!isset($this->_config['components'][$id])) {
+        if (!isset($this->_config['components'][$id])) {
             throw new \Exception("Unknown component ID: $id");
         }
 

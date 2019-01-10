@@ -44,11 +44,7 @@ class App extends \mii\core\App
 
             // Create a new instance of the controller
 
-            if ($this->container === null) {
-                $this->controller = new $controller_name;
-            } else {
-                $this->controller = $this->container->get($controller_name);
-            }
+            $this->controller = new $controller_name;
 
             // Save links to request and response just for usability
             $this->controller->request = $this->request;

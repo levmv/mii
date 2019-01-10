@@ -57,8 +57,6 @@ class PageController extends Controller
 
     public $breadcrumbs = '';
 
-    public $user;
-
     public $csrf_validation = true;
 
 
@@ -135,13 +133,8 @@ class PageController extends Controller
 
         $this->access_rules();
 
-        if (\Mii::$app->session->check_cookie()) {
-            $this->user = Mii::$app->user = Mii::$app->auth->get_user();
-        }
-        $this->user = Mii::$app->user = Mii::$app->auth->get_user();
-
         if($this->acl !== null) {
-            $roles = Mii::$app->user ? Mii::$app->user->get_roles() : '*';
+            $roles = Mii::$app->auth->get_user() ? Mii::$app->auth->get_user()->get_roles() : '*';
 
             if (empty($roles))
                 $roles = '*';

@@ -5,6 +5,7 @@ namespace mii\auth;
 use Mii;
 use mii\core\Component;
 use mii\db\Query;
+use mii\web\Session;
 
 /**
  * User authorization library. Handles user login and logout, as well as secure
@@ -13,6 +14,9 @@ use mii\db\Query;
  */
 class Auth extends Component
 {
+    /**
+     * @var Session
+     */
     protected $_session;
 
     protected $_user;
@@ -59,6 +63,9 @@ class Auth extends Component
             // check for "remembered" login
             $this->auto_login();
         }
+        // If somehow our user was corrupted
+        if(!is_object($this->_user) || !$this->_user->id)
+            $this->_user = null;
 
         return $this->_user;
     }
@@ -107,7 +114,6 @@ class Auth extends Component
 
             // Finish the login
             $this->complete_login($user);
-            $this->_user = $user;
 
             return true;
         }
@@ -169,9 +175,7 @@ class Auth extends Component
         // Get the user from the session
         $user = $this->get_user();
 
-
-        return $user AND is_object($user) AND $user->id AND
-            ($role !== null ? $user->has_role($role) : true);
+        return $user AND ($role !== null ? $user->has_role($role) : true);
     }
 
 

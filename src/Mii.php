@@ -8,9 +8,6 @@ defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
 
 class Mii
 {
-
-    const VERSION = '1.4.0';
-
     /**
      * @var \mii\web\App|\mii\console\App;
      */
@@ -116,29 +113,20 @@ class Mii
     }
 }
 
-function app($component = null) {
-    if($component === null)
-        return Mii::$app;
 
-    return Mii::$app->get($component);
-}
-
-
-function abort($code = 404, $message = '')
-{
+function abort(int $code = 404, string $message = '') {
     if ($code == 404) {
         throw new \mii\web\NotFoundHttpException();
     }
     throw new \mii\web\HttpException($code, $message);
 }
 
-function session($key = null, $default = null)
-{
+function session($key = null, $default = null) {
     if (is_null($key)) {
-        return app('session');
+        return Mii::$app->session;
     }
 
-    return app('session')->get($key, $default);
+    return Mii::$app->session->get($key, $default);
 }
 
 
@@ -192,7 +180,6 @@ function block(string $name, array $params = null): \mii\web\Block {
  * @throws  \mii\cache\CacheException
  */
 function get_cached($id, $default = null, $lifetime = null) {
-
 
     if (is_object($default) && $default instanceof \Closure) {
 
@@ -262,7 +249,7 @@ if (!function_exists('dd')) {
      * Dump and die
      */
     function dd(...$params) {
-        if (Mii::$app instanceof \mii\web\App) {
+        if (Mii::$app instanceof \mii\web\App && Mii::$app->response->format === \mii\web\Response::FORMAT_HTML) {
 
             echo "<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }";
             echo "pre small { font-size: 1em; color: #000080;font-weight:bold}";
