@@ -8,7 +8,7 @@ use Mii;
  * Class App
  * @property \mii\cache\Cache $cache The cache application component.
  * @property \mii\db\Database $db The database connection.
- * @property \mii\email\PHPMailer $mailer
+ * @property \mii\email\Mailer $mailer
  * @property \mii\auth\Auth $auth;
  * @property ErrorHandler $error;
  */
@@ -38,11 +38,6 @@ abstract class App
     public function __construct(array $config = []) {
         Mii::$app = $this;
 
-        $this->init($config);
-    }
-
-    public function init(array $config) {
-
         $this->_config = $config;
 
         if (isset($this->_config['app'])) {
@@ -56,7 +51,7 @@ abstract class App
         if ($this->timezone)
             date_default_timezone_set($this->timezone);
 
-        if ($this->container) {
+        if ($this->container !== null) {
             if ($this->container === true) {
                 $this->container = new Container();
             } elseif (is_string($this->container)) {
@@ -65,31 +60,19 @@ abstract class App
             }
         }
 
-        $components = $this->default_components();
+        $default_components = $this->default_components();
 
         if (!isset($this->_config['components'])) {
             $this->_config['components'] = [];
         }
 
-        foreach ($components as $name => $component) {
+        foreach ($default_components as $name => $class) {
             if (!isset($this->_config['components'][$name])) {
-                $this->_config['components'][$name] = $component;
+                $this->_config['components'][$name] = $class;
             } elseif (is_array($this->_config['components'][$name]) && !isset($this->_config['components'][$name]['class'])) {
-                $this->_config['components'][$name]['class'] = $component['class'];
+                $this->_config['components'][$name]['class'] = $class;
             }
         }
-
-        if ($this->container === null) {
-            $components = array_keys($this->_config['components']);
-            foreach ($components as $id) {
-                $this->inner_set($id);
-            }
-        } else {
-            foreach ($this->_config['components'] as $name => $definition) {
-                $this->set($name, $definition);
-            }
-        }
-
         // register Error handler
         if ($this->has('error')) {
             $this->error->register();
@@ -100,13 +83,13 @@ abstract class App
 
     public function default_components() : array {
         return [
-            'log' => ['class' => 'mii\log\Logger'],
-            'blocks' => ['class' => 'mii\web\Blocks'],
-            'auth' => ['class' => 'mii\auth\Auth'],
-            'router' => ['class' => 'mii\core\Router'],
-            'db' => ['class' => 'mii\db\Database'],
-            'cache' => ['class' => 'mii\cache\Apcu'],
-            'mailer' => ['class' => 'mii\email\PHPMailer']
+            'log' => 'mii\log\Logger',
+            'blocks' => 'mii\web\Blocks',
+            'auth' => 'mii\auth\Auth',
+            'router' => 'mii\core\Router',
+            'db' => 'mii\db\Database',
+            'cache' => 'mii\cache\Apcu',
+            'mailer' => 'mii\email\PHPMailer'
         ];
     }
 
@@ -116,119 +99,60 @@ abstract class App
 
 
     public function __get($name) {
-
-        if ($this->has($name)) {
-            return $this->get($name);
-        }
-        return false;
+        return $this->get($name);
     }
 
     public function has(string $id): bool {
-        return isset($this->_components[$id]);
+        return isset($this->_components[$id]) || isset($this->_config['components'][$id]);
     }
 
 
     public function get(string $id) {
 
-        if ($this->container === null) {
-            if (isset($this->_components[$id])) {
-
-                if (isset($this->_instances[$id]))
-                    return $this->_instances[$id];
-
-                $this->_instances[$id] = $this->load_component($id);
-
-                return $this->_instances[$id];
-            }
-
-        } else {
-            if (isset($this->_components[$id])) {
-                return $this->container->get($id);
-            }
+        if (!isset($this->_instances[$id])) {
+            $this->_instances[$id] = $this->load_component($id);
         }
 
-
-        throw new \Exception("Unknown component ID: $id");
+        return $this->_instances[$id];
     }
 
     public function __isset($name) {
         return $this->has($name);
     }
 
-    public function inner_set($id, $definition = null): void {
+    protected function load_component($id) {
 
-        if ($definition !== null)
-            $this->_config['components'][$id] = $definition;
+        $params = [];
+
+        if(!isset($this->_config['components'][$id])) {
+            throw new \Exception("Unknown component ID: $id");
+        }
 
         if (is_array($this->_config['components'][$id])) {
             // a configuration array
             if (isset($this->_config['components'][$id]['class'])) {
-                $this->_components[$id] = $this->_config['components'][$id]['class'];
+                $class = $this->_config['components'][$id]['class'];
                 unset($this->_config['components'][$id]['class']);
+                $params = $this->_config['components'][$id];
             } else {
                 throw new \Exception("The configuration for the \"$id\" component must contain a \"class\" element.");
             }
 
         } elseif (is_string($this->_config['components'][$id])) {
-            $this->_components[$id] = $this->_config['components'][$id];
+            $class = $this->_config['components'][$id];
             $this->_config['components'][$id] = null;
         } elseif (is_object($this->_config['components'][$id]) AND $this->_config['components'][$id] instanceof \Closure) {
-            $this->_components[$id] = true;
+
+            return call_user_func($this->_config['components'][$id], $this);
+
         } else {
             throw new \Exception("Unexpected configuration type for the $id component: " . gettype($this->_config['components'][$id]));
         }
 
-    }
-
-    public function set($id, $definition): void {
-
-        if ($this->container === null) {
-            $this->inner_set($id, $definition);
-            return;
-        }
-
-        if ($definition === null) {
-            unset($this->_components[$id]);
-            $this->container->clear($id);
-            return;
-        }
-        if (is_array($definition)) {
-            // a configuration array
-            if (isset($definition['class'])) {
-                $this->_components[$id] = $definition['class'];
-                unset($definition['class']);
-                $params = (empty($definition)) ? [] : [$definition];
-
-                $this->container->share($id, $this->_components[$id], $params);
-            } else {
-                throw new \Exception("The configuration for the \"$id\" component must contain a \"class\" element.");
-            }
-
-        } elseif (is_string($definition)) {
-            $this->container->share($id, $definition);
-            $this->_components[$id] = true;
-
-        } elseif (is_callable($definition, true)) {
-            $this->_components[$id] = $definition;
-        } else {
-            throw new \Exception("Unexpected configuration type for the \"$id\" component: " . gettype($definition));
-        }
-    }
-
-    protected function load_component($id) {
-
-        $class = $this->_components[$id];
+        unset($this->_config['components'][$id]);
 
         if (is_string($class)) {
-
-            if (!empty($this->_config['components'][$id]))
-                return new $class($this->_config['components'][$id]);
-
-            return new $class();
-        }
-
-        if (is_object($class) && $class instanceof \Closure) {
-            return call_user_func($class, $this);
+            return new $class($params);
         }
 
         throw new \Exception("Cant load component \"$id\" because of wrong type: " . gettype($class));
