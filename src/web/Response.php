@@ -125,7 +125,7 @@ class Response extends Component
             if (isset($_SERVER['SERVER_PROTOCOL']) && $_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.0') {
                 $this->version = '1.0';
             } else {
-                $this->version = '1.1';
+                $this->version = '1.0';
             }
         }
 
@@ -155,11 +155,10 @@ class Response extends Component
      * @return  mixed
      */
     public function status($status = NULL) {
-
         if ($status === NULL) {
             return $this->status;
         } elseif (array_key_exists($status, Response::$messages)) {
-            $this->status = (int) $status;
+            $this->status = (int)$status;
             $this->status_message = Response::$messages[$this->status];
             return $this;
         } else {

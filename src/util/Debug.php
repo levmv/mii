@@ -367,8 +367,34 @@ class Debug
     public static function short_text_trace(array $trace = null) {
         $trace = static::trace($trace);
 
-        return implode("\n", array_map(function ($row) {
-            return Debug::path($row['file']) . ": " . $row['function'] . "(" . $row['args'] . ")";
+        $count = 0;
+
+        return implode("\n", array_map(function ($step) use (&$count) {
+            $file = $step['file'] ? Debug::path($step['file']) : 'PHP internal call';
+            $line = $step['line'];
+
+            $args = [];
+            foreach($step['args'] as $arg) {
+
+                if (is_string($arg)) {
+                    $args[] = "'" . Text::limit_chars($arg, 40) . "'";
+                } elseif (is_array($arg)) {
+                    $args[] = "Array";
+                } elseif (is_null($arg)) {
+                    $args[] = 'null';
+                } elseif (is_bool($arg)) {
+                    $args[] = ($arg) ? "true" : "false";
+                } elseif (is_object($arg)) {
+                    $args[] = get_class($arg);
+                } elseif (is_resource($arg)) {
+                    $args[] = get_resource_type($arg);
+                } else {
+                    $args[] = $arg;
+                }
+            }
+            $count++;
+
+            return  "#$count $file [$line]: " . $step['function'] . "(" . implode(', ', $args) . ")";
         }, $trace));
     }
 

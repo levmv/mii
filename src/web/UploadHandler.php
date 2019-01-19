@@ -2,12 +2,10 @@
 
 namespace mii\web;
 
-
 use mii\core\Component;
 
 class UploadHandler extends Component
 {
-
 
     private $_files;
 
@@ -17,7 +15,7 @@ class UploadHandler extends Component
         $this->files();
     }
 
-    public function get_file(string $name): ? UploadedFile {
+    public function get_file(string $name): ?UploadedFile {
         return isset($this->_files[$name]) ? $this->_files[$name] : null;
     }
 

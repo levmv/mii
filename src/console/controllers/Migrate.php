@@ -19,7 +19,7 @@ class Migrate extends Controller
 
     protected $migrations_paths = [];
 
-    public function before() {
+    protected function before() {
 
         $config = config('migrate', []);
 
@@ -44,9 +44,6 @@ class Migrate extends Controller
 
             $this->applied_migrations = [];
         }
-
-
-        $files = [];
 
         for ($i = 0; $i < count($this->migrations_paths); $i++)
             $this->migrations_paths[$i] = \Mii::resolve($this->migrations_paths[$i]);
@@ -84,7 +81,9 @@ class Migrate extends Controller
 
     }
 
-
+    /**
+     * Create new migration file
+     */
     public function create($argv) {
 
         $custom_name = false;
@@ -96,8 +95,6 @@ class Migrate extends Controller
 
         DB::begin();
         try {
-            //   $migration_id = DB::insert('INSERT INTO `'.$this->migrate_table.'`(`apply_time`)  VALUES (0)')[0];
-
             $name = 'm' . gmdate('ymd_His');
             if ($custom_name)
                 $name = $name . '_' . $custom_name;
@@ -142,23 +139,15 @@ class ' . $name . ' extends Migration {
 
     }
 
-
-    public function index($argv) {
-
-        $limit = count($argv) ? $argv[0] : null;
-
-        $this->_up($limit);
-    }
-
-
-    private function _up($limit = null) {
-
+    /**
+     * Apply new migrations
+     */
+    public function up($limit = null) {
 
         $applied = 0;
 
         $migrations = $this->migrations_list;
 
-        $total = count($migrations);
         $limit = (int)$limit;
 
         if ($limit > 0) {
@@ -205,8 +194,7 @@ class ' . $name . ' extends Migration {
     }
 
 
-    public function load_migration($migration) {
-
+    protected function load_migration($migration) {
         require_once($migration['file']);
         return new $migration['name'];
     }

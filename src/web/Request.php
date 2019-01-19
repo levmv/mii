@@ -220,7 +220,7 @@ class Request extends Component
             $token = $_SERVER['HTTP_X_CSRF_TOKEN'];
 
         } else {
-            \Mii::error('csrf_token not found', 'mii');
+            return false;
         }
 
         return $this->csrf_token() === $token;
