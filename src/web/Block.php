@@ -21,17 +21,11 @@ class Block
 
     // List of remote assets
     public $__remote_css;
-
     public $__remote_js;
 
-    /**
-     * @var array $inline_css
-     */
+    // List of inline codes
     public $__inline_css;
-
     public $__inline_js;
-
-    protected $_has_remote = 0;
 
     public $_depends = [];
 
@@ -145,19 +139,12 @@ class Block
     }
 
 
-    public function css(string $link, array $options = []) {
-        if ($this->__remote_css === null)
-            $this->__remote_css = [];
-
-        $this->__remote_css[$link] = $options;
-
+    public function css(string $link) {
+        $this->__remote_css[] = $link;
         return $this;
     }
 
     public function js(string $link, array $options = []) {
-        if ($this->__remote_js === null)
-            $this->__remote_js = [];
-
         $this->__remote_js[$link] = $options;
         return $this;
     }

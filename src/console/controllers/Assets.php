@@ -7,19 +7,25 @@ use Mii;
 use mii\console\CliException;
 use mii\console\Controller;
 use mii\util\Console;
+use mii\util\Text;
 
 class Assets extends Controller
 {
-
     public $description = 'Blocks assets builder';
 
-    private $blocks;
+    public $config_file;
+
+    private $json_output = false;
+
+    private $assets;
     private $libraries;
 
     private $base_path;
     private $base_url = '/assets';
 
-    protected $static_source = 'static';
+    private $assets_map_path;
+
+    protected $assets_group = 'static';
 
     private $results = [];
 
@@ -28,7 +34,7 @@ class Assets extends Controller
         'js' => [],
     ];
 
-    public function before() {
+    protected function before() {
 
         $this->_time = microtime(true);
         $this->_memory = memory_get_usage();
@@ -38,15 +44,19 @@ class Assets extends Controller
 
         $this->sets = config('components.blocks.sets');
 
-        if(!file_exists(path('app').'/config/assets.php')) {
-            $this->error('Config app/config/assets.php does not exist.');
+        $this->assets_map_path = config('components.blocks.assets_map_path', '@tmp');
+
+        $this->config_file = $this->request->params['config'] ?? '@app/config/assets.php';
+        $this->json_output = $this->request->params['json'] ?? false;
+
+        if(!file_exists(Mii::resolve($this->config_file))) {
+            $this->error("Config {$this->config_file} does not exist.");
             exit(1);
         }
 
-        $assets_config = require(path('app').'/config/assets.php');
-        foreach($assets_config as $static_source_name => $static_source)
-            $this->$static_source_name = $static_source;
+        $this->assets = require(Mii::resolve($this->config_file));
 
+        /*
         $this->blocks = config('components.blocks.blocks');
         $this->libraries = config('components.blocks.libraries',
             [path('app') . '/blocks']
@@ -62,15 +72,16 @@ class Assets extends Controller
             ],
             'base_url' => '/assets/d',
             'base_path' => null
-        ];
+        ];*/
 
     }
 
-    public function index($argv) {
+    public function usage($argv) {
         $this->stdout(
             "\nUsage: ./mii assets (build|test|gen-config) [options]\n\n" .
             "Options:\n" .
             " ——config=<path>\tPath to configuration file. By default it's «@app/config/assets.php»\n" .
+            " ——stdout\tTo print assets paths to stdout\n" .
             "\n\n",
             Console::FG_YELLOW
         );
@@ -93,7 +104,6 @@ class Assets extends Controller
 
     public function build() {
 
-
         if(count($this->sets)) {
 
             foreach($this->sets as $name => $set) {
@@ -103,28 +113,27 @@ class Assets extends Controller
             $this->build_set('default');
         }
 
-        $this->info(':N css and :M js files compiled.', [
-            ':N' => count($this->processed['css']),
-            ':M' => count($this->processed['js'])
-        ]);
-
-        if(count($this->processed['css']) || count($this->processed['js']) ){
-            $this->info('Start post processing...');
-            $this->post_process();
-
-
-            foreach($this->results as $source => $list) {
-                file_put_contents(
-                    path('root')."/".$source.'.assets',
-                        "<?php return ".var_export($list, true).';'
-                    );
-            }
-
-        } else {
-
-            $this->info('No recompiled files. No need to regenerate config');
+        foreach($this->results as $set_name => $list) {
+            file_put_contents(
+                $this->assets_map_path."/".$set_name.'.assets',
+                "<?php return ".var_export($list, true).';'
+            );
         }
 
+        if($this->json_output) {
+            $this->stdout(json_encode($this->processed));
+            return;
+        }
+
+
+        if(count($this->processed['css']) || count($this->processed['js']) ){
+            $this->info(':N css and :M js files compiled.', [
+                ':N' => count($this->processed['css']),
+                ':M' => count($this->processed['js'])
+            ]);
+        } else {
+            $this->info('No recompiled files. No need to regenerate config');
+        }
 
         $this->info('All done. Spent :Ts and :MMb', [
             ':T' => number_format(microtime(true) - $this->_time, 1),
@@ -179,12 +188,12 @@ class Assets extends Controller
 
         $reverse = ['css' => [], 'js' => []];
 
-        if(!isset($this->{$this->static_source})) {
-            $this->error('Source list with name «'.$this->static_source.'» does not exist');
+        if(!isset($this->assets[$this->assets_group])) {
+            $this->error('Source list with name «'.$this->assets_group.'» does not exist');
             return;
         }
 
-        foreach ($this->{$this->static_source} as $name => $file) {
+        foreach ($this->assets[$this->assets_group] as $name => $file) {
             foreach (['css', 'js'] as $type) {
                 if (isset($file[$type])) {
                     if (!is_array($file[$type]))
@@ -264,12 +273,14 @@ class Assets extends Controller
             $this->base_path = Mii::resolve($this->base_path);
         }
 
+        $this->assets_map_path = Mii::resolve($this->assets_map_path);
+
         if(!is_dir($this->base_path)) {
             mkdir($this->base_path, 0777, true);
         }
 
-        if(!isset($this->{$this->static_source})) {
-            $this->error('Static source «'.$this->static_source.'» does not exist');
+        if(!isset($this->assets[$this->assets_group])) {
+            $this->error('Assets group «'.$this->assets_group.'» does not exist');
         }
     }
 
@@ -278,85 +289,82 @@ class Assets extends Controller
         $this->init_set($set_name);
 
         $this->results[$set_name] = [];
-
-        foreach($this->{$this->static_source} as $name => $block) {
-            $this->build_block($set_name, $name, $block);
-        }
-    }
-
-
-    protected function build_block($set_name, $name, $data) {
-
-        foreach (['css', 'js'] as $type) {
-            if(isset($data[$type])) {
-
-                $files = [];
+        foreach($this->assets[$this->assets_group] as $filename => $data) {
+            foreach (['css', 'js'] as $type) {
+                if(!isset($data[$type]))
+                    continue;
 
                 if(!is_array($data[$type]))
                     $data[$type] = (array) $data[$type];
 
-                $outpath = $this->base_path .'/';
-                $names = [];
+                $result_file_name = $this->build_file($set_name, $filename, $data[$type], $type);
 
                 foreach($data[$type] as $block_name) {
-
-                    $block_path = '/' . implode('/', explode('_', $block_name)) ;
-
-                    $block_file = $block_path . '/' . $block_name;
-
-                    foreach ($this->libraries as $library_path) {
-                        $library_path = Mii::resolve($library_path);
-
-                        if (is_file($library_path . $block_file . '.' . $type)) {
-                            $files[] = $library_path . $block_file . '.' . $type;
-
-                            $names[] = $block_name .
-                                        filemtime($library_path . $block_file . '.' . $type);
-                            break;
-                        }
-                    }
-
-                    foreach ($this->libraries as $library_path) {
-                        $library_path = Mii::resolve($library_path);
-
-                        if (is_dir($library_path . $block_path . '/assets')) {
-
-                            $output = $this->base_path .'/'.$block_name;
-
-                            if (!is_link($output)) {
-                                symlink($library_path . $block_path . '/assets', $output);
-                            }
-                            break;
-                        }
-                    }
+                    $this->results[$set_name][$type][$block_name] = $result_file_name;
                 }
+            }
+        }
+    }
 
-                $outname = $name.$this->hash(implode(',', $names));
 
+    protected function build_file($set_name, $filename, $blocks, $type) : string {
 
-                if(!empty($files)) {
-                    if(!file_exists($outpath.$outname.'.'.$type)) {
-                        $this->processed[$type][] = $this->process_files($files, $outpath, $outname .'.'.$type);
+        $out_path = $this->base_path .'/';
+
+        $files = [];
+
+        $hashes = '';
+
+        foreach($blocks as $block_name) {
+
+            $block_path = '/' . implode('/', explode('_', $block_name)) ;
+            $block_file = $block_path . '/' . $block_name;
+
+            foreach ($this->libraries as $library_path) {
+                $result_filename = Mii::resolve($library_path) . $block_file . '.' . $type;
+
+                if (is_file($result_filename)) {
+                    $files[] = $result_filename;
+                    $hashes .= sha1_file($result_filename);
+                    break;
+                }
+            }
+            // Can't merge with previous cycle because of the break
+            foreach ($this->libraries as $library_path) {
+                $library_path = Mii::resolve($library_path);
+
+                if (is_dir($library_path . $block_path . '/assets')) {
+
+                    $output = $this->base_path .'/'.$block_name;
+
+                    if (!is_link($output)) {
+                        symlink($library_path . $block_path . '/assets', $output);
                     }
-
-                    foreach($data[$type] as $block_name) {
-                        $this->results[$set_name][$type][$block_name] = $outname;
-                    }
+                    break;
                 }
             }
         }
 
+        $outname = $filename.$this->hash($hashes);
+
+        if(!empty($files)) {
+            if(!file_exists($out_path.$outname.'.'.$type)) {
+                $this->processed[$type][] = $this->merge_files_to_one($files, $out_path, $outname .'.'.$type);
+            }
+        }
+
+        return $outname;
     }
 
 
     protected function hash(string $str) : string {
 
-        return substr(md5($str), 0,5).
-                substr(sha1($str), 0,6);
+        return substr(Text::base64url_encode(md5($str, true)), 0,7).
+               substr(Text::base64url_encode(sha1($str, true)), 0,7);
     }
 
 
-    protected function process_files($files, $path, $filename) {
+    protected function merge_files_to_one($files, $path, $filename) {
 
         $tmp = '';
 
@@ -370,8 +378,9 @@ class Assets extends Controller
 
         file_put_contents($path.$filename, $tmp);
 
-        $this->info(':block compiled.', [':block' => $path.$filename]);
-
+        if(!$this->json_output) {
+            $this->info(':block compiled.', [':block' => $path.$filename]);
+        }
 
         return $path.$filename;
     }
