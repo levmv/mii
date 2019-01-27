@@ -126,7 +126,7 @@ abstract class App
             $this->_config['components'][$id] = null;
         } elseif (is_object($this->_config['components'][$id]) AND $this->_config['components'][$id] instanceof \Closure) {
 
-            return call_user_func($this->_config['components'][$id], $this);
+            return call_user_func($this->_config['components'][$id], []);
 
         } else {
             throw new \Exception("Unexpected configuration type for the $id component: " . gettype($this->_config['components'][$id]));
@@ -136,6 +136,10 @@ abstract class App
 
         if (is_string($class)) {
             return new $class($params);
+        }
+
+        if(is_object($class) AND $class instanceof \Closure) {
+            return call_user_func($class, $params);
         }
 
         throw new \Exception("Cant load component \"$id\" because of wrong type: " . gettype($class));
