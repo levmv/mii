@@ -97,19 +97,7 @@ class Auth extends Component
 
         if ($user->id AND $user->has_role('login') AND $this->verify_password($password, $user->password)) {
             if ($remember === true) {
-                // Token data
-                $data = [
-                    'user_id' => $user->id,
-                    'expires' => time() + $this->lifetime,
-                    'user_agent' => sha1(Mii::$app->request->get_user_agent()),
-                ];
-
-                // Create a new autologin token
-                $token = (new Token)->set($data);
-                $token->create();
-
-                // Set the autologin cookie
-                Mii::$app->request->set_cookie($this->token_cookie, $token->token, $this->lifetime);
+                $this->set_autologin($user);
             }
 
             // Finish the login
@@ -164,6 +152,20 @@ class Auth extends Component
 
         // Double check
         return !$this->logged_in();
+    }
+
+    public function set_autologin($user)
+    {
+        // Create a new autologin token
+        $token = (new Token)->set([
+            'user_id' => $user->id,
+            'expires' => time() + $this->lifetime,
+            'user_agent' => sha1(Mii::$app->request->get_user_agent()),
+        ]);
+        $token->create();
+
+        // Set the autologin cookie
+        Mii::$app->request->set_cookie($this->token_cookie, $token->token, $this->lifetime);
     }
 
 
