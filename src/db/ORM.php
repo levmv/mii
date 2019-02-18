@@ -395,10 +395,10 @@ class ORM
             ->where('id', '=', $this->_data['id'])
             ->execute();
 
-        $this->_changed = [];
-
         $this->on_after_update();
         $this->on_after_change();
+
+        $this->_changed = [];
 
         return \Mii::$app->db->affected_rows();
     }
@@ -452,10 +452,10 @@ class ORM
 
         $this->_data['id'] = \Mii::$app->db->inserted_id();
 
-        $this->_changed = [];
-
         $this->on_after_create();
         $this->on_after_change();
+
+        $this->_changed = [];
 
         return $this->_data['id'];
     }
