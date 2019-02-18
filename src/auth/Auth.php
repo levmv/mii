@@ -70,6 +70,17 @@ class Auth extends Component
         return $this->_user;
     }
 
+
+    /**
+     * Set current user and store him in session
+     * @param User $user
+     */
+    public function set_user(User $user) : void {
+        $this->_session->set($this->session_key, $user);
+        $this->_user = $user;
+    }
+
+
     public function get_user_model() {
         return new $this->user_model;
     }
@@ -200,10 +211,7 @@ class Auth extends Component
         // Regenerate session_id
         $this->_session->regenerate();
 
-        // Store user in session
-        $this->_session->set($this->session_key, $user);
-
-        $this->_user = $user;
+        $this->set_user($user);
 
         $user->complete_login();
 
