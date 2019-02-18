@@ -397,7 +397,14 @@ class ORM
 
         $this->_changed = [];
 
+        $this->on_after_update();
+        $this->on_after_change();
+
         return \Mii::$app->db->affected_rows();
+    }
+
+    protected function on_create() {
+        return true;
     }
 
     protected function on_update() {
@@ -405,7 +412,15 @@ class ORM
     }
 
     protected function on_change() {
-        return true;
+    }
+
+    protected function on_after_create() : void {
+    }
+
+    protected function on_after_update() : void {
+    }
+
+    protected function on_after_change() : void {
     }
 
     /**
@@ -439,13 +454,12 @@ class ORM
 
         $this->_changed = [];
 
+        $this->on_after_create();
+        $this->on_after_change();
+
         return $this->_data['id'];
     }
 
-    protected function on_create() {
-        return true;
-
-    }
 
     /**
      * Deletes the current object's associated database row.
