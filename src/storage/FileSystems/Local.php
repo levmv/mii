@@ -62,5 +62,8 @@ class Local extends Storage implements FileSystemInterface {
         mkdir($this->resolve($path), $mode, true);
     }
 
-
+    public function path(string $path)
+    {
+        return $this->path . '/' . $path;
+    }
 }
