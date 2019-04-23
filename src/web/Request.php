@@ -151,6 +151,14 @@ class Request extends Component
     }
 
 
+    public function get_content_type()
+    {
+        if (isset($_SERVER['CONTENT_TYPE'])) {
+            return $_SERVER['CONTENT_TYPE'];
+        }
+    }
+
+
     /**
      * Gets or sets the HTTP method. Usually GET, POST, PUT or DELETE in
      * traditional CRUD applications.
@@ -303,6 +311,35 @@ class Request extends Component
         }
 
         return $this->_raw_body;
+    }
+
+    private $_json_params;
+
+
+    public function json_params() {
+        if ($this->_json_params === null) {
+            $this->_json_params = file_get_contents('php://input');
+        }
+
+        return $this->_json_params;
+    }
+
+
+    private $_json_items;
+
+    public function json($key, $default = null) {
+
+        if(!$this->_json_items && strtolower($this->get_content_type()) === 'application/json') {
+            $this->_json_items = json_decode(file_get_contents('php://input'), true);
+        } else {
+            $this->_json_items = [];
+        }
+
+        if ($key === null) {
+            return $this->_json_items;
+        }
+
+        return isset($this->_json_items[$key]) ? $this->_json_items[$key] : $default;
     }
 
 

@@ -148,9 +148,14 @@ class PageController extends Controller
             throw new BadRequestHttpException('Token mismatch error');
         }
 
+        $method = new \ReflectionMethod($this, $action);
+
+        if (!$method->isPublic())
+            throw new BadRequestHttpException("Cannot access not public method");
+
         $this->before();
 
-        $this->after($this->execute_action($action, $params));
+        $this->after($this->execute_action($method, $action, $params));
     }
 
 }

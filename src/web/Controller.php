@@ -28,19 +28,18 @@ class Controller
 
     public function execute(string $action, $params) {
 
-        $this->before();
-
-        $this->after($this->execute_action($action, $params));
-    }
-
-
-    protected function execute_action($action, $params) {
-
         $method = new \ReflectionMethod($this, $action);
 
         if (!$method->isPublic())
             throw new BadRequestHttpException("Cannot access not public method");
 
+        $this->before();
+
+        $this->after($this->execute_action($method, $action, $params));
+    }
+
+
+    protected function execute_action($method, $action, $params) {
         $args = [];
         $missing = [];
         $action_params = [];
