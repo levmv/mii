@@ -114,6 +114,14 @@ class Response extends Component
     }
 
 
+    public function remove_header($name) {
+        $name = strtolower($name);
+        if(isset($this->_headers[$name]))
+            unset($this->_headers[$name]);
+        return $this;
+    }
+
+
     public function send_headers() {
         assert(headers_sent() === false, "Headers were already sent");
 
