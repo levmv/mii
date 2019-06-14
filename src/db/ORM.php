@@ -289,7 +289,6 @@ class ORM
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
     }
 
-
     public function set($values, $value = NULL): ORM
     {
 
@@ -327,9 +326,9 @@ class ORM
      *
      * @return bool
      */
-    public function __isset($name)
+    public function __isset($key)
     {
-        return isset($this->_data[$name]);
+        return array_key_exists($key, $this->_data) OR array_key_exists($key, $this->_unmapped);
     }
 
     /**
