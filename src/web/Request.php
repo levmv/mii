@@ -29,6 +29,10 @@ class Request extends Component
      */
     const CSRF_HEADER = 'X-CSRF-Token';
 
+    const SAME_SITE_LAX = 'Lax';
+
+    const SAME_SITE_STRICT = 'Strict';
+
     /**
      * @var  string  the URI of the request
      */
@@ -78,6 +82,9 @@ class Request extends Component
      * @var  boolean  Only transmit cookies over HTTP, disabling Javascript access
      */
     public $cookie_httponly = false;
+
+
+    public $cookie_samesite = self::SAME_SITE_LAX;
 
     /**
      * @var  array   parameters from the route
@@ -404,7 +411,19 @@ class Request extends Component
         // Add the salt to the cookie value
         $value = $this->salt($name, $value) . '~' . $value;
 
-        return setcookie($name, $value, $expiration, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
+        if (PHP_VERSION_ID >= 70300) {
+            return setcookie($name, $value,
+                [
+                    'expires' => $expiration,
+                    'path' => $this->cookie_path,
+                    'domain' => $this->cookie_domain,
+                    'secure' => $this->cookie_secure,
+                    'httpOnly' => $this->cookie_httponly,
+                    'sameSite' => $this->cookie_samesite,
+                ]);
+        } else {
+            return setcookie($name, $value, $expiration, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
+        }
     }
 
 
@@ -441,9 +460,6 @@ class Request extends Component
             );
         }
 
-        // Determine the user agent
-        $agent = isset($_SERVER['HTTP_USER_AGENT']) ? strtolower($_SERVER['HTTP_USER_AGENT']) : 'unknown';
-
-        return sha1($agent . $name . $value . $this->cookie_salt);
+        return sha1($name . $value . $this->cookie_salt);
     }
 }
