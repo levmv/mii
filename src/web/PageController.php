@@ -66,7 +66,7 @@ class PageController extends Controller
 
     protected function before() {
 
-        if (!Mii::$app->request->is_ajax()) {
+        if (!Mii::$app->request->is_ajax() && $this->render_layout) {
             $this->setup_layout();
         }
 
