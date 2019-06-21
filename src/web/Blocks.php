@@ -72,21 +72,15 @@ class Blocks extends Component
 
     public function load_set(string $setname): void {
 
+        assert(isset($this->sets[$setname]), "Unknown blocks set name: $setname");
+
         $this->current_set = $setname;
 
-        $default_set = [
+        $set = array_replace([
             'libraries' => [],
             'base_url' => $this->base_url,
             'base_path' => null
-        ];
-
-        if (isset($this->sets[$setname])) {
-            $set = $this->sets[$setname];
-        } else {
-            throw new ErrorException("Unknow blocks set name: $setname");
-        }
-
-        $set = array_replace($default_set, $set);
+        ], $this->sets[$setname]);
 
         foreach ($set as $key => $value)
             $this->$key = $value;
