@@ -128,11 +128,11 @@ class Database extends Component
         // Make sure the database is connected
         $this->_connection or $this->connect();
 
-        $benchmark = false;
-        if (config('debug')) {
-            // Benchmark this query
-            $benchmark = \mii\util\Profiler::start("Database", $sql);
-        }
+        assert(
+            config('debug') &&
+            ($benchmark = \mii\util\Profiler::start("Database", $sql)) ||
+            true
+        );
 
         // Execute the query
         if ($type === Database::MULTI) {
@@ -158,9 +158,7 @@ class Database extends Component
             ], $this->_connection->errno);
         }
 
-        if ($benchmark) {
-            \mii\util\Profiler::stop($benchmark);
-        }
+        assert(isset($benchmark) && \mii\util\Profiler::stop($benchmark) || true);
 
         // Set the last query
         $this->last_query = $sql;

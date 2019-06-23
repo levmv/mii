@@ -258,15 +258,15 @@ class Block
                 throw new Exception('Block :block does not have a php file', [':block' => $this->__name]);
         }
 
-        $benchmark = false;
-        if (config('debug'))
-            $benchmark = \mii\util\Profiler::start('Block:render', \mii\util\Debug::path($this->_file));
-
+        assert(
+            config('debug') &&
+            ($benchmark = \mii\util\Profiler::start('Block:render', \mii\util\Debug::path($this->_file)))
+            || true
+        );
         // Combine local and global data and capture the output
         $c = $this->capture($this->_file);
 
-        if ($benchmark)
-            \mii\util\Profiler::stop($benchmark);
+        assert(isset($benchmark) && \mii\util\Profiler::stop($benchmark) || true);
 
         return $c;
     }
