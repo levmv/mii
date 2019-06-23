@@ -133,7 +133,7 @@ class Response extends Component
             if (isset($_SERVER['SERVER_PROTOCOL']) && $_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.0') {
                 $this->version = '1.0';
             } else {
-                $this->version = '1.0';
+                $this->version = '1.1';
             }
         }
 
@@ -162,10 +162,10 @@ class Response extends Component
      * @param   integer $status Status to set to this response
      * @return  mixed
      */
-    public function status($status = NULL) {
+    public function status(int $status = NULL) {
         if ($status === NULL) {
             return $this->status;
-        } elseif (array_key_exists($status, Response::$messages)) {
+        } elseif (isset(Response::$messages[$status])) {
             $this->status = (int)$status;
             $this->status_message = Response::$messages[$this->status];
             return $this;

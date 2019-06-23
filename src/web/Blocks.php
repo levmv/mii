@@ -115,7 +115,7 @@ class Blocks extends Component
             $block_path .= $name;
 
             foreach ($this->libraries as $library_path) {
-                if (is_file($library_path . $block_path . '.php')) {
+                if (is_readable($library_path . $block_path . '.php')) {
                     return $library_path . $block_path . '.php';
                 }
             }

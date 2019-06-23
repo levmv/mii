@@ -5,12 +5,6 @@ namespace mii\util;
 
 class Arr
 {
-
-    /**
-     * @var  string  default delimiter for path()
-     */
-    public static $delimiter = '.';
-
     /**
      * Tests if an array is associative or not.
      *
@@ -60,8 +54,8 @@ class Arr
      * @param   string $delimiter key path delimiter
      * @return  mixed
      */
-    public static function path($array, $path, $default = null, $delimiter = null) {
-        if (!static::is_array($array)) {
+    public static function path($array, $path, $default = null, $delimiter = '.') {
+        if (!is_array($array) && !static::is_array($array)) {
             // This is not an array!
             return $default;
         }
@@ -73,11 +67,6 @@ class Arr
             if (array_key_exists($path, $array)) {
                 // No need to do extra processing
                 return $array[$path];
-            }
-
-            if (!$delimiter) {
-                // Use the default delimiter
-                $delimiter = static::$delimiter;
             }
 
             // Remove  delimiters and spaces

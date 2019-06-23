@@ -3,7 +3,6 @@
 namespace mii\web;
 
 use mii\core\Component;
-use mii\core\InvalidRouteException;
 
 
 class Request extends Component
@@ -71,7 +70,7 @@ class Request extends Component
     /**
      * @var  string  Restrict the domain that the cookie is available to
      */
-    public $cookie_domain = null;
+    public $cookie_domain = '';
 
     /**
      * @var  boolean  Only transmit cookies over secure connections
@@ -397,7 +396,7 @@ class Request extends Component
      * @param   integer $expiration lifetime in seconds
      * @return  boolean
      */
-    public function set_cookie($name, $value, $expiration = null) {
+    public function set_cookie(string $name, string $value, int $expiration = null) {
         if ($expiration === null) {
             // Use the default expiration
             $expiration = $this->cookie_expiration;
@@ -409,7 +408,7 @@ class Request extends Component
         }
 
         // Add the salt to the cookie value
-        $value = $this->salt($name, $value) . '~' . $value;
+        $value = $this->salt($name, (string) $value) . '~' . $value;
 
         if (PHP_VERSION_ID >= 70300) {
             return setcookie($name, $value,
