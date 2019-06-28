@@ -27,7 +27,7 @@ class ErrorHandler extends Component
 
 
     public function register() {
-        ini_set('display_errors', 'off');
+        ini_set('display_errors', false);
         set_exception_handler([$this, 'handle_exception']);
         set_error_handler([$this, 'handle_error']);
 

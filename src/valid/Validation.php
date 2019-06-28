@@ -206,7 +206,7 @@ class Validation
                 if (is_array($rule)) {
 
                     // Allows rule('field', array(':model', 'some_rule'));
-                    if (is_string($rule[0]) AND array_key_exists($rule[0], $this->_bound)) {
+                    if (is_string($rule[0]) AND \array_key_exists($rule[0], $this->_bound)) {
                         // Replace with bound value
                         $rule[0] = $this->_bound[$rule[0]];
                     }

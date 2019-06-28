@@ -61,14 +61,14 @@ class Session extends Component
     public function get($key, $default = null) {
         $this->open();
 
-        return array_key_exists($key, $this->_data) ? $this->_data[$key] : $default;
+        return \array_key_exists($key, $this->_data) ? $this->_data[$key] : $default;
     }
 
 
     public function has($key) {
         $this->open();
 
-        return array_key_exists($key, $this->_data);
+        return \array_key_exists($key, $this->_data);
     }
 
 

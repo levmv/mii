@@ -241,7 +241,7 @@ class Router extends Component
                 return false;
         }
 
-        $params = isset($route[static::R_VALUES]) ? $route[static::R_VALUES] : [];
+        $params = $route[static::R_VALUES] ?? [];
 
         foreach ($matches as $key => $value) {
             if (is_int($key)) {

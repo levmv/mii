@@ -234,7 +234,7 @@ class ORM
 
     public function __set($key, $value)
     {
-        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+        if (\array_key_exists($key, $this->_data)) {
 
             if ($this->__loaded !== false) {
                 if ($value !== $this->_data[$key]) {
@@ -261,14 +261,14 @@ class ORM
      */
     public function __get($key)
     {
-        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+        if (isset($this->_data[$key]) OR \array_key_exists($key, $this->_data)) {
 
             return ($this->_serialize_fields !== null && $this->__loaded && in_array($key, $this->_serialize_fields, true))
                 ? $this->_unserialize_value($key)
                 : $this->_data[$key];
         }
 
-        if (array_key_exists($key, $this->_unmapped))
+        if (\array_key_exists($key, $this->_unmapped))
             return $this->_unmapped[$key];
 
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
@@ -276,14 +276,14 @@ class ORM
 
     public function get(string $key)
     {
-        if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+        if (isset($this->_data[$key]) OR \array_key_exists($key, $this->_data)) {
 
             return ($this->_serialize_fields !== null && $this->__loaded && in_array($key, $this->_serialize_fields, true))
                 ? $this->_unserialize_value($key)
                 : $this->_data[$key];
         }
 
-        if (array_key_exists($key, $this->_unmapped))
+        if (\array_key_exists($key, $this->_unmapped))
             return $this->_unmapped[$key];
 
         throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
@@ -301,7 +301,7 @@ class ORM
         }
 
         foreach ($values as $key => $value) {
-            if (isset($this->_data[$key]) OR array_key_exists($key, $this->_data)) {
+            if (\array_key_exists($key, $this->_data)) {
 
                 if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
                     $this->_serialize_cache[$key] = $value;
@@ -328,7 +328,7 @@ class ORM
      */
     public function __isset($key)
     {
-        return array_key_exists($key, $this->_data) OR array_key_exists($key, $this->_unmapped);
+        return \array_key_exists($key, $this->_data) OR \array_key_exists($key, $this->_unmapped);
     }
 
     /**
@@ -541,7 +541,7 @@ class ORM
 
     protected function _unserialize_value($key)
     {
-        if (!array_key_exists($key, $this->_serialize_cache)) {
+        if (!\array_key_exists($key, $this->_serialize_cache)) {
             assert(is_string($this->_data[$key]), 'Unserialized field must have a string value');
             $this->_serialize_cache[$key] = json_decode($this->_data[$key], TRUE);
         }

@@ -161,7 +161,7 @@ class Block
 
     public function get(string $key, $default = NULL) {
 
-        if (array_key_exists($key, $this->_data)) {
+        if (\array_key_exists($key, $this->_data)) {
             return $this->_data[$key];
         } else {
             if ($default !== NULL)

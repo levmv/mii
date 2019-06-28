@@ -100,7 +100,7 @@ class Controller
         $action_params = [];
         foreach ($method->getParameters() as $param) {
             $name = $param->getName();
-            if (array_key_exists($name, $params)) {
+            if (\array_key_exists($name, $params)) {
                 if ($param->isArray()) {
                     $args[] = $action_params[$name] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
                 } elseif (!is_array($params[$name])) {

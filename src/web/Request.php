@@ -145,7 +145,7 @@ class Request extends Component
 
         if (!$this->_hostname) {
             $http = $this->is_secure() ? 'https' : 'http';
-            $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+            $domain = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'];
             $this->_hostname = $http . '://' . $domain;
         }
 
@@ -153,15 +153,13 @@ class Request extends Component
     }
 
     public function get_user_agent(): string {
-        return $_SERVER['HTTP_USER_AGENT'];
+        return $_SERVER['HTTP_USER_AGENT'] ?? '';
     }
 
 
-    public function get_content_type()
+    public function get_content_type() : string
     {
-        if (isset($_SERVER['CONTENT_TYPE'])) {
-            return $_SERVER['CONTENT_TYPE'];
-        }
+        return $_SERVER['CONTENT_TYPE'] ?? '';
     }
 
 
@@ -203,17 +201,14 @@ class Request extends Component
      */
     public function get($key = null, $default = null) {
         if ($key) {
-            return isset($_GET[$key]) ? $_GET[$key] : $default;
+            return $_GET[$key] ?? $default;
         }
 
         return $_GET;
     }
 
     public function param($key, $default = null) {
-        if (isset($this->params[$key]))
-            return $this->params[$key];
-
-        return $default;
+        return $this->params[$key] ?? $default;
     }
 
 
@@ -281,7 +276,7 @@ class Request extends Component
             return $_POST;
         }
 
-        return isset($_POST[$key]) ? $_POST[$key] : $default;
+        return $_POST[$key] ?? $default;
     }
 
     /**
@@ -345,7 +340,7 @@ class Request extends Component
             return $this->_json_items;
         }
 
-        return isset($this->_json_items[$key]) ? $this->_json_items[$key] : $default;
+        return $this->_json_items[$key] ?? $default;
     }
 
 

@@ -292,7 +292,7 @@ class Form
 
     public function field($type, $name, $attributes = null): string {
 
-        if (!array_key_exists($name, $this->_fields)) {
+        if (!\array_key_exists($name, $this->_fields)) {
             $this->_fields[$name] = null;
         }
 
@@ -323,7 +323,7 @@ class Form
                 if ($attributes AND isset($attributes['multiple']) AND $attributes['multiple'] !== false) {
                     return HTML::select(
                         $name . '[]',
-                        isset($this->_select_data[$name]) ? $this->_select_data[$name] : [],
+                        $this->_select_data[$name] ?? [],
                         $this->_fields[$name],
                         $attributes
                     );

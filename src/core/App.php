@@ -59,10 +59,8 @@ abstract class App
                 $this->_config['components'][$name]['class'] = $class;
             }
         }
-        // register Error handler
-        if ($this->has('error')) {
-            $this->error->register();
-        }
+
+        $this->error->register();
     }
 
     abstract function run();

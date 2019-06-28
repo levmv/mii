@@ -64,7 +64,7 @@ class Arr
             // The path has already been separated into keys
             $keys = $path;
         } else {
-            if (array_key_exists($path, $array)) {
+            if (\array_key_exists($path, $array)) {
                 // No need to do extra processing
                 return $array[$path];
             }
@@ -186,7 +186,7 @@ class Arr
      * @return  mixed
      */
     public static function get($array, $key, $default = null) {
-        return isset($array[$key]) ? $array[$key] : $default;
+        return $array[$key] ?? $default;
     }
 
     /**

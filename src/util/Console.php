@@ -784,7 +784,7 @@ class Console
             }
             static::output(" ? - Show help");
             goto top;
-        } elseif (!array_key_exists($input, $options)) {
+        } elseif (!\array_key_exists($input, $options)) {
             goto top;
         }
 
