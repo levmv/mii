@@ -5,7 +5,7 @@ $error_id = uniqid('error');
 
 ?>
 <style type="text/css">
-    #kohana_error {
+    #mii_error {
         background: #ddd;
         font-size: 1em;
         font-family: sans-serif;
@@ -13,8 +13,8 @@ $error_id = uniqid('error');
         color: #111;
     }
 
-    #kohana_error h1,
-    #kohana_error h2 {
+    #mii_error h1,
+    #mii_error h2 {
         margin: 0;
         padding: 1em;
         font-size: 1em;
@@ -23,37 +23,37 @@ $error_id = uniqid('error');
         color: #fff;
     }
 
-    #kohana_error h1 a,
-    #kohana_error h2 a {
+    #mii_error h1 a,
+    #mii_error h2 a {
         color: #fff;
     }
 
-    #kohana_error h2 {
+    #mii_error h2 {
         background: #222;
     }
 
-    #kohana_error h3 {
+    #mii_error h3 {
         margin: 0;
         padding: 0.4em 0 0;
         font-size: 1em;
         font-weight: normal;
     }
 
-    #kohana_error p {
+    #mii_error p {
         margin: 0;
         padding: 0.2em 0;
     }
 
-    #kohana_error a {
+    #mii_error a {
         color: #1b323b;
     }
 
-    #kohana_error pre {
+    #mii_error pre {
         overflow: auto;
         white-space: pre-wrap;
     }
 
-    #kohana_error table {
+    #mii_error table {
         width: 100%;
         display: block;
         margin: 0 0 0.4em;
@@ -62,19 +62,19 @@ $error_id = uniqid('error');
         background: #fff;
     }
 
-    #kohana_error table td {
+    #mii_error table td {
         border: solid 1px #ddd;
         text-align: left;
         vertical-align: top;
         padding: 0.4em;
     }
 
-    #kohana_error div.content {
+    #mii_error div.content {
         padding: 0.4em 1em 1em;
         overflow: hidden;
     }
 
-    #kohana_error pre.source {
+    #mii_error pre.source {
         margin: 0 0 1em;
         padding: 0.4em;
         background: #fff;
@@ -82,26 +82,26 @@ $error_id = uniqid('error');
         line-height: 1.2em;
     }
 
-    #kohana_error pre.source span.line {
+    #mii_error pre.source span.line {
         display: block;
     }
 
-    #kohana_error pre.source span.highlight {
+    #mii_error pre.source span.highlight {
         background: #f0eb96;
     }
 
-    #kohana_error pre.source span.line span.number {
+    #mii_error pre.source span.line span.number {
         color: #666;
     }
 
-    #kohana_error ol.trace {
+    #mii_error ol.trace {
         display: block;
         margin: 0 0 0 2em;
         padding: 0;
         list-style: decimal;
     }
 
-    #kohana_error ol.trace li {
+    #mii_error ol.trace li {
         margin: 0;
         padding: 0;
     }
@@ -131,7 +131,7 @@ $error_id = uniqid('error');
         return false;
     }
 </script>
-<div id="kohana_error">
+<div id="mii_error">
     <h1><span class="type"><?php echo $class ?> [ <?php echo $code ?> ]:</span> <span
                 class="message"><?php echo \mii\util\HTML::chars($message) ?></span></h1>
     <div id="<?php echo $error_id ?>" class="content">

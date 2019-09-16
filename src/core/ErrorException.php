@@ -3,12 +3,6 @@
 namespace mii\core;
 
 
-/**
- * ErrorException represents a PHP error.
- *
- * @author Alexander Makarov <sam@rmcreative.ru>
- * @since 2.0
- */
 class ErrorException extends \ErrorException
 {
     /**
@@ -49,16 +43,6 @@ class ErrorException extends \ErrorException
             $ref->setAccessible(true);
             $ref->setValue($this, $trace);
         }
-    }
-
-    /**
-     * Returns if error is one of fatal type.
-     *
-     * @param array $error error got from error_get_last()
-     * @return boolean if error is one of fatal type
-     */
-    public static function is_fatal_error($error) {
-        return isset($error['type']) && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING]);
     }
 
     /**

@@ -6,11 +6,6 @@ namespace mii\core;
 abstract class Exception extends \Exception
 {
 
-    /**
-     * @var  Request    Request instance that triggered this exception.
-     */
-    protected $_request;
-
 
     /**
      * Creates a new translated exception.

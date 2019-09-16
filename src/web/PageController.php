@@ -102,7 +102,7 @@ class PageController extends Controller
         return $this->response;
     }
 
-    public function setup_index($block_name = false): void {
+    protected function setup_index($block_name = false): void {
         $name = ($block_name) ? $block_name : $this->index_block_name;
 
         $this->index_block = block($name)
@@ -113,7 +113,7 @@ class PageController extends Controller
     }
 
 
-    public function setup_layout($block_name = null, $depends = null): void {
+    protected function setup_layout($block_name = null, $depends = null): void {
         if ($block_name === null)
             $block_name = $this->layout_block_name;
 

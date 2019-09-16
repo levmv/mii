@@ -2,23 +2,9 @@
 
 namespace mii\util;
 
-/**
- * Number helper class. Provides additional formatting methods that for working
- * with numbers.
- *
- * @package    Kohana
- * @category   Helpers
- * @author     Kohana Team
- * @copyright  (c) 2009-2012 Kohana Team
- * @license    http://kohanaframework.org/license
- */
+
 class Num
 {
-
-    const ROUND_HALF_UP = 1;
-    const ROUND_HALF_DOWN = 2;
-    const ROUND_HALF_EVEN = 3;
-    const ROUND_HALF_ODD = 4;
 
     /**
      * @var  array  Valid byte units => power of 2 that defines the unit's size
@@ -164,7 +150,6 @@ class Num
     }
 
 
-    public static $words = array('комментарий', 'комментария', 'комментариев');
 
     /**
      * Declination of number

@@ -147,10 +147,7 @@ class Database extends Component
         }
 
         if ($result === false || $this->_connection->errno) {
-            if ($benchmark) {
-                // This benchmark is worthless
-                \mii\util\Profiler::delete($benchmark);
-            }
+            assert(isset($benchmark) && \mii\util\Profiler::delete($benchmark) || true);
 
             throw new DatabaseException(':error [ :query ]', [
                 ':error' => $this->_connection->error,
