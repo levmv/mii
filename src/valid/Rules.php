@@ -2,7 +2,7 @@
 
 namespace mii\valid;
 
-use mii\util\Num;
+use mii\util\Text;
 use mii\web\UploadedFile;
 
 class Rules
@@ -470,7 +470,7 @@ class Rules
      * Validation rule to test if an uploaded file is allowed by file size.
      * File sizes are defined as: SB, where S is the size (1, 8.5, 300, etc.)
      * and B is the byte unit (K, MiB, GB, etc.). All valid byte units are
-     * defined in Num::$byte_units
+     * defined in Text::$byte_units
      *
      *     $array->rule('file', 'file_size', array(':value', '1M'))
      *     $array->rule('file', 'file_size', array(':value', '2.5KiB'))
@@ -491,7 +491,7 @@ class Rules
         }
 
         // Convert the provided size to bytes for comparison
-        $size = Num::bytes($size);
+        $size = Text::bytes($size);
 
 
         return ($file->size <=> $size) === $dir;

@@ -641,7 +641,7 @@ class Date
         } elseif ($offset < Date::HOUR) {
             $minutes = round($offset / 60);
 
-            $span = $minutes . ' ' . Num::decl($minutes, array('минуту', 'минуты', 'минут')) . ' назад';
+            $span = $minutes . ' ' . Text::decl($minutes, array('минуту', 'минуты', 'минут')) . ' назад';
         } elseif ($offset == Date::HOUR) {
             $span = 'час назад';
         } elseif ($offset < (Date::HOUR * 2)) {

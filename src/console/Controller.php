@@ -97,22 +97,19 @@ class Controller
 
         $args = [];
         $missing = [];
-        $action_params = [];
         foreach ($method->getParameters() as $param) {
             $name = $param->getName();
             if (\array_key_exists($name, $params)) {
                 if ($param->isArray()) {
-                    $args[] = $action_params[$name] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
+                    $args[] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
                 } elseif (!is_array($params[$name])) {
-                    $args[] = $action_params[$name] = $params[$name];
+                    $args[] = $params[$name];
                 } else {
-                    throw new CliException('Invalid data received for parameter ":param".', [
-                        ':param' => $name,
-                    ]);
+                    throw new CliException("Invalid data received for parameter \"$name\".");
                 }
                 unset($params[$name]);
             } elseif ($param->isDefaultValueAvailable()) {
-                $args[] = $action_params[$name] = $param->getDefaultValue();
+                $args[] = $param->getDefaultValue();
             } else {
                 $missing[] = $name;
             }
@@ -121,12 +118,9 @@ class Controller
             if($missing[0] === 'argv' AND $action === 'index') {
                 $args = [$params]; // Emulate old behavior for backwards compatibility
             } else {
-                throw new CliException( 'Missing required parameters: ":params"', [
-                    ':params' => implode(', ', $missing),
-                ]);
+                throw new CliException( 'Missing required parameters: "'.implode(', ', $missing).'"');
             }
         }
-        $this->action_params = $action_params;
 
         return call_user_func_array([$this, $action], $args);
     }

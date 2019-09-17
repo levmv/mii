@@ -149,8 +149,7 @@ class Menu
             if ($default !== NULL)
                 return $default;
 
-            throw new Exception('Menu variable is not set: :var',
-                [':var' => $key]);
+            throw new Exception("Menu variable is not set: $key");
         }
     }
 

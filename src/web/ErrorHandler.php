@@ -4,8 +4,6 @@ namespace mii\web;
 
 use mii\core\ErrorException;
 use mii\core\Exception;
-use mii\core\UserException;
-use mii\util\Debug;
 
 class ErrorHandler extends \mii\core\ErrorHandler
 {
@@ -50,6 +48,8 @@ class ErrorHandler extends \mii\core\ErrorHandler
                 $response->content($this->render_file(__DIR__ . '/Exception/error.php', $params));
             }
 
+        } elseif ($response->format === Response::FORMAT_JSON) {
+            $response->content = $this->exception_to_array($exception);
         } else {
             $response->content(Exception::text($exception));
         }
@@ -99,7 +99,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
             'code' => $e->getCode(),
         ];
         if ($e instanceof HttpException) {
-            $array['status'] = $e->statusCode;
+            $array['status'] = $e->status_code;
         }
         if (config('debug')) {
             $array['type'] = get_class($e);

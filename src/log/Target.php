@@ -71,7 +71,7 @@ abstract class Target extends Component
         $level = Logger::$level_names[$level];
         if (!is_string($text)) {
 
-            if ($text instanceof \Exception || $text instanceof \Throwable || $text instanceof Exception) {
+            if ($text instanceof \Throwable) {
                 $text = (string)$text;
             } else {
                 $text = var_export($text);

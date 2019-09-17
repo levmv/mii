@@ -1,12 +1,10 @@
 <?php
 
 namespace mii\rest;
-use mii\util\Arr;
 
-/**
- * Database result wrapper.
- */
+
 class Response {
+
     public $headers = [];
 
     public $content;
@@ -17,24 +15,7 @@ class Response {
 
     protected $_error;
 
-    // Raw result resource
-    protected $_response;
-
-    // Total number of rows and current row
-    protected $_total_rows = 0;
-    protected $_current_row = 0;
-
-    // Return rows as an object or associative array
-    protected $_as_object;
-
-    // Parameters for __construct when using object results
-    protected $_object_params = NULL;
-
-    protected $_internal_row = 0;
-
-    protected $_index_by;
-
-    protected $_pagination;
+    protected $_result;
 
     /**
      * Sets the total number of rows and stores the result locally.
@@ -90,7 +71,7 @@ class Response {
         return $this->content[$name] ?? $default;
     }
 
-    public function iterate($name = null, $as_object = false) {
+    public function iterate($name = null) {
         if($name === null) {
             foreach($this->content as $value)
                 yield $value;

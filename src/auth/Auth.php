@@ -31,8 +31,6 @@ class Auth extends Component
 
     protected $token_cookie = 'miia';
 
-    protected $hash_key;
-
 
     /**
      * Loads Session and configuration options.
@@ -98,7 +96,7 @@ class Auth extends Component
         if (empty($password))
             return false;
 
-        $username = mb_strtolower($username, Mii::$app->charset);
+        $username = mb_strtolower($username, 'utf-8');
 
         $user = (new $this->user_model)->find_user($username);
 

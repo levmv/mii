@@ -354,9 +354,7 @@ class Router extends Component
                         $replace = str_replace($key, $defaults[$param], $replace);
                     } else {
                         // Ungrouped parameters are required
-                        throw new InvalidRouteException('Required route parameter not passed: :param', [
-                            ':param' => $param,
-                        ]);
+                        throw new InvalidRouteException("Required route parameter not passed: $param");
                     }
                 } else {
                     // This group has missing parameters
@@ -380,9 +378,7 @@ class Router extends Component
                     $params[$param] = $this->_defaults[$param];
                 } else {
                     // Ungrouped parameters are required
-                    throw new InvalidRouteException('Required route parameter not passed: :param', [
-                        ':param' => $param,
-                    ]);
+                    throw new InvalidRouteException("Required route parameter not passed: $param");
                 }
             }
 

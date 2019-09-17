@@ -3,34 +3,8 @@
 namespace mii\core;
 
 
-abstract class Exception extends \Exception
+class Exception extends \Exception
 {
-
-
-    /**
-     * Creates a new translated exception.
-     *
-     *     throw new Exception('Something went terrible wrong, :user',
-     *         array(':user' => $user));
-     *
-     * @param   string $message error message
-     * @param   array $variables translation variables
-     * @param   integer|string $code the exception code
-     * @param   Exception $previous Previous exception
-     * @return  void
-     */
-    public function __construct($message = "", array $variables = NULL, $code = 0, Exception $previous = NULL) {
-
-        // Set the message
-        $message = empty($variables) ? $message : strtr($message, $variables);
-
-        // Pass the message and integer code to the parent
-        parent::__construct($message, (int)$code, $previous);
-
-        // Save the unmodified code
-        // @link http://bugs.php.net/39615
-        $this->code = $code;
-    }
 
     /**
      * Magic object-to-string method.
@@ -42,11 +16,6 @@ abstract class Exception extends \Exception
      */
     public function __toString() {
         return static::text($this);
-    }
-
-
-    public function get_name() {
-        return 'Exception';
     }
 
 

@@ -287,13 +287,6 @@ class Request extends Component
         return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
-    /**
-     * Returns whether this is a PJAX request
-     * @return boolean whether this is a PJAX request
-     */
-    public function is_pjax() {
-        return $this->is_ajax() && !empty($_SERVER['HTTP_X_PJAX']);
-    }
 
     public function is_post() {
         return $this->method() === 'POST';

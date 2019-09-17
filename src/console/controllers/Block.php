@@ -25,9 +25,7 @@ class Block extends Controller
 
 
         if (empty($list)) {
-            // Old way: list of blocks returned by method block_rules();
-            $this->warning('Warning: block_rules() method is deprecated. Please, use config(console.block.rules)');
-            $this->blocks = $this->block_rules();
+            $this->warning('Warning: console.block.rules is empty');
         } else {
             // New way - get from the config
 
@@ -54,19 +52,6 @@ class Block extends Controller
         }
 
         $this->input_path = Mii::resolve(config('console.block.input_path', '@root/node_modules/'));
-    }
-
-    /**
-     * @deprecated
-     * @return array
-     */
-    public function block_rules() {
-        return [
-            path('app') . '/blocks' => [
-                'i_jquery' => 'do_jquery',
-                'i_fancybox' => 'do_fancybox'
-            ],
-        ];
     }
 
 

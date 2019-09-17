@@ -271,7 +271,7 @@ class ORM
         if (\array_key_exists($key, $this->_unmapped))
             return $this->_unmapped[$key];
 
-        throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
+        throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!');
     }
 
     public function get(string $key)
@@ -286,7 +286,7 @@ class ORM
         if (\array_key_exists($key, $this->_unmapped))
             return $this->_unmapped[$key];
 
-        throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!', [], '');
+        throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!');
     }
 
     public function set($values, $value = NULL): ORM
@@ -510,7 +510,7 @@ class ORM
             return;
         }
 
-        throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
+        throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!');
     }
 
     protected function _invalidate_serialize_cache(): void

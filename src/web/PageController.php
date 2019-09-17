@@ -126,7 +126,7 @@ class PageController extends Controller
     }
 
     protected function on_access_denied() {
-        throw new ForbiddenHttpException('User has no rights to access :page', [':page' => $this->request->uri()]);
+        throw new ForbiddenHttpException('User has no rights to access '.$this->request->uri());
     }
 
     public function execute(string $action, $params) {

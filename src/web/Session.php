@@ -220,7 +220,7 @@ class Session extends Component
             $this->_data = [];
 
             // Make sure the session cannot be restarted
-            Cookie::delete($this->name);
+            \Mii::$app->request->delete_cookie($this->name);
         }
     }
 

@@ -4,7 +4,7 @@ namespace mii\web;
 
 use Mii;
 use mii\core\Component;
-use mii\core\ErrorException;
+use mii\util\FS;
 use mii\util\HTML;
 
 class Blocks extends Component
@@ -166,7 +166,7 @@ class Blocks extends Component
         $this->base_path = Mii::resolve($this->base_path);
 
         if (!is_dir($this->base_path))
-            mkdir($this->base_path, 0777, true);
+            FS::mkdir($this->base_path, 0777, true);
 
         foreach ($this->_blocks as $block_name => $block) {
             if ($block->__has_parent)
@@ -353,7 +353,7 @@ class Blocks extends Component
                     copy($file, $output);
                 } catch (\Exception $e) {
                     $dir = dirname($output);
-                    mkdir($dir, 0777, true);
+                    FS::mkdir($dir, 0777, true);
                     copy($file['path'], $output);
                 }
             }

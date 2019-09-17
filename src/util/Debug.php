@@ -270,7 +270,7 @@ class Debug
      *     echo implode('<br/>', Debug::trace());
      *
      * @param   array $trace
-     * @return  string
+     * @return  array
      */
     public static function trace(array $trace = NULL) {
         if ($trace === NULL) {

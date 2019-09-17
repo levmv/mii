@@ -27,9 +27,7 @@ class App extends \mii\core\App
             $params = $this->router->match($uri);
 
             if ($params === false) {
-                throw new InvalidRouteException('Unable to find a route to match the URI: :uri', [
-                    ':uri' => $uri
-                ]);
+                throw new InvalidRouteException("Unable to find a route to match the URI: $uri");
             }
 
             $this->request->controller = $controller_name = $params['controller'];

@@ -2,54 +2,11 @@
 
 namespace mii\util;
 
-/**
- * Text helper class. Provides simple methods for working with text.
- *
- * @package    Kohana
- * @category   Helpers
- * @author     Kohana Team
- * @copyright  (c) 2007-2012 Kohana Team
- * @license    http://kohanaframework.org/license
- */
+
+use mii\core\Exception;
+
 class Text
 {
-
-    /**
-     * @var  array   number units and text equivalents
-     */
-    public static $units = array(
-        1000000000 => 'billion',
-        1000000 => 'million',
-        1000 => 'thousand',
-        100 => 'hundred',
-        90 => 'ninety',
-        80 => 'eighty',
-        70 => 'seventy',
-        60 => 'sixty',
-        50 => 'fifty',
-        40 => 'fourty',
-        30 => 'thirty',
-        20 => 'twenty',
-        19 => 'nineteen',
-        18 => 'eighteen',
-        17 => 'seventeen',
-        16 => 'sixteen',
-        15 => 'fifteen',
-        14 => 'fourteen',
-        13 => 'thirteen',
-        12 => 'twelve',
-        11 => 'eleven',
-        10 => 'ten',
-        9 => 'nine',
-        8 => 'eight',
-        7 => 'seven',
-        6 => 'six',
-        5 => 'five',
-        4 => 'four',
-        3 => 'three',
-        2 => 'two',
-        1 => 'one',
-    );
 
     /**
      * Limits a phrase to a given number of words.
@@ -112,30 +69,6 @@ class Text
         return rtrim($matches[0]) . ((strlen($matches[0]) === strlen($str)) ? '' : $end_char);
     }
 
-    /**
-     * Alternates between two or more strings.
-     *
-     *     echo Text::alternate('one', 'two'); // "one"
-     *     echo Text::alternate('one', 'two'); // "two"
-     *     echo Text::alternate('one', 'two'); // "one"
-     *
-     * Note that using multiple iterations of different strings may produce
-     * unexpected results.
-     *
-     * @param   string $str,... strings to alternate between
-     * @return  string
-     */
-    public static function alternate() {
-        static $i;
-
-        if (func_num_args() === 0) {
-            $i = 0;
-            return '';
-        }
-
-        $args = func_get_args();
-        return $args[($i++ % count($args))];
-    }
 
     /**
      * Generates a random string of a given type and length.
@@ -171,8 +104,6 @@ class Text
             $type = 'alnum';
         }
 
-        $utf8 = FALSE;
-
         switch ($type) {
             case 'alnum':
                 $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -193,13 +124,12 @@ class Text
                 $pool = '2345679ACDEFHJKLMNPRSTUVWXYZ';
                 break;
             default:
-                $pool = (string)$type;
-                $utf8 = !UTF8::is_ascii($pool);
+                $pool = (string) $type;
                 break;
         }
 
         // Split the pool into an array of characters
-        $pool = ($utf8 === TRUE) ? UTF8::str_split($pool, 1) : str_split($pool, 1);
+        $pool = str_split($pool, 1);
 
         // Largest pool key
         $max = count($pool) - 1;
@@ -434,110 +364,6 @@ class Text
     }
 
     /**
-     * Returns human readable sizes. Based on original functions written by
-     * [Aidan Lister](http://aidanlister.com/repos/v/function.size_readable.php)
-     * and [Quentin Zervaas](http://www.phpriot.com/d/code/strings/filesize-format/).
-     *
-     *     echo Text::bytes(filesize($file));
-     *
-     * @param   integer $bytes size in bytes
-     * @param   string $force_unit a definitive unit
-     * @param   string $format the return string format
-     * @param   boolean $si whether to use SI prefixes or IEC
-     * @return  string
-     */
-    public static function bytes($bytes, $force_unit = NULL, $format = NULL, $si = TRUE) {
-        // Format string
-        $format = ($format === NULL) ? '%01.2f %s' : (string)$format;
-
-        // IEC prefixes (binary)
-        if ($si == FALSE OR strpos($force_unit, 'i') !== FALSE) {
-            $units = array('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB');
-            $mod = 1024;
-        } // SI prefixes (decimal)
-        else {
-            $units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
-            $mod = 1000;
-        }
-
-        // Determine unit to use
-        if (($power = array_search((string)$force_unit, $units)) === FALSE) {
-            $power = ($bytes > 0) ? floor(log($bytes, $mod)) : 0;
-        }
-
-        return sprintf($format, $bytes / pow($mod, $power), $units[$power]);
-    }
-
-    /**
-     * Format a number to human-readable text.
-     *
-     *     // Display: one thousand and twenty-four
-     *     echo Text::number(1024);
-     *
-     *     // Display: five million, six hundred and thirty-two
-     *     echo Text::number(5000632);
-     *
-     * @param   integer $number number to format
-     * @return  string
-     * @since   3.0.8
-     */
-    public static function number($number) {
-        // The number must always be an integer
-        $number = (int)$number;
-
-        // Uncompiled text version
-        $text = array();
-
-        // Last matched unit within the loop
-        $last_unit = NULL;
-
-        // The last matched item within the loop
-        $last_item = '';
-
-        foreach (Text::$units as $unit => $name) {
-            if ($number / $unit >= 1) {
-                // $value = the number of times the number is divisble by unit
-                $number -= $unit * ($value = (int)floor($number / $unit));
-                // Temporary var for textifying the current unit
-                $item = '';
-
-                if ($unit < 100) {
-                    if ($last_unit < 100 AND $last_unit >= 20) {
-                        $last_item .= '-' . $name;
-                    } else {
-                        $item = $name;
-                    }
-                } else {
-                    $item = Text::number($value) . ' ' . $name;
-                }
-
-                // In the situation that we need to make a composite number (i.e. twenty-three)
-                // then we need to modify the previous entry
-                if (empty($item)) {
-                    array_pop($text);
-
-                    $item = $last_item;
-                }
-
-                $last_item = $text[] = $item;
-                $last_unit = $unit;
-            }
-        }
-
-        if (count($text) > 1) {
-            $and = array_pop($text);
-        }
-
-        $text = implode(', ', $text);
-
-        if (isset($and)) {
-            $text .= ' and ' . $and;
-        }
-
-        return $text;
-    }
-
-    /**
      * Prevents [widow words](http://www.shauninman.com/archive/2006/08/22/widont_wordpress_plugin)
      * by inserting a non-breaking space between the last two words.
      *
@@ -598,6 +424,71 @@ class Text
 
     public static function base64url_decode($data) {
         return base64_decode(strtr($data, '-_', '+/'));
+    }
+
+
+    /**
+     * Declination of number
+     * @param $number
+     * @param mixed $array
+     * @return mixed
+     */
+    public static function decl($number, $array) {
+
+        $cases = array(2, 0, 1, 1, 1, 2);
+
+        if ($number % 100 > 4 AND $number % 100 < 20) {
+            return $array[2];
+        } else {
+            return $array[$cases[min($number % 10, 5)]];
+        }
+    }
+
+
+
+    public static $byte_units = array
+    (
+        'B' => 0,
+        'K' => 10,
+        'KB' => 10,
+        'M' => 20,
+        'MB' => 20,
+        'G' => 30,
+        'GB' => 30
+    );
+
+
+    /**
+     * Converts a file size number to a byte value. File sizes are defined in
+     * the format: SB, where S is the size (1, 8.5, 300, etc.) and B is the
+     * byte unit (K, Mb, GB, etc.). All valid byte units are defined in
+     * Num::$byte_units
+     *
+     *     echo Text::bytes('200K');  // 204800
+     *     echo Text::bytes('5MB');  // 5242880
+     *     echo Text::bytes('1000');  // 1000
+     *     echo Text::bytes('2.5GB'); // 2684354560
+     *
+     * @param   string $bytes file size in SB format
+     * @return  float
+     */
+    public static function bytes($size) {
+        // Prepare the size
+        $size = trim((string)$size);
+        // Construct an OR list of byte units for the regex
+        $accepted = implode('|', array_keys(Text::$byte_units));
+        // Construct the regex pattern for verifying the size format
+        $pattern = '/^([0-9]+(?:\.[0-9]+)?)(' . $accepted . ')?$/Di';
+        // Verify the size format and store the matching parts
+        if (!preg_match($pattern, $size, $matches))
+            throw new Exception('The byte unit size, "'.$size.'", is improperly formatted.');
+        // Find the float value of the size
+        $size = (float)$matches[1];
+        // Find the actual unit, assume B if no unit specified
+        $unit = Arr::get($matches, 2, 'B');
+        // Convert the size into bytes
+        $bytes = $size * pow(2, Text::$byte_units[$unit]);
+        return $bytes;
     }
 
 }

@@ -8,7 +8,6 @@ use mii\util\FS;
 
 class File extends Target
 {
-    protected $base_path;
     protected $file = '';
 
     public function init(array $config = []): void

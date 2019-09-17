@@ -114,11 +114,7 @@ class Arr
      * @param mixed $value Value to set
      * @param string $delimiter Path delimiter
      */
-    public static function set_path(&$array, $path, $value, $delimiter = null): void {
-        if (!$delimiter) {
-            // Use the default delimiter
-            $delimiter = static::$delimiter;
-        }
+    public static function set_path(&$array, $path, $value, $delimiter = '.'): void {
 
         // The path has already been separated into keys
         $keys = $path;

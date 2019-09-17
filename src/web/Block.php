@@ -167,8 +167,7 @@ class Block
             if ($default !== NULL)
                 return $default;
 
-            throw new Exception('Block variable is not set: :var',
-                [':var' => $key]);
+            throw new Exception("Block variable is not set: $key");
         }
     }
 
@@ -255,7 +254,7 @@ class Block
             $this->_file = Mii::$app->blocks->get_block_php_file($this->__name);
 
             if($this->_file === null)
-                throw new Exception('Block :block does not have a php file', [':block' => $this->__name]);
+                throw new Exception('Block '.$this->__name.' does not have a php file');
         }
 
         assert(

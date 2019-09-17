@@ -254,7 +254,7 @@ class Assets extends Controller
         } elseif(isset($this->sets[$set_name])) {
             $set = $this->sets[$set_name];
         } else {
-            throw new ErrorException("Unknow blocks set name: $set_name");
+            throw new CliException("Unknow blocks set name: $set_name");
         }
 
         $set = array_replace_recursive($default_set, $set);
@@ -297,7 +297,7 @@ class Assets extends Controller
                 if(!is_array($data[$type]))
                     $data[$type] = (array) $data[$type];
 
-                $result_file_name = $this->build_file($set_name, $filename, $data[$type], $type);
+                $result_file_name = $this->build_file($filename, $data[$type], $type);
 
                 foreach($data[$type] as $block_name) {
                     $this->results[$set_name][$type][$block_name] = $result_file_name;
@@ -307,7 +307,7 @@ class Assets extends Controller
     }
 
 
-    protected function build_file($set_name, $filename, $blocks, $type) : string {
+    protected function build_file($filename, $blocks, $type) : string {
 
         $out_path = $this->base_path .'/';
 

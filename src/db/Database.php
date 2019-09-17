@@ -149,10 +149,7 @@ class Database extends Component
         if ($result === false || $this->_connection->errno) {
             assert(isset($benchmark) && \mii\util\Profiler::delete($benchmark) || true);
 
-            throw new DatabaseException(':error [ :query ]', [
-                ':error' => $this->_connection->error,
-                ':query' => $sql
-            ], $this->_connection->errno);
+            throw new DatabaseException("{$this->_connection->error} [ $sql ]", $this->_connection->errno);
         }
 
         assert(isset($benchmark) && \mii\util\Profiler::stop($benchmark) || true);
@@ -224,9 +221,7 @@ class Database extends Component
             // No connection exists
             $this->_connection = NULL;
 
-            throw new DatabaseException(':error',
-                [':error' => $e->getMessage()],
-                $e->getCode());
+            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
         }
 
         if (!empty($this->_config['charset'])) {
@@ -263,7 +258,7 @@ class Database extends Component
         $status = $this->_connection->set_charset($charset);
 
         if ($status === false) {
-            throw new DatabaseException(':error', [':error' => $this->_connection->error], $this->_connection->errno);
+            throw new DatabaseException($this->_connection->error, $this->_connection->errno);
         }
     }
 
@@ -327,9 +322,7 @@ class Database extends Component
         $this->_connection or $this->connect();
 
         if (($value = $this->_connection->real_escape_string((string)$value)) === false) {
-            throw new DatabaseException(':error', [
-                ':error' => $this->_connection->error,
-            ], $this->_connection->errno);
+            throw new DatabaseException($this->_connection->error, $this->_connection->errno);
         }
 
         // SQL standard is to use single-quotes for all values
@@ -362,9 +355,7 @@ class Database extends Component
         $this->_connection or $this->connect();
 
         if ($mode AND !$this->_connection->query("SET TRANSACTION ISOLATION LEVEL $mode")) {
-            throw new DatabaseException(':error', [
-                ':error' => $this->_connection->error
-            ], $this->_connection->errno);
+            throw new DatabaseException($this->_connection->error, $this->_connection->errno);
         }
 
         return (bool)$this->_connection->query('START TRANSACTION');

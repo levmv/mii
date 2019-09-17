@@ -59,7 +59,6 @@ class Response extends Component
     const FORMAT_RAW = 'raw';
     const FORMAT_HTML = 'html';
     const FORMAT_JSON = 'json';
-    const FORMAT_JSONP = 'jsonp';
     const FORMAT_XML = 'xml';
 
     public $format = self::FORMAT_HTML;
@@ -170,7 +169,7 @@ class Response extends Component
             $this->status_message = Response::$messages[$this->status];
             return $this;
         } else {
-            throw new Exception(__METHOD__ . ' unknown status value : :value', array(':value' => $status));
+            throw new Exception(__METHOD__ . ' unknown status value: '.$status);
         }
     }
 
