@@ -28,7 +28,6 @@ class File extends Target
             throw new ErrorException("Unable to append to log file: {$this->file}");
         }
         @flock($fp, LOCK_EX);
-
         @fwrite($fp, $text);
         @flock($fp, LOCK_UN);
         @fclose($fp);

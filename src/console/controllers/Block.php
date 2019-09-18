@@ -86,18 +86,6 @@ class Block extends Controller
     }
 
 
-    protected function do_m1k($block) {
-
-        $this->to_block([
-            'jquery-m1k/jquery.m1k.min.js'
-        ], $block, 'js');
-
-        $this->to_block([
-            'jquery-m1k/jquery.m1k.min.css'
-        ], $block, 'css');
-    }
-
-
     protected function do_jcrop($block) {
         $this->to_block('Jcrop/js/Jcrop.min.js', $block, 'js');
         $this->to_block('Jcrop/css/Jcrop.min.css', $block, 'css', function ($text) use ($block) {
@@ -107,27 +95,8 @@ class Block extends Controller
     }
 
 
-    protected function do_timeago($block) {
-        $this->to_block('timeago/jquery.timeago.js', $block, 'js', function ($text) {
-            return $text . file_get_contents($this->input_path . '/timeago/locales/jquery.timeago.ru.js');
-        });
-    }
-
     protected function do_dot($block) {
         $this->to_block('doT/doT.min.js', $block, 'js');
-    }
-
-
-    protected function do_blueimp($block) {
-        $this->to_block([
-            'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
-            'blueimp-file-upload/js/jquery.iframe-transport.js',
-            'blueimp-file-upload/js/jquery.fileupload.js',
-        ], $block, 'js');
-
-        $this->to_block([
-            'blueimp-file-upload/css/jquery.fileupload.css'
-        ], $block, 'css');
     }
 
 
@@ -270,11 +239,6 @@ class Block extends Controller
         });
     }
 
-    protected function do_spinjs($block) {
-        $this->to_block('spin.js/spin.min.js', $block, 'js');
-    }
-
-
     protected function do_fontawesome($block) {
         $this->to_block('font-awesome/css/font-awesome.min.css', $block, 'css',
             function ($text) use ($block) {
@@ -316,7 +280,7 @@ class Block extends Controller
         foreach ($from as $f) {
 
             if (!file_exists($this->input_path . '/' . $f))
-                throw new CliException('Source for :block not found. Skip.', [':block' => $block_name]);
+                throw new CliException("Source for $block_name not found. Skip.");
 
             if (!$exist OR filemtime($this->input_path . '/' . $f) > filemtime($to))
                 $same = false;

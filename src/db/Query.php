@@ -2,6 +2,7 @@
 
 namespace mii\db;
 
+use mii\core\ErrorHandler;
 use mii\valid\Rules;
 use mii\web\Pagination;
 
@@ -115,7 +116,7 @@ class Query
             // Return the SQL string
             return $this->compile();
         } catch (DatabaseException $e) {
-            return DatabaseException::text($e);
+            return ErrorHandler::convert_to_error($e);
         }
     }
 

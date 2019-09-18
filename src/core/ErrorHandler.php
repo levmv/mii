@@ -43,15 +43,8 @@ class ErrorHandler extends Component
     }
 
 
-    public function report($exception, $context = '') {
-
-        if($this->report_trace) {
-            $trace = "\n".Debug::short_text_trace($exception->getTrace());
-        } else {
-            $trace = '';
-        }
-
-        \Mii::error(Exception::text($exception) . $context . $trace, get_class($exception));
+    public function report($exception) {
+        \Mii::error($exception, get_class($exception));
     }
 
 
@@ -80,7 +73,7 @@ class ErrorHandler extends Component
             $this->render($e);
 
         } catch (\Throwable $e) {
-            echo Exception::text($e);
+            echo static::exception_to_text($e);
         }
         exit(1);
     }
@@ -154,6 +147,19 @@ class ErrorHandler extends Component
      */
     public static function convert_to_error($exception) {
         trigger_error(Exception::text($exception), E_USER_ERROR);
+    }
+
+
+    public static function exception_to_text($e) {
+        if(config('debug')) {
+            return (string) $e;
+        }
+
+        if($e instanceof UserException ) {
+            return get_class($e)." : ".$e->getMessage();
+        }
+
+        return 'An internal server error occurred.';
     }
 
 }

@@ -4,6 +4,8 @@ namespace mii\web;
 
 use mii\core\ErrorException;
 use mii\core\Exception;
+use mii\core\UserException;
+use mii\util\Debug;
 
 class ErrorHandler extends \mii\core\ErrorHandler
 {
@@ -14,46 +16,10 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
         if (\Mii::$app->has('response')) {
             $response = \Mii::$app->response;
+            $response->content("");
         } else {
             $response = new Response();
         }
-
-        if ($this->route && $response->format === Response::FORMAT_HTML && !config('debug')) {
-
-            \Mii::$app->request->uri($this->route);
-
-            try {
-                \Mii::$app->run();
-            } catch (\Throwable $t) {
-            }
-            return;
-
-
-        } elseif ($response->format === Response::FORMAT_HTML) {
-
-            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-
-                $response->content('<pre>' . e(Exception::text($exception)) . '</pre>');
-
-            } else {
-
-                $params = [
-                    'class' => get_class($exception),
-                    'code' => $exception->getCode(),
-                    'message' => $exception->getMessage(),
-                    'file' => $exception->getFile(),
-                    'line' => $exception->getLine(),
-                    'trace' => $exception->getTrace()
-                ];
-                $response->content($this->render_file(__DIR__ . '/Exception/error.php', $params));
-            }
-
-        } elseif ($response->format === Response::FORMAT_JSON) {
-            $response->content = $this->exception_to_array($exception);
-        } else {
-            $response->content(Exception::text($exception));
-        }
-
 
         if ($exception instanceof HttpException) {
             $response->status($exception->status_code);
@@ -61,22 +27,40 @@ class ErrorHandler extends \mii\core\ErrorHandler
             $response->status(500);
         }
 
-        $response->send();
+        if ($this->route && !config('debug')) {
 
-    }
+            \Mii::$app->request->uri($this->route);
 
+            try {
+                \Mii::$app->run();
+                return;
+            } catch (\Throwable $t) {
+                $response->content(static::exception_to_text($exception));
+            }
 
-    public function report($exception, $context = '') {
-        try {
-            $context = sprintf(' %s%s: %s',
-                \Mii::$app->request->method(),
-                \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
-                $_SERVER['REQUEST_URI']
-            );
-        } catch (\Throwable $t) {
-            $context = '';
+        } elseif ($response->format === Response::FORMAT_HTML) {
+
+           if(config('debug')) {
+               $params = [
+                   'class' => $exception instanceof ErrorException ? $exception->get_name() : get_class($exception),
+                   'code' => $exception->getCode(),
+                   'message' => $exception->getMessage(),
+                   'file' => $exception->getFile(),
+                   'line' => $exception->getLine(),
+                   'trace' => $exception->getTrace()
+               ];
+               $response->content($this->render_file(__DIR__ . '/Exception/error.php', $params));
+            } else {
+               $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');
+            }
+
+        } elseif ($response->format === Response::FORMAT_JSON) {
+            $response->content($this->exception_to_array($exception));
+        } else {
+            $response->content(static::exception_to_text($exception));
         }
-        parent::report($exception, $context);
+
+        $response->send();
     }
 
 
@@ -90,27 +74,35 @@ class ErrorHandler extends \mii\core\ErrorHandler
     }
 
     protected function exception_to_array($e) {
-        if (!config('debug') && !$e instanceof HttpException) {
-            $e = new HttpException(500, 'There was an error at the server.');
+        if (!config('debug')) {
+            return ['message' => 'An internal server error occurred.'];
         }
-        $array = [
-            'name' => ($e instanceof Exception || $e instanceof ErrorException) ? $e->get_name() : 'Exception',
-            'message' => $e->getMessage(),
-            'code' => $e->getCode(),
+
+        $arr = [
+            'name' => 'Exception',
+            'message' => 'An internal server error occurred.',
+            'code' => $e->getCode()
         ];
-        if ($e instanceof HttpException) {
-            $array['status'] = $e->status_code;
+
+        if ($e instanceof UserException || config('debug')) {
+            $arr['name'] = get_class($e);
+            $arr['message'] = $e->getMessage();
         }
+
+        if ($e instanceof HttpException) {
+            $arr['status'] = $e->status_code;
+        }
+
         if (config('debug')) {
-            $array['type'] = get_class($e);
-            $array['file'] = $e->getFile();
-            $array['line'] = $e->getLine();
-            $array['stack-trace'] = explode("\n", $e->getTraceAsString());
+            $arr['type'] = get_class($e);
+            $arr['file'] = $e->getFile();
+            $arr['line'] = $e->getLine();
+            $arr['stack-trace'] = explode("\n", Debug::short_text_trace($e->getTrace()));
         }
         if (($prev = $e->getPrevious()) !== null) {
-            $array['previous'] = $this->exception_to_array($prev);
+            $arr['previous'] = $this->exception_to_array($prev);
         }
-        return $array;
+        return $arr;
     }
 
 }

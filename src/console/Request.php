@@ -89,9 +89,7 @@ class Request extends Component
                 $controller_class = 'mii\\console\\controllers\\' . $controller;
 
                 if (!class_exists($controller_class)) {
-                    throw new CliException('Unknown command :com',
-                        [':com' => $controller]
-                    );
+                    throw new CliException("Unknown command $controller");
                 }
             }
         }
@@ -99,10 +97,7 @@ class Request extends Component
         $class = new \ReflectionClass($controller_class);
 
         if ($class->isAbstract()) {
-            throw new CliException(
-                'Cannot create instances of abstract :controller',
-                [':controller' => $controller]
-            );
+            throw new CliException("Cannot create instances of abstract $controller");
         }
         $response = new Response;
 

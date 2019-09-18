@@ -4,6 +4,7 @@ namespace mii\log;
 
 
 use mii\core\Component;
+use mii\web\App;
 
 abstract class Target extends Component
 {
@@ -12,6 +13,10 @@ abstract class Target extends Component
     protected $categories;
 
     protected $except;
+
+    protected $with_trace = true;
+
+    protected $with_context = true;
 
     protected $messages = [];
 
@@ -69,15 +74,34 @@ abstract class Target extends Component
         list($text, $level, $category, $timestamp) = $message;
 
         $level = Logger::$level_names[$level];
+
+        $trace = '';
+        $context = '';
+
         if (!is_string($text)) {
 
             if ($text instanceof \Throwable) {
-                $text = (string)$text;
+
+                if($this->with_trace) {
+                    $trace = "\n".mii\util\Debug::short_text_trace($text->getTrace());
+                }
+
+                $text = (string) $text;
+
             } else {
                 $text = var_export($text);
             }
         }
-        return date('Y-m-d H:i:s', $timestamp) . " [$level][" . $category . "] $text";
+
+        if($this->with_context && \Mii::$app instanceof App) {
+            $context = sprintf("\n%s%s: %s",
+                \Mii::$app->request->method(),
+                \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
+                $_SERVER['REQUEST_URI']
+            );
+        }
+
+        return date('Y-m-d H:i:s', $timestamp) . " [$level][" . $category . "] $text$context$trace";
     }
 
 }

@@ -7,6 +7,7 @@ use Mii;
 use mii\console\CliException;
 use mii\console\Controller;
 use mii\util\Console;
+use mii\util\FS;
 use mii\util\Text;
 
 class Assets extends Controller
@@ -14,8 +15,8 @@ class Assets extends Controller
     public $description = 'Blocks assets builder';
 
     public $config_file;
-
-    private $json_output = false;
+    private $json_output;
+    private $force_mode;
 
     private $assets;
     private $libraries;
@@ -39,7 +40,7 @@ class Assets extends Controller
         $this->_time = microtime(true);
         $this->_memory = memory_get_usage();
 
-        $this->input_path = path('vendor') . '/bower/';
+        $this->input_path = path('vendor') . '/node_modules/';
         $this->output_path = path('app') . '/blocks';
 
         $this->sets = config('components.blocks.sets');
@@ -48,6 +49,7 @@ class Assets extends Controller
 
         $this->config_file = $this->request->params['config'] ?? '@app/config/assets.php';
         $this->json_output = $this->request->params['json'] ?? false;
+        $this->force_mode = $this->request->params['force'] ?? false;
 
         if(!file_exists(Mii::resolve($this->config_file))) {
             $this->error("Config {$this->config_file} does not exist.");
@@ -55,33 +57,15 @@ class Assets extends Controller
         }
 
         $this->assets = require(Mii::resolve($this->config_file));
-
-        /*
-        $this->blocks = config('components.blocks.blocks');
-        $this->libraries = config('components.blocks.libraries',
-            [path('app') . '/blocks']
-        );
-
-        $this->pubdir = config('components.blocks.base_url');
-
-        $this->gen_config_path = path('root').'/assets.compiled';
-
-        $this->default_set = [
-            'libraries' => [
-                path('app') . '/blocks'
-            ],
-            'base_url' => '/assets/d',
-            'base_path' => null
-        ];*/
-
     }
 
     public function usage($argv) {
         $this->stdout(
             "\nUsage: ./mii assets (build|test|gen-config) [options]\n\n" .
             "Options:\n" .
-            " ——config=<path>\tPath to configuration file. By default it's «@app/config/assets.php»\n" .
-            " ——stdout\tTo print assets paths to stdout\n" .
+            " --config=<path>\tPath to configuration file. By default it's «@app/config/assets.php»\n" .
+            " --force\tDont check if files changed\n" .
+            " --stdout\tTo print assets paths to stdout\n" .
             "\n\n",
             Console::FG_YELLOW
         );
@@ -137,7 +121,7 @@ class Assets extends Controller
 
         $this->info('All done. Spent :Ts and :MMb', [
             ':T' => number_format(microtime(true) - $this->_time, 1),
-            ':M' => number_format((memory_get_usage()-$this->_memory) / 1024, 1)
+            ':M' => number_format((memory_get_usage()-$this->_memory) / 1024 / 1024, 1)
         ]);
     }
 
@@ -227,9 +211,7 @@ class Assets extends Controller
             $this->warning('May be you forget these:');
             foreach($forget as $name => $block) {
                 $out = "'$name' => [";
-
                 $out .= implode(',',  $block);
-
 
                 $this->stdout("$out],\n");
             }
@@ -348,7 +330,7 @@ class Assets extends Controller
         $outname = $filename.$this->hash($hashes);
 
         if(!empty($files)) {
-            if(!file_exists($out_path.$outname.'.'.$type)) {
+            if(!file_exists($out_path.$outname.'.'.$type) || $this->force_mode) {
                 $this->processed[$type][] = $this->merge_files_to_one($files, $out_path, $outname .'.'.$type);
             }
         }
@@ -373,7 +355,7 @@ class Assets extends Controller
         }
 
         if(!is_dir($path)) {
-            mkdir($path, 0777, true);
+            FS::mkdir($path, 0777, true);
         }
 
         file_put_contents($path.$filename, $tmp);
@@ -383,47 +365,6 @@ class Assets extends Controller
         }
 
         return $path.$filename;
-    }
-
-
-    protected function post_process() {
-
-        if(!is_file(path('root') . '/assets.js')) {
-            $this->warning('File @root/assets.js does not exist. Cancel post-processing.');
-            return;
-        }
-
-        $nodejs = proc_open('node ' . path('root') . '/assets.js',
-            array(array('pipe', 'r'), array('pipe', 'w')),
-            $pipes
-        );
-        if ($nodejs === false) {
-            $this->error('Could not reach node runtime');
-            return;
-        }
-        $this->fwrite_stream($pipes[0],
-            json_encode($this->processed)
-            );
-        fclose($pipes[0]);
-        $output = stream_get_contents($pipes[1]);
-        if($output)
-            $this->warning($output);
-
-        fclose($pipes[1]);
-        proc_close($nodejs);
-
-    }
-
-    private function fwrite_stream($fp, $string, $buflen = 4096)
-    {
-        for ($written = 0, $len = strlen($string); $written < $len; $written += $fwrite) {
-            $fwrite = fwrite($fp, substr($string, $written, $buflen));
-            if ($fwrite === false) {
-                return $written;
-            }
-        }
-
-        return $written;
     }
 
 }

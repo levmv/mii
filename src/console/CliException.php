@@ -11,8 +11,4 @@ class CliException extends Exception
         parent::__construct($message, $variables, $code);
     }
 
-    public function get_name() {
-        return 'Error';
-    }
-
 }
