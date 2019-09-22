@@ -119,7 +119,7 @@ class HTML
      * @uses    URL::site
      * @uses    HTML::attributes
      */
-    public static function anchor($uri, $title = NULL, array $attributes = NULL, $protocol = NULL, $index = TRUE) {
+    public static function anchor($uri, $title = NULL, array $attributes = NULL, $protocol = NULL) {
         if ($title === NULL) {
             // Use the URI as the title
             $title = $uri;
@@ -127,7 +127,7 @@ class HTML
 
         if ($uri === '') {
             // Only use the base URL
-            $uri = URL::base($protocol, $index);
+            $uri = URL::base($protocol);
         } else {
             if (strpos($uri, '://') !== FALSE) {
                 if (HTML::$windowed_urls === TRUE AND empty($attributes['target'])) {
@@ -136,7 +136,7 @@ class HTML
                 }
             } elseif ($uri[0] !== '#') {
                 // Make the URI absolute for non-id anchors
-                $uri = URL::site($uri, $protocol, $index);
+                $uri = URL::site($uri, $protocol);
             }
         }
 
@@ -161,14 +161,14 @@ class HTML
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function file_anchor($file, $title = NULL, array $attributes = NULL, $protocol = NULL, $index = FALSE) {
+    public static function file_anchor($file, $title = NULL, array $attributes = NULL, $protocol = NULL) {
         if ($title === NULL) {
             // Use the file name as the title
             $title = basename($file);
         }
 
         // Add the file link to the attributes
-        $attributes['href'] = URL::site($file, $protocol, $index);
+        $attributes['href'] = URL::site($file, $protocol);
 
         return '<a' . HTML::attributes($attributes) . '>' . $title . '</a>';
     }
@@ -207,10 +207,10 @@ class HTML
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function style($file, array $attributes = NULL, $protocol = NULL, $index = FALSE) {
+    public static function style($file, array $attributes = NULL, $protocol = NULL) {
         if (strpos($file, '://') === FALSE) {
             // Add the base URL
-            $file = URL::site($file, $protocol, $index);
+            $file = URL::site($file, $protocol);
         }
 
         // Set the stylesheet link
@@ -238,10 +238,10 @@ class HTML
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function script($file, array $attributes = NULL, $protocol = NULL, $index = FALSE) {
+    public static function script($file, array $attributes = NULL, $protocol = NULL) {
         if (strpos($file, '://') === FALSE && strpos($file, '//') !== 0) {
             // Add the base URL
-            $file = URL::site($file, $protocol, $index);
+            $file = URL::site($file, $protocol);
         }
 
         // Set the script link
@@ -637,30 +637,6 @@ class HTML
         return HTML::input($name, $value, $attributes);
     }
 
-    /**
-     * Creates a image form input.
-     *
-     *     echo Form::image(NULL, NULL, array('src' => 'media/img/login.png'));
-     *
-     * @param   string $name input name
-     * @param   string $value input value
-     * @param   array $attributes html attributes
-     * @param   boolean $index add index file to URL?
-     * @return  string
-     * @uses    Form::input
-     */
-    public static function image_input($name, $value, array $attributes = NULL, $index = FALSE) {
-        if (!empty($attributes['src'])) {
-            if (strpos($attributes['src'], '://') === FALSE) {
-                // Add the base URL
-                $attributes['src'] = URL::base($index) . $attributes['src'];
-            }
-        }
-
-        $attributes['type'] = 'image';
-
-        return HTML::input($name, $value, $attributes);
-    }
 
     /**
      * Creates a button form input. Note that the body of a button is NOT escaped,
@@ -717,4 +693,4 @@ class HTML
 
     }
 
-} // End html
+}

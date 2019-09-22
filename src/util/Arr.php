@@ -143,47 +143,6 @@ class Arr
         $array[array_shift($keys)] = $value;
     }
 
-    /**
-     * Fill an array with a range of numbers.
-     *
-     *     // Fill an array with values 5, 10, 15, 20
-     *     $values = Arr::range(5, 20);
-     *
-     * @param   integer $step stepping
-     * @param   integer $max ending number
-     * @return  array
-     */
-    public static function range($step = 10, $max = 100) {
-        if ($step < 1) {
-            return array();
-        }
-
-        $array = array();
-        for ($i = $step; $i <= $max; $i += $step) {
-            $array[$i] = $i;
-        }
-
-        return $array;
-    }
-
-    /**
-     * Retrieve a single key from an array. If the key does not exist in the
-     * array, the default value will be returned instead.
-     *
-     *     // Get the value "username" from $_POST, if it exists
-     *     $username = Arr::get($_POST, 'username');
-     *
-     *     // Get the value "sorting" from $_GET, if it exists
-     *     $sorting = Arr::get($_GET, 'sorting');
-     *
-     * @param   array $array array to extract from
-     * @param   string $key key name
-     * @param   mixed $default default value
-     * @return  mixed
-     */
-    public static function get($array, $key, $default = null) {
-        return $array[$key] ?? $default;
-    }
 
     /**
      * Retrieves multiple paths from an array. If the path does not exist in the
@@ -208,50 +167,6 @@ class Arr
         }
 
         return $found;
-    }
-
-    /**
-     * Retrieves multiple single-key values from a list of arrays.
-     *
-     *     // Get all of the "id" values from a result
-     *     $ids = Arr::pluck($result, 'id');
-     *
-     * [!!] A list of arrays is an array that contains arrays, eg: array(array $a, array $b, array $c, ...)
-     *
-     * @param   array $array list of arrays to check
-     * @param   string $key key to pluck
-     * @return  array
-     */
-    public static function pluck($array, $key) {
-        $values = array();
-
-        foreach ($array as $row) {
-            if (isset($row[$key])) {
-                // Found a value in this row
-                $values[] = $row[$key];
-            }
-        }
-
-        return $values;
-    }
-
-    /**
-     * Adds a value to the beginning of an associative array.
-     *
-     *     // Add an empty value to the start of a select list
-     *     Arr::unshift($array, 'none', 'Select a value');
-     *
-     * @param   array $array array to modify
-     * @param   string $key array key name
-     * @param   mixed $val array value
-     * @return  array
-     */
-    public static function unshift(array &$array, $key, $val) {
-        $array = array_reverse($array, true);
-        $array[$key] = $val;
-        $array = array_reverse($array, true);
-
-        return $array;
     }
 
     /**

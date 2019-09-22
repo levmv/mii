@@ -345,12 +345,4 @@ class Form
 
         return HTML::label($field_name, $label_name, $attributes);
     }
-
-    public function uploaded($name): bool {
-
-        return isset($_FILES[$name]) AND Upload::not_empty($_FILES[$name]) AND Upload::valid($_FILES[$name]);
-
-    }
-
-
 }

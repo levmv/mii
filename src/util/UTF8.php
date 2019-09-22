@@ -281,15 +281,6 @@ class UTF8
     }
 
 
-    public static function month_in_ru($name) {
-        static $trans_table = array('September' => 'сентября', 'November' => 'ноября', 'October' => 'октября', 'December' => 'декабря',
-            'January' => 'января', 'February' => 'февраля', 'March' => 'марта', 'April' => 'апреля',
-            'May' => 'мая', 'June' => 'июня', 'July' => 'июля', 'August' => 'августа');
-
-        return isset($trans_table[$name]) ? $trans_table[$name] : $name;
-    }
-
-
     public static function ru_translit($str) {
         static $trans_table = null;
 

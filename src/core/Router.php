@@ -342,7 +342,7 @@ class Router extends Component
                 list($key, $param) = $match;
 
 
-                if ($params !== null AND isset($params[$param]) AND $params[$param] !== Arr::get($defaults, $param)) {
+                if ($params !== null AND isset($params[$param]) AND $params[$param] !== ($defaults[$param] ?? null)) {
                     // Future optional params should be required
                     $provided_optional = TRUE;
 

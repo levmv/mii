@@ -594,7 +594,6 @@ class ORM
 
     private function get_tables_schema()
     {
-
         static $table_infos = [];
 
         $cache_id = 'db_schema_140' . $this->get_table();

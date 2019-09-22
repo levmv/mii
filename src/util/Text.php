@@ -485,7 +485,7 @@ class Text
         // Find the float value of the size
         $size = (float)$matches[1];
         // Find the actual unit, assume B if no unit specified
-        $unit = Arr::get($matches, 2, 'B');
+        $unit = $matches[2] ?? 'B';
         // Convert the size into bytes
         $bytes = $size * pow(2, Text::$byte_units[$unit]);
         return $bytes;
