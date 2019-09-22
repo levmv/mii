@@ -83,7 +83,7 @@ abstract class Target extends Component
             if ($text instanceof \Throwable) {
 
                 if($this->with_trace) {
-                    $trace = "\n".mii\util\Debug::short_text_trace($text->getTrace());
+                    $trace = "\n".\mii\util\Debug::short_text_trace($text->getTrace());
                 }
 
                 $text = (string) $text;
