@@ -183,20 +183,7 @@ class Menu
     public function __toString() {
         try {
             return $this->render();
-        } catch (\Exception $e) {
-
-            /**
-             * Display the exception message.
-             *
-             * We use this method here because it's impossible to throw and
-             * exception from __toString().
-             */
-
-            for ($level = ob_get_level(); $level > 0; --$level) {
-                if (!@ob_end_clean()) {
-                    ob_clean();
-                }
-            }
+        } catch (\Throwable $e) {
             ErrorHandler::convert_to_error($e);
             return '';
         }

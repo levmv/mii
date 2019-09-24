@@ -12,13 +12,7 @@ class File extends Cache
 
     public $chmode = 0775;
 
-    /**
-     * Check for existence of the APC extension This method cannot be invoked externally. The driver must
-     * be instantiated using the `Cache::instance()` method.
-     *
-     * @param  array $config configuration
-     * @throws CacheException
-     */
+
     public function init(array $config = []): void {
 
         parent::init($config);
@@ -58,14 +52,6 @@ class File extends Cache
     /**
      * Set a value to cache with id and lifetime
      *
-     *     $data = 'bar';
-     *
-     *     // Set 'bar' to 'foo' in apc group, using default expiry
-     *     Cache::instance('apc')->set('foo', $data);
-     *
-     *     // Set 'bar' to 'foo' in apc group for 30 seconds
-     *     Cache::instance('apc')->set('foo', $data, 30);
-     *
      * @param   string $id id of cache entry
      * @param   string $data data to set to cache
      * @param   integer $lifetime lifetime in seconds
@@ -99,9 +85,6 @@ class File extends Cache
 
     /**
      * Delete a cache entry based on id
-     *
-     *     // Delete 'foo' entry from the apc group
-     *     Cache::instance('apc')->delete('foo');
      *
      * @param   string $id id to remove from cache
      * @return  boolean
@@ -168,7 +151,6 @@ class File extends Cache
     public function decrement($id, $step = 1) {
 
     }
-
 
 
     /**

@@ -27,7 +27,7 @@ class Simple
         if ($this->base_path) {
             $this->base_path = \Mii::resolve($this->base_path);
         } else {
-            $this->base_path = path('app') . '/messages';
+            $this->base_path = \path('app') . '/messages';
         }
 
         if ($this->language === null) {

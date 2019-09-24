@@ -151,7 +151,7 @@ class ErrorHandler extends Component
 
 
     public static function exception_to_text($e) {
-        if(config('debug')) {
+        if(\config('debug')) {
             return (string) $e;
         }
 

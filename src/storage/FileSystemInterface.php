@@ -3,13 +3,15 @@
 namespace mii\storage;
 
 
-interface  FileSystemInterface {
+interface FileSystemInterface {
 
     public function exist(string $path);
 
     public function get(string $path);
 
     public function put(string $path, $content);
+
+    public function put_file(string $from, string $path);
 
     public function delete(string $path);
 

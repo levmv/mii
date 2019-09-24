@@ -256,22 +256,9 @@ class ORM
         }
     }
 
-    /**
-     * MUST BE EQUAL TO ::GET()
-     */
     public function __get($key)
     {
-        if (isset($this->_data[$key]) OR \array_key_exists($key, $this->_data)) {
-
-            return ($this->_serialize_fields !== null && $this->__loaded && in_array($key, $this->_serialize_fields, true))
-                ? $this->_unserialize_value($key)
-                : $this->_data[$key];
-        }
-
-        if (\array_key_exists($key, $this->_unmapped))
-            return $this->_unmapped[$key];
-
-        throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!');
+        return $this->get($key);
     }
 
     public function get(string $key)
@@ -291,7 +278,6 @@ class ORM
 
     public function set($values, $value = NULL): ORM
     {
-
         if (is_object($values) AND $values instanceof \mii\web\Form) {
 
             $values = $values->changed_fields();
@@ -391,7 +377,6 @@ class ORM
      */
     public function update()
     {
-
         if ($this->_serialize_fields !== null && !empty($this->_serialize_fields))
             $this->_invalidate_serialize_cache();
 

@@ -2,9 +2,8 @@
 
 use mii\log\Logger;
 
-defined('MII_START_TIME') or define('MII_START_TIME', microtime(true));
-defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage());
-
+assert(defined('MII_START_TIME') or define('MII_START_TIME', microtime(true)));
+assert(defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage()));
 
 class Mii
 {
@@ -36,7 +35,7 @@ class Mii
 
 
     public static function resolve(string $path): string {
-        if (strncmp($path, '@', 1)) {
+        if ($path[0] !== '@') {
             return $path;
         }
 
@@ -80,8 +79,8 @@ class Mii
 
             if (file_exists($file . '.php')) {
                 $content = include($file . '.php');
-            } elseif (file_exists(path('app') . '/messages/' . $file . '.php')) {
-                $content = include(path('app') . '/messages/' . $file . '.php');
+            } elseif (file_exists(\path('app') . '/messages/' . $file . '.php')) {
+                $content = include(\path('app') . '/messages/' . $file . '.php');
             } else {
                 throw new \Exception("Message file does not exist: $file.php");
             }

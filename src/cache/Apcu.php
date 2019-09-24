@@ -4,31 +4,8 @@ namespace mii\cache;
 
 class Apcu extends Cache
 {
-
-    /**
-     * Check for existence of the APC extension This method cannot be invoked externally. The driver must
-     * be instantiated using the `Cache::instance()` method.
-     *
-     * @param  array $config configuration
-     * @throws CacheException
-     */
-    public function init(array $config = []): void {
-
-        if (!extension_loaded('apcu')) {
-            throw new CacheException('PHP APC extension is not available.');
-        }
-
-        parent::init($config);
-    }
-
     /**
      * Retrieve a cached value entry by id.
-     *
-     *     // Retrieve cache entry from apc group
-     *     $data = Cache::instance('apc')->get('foo');
-     *
-     *     // Retrieve cache entry from apc group and return 'bar' if miss
-     *     $data = Cache::instance('apc')->get('foo', 'bar');
      *
      * @param   string $id id of cache to entry
      * @param   string $default default value to return if cache miss
@@ -43,14 +20,6 @@ class Apcu extends Cache
 
     /**
      * Set a value to cache with id and lifetime
-     *
-     *     $data = 'bar';
-     *
-     *     // Set 'bar' to 'foo' in apc group, using default expiry
-     *     Cache::instance('apc')->set('foo', $data);
-     *
-     *     // Set 'bar' to 'foo' in apc group for 30 seconds
-     *     Cache::instance('apc')->set('foo', $data, 30);
      *
      * @param   string $id id of cache entry
      * @param   string $data data to set to cache
@@ -68,9 +37,6 @@ class Apcu extends Cache
     /**
      * Delete a cache entry based on id
      *
-     *     // Delete 'foo' entry from the apc group
-     *     Cache::instance('apc')->delete('foo');
-     *
      * @param   string $id id to remove from cache
      * @return  boolean
      */
@@ -84,9 +50,6 @@ class Apcu extends Cache
      * Beware of using this method when
      * using shared memory cache systems, as it will wipe every
      * entry within the system for all clients.
-     *
-     *     // Delete all cache entries in the apc group
-     *     Cache::instance('apc')->delete_all();
      *
      */
     public function delete_all(): bool {

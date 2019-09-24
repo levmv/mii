@@ -79,7 +79,7 @@ class Init extends Controller
 
         $config = $this->config[$envs[$in]];
 
-        $this->env_copy($config['path'], path('root'));
+        $this->env_copy($config['path'], \path('root'));
 
 
         if (isset($config['rights'])) {

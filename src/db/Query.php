@@ -743,7 +743,6 @@ class Query
             $query .= ' ' . $this->_compile_join();
         }
 
-
         // Add the columns to update
 
         $set = [];

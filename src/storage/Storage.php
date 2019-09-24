@@ -15,7 +15,6 @@ abstract class Storage {
         $this->path = \Mii::resolve($this->path);
     }
 
-
     public function init($config) {
         foreach($config as $key => $value)
             $this->$key = $value;
@@ -25,6 +24,5 @@ abstract class Storage {
     protected function resolve(string $path) : string {
         return $this->path.DIRECTORY_SEPARATOR.ltrim($path, DIRECTORY_SEPARATOR);
     }
-
 
 }

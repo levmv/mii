@@ -27,7 +27,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
             $response->status(500);
         }
 
-        if ($this->route && !config('debug')) {
+        if ($this->route && !\config('debug')) {
 
             \Mii::$app->request->uri($this->route);
 

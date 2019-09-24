@@ -73,7 +73,6 @@ class Text
     /**
      * Generates a random string of a given type and length.
      *
-     *
      *     $str = Text::random(); // 8 character random string
      *
      * The following types are supported:
@@ -116,9 +115,6 @@ class Text
                 break;
             case 'numeric':
                 $pool = '0123456789';
-                break;
-            case 'nozero':
-                $pool = '123456789';
                 break;
             case 'distinct':
                 $pool = '2345679ACDEFHJKLMNPRSTUVWXYZ';
@@ -219,98 +215,6 @@ class Text
     }
 
     /**
-     * Finds the text that is similar between a set of words.
-     *
-     *     $match = Text::similar(array('fred', 'fran', 'free'); // "fr"
-     *
-     * @param   array $words words to find similar text of
-     * @return  string
-     */
-    public static function similar(array $words) {
-        // First word is the word to match against
-        $word = current($words);
-
-        for ($i = 0, $max = strlen($word); $i < $max; ++$i) {
-            foreach ($words as $w) {
-                // Once a difference is found, break out of the loops
-                if (!isset($w[$i]) OR $w[$i] !== $word[$i])
-                    break 2;
-            }
-        }
-
-        // Return the similar text
-        return substr($word, 0, $i);
-    }
-
-    /**
-     * Converts text email addresses and anchors into links. Existing links
-     * will not be altered.
-     *
-     *     echo Text::auto_link($text);
-     *
-     * [!!] This method is not foolproof since it uses regex to parse HTML.
-     *
-     * @param   string $text text to auto link
-     * @return  string
-     * @uses    Text::auto_link_urls
-     * @uses    Text::auto_link_emails
-     */
-    public static function auto_link($text) {
-        // Auto link emails first to prevent problems with "www.domain.com@example.com"
-        return Text::auto_link_urls(Text::auto_link_emails($text));
-    }
-
-    /**
-     * Converts text anchors into links. Existing links will not be altered.
-     *
-     *     echo Text::auto_link_urls($text);
-     *
-     * [!!] This method is not foolproof since it uses regex to parse HTML.
-     *
-     * @param   string $text text to auto link
-     * @return  string
-     * @uses    HTML::anchor
-     */
-    public static function auto_link_urls($text) {
-        // Find and replace all http/https/ftp/ftps links that are not part of an existing html anchor
-        $text = preg_replace_callback('~\b(?<!href="|">)(?:ht|f)tps?://[^<\s]+(?:/|\b)~i', 'static::_auto_link_urls_callback1', $text);
-
-        // Find and replace all naked www.links.com (without http://)
-        return preg_replace_callback('~\b(?<!://|">)www(?:\.[a-z0-9][-a-z0-9]*+)+\.[a-z]{2,6}[^<\s]*\b~i', 'static::_auto_link_urls_callback2', $text);
-    }
-
-    protected static function _auto_link_urls_callback1($matches) {
-        return HTML::anchor($matches[0]);
-    }
-
-    protected static function _auto_link_urls_callback2($matches) {
-        return HTML::anchor('//' . $matches[0], $matches[0]);
-    }
-
-    /**
-     * Converts text email addresses into links. Existing links will not
-     * be altered.
-     *
-     *     echo Text::auto_link_emails($text);
-     *
-     * [!!] This method is not foolproof since it uses regex to parse HTML.
-     *
-     * @param   string $text text to auto link
-     * @return  string
-     * @uses    HTML::mailto
-     */
-    public static function auto_link_emails($text) {
-        // Find and replace all email addresses that are not part of an existing html mailto anchor
-        // Note: The "58;" negative lookbehind prevents matching of existing encoded html mailto anchors
-        //       The html entity for a colon (:) is &#58; or &#058; or &#0058; etc.
-        return preg_replace_callback('~\b(?<!href="mailto:|58;)(?!\.)[-+_a-z0-9.]++(?<!\.)@(?![-.])[-a-z0-9.]+(?<!\.)\.[a-z]{2,6}\b(?!</a>)~i', 'static::_auto_link_emails_callback', $text);
-    }
-
-    protected static function _auto_link_emails_callback($matches) {
-        return HTML::mailto($matches[0]);
-    }
-
-    /**
      * Automatically applies "p" and "br" markup to text.
      * Basically [nl2br](http://php.net/nl2br) on steroids.
      *
@@ -386,7 +290,7 @@ class Text
     /**
      * Convert a phrase to a URL-safe title.
      *
-     *     echo URL::title('Мой блог пост'); // "moi-blog-post"
+     *     echo Text::title('Мой блог пост'); // "moi-blog-post"
      *
      * @param   string $title Phrase to convert
      * @param   string $separator Word separator (any single character)
@@ -402,7 +306,6 @@ class Text
         // Transliterate value to ASCII
         $value = UTF8::transliterate_to_ascii($value);
 
-
         // Set preserved characters
         $preserved_characters = preg_quote($separator);
 
@@ -410,7 +313,7 @@ class Text
         $value = preg_replace('![^' . $preserved_characters . 'a-z0-9.\s]+!', '', strtolower($value));
 
         // Replace all separator characters and whitespace by a single separator
-        $value = preg_replace('![' . preg_quote($separator) . '\s]+!u', $separator, $value);
+        $value = preg_replace('![' . $preserved_characters . '\s]+!u', $separator, $value);
 
         // Trim separators from the beginning and end
         return trim($value, $separator);
@@ -443,7 +346,6 @@ class Text
             return $array[$cases[min($number % 10, 5)]];
         }
     }
-
 
 
     public static $byte_units = array
@@ -489,6 +391,14 @@ class Text
         // Convert the size into bytes
         $bytes = $size * pow(2, Text::$byte_units[$unit]);
         return $bytes;
+    }
+
+
+    public static function UUIDv4() {
+        $data = random_bytes(16);
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+        return $data;
     }
 
 }

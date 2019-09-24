@@ -66,9 +66,7 @@ class Router extends Component
                 $this->init_routes();
 
         } else {
-
             $this->init_routes();
-
         }
     }
 

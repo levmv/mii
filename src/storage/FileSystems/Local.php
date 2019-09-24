@@ -22,6 +22,11 @@ class Local extends Storage implements FileSystemInterface {
         return file_put_contents($this->resolve($path), $content);
     }
 
+    public function put_file(string $from, string $path)
+    {
+        return file_put_contents($this->resolve($path), file_get_contents($from));
+    }
+
     public function delete(string $path)
     {
         unlink($this->resolve($path));

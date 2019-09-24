@@ -40,8 +40,8 @@ class Assets extends Controller
         $this->_time = microtime(true);
         $this->_memory = memory_get_usage();
 
-        $this->input_path = path('vendor') . '/node_modules/';
-        $this->output_path = path('app') . '/blocks';
+        $this->input_path = \path('vendor') . '/node_modules/';
+        $this->output_path = \path('app') . '/blocks';
 
         $this->sets = config('components.blocks.sets');
 
@@ -250,7 +250,7 @@ class Assets extends Controller
         $this->base_url = Mii::resolve($this->base_url);
 
         if ($this->base_path === null) {
-            $this->base_path = path('pub') . $this->base_url;
+            $this->base_path = \path('pub') . $this->base_url;
         } else {
             $this->base_path = Mii::resolve($this->base_path);
         }
