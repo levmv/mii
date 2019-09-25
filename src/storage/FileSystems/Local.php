@@ -4,6 +4,7 @@ namespace mii\storage\FileSystems;
 
 use mii\storage\Storage;
 use mii\storage\FileSystemInterface;
+use mii\web\UploadedFile;
 
 class Local extends Storage implements FileSystemInterface {
 
@@ -19,12 +20,15 @@ class Local extends Storage implements FileSystemInterface {
 
     public function put(string $path, $content)
     {
+        if($content instanceof UploadedFile) {
+            return $content->save_as($this->resolve($path));
+        }
         return file_put_contents($this->resolve($path), $content);
     }
 
-    public function put_file(string $from, string $path)
+    public function put_file(string $path, string $from)
     {
-        return file_put_contents($this->resolve($path), file_get_contents($from));
+        $this->copy($from, $path);
     }
 
     public function delete(string $path)

@@ -11,7 +11,7 @@ interface FileSystemInterface {
 
     public function put(string $path, $content);
 
-    public function put_file(string $from, string $path);
+    public function put_file(string $path, string $from);
 
     public function delete(string $path);
 
