@@ -35,7 +35,7 @@ class Mii
 
 
     public static function resolve(string $path): string {
-        if ($path[0] !== '@') {
+        if (empty($path) || $path[0] !== '@') {
             return $path;
         }
 
