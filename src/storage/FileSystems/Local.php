@@ -8,6 +8,21 @@ use mii\web\UploadedFile;
 
 class Local extends Storage implements FileSystemInterface {
 
+    protected $path = '';
+    protected $url = '';
+
+    protected function resolve(string $path) : string {
+        return $this->path.DIRECTORY_SEPARATOR.ltrim($path, DIRECTORY_SEPARATOR);
+    }
+
+    public function init(array $config = []): void
+    {
+        parent::init($config);
+        if($this->path) {
+            $this->path = \Mii::resolve($this->path);
+        }
+    }
+
     public function exist(string $path)
     {
         return file_exists($this->resolve($path));
