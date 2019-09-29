@@ -39,10 +39,11 @@ class File extends Cache
             $fp = @fopen($filename, 'r');
             if ($fp !== false) {
                 @flock($fp, LOCK_SH);
-                $value = unserialize(@stream_get_contents($fp));
+                $value = @stream_get_contents($fp);
                 @flock($fp, LOCK_UN);
                 @fclose($fp);
-                return $value;
+
+                return $this->serialize ? unserialize($value) : $value;
             }
         }
 
@@ -67,7 +68,7 @@ class File extends Cache
         if ($this->directory_level > 0) {
             FS::mkdir(dirname($filename), $this->chmode);
         }
-        if (@file_put_contents($filename, serialize($data), LOCK_EX) !== false) {
+        if (@file_put_contents($filename, $this->serialize ? serialize($data) : $data, LOCK_EX) !== false) {
             if ($this->chmode !== null) {
                 @chmod($filename, $this->chmode);
             }

@@ -11,6 +11,8 @@ abstract class Cache extends Component
 
     protected $prefix = '';
 
+    protected $serialize = true;
+
     /**
      * Retrieve a cached value entry by id.
      *
