@@ -47,7 +47,7 @@ class ORM
     /**
      * @var boolean Is this model loaded from DB
      */
-    public $__loaded = false;
+    public $__loaded;
 
 
     /**
@@ -59,7 +59,6 @@ class ORM
      */
     public function __construct($values = [], $loaded = false)
     {
-
         if ($values) {
             foreach (array_intersect_key($values, $this->_data) as $key => $value) {
                 $this->$key = $value;
@@ -236,20 +235,22 @@ class ORM
     {
         if (\array_key_exists($key, $this->_data)) {
 
-            if ($this->__loaded !== false) {
+            if($this->__loaded === null) {
+                $this->_data[$key] = $value;
+                return;
+            }
+
+            if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
+                $this->_serialize_cache[$key] = $value;
+                return;
+            }
+
+            if ($this->__loaded === true) {
                 if ($value !== $this->_data[$key]) {
                     $this->_changed[$key] = true;
                 }
-
-                if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
-                    $this->_serialize_cache[$key] = $value;
-                } else {
-                    $this->_data[$key] = $value;
-                }
-
-            } else {
-                $this->_data[$key] = $value;
             }
+            $this->_data[$key] = $value;
 
         } else {
             $this->_unmapped[$key] = $value;
@@ -265,7 +266,7 @@ class ORM
     {
         if (isset($this->_data[$key]) OR \array_key_exists($key, $this->_data)) {
 
-            return ($this->_serialize_fields !== null && $this->__loaded && in_array($key, $this->_serialize_fields, true))
+            return ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields, true))
                 ? $this->_unserialize_value($key)
                 : $this->_data[$key];
         }
