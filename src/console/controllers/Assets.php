@@ -17,6 +17,7 @@ class Assets extends Controller
     public $config_file;
     private $json_output;
     private $force_mode;
+    private $filtered_sets;
 
     private $assets;
     private $libraries;
@@ -50,6 +51,7 @@ class Assets extends Controller
         $this->config_file = $this->request->params['config'] ?? '@app/config/assets.php';
         $this->json_output = $this->request->params['json'] ?? false;
         $this->force_mode = $this->request->params['force'] ?? false;
+        $this->filtered_sets = (array) ($this->request->params['set'] ?? array_keys($this->sets));
 
         if(!file_exists(Mii::resolve($this->config_file))) {
             $this->error("Config {$this->config_file} does not exist.");
@@ -64,6 +66,7 @@ class Assets extends Controller
             "\nUsage: ./mii assets (build|test|gen-config) [options]\n\n" .
             "Options:\n" .
             " --config=<path>\tPath to configuration file. By default it's «@app/config/assets.php»\n" .
+            " --set=<setname>\tName of set to process\n" .
             " --force\tDont check if files changed\n" .
             " --stdout\tTo print assets paths to stdout\n" .
             "\n\n",
@@ -90,7 +93,7 @@ class Assets extends Controller
 
         if(count($this->sets)) {
 
-            foreach($this->sets as $name => $set) {
+            foreach($this->filtered_sets as $name) {
                 $this->build_set($name);
             }
         } else {
@@ -306,8 +309,10 @@ class Assets extends Controller
                 $result_filename = Mii::resolve($library_path) . $block_file . '.' . $type;
 
                 if (is_file($result_filename)) {
+
                     $files[] = $result_filename;
-                    $hashes .= sha1_file($result_filename);
+                    $hashes .= sha1_file($result_filename, true) . pack('L', filesize($result_filename));
+
                     break;
                 }
             }
@@ -340,9 +345,8 @@ class Assets extends Controller
 
 
     protected function hash(string $str) : string {
-
-        return substr(Text::base64url_encode(md5($str, true)), 0,7).
-               substr(Text::base64url_encode(sha1($str, true)), 0,7);
+        return Text::base64url_encode(hash('fnv1a64', $str, true)) .
+            Text::base64url_encode(hash('crc32b', $str, true));
     }
 
 
