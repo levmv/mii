@@ -17,7 +17,8 @@ class Menu
      *      'name' => 'Menu item name',
      *      'url' => 'item url',
      *      'current' => bool (current flag)
-     *      'active' => bool (active flag)
+     *      'active' => bool (active flag),
+     *      'params' => [] (optional params)
      * ], ...]
      *
      */
@@ -127,16 +128,18 @@ class Menu
 
             $active = $this->active($item);
 
-
             $children = isset($item['children'])
                 ? $children = (new Menu($item['children']))->as_array()
                 : [];
 
-            $menu[] = array('name' => $item['name'],
+            $menu[] = [
+                'name' => $item['name'],
                 'url' => $item['url'],
                 'children' => $children,
                 'active' => ($active === Menu::ACTIVE_ITEM),
-                'current' => ($active === Menu::CURRENT_ITEM));
+                'current' => ($active === Menu::CURRENT_ITEM),
+                'params' => $item['params'] ?? []
+            ];
         }
         return $menu;
     }
@@ -216,9 +219,9 @@ class Menu
         } // Checks if it is part of the active path
         else {
             $current_pieces = explode('/', $uri);
-            array_shift($current_pieces);
+            //     array_shift($current_pieces);
             $link_pieces = explode('/', $link);
-            array_shift($link_pieces);
+            //     array_shift($link_pieces);
 
             for ($i = 0, $l = count($link_pieces); $i < $l; $i++) {
                 if ((isset($current_pieces[$i]) AND $current_pieces[$i] !== $link_pieces[$i]) OR empty($current_pieces[$i])) {
