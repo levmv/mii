@@ -346,8 +346,8 @@ class Assets extends Controller
 
     protected function hash(string $str): string
     {
-        return substr(Text::base64url_encode(md5($str, true)), 0,6).
-            substr(Text::base64url_encode(sha1($str, true)), 0,3);
+        return substr(Text::base64url_encode(md5($str, true)), 0, 8).
+            substr(Text::base64url_encode(sha1($str, true)), 0, 4);
     }
 
 
