@@ -83,10 +83,9 @@ class BaseBlocks extends Component
      * @return Block
      */
     public function get(string $name): Block {
-        if (isset($this->_blocks[$name]))
-            return $this->_blocks[$name];
-
-        $this->_blocks[$name] = new Block($name);
+        if (!isset($this->_blocks[$name])) {
+            $this->_blocks[$name] = new Block($name);
+        }
 
         return $this->_blocks[$name];
     }
@@ -95,18 +94,14 @@ class BaseBlocks extends Component
     public function get_block_php_file(string $name): ?string {
 
         $block_file = null;
-        $block_path = $this->get_block_path($name);
+        $block_path = $this->get_block_path($name).$name;
 
-        if (strpos($name, 'i_') !== 0) {
-
-            $block_path .= $name;
-
-            foreach ($this->libraries as $library_path) {
-                if (is_readable($library_path . $block_path . '.php')) {
-                    return $library_path . $block_path . '.php';
-                }
+        foreach ($this->libraries as $library_path) {
+            if (is_readable($library_path . $block_path . '.php')) {
+                return $library_path . $block_path . '.php';
             }
         }
+
         return null;
     }
 
