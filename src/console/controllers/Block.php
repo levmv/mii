@@ -6,6 +6,7 @@ namespace mii\console\controllers;
 use Mii;
 use mii\console\CliException;
 use mii\console\Controller;
+use mii\util\FS;
 
 class Block extends Controller
 {
@@ -17,17 +18,17 @@ class Block extends Controller
 
     protected $blocks = [];
 
-    protected $check_mtime = false;
+    protected $force = false;
+
+    private $changed_files = 0;
 
     public function before() {
 
         $list = config('console.block.rules', []);
 
-
         if (empty($list)) {
             $this->warning('Warning: console.block.rules is empty');
         } else {
-            // New way - get from the config
 
             foreach ($list as $namespace => $blocks) {
                 if (!isset($this->blocks[$namespace]))
@@ -56,7 +57,8 @@ class Block extends Controller
 
 
     public function index($argv) {
-        $this->check_mtime = isset($argv['check_mtime']) ? true : false;
+
+        $this->force = $this->request->param('force', false);
 
         foreach ($this->blocks as $output_path => $blocks) {
 
@@ -71,13 +73,15 @@ class Block extends Controller
                 } else {
                     try {
                         $this->{$func}($block);
-                        $this->info(':block compiled.', [':block' => $block]);
+                        $this->info($block);
                     } catch (CliException $e) {
                         $this->error($e->getMessage());
                     }
                 }
             }
         }
+
+        $this->info("Changed files: {$this->changed_files}");
     }
 
 
@@ -94,11 +98,9 @@ class Block extends Controller
         $this->to_assets('Jcrop/css/Jcrop.gif', $block);
     }
 
-
     protected function do_dot($block) {
         $this->to_block('doT/doT.min.js', $block, 'js');
     }
-
 
     protected function do_tinymce($block) {
         $this->to_block(
@@ -137,22 +139,6 @@ class Block extends Controller
             'tinymce/skins/lightgray/fonts/tinymce.woff',
             'tinymce/skins/lightgray/fonts/tinymce.ttf'
         ], $block);
-    }
-
-    /**
-     * @param $block
-     * @throws CliException
-     */
-    protected function do_chosen($block) {
-
-        $this->to_block('chosen/chosen.jquery.min.js', $block, 'js');
-
-        $this->to_block('chosen/chosen.min.css', $block, 'css', function ($text) use ($block) {
-            return str_replace('url(chosen', 'url(/assets/' . $block . '/chosen', $text);
-        });
-
-        $this->to_assets('chosen/chosen-sprite.png', $block);
-        $this->to_assets('chosen/chosen-sprite@2x.png', $block);
     }
 
 
@@ -263,12 +249,7 @@ class Block extends Controller
         $dir = $this->output_path . '/' . implode('/', explode('_', $block_name));
 
         if (!is_dir($dir)) {
-            try {
-                mkdir($dir, 0777, true);
-            } catch (\Exception $e) {
-                $this->error($e->getMessage());
-                $this->error($dir);
-            }
+            FS::mkdir($dir, 0777, true);
         }
 
         $to = $dir . '/' . $block_name . '.' . $ext;
@@ -286,7 +267,7 @@ class Block extends Controller
                 $same = false;
         }
 
-        if ($same AND $this->check_mtime) {
+        if ($same AND !$this->force) {
             return;
         }
 
@@ -300,6 +281,8 @@ class Block extends Controller
         }
 
         file_put_contents($to, $out);
+
+        $this->changed_files++;
     }
 
     protected function to_assets($from, $block_name, $callback = null) {
@@ -309,7 +292,7 @@ class Block extends Controller
         $dir = $this->output_path . '/' . implode('/', explode('_', $block_name)) . '/assets';
 
         if (!is_dir($dir)) {
-            mkdir($dir);
+            FS::mkdir($dir);
         }
 
         foreach ($from as $f) {
