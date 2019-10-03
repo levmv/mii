@@ -55,7 +55,7 @@ class App extends \mii\core\App
             $this->response->redirect($e->url);
 
         } catch (InvalidRouteException | ForbiddenHttpException | ModelNotFoundException $e) {
-            if (config('debug')) {
+            if (\config('debug')) {
                 throw $e;
             } else {
                 throw new NotFoundHttpException();
@@ -66,8 +66,7 @@ class App extends \mii\core\App
     }
 
 
-
-    public function default_components() : array {
+    public function default_components(): array {
         return [
             'log' => 'mii\log\Logger',
             'blocks' => 'mii\web\Blocks',

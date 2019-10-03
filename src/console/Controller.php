@@ -58,13 +58,13 @@ class Controller
             $methods[] = $m->name;
         }
 
-        if (count($methods))
+        if (\count($methods))
             $this->stdout("\n  Commands:");
 
 
         $max = 0;
         foreach($methods as $method) {
-            $max = max(strlen($method), $max);
+            $max = max(\strlen($method), $max);
         }
 
         $max = min($max, 30); // limit our max length to 30
@@ -101,8 +101,8 @@ class Controller
             $name = $param->getName();
             if (\array_key_exists($name, $params)) {
                 if ($param->isArray()) {
-                    $args[] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
-                } elseif (!is_array($params[$name])) {
+                    $args[] = \is_array($params[$name]) ? $params[$name] : [$params[$name]];
+                } elseif (!\is_array($params[$name])) {
                     $args[] = $params[$name];
                 } else {
                     throw new CliException("Invalid data received for parameter \"$name\".");
@@ -122,7 +122,7 @@ class Controller
             }
         }
 
-        return call_user_func_array([$this, $action], $args);
+        return \call_user_func_array([$this, $action], $args);
     }
 
     /**
@@ -148,7 +148,7 @@ class Controller
         if($this->auto_params)
             $this->execute_action($this->request->action, $this->request->params);
         else
-            call_user_func([$this, $this->request->action], $this->request->params);
+            \call_user_func([$this, $this->request->action], $this->request->params);
 
         $this->after();
 
@@ -162,7 +162,7 @@ class Controller
 
     public function ansi_format($string) {
         if ($this->is_color_enabled()) {
-            $args = func_get_args();
+            $args = \func_get_args();
             array_shift($args);
             $string = Console::ansi_format($string, $args);
         }
@@ -171,7 +171,7 @@ class Controller
 
     public function stdout($string) {
         if ($this->is_color_enabled()) {
-            $args = func_get_args();
+            $args = \func_get_args();
             array_shift($args);
             $string = Console::ansi_format($string, $args);
         }
@@ -180,7 +180,7 @@ class Controller
 
     public function stderr($string) {
         if ($this->is_color_enabled(\STDERR)) {
-            $args = func_get_args();
+            $args = \func_get_args();
             array_shift($args);
             $string = Console::ansi_format($string, $args);
         }

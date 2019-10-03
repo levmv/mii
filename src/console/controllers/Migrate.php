@@ -45,7 +45,7 @@ class Migrate extends Controller
             $this->applied_migrations = [];
         }
 
-        for ($i = 0; $i < count($this->migrations_paths); $i++)
+        for ($i = 0; $i < \count($this->migrations_paths); $i++)
             $this->migrations_paths[$i] = \Mii::resolve($this->migrations_paths[$i]);
 
         foreach ($this->migrations_paths as $migrations_path) {
@@ -88,7 +88,7 @@ class Migrate extends Controller
 
         $custom_name = false;
 
-        if ($argv && count($argv)) {
+        if ($argv && \count($argv)) {
 
             $custom_name = mb_strtolower($argv[0], 'utf-8');
         }
@@ -151,7 +151,7 @@ class ' . $name . ' extends Migration {
         $limit = (int)$limit;
 
         if ($limit > 0) {
-            $migrations = array_slice($migrations, 0, $limit);
+            $migrations = \array_slice($migrations, 0, $limit);
         }
 
         foreach ($migrations as $migration) {

@@ -88,7 +88,7 @@ class ORM
 
             assert(is_array($value) === true, 'Value must be an array or null');
 
-            if (!is_array($value[0])) {
+            if (!\is_array($value[0])) {
                 return (new static)
                     ->select_query()
                     ->where('id', 'IN', $value)
@@ -123,7 +123,7 @@ class ORM
     public static function one($value = null, $find_or_fail = false)
     {
         $result = null;
-        if (is_array($value)) {
+        if (\is_array($value)) {
 
             assert(count($value[0]) === 3, "Wrong conditions array");
 
@@ -132,7 +132,7 @@ class ORM
                 ->where($value)
                 ->one();
 
-        } elseif (is_integer($value) || is_string($value)) {
+        } elseif (\is_integer($value) || \is_string($value)) {
             $result = (new static)->select_query(false)->where('id', '=', (int)$value)->one();
         } else {
             assert($find_or_fail === false, 'You passed null as value: ORM::one(null, true). Its probably a bug');
@@ -184,7 +184,7 @@ class ORM
         $table = $this->get_table();
 
         foreach ($this->_data as $key => $value) {
-            if (!in_array($key, $this->_exclude_fields)) {
+            if (!\in_array($key, $this->_exclude_fields)) {
                 $fields[] = "`$table`.`$key`"; // TODO: support for table prefixes
             }
         }
@@ -240,7 +240,7 @@ class ORM
                 return;
             }
 
-            if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
+            if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
                 $this->_serialize_cache[$key] = $value;
                 return;
             }
@@ -266,7 +266,7 @@ class ORM
     {
         if (isset($this->_data[$key]) OR \array_key_exists($key, $this->_data)) {
 
-            return ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields, true))
+            return ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields, true))
                 ? $this->_unserialize_value($key)
                 : $this->_data[$key];
         }
@@ -274,23 +274,23 @@ class ORM
         if (\array_key_exists($key, $this->_unmapped))
             return $this->_unmapped[$key];
 
-        throw new ORMException('Field ' . $key . ' does not exist in ' . get_class($this) . '!');
+        throw new ORMException('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
     }
 
     public function set($values, $value = NULL): ORM
     {
-        if (is_object($values) AND $values instanceof \mii\web\Form) {
+        if (\is_object($values) AND $values instanceof \mii\web\Form) {
 
             $values = $values->changed_fields();
 
-        } elseif (!is_array($values)) {
+        } elseif (!\is_array($values)) {
             $values = [$values => $value];
         }
 
         foreach ($values as $key => $value) {
             if (\array_key_exists($key, $this->_data)) {
 
-                if ($this->_serialize_fields !== null && in_array($key, $this->_serialize_fields)) {
+                if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
                     $this->_serialize_cache[$key] = $value;
                 } else {
                     if ($value !== $this->_data[$key]) {
@@ -346,11 +346,11 @@ class ORM
             return true;
 
         if ($field_name === null) {
-            return count($this->_changed) > 0;
+            return \count($this->_changed) > 0;
         }
 
-        if (is_array($field_name)) {
-            return count(array_intersect($field_name, array_keys($this->_changed)));
+        if (\is_array($field_name)) {
+            return \count(array_intersect($field_name, array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);
@@ -496,7 +496,7 @@ class ORM
             return;
         }
 
-        throw new ORMException('Cannot delete a non-loaded model ' . get_class($this) . '!');
+        throw new ORMException('Cannot delete a non-loaded model ' . \get_class($this) . '!');
     }
 
     protected function _invalidate_serialize_cache(): void

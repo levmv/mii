@@ -42,7 +42,7 @@ class UploadHandler extends Component
 
         if ($this->_files === null) {
             $this->_files = [];
-            if (isset($_FILES) && is_array($_FILES)) {
+            if (isset($_FILES) && \is_array($_FILES)) {
                 foreach ($_FILES as $class => $info) {
                     $this->load_files_recursive($class, $info['name'], $info['tmp_name'], $info['type'], $info['size'], $info['error']);
                 }
@@ -62,7 +62,7 @@ class UploadHandler extends Component
      * @param mixed $errors uploading issues provided by PHP
      */
     private function load_files_recursive($key, $names, $tmp_names, $types, $sizes, $errors) {
-        if (is_array($names)) {
+        if (\is_array($names)) {
             foreach ($names as $i => $name) {
                 static::load_files_recursive($key . '[' . $i . ']', $name, $tmp_names[$i], $types[$i], $sizes[$i], $errors[$i]);
             }

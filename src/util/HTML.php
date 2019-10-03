@@ -309,7 +309,7 @@ class HTML
                 continue;
             }
 
-            if (is_int($key)) {
+            if (\is_int($key)) {
                 // Assume non-associative keys are mirrored attributes
                 $key = $value;
                 $value = FALSE;
@@ -551,12 +551,12 @@ class HTML
         $attributes['name'] = $name;
 
 
-        if (is_array($selected)) {
+        if (\is_array($selected)) {
             // This is a multi-select, god save us!
             $attributes[] = 'multiple';
         }
 
-        if (!is_array($selected)) {
+        if (!\is_array($selected)) {
             if ($selected === NULL) {
                 // Use an empty array
                 $selected = array();
@@ -571,7 +571,7 @@ class HTML
             $options = '';
         } else {
             foreach ($options as $value => $name) {
-                if (is_array($name)) {
+                if (\is_array($name)) {
                     // Create a new optgroup
                     $group = array('label' => $value);
 
@@ -581,7 +581,7 @@ class HTML
                     foreach ($name as $_value => $_name) {
                         $_value = HTML::chars($_value);
 
-                        if (in_array($_value, $selected)) {
+                        if (\in_array($_value, $selected)) {
                             // This option is selected
                             $_value = '"' . $_value . '" selected';
                         } else {
@@ -600,7 +600,7 @@ class HTML
                     // Force value to be string
                     $value = HTML::chars($value);
 
-                    if (in_array($value, $selected)) {
+                    if (\in_array($value, $selected)) {
                         // This option is selected
                         $value = '"' . $value . '" selected';
                     } else {

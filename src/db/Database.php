@@ -14,7 +14,6 @@ use mii\core\Component;
  */
 class Database extends Component
 {
-
     // Query types
     public const SELECT = 1;
     public const INSERT = 2;
@@ -28,7 +27,6 @@ class Database extends Component
      */
     public $last_query;
 
-
     /**
      * @var \mysqli Raw server connection
      */
@@ -38,7 +36,6 @@ class Database extends Component
      * @var array configuration array
      */
     protected $_config;
-
 
     protected $_dbname;
 
@@ -60,7 +57,6 @@ class Database extends Component
             $this->_config['table_prefix'] = '';
         }
     }
-
 
     /**
      * Disconnect from the database when the object is destroyed.
@@ -90,7 +86,7 @@ class Database extends Component
             // Database is assumed disconnected
             $status = true;
 
-            if (is_resource($this->_connection)) {
+            if (\is_resource($this->_connection)) {
                 if ($status = $this->_connection->close()) {
                     // Clear the connection
                     $this->_connection = NULL;
@@ -98,7 +94,7 @@ class Database extends Component
             }
         } catch (\Exception $e) {
             // Database is probably not disconnected
-            $status = !is_resource($this->_connection);
+            $status = !\is_resource($this->_connection);
         }
 
         return $status;
@@ -118,10 +114,10 @@ class Database extends Component
      *     // Make a SELECT query and use "Model_User" for the results
      *     $db->query(Database::SELECT, 'SELECT * FROM users LIMIT 1', 'Model_User');
      *
-     * @param   integer $type Database::SELECT, Database::INSERT, etc
-     * @param   string $sql SQL query
-     * @param   mixed $as_object result object class string, TRUE for stdClass, FALSE for assoc array
-     * @param   array $params object construct parameters for result class
+     * @param integer $type Database::SELECT, Database::INSERT, etc
+     * @param string $sql SQL query
+     * @param mixed $as_object result object class string, TRUE for stdClass, FALSE for assoc array
+     * @param array $params object construct parameters for result class
      * @return  Result|null   Result for SELECT queries or null
      */
     public function query(?int $type, string $sql, $as_object = false, array $params = NULL): ?Result {
@@ -165,9 +161,11 @@ class Database extends Component
         return null;
     }
 
+
     public function inserted_id() {
         return $this->_connection->insert_id;
     }
+
 
     public function affected_rows(): int {
         return $this->_connection->affected_rows;
@@ -179,8 +177,8 @@ class Database extends Component
      *
      *     $db->connect();
      *
-     * @throws  DatabaseException
      * @return  void
+     * @throws  DatabaseException
      */
     public function connect() {
         if ($this->_connection)
@@ -247,9 +245,9 @@ class Database extends Component
      *
      *     $db->set_charset('utf8');
      *
-     * @throws  DatabaseException
-     * @param   string $charset character set name
+     * @param string $charset character set name
      * @return  void
+     * @throws  DatabaseException
      */
     public function set_charset($charset) {
         // Make sure the database is connected
@@ -274,7 +272,7 @@ class Database extends Component
      * [Database_Query] objects will be compiled and converted to a sub-query.
      * All other objects will be converted using the `__toString` method.
      *
-     * @param   mixed $value any value to quote
+     * @param mixed $value any value to quote
      * @return  string
      * @uses    Database::escape
      */
@@ -285,14 +283,14 @@ class Database extends Component
             return "'1'";
         } elseif ($value === false) {
             return "'0'";
-        } elseif (is_int($value)) {
+        } elseif (\is_int($value)) {
             return (int)$value;
-        } elseif (is_float($value)) {
+        } elseif (\is_float($value)) {
             // Convert to non-locale aware float to prevent possible commas
             return sprintf('%F', $value);
-        } elseif (is_array($value)) {
+        } elseif (\is_array($value)) {
             return '(' . implode(', ', array_map([$this, __FUNCTION__], $value)) . ')';
-        } elseif (is_object($value)) {
+        } elseif (\is_object($value)) {
             if ($value instanceof Query) {
                 // Create a sub-query
                 return '(' . $value->compile($this) . ')';
@@ -314,7 +312,7 @@ class Database extends Component
      *
      *     $value = $db->escape('any string');
      *
-     * @param   string $value value to quote
+     * @param string $value value to quote
      * @return  string
      */
     public function escape($value): string {
@@ -394,20 +392,20 @@ class Database extends Component
 
     public function get_lock($name, $timeout = 0) {
 
-        return (bool) $this->query(
+        return (bool)$this->query(
             static::SELECT,
-            strtr('SELECT GET_LOCK(:name, :timeout)',  [
+            strtr('SELECT GET_LOCK(:name, :timeout)', [
                 ':name' => $this->quote($name),
-                ':timeout' => (int) $timeout
+                ':timeout' => (int)$timeout
             ])
         )->scalar();
     }
 
 
     public function release_lock($name) {
-        return (bool) $this->query(
+        return (bool)$this->query(
             static::SELECT,
-            strtr('SELECT RELEASE_LOCK(:name)',  [
+            strtr('SELECT RELEASE_LOCK(:name)', [
                 ':name' => $this->quote($name)
             ])
         )->scalar();
@@ -428,16 +426,16 @@ class Database extends Component
      * [Database_Query] objects will be compiled and converted to a sub-query.
      * All other objects will be converted using the `__toString` method.
      *
-     * @param   mixed $column column name or array(column, alias)
+     * @param mixed $column column name or array(column, alias)
      * @return  string
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
      */
     public function quote_column($column): string {
 
-        if (is_array($column)) {
+        if (\is_array($column)) {
             list($column, $alias) = $column;
-            $alias = str_replace('`', '``', $alias);
+            $alias = \str_replace('`', '``', $alias);
         }
 
         if ($column instanceof Query) {
@@ -450,16 +448,16 @@ class Database extends Component
             // Convert to a string
             $column = (string)$column;
 
-            $column = str_replace('`', '``', $column);
+            $column = \str_replace('`', '``', $column);
 
             if ($column === '*') {
                 return $column;
-            } elseif (strpos($column, '.') !== false) {
-                $parts = explode('.', $column);
+            } elseif (\strpos($column, '.') !== false) {
+                $parts = \explode('.', $column);
 
                 if ($prefix = $this->table_prefix()) {
                     // Get the offset of the table name, 2nd-to-last part
-                    $offset = count($parts) - 2;
+                    $offset = \count($parts) - 2;
 
                     // Add the table prefix to the table name
                     $parts[$offset] = $prefix . $parts[$offset];
@@ -468,18 +466,18 @@ class Database extends Component
                 foreach ($parts as & $part) {
                     if ($part !== '*') {
                         // Quote each of the parts
-                        $part = '`' . $part . '`';
+                        $part = "`$part`";
                     }
                 }
 
-                $column = implode('.', $parts);
+                $column = \implode('.', $parts);
             } else {
                 $column = '`' . $column . '`';
             }
         }
 
         if (isset($alias)) {
-            $column .= ' AS ' . '`' . $alias . '`';
+            $column .= " AS `$alias`";
         }
 
         return $column;
@@ -511,13 +509,13 @@ class Database extends Component
      * [Database_Query] objects will be compiled and converted to a sub-query.
      * All other objects will be converted using the `__toString` method.
      *
-     * @param   mixed $table table name or array(table, alias)
+     * @param mixed $table table name or array(table, alias)
      * @return  string
      * @uses    Database::quote_identifier
      * @uses    Database::table_prefix
      */
     public function quote_table($table): string {
-        if (is_array($table)) {
+        if (\is_array($table)) {
             list($table, $alias) = $table;
             $alias = str_replace('`', '``', $alias);
         }
@@ -539,7 +537,7 @@ class Database extends Component
 
                 if ($prefix = $this->table_prefix()) {
                     // Get the offset of the table name, last part
-                    $offset = count($parts) - 1;
+                    $offset = \count($parts) - 1;
 
                     // Add the table prefix to the table name
                     $parts[$offset] = $prefix . $parts[$offset];
@@ -573,14 +571,14 @@ class Database extends Component
      * [Database_Query] objects will be compiled and converted to a sub-query.
      * All other objects will be converted using the `__toString` method.
      *
-     * @param   mixed $value any identifier
+     * @param mixed $value any identifier
      * @return  string
      */
     public function quote_identifier($value): string {
 
-        if (is_array($value)) {
+        if (\is_array($value)) {
             list($value, $alias) = $value;
-            $alias = str_replace('`', '``', $alias);
+            $alias = \str_replace('`', '``', $alias);
         }
 
         if ($value instanceof Query) {
@@ -593,24 +591,24 @@ class Database extends Component
             // Convert to a string
             $value = (string)$value;
 
-            $value = str_replace('`', '``', $value);
+            $value = \str_replace('`', '``', $value);
 
-            if (strpos($value, '.') !== false) {
-                $parts = explode('.', $value);
+            if (\strpos($value, '.') !== false) {
+                $parts = \explode('.', $value);
 
                 foreach ($parts as & $part) {
                     // Quote each of the parts
-                    $part = '`' . $part . '`';
+                    $part = "`$part`";
                 }
 
-                $value = implode('.', $parts);
+                $value = \implode('.', $parts);
             } else {
-                $value = '`' . $value . '`';
+                $value = "`$value`";
             }
         }
 
         if (isset($alias)) {
-            $value .= ' AS ' . '`' . $alias . '`';
+            $value .= " AS `$alias`";
         }
 
         return $value;

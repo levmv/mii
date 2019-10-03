@@ -188,7 +188,7 @@ class Block
      * @return  $this
      */
     public function set($key, $value = NULL) {
-        if (is_array($key)) {
+        if (\is_array($key)) {
             foreach ($key as $name => $value) {
                 $this->_data[$name] = $value;
             }

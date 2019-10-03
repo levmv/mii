@@ -46,7 +46,7 @@ class User extends ORM
     public function has_role($role_names): bool {
         $roles = $this->get_roles();
 
-        if (!is_array($role_names)) {
+        if (!\is_array($role_names)) {
             $role_names = (array)$role_names;
         }
 

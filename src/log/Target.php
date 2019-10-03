@@ -78,7 +78,7 @@ abstract class Target extends Component
         $trace = '';
         $context = '';
 
-        if (!is_string($text)) {
+        if (!\is_string($text)) {
 
             if ($text instanceof \Throwable) {
 

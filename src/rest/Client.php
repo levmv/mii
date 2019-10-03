@@ -47,11 +47,11 @@ class Client extends Component {
         if($this->username && $this->password)
             $curlopt[CURLOPT_USERPWD] = "{$this->username}:{$this->password}";
 
-        if(count($this->headers) || count($headers)){
+        if(\count($this->headers) || \count($headers)){
             $curlopt[CURLOPT_HTTPHEADER] = [];
             $headers = array_merge($this->headers, $headers);
             foreach($headers as $key => $values){
-                foreach(is_array($values)? $values : [$values] as $value){
+                foreach(\is_array($values)? $values : [$values] as $value){
                     $curlopt[CURLOPT_HTTPHEADER][] = "$key:$value";
                 }
             }
@@ -60,7 +60,7 @@ class Client extends Component {
         // Allow passing parameters as a pre-encoded string (or something that
         // allows casting to a string). Parameters passed as strings will not be
         // merged with parameters specified in the default options.
-        if(is_array($params)){
+        if(\is_array($params)){
             $params = array_merge($this->params, $params);
             $parameters_string = http_build_query($params);
 

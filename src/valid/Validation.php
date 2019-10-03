@@ -138,7 +138,7 @@ class Validation
             $rule = $row[1];
             $params = isset($row[2]) ? $row[2] : [];
 
-            if (is_array($field)) {
+            if (\is_array($field)) {
                 foreach ($field as $field_name) {
                     $this->rule($field_name, $rule, $params);
                 }
@@ -203,23 +203,23 @@ class Validation
 
                 // Default the error name to be the rule (except array and lambda rules)
                 $error_name = $rule;
-                if (is_array($rule)) {
+                if (\is_array($rule)) {
 
                     // Allows rule('field', array(':model', 'some_rule'));
-                    if (is_string($rule[0]) AND \array_key_exists($rule[0], $this->_bound)) {
+                    if (\is_string($rule[0]) AND \array_key_exists($rule[0], $this->_bound)) {
                         // Replace with bound value
                         $rule[0] = $this->_bound[$rule[0]];
                     }
 
                     // This is an array callback, the method name is the error name
                     $error_name = $rule[1];
-                    $passed = call_user_func_array($rule, $params);
-                } elseif (!is_string($rule)) {
+                    $passed = \call_user_func_array($rule, $params);
+                } elseif (!\is_string($rule)) {
                     // This is a lambda function, there is no error name (errors must be added manually)
                     $error_name = FALSE;
                     array_unshift($params, $field);
                     array_unshift($params, $this);
-                    $passed = call_user_func_array($rule, $params);
+                    $passed = \call_user_func_array($rule, $params);
                 } elseif (method_exists('mii\valid\Rules', $rule)) {
                     // Use a method in this object
                     $method = new \ReflectionMethod('mii\valid\Rules', $rule);
@@ -249,7 +249,7 @@ class Validation
                 }
 
                 // Ignore return values from rules when the field is empty
-                if (!in_array($rule, $this->_empty_rules) AND !Rules::not_empty($value))
+                if (!\in_array($rule, $this->_empty_rules) AND !Rules::not_empty($value))
                     continue;
 
                 if ($passed === FALSE AND $error_name !== FALSE) {
@@ -295,7 +295,7 @@ class Validation
 
 
     public function has_errors() {
-        return count($this->_errors);
+        return \count($this->_errors);
     }
 
     /**
@@ -326,7 +326,7 @@ class Validation
         $messages = [];
 
         foreach ($this->_errors as $field => $set) {
-            if (is_array($set)) {
+            if (\is_array($set)) {
                 list($error, $params) = $set;
             } else {
                 $error = $set;
@@ -347,17 +347,17 @@ class Validation
                 ':value' => $this->field($field),
             ];
 
-            if (is_array($values[':value'])) {
+            if (\is_array($values[':value'])) {
                 // All values must be strings
                 $values[':value'] = implode(', ', Arr::flatten($values[':value']));
             }
 
             if ($params) {
                 foreach ($params as $key => $value) {
-                    if (is_array($value)) {
+                    if (\is_array($value)) {
                         // All values must be strings
                         $value = implode(', ', Arr::flatten($value));
-                    } elseif (is_object($value)) {
+                    } elseif (\is_object($value)) {
                         // Objects cannot be used in message files
                         continue;
                     }
@@ -379,16 +379,16 @@ class Validation
             }
 
 
-            if ($message = Arr::path($this->_error_messages, "{$field}.{$error}") AND is_string($message)) {
+            if ($message = Arr::path($this->_error_messages, "{$field}.{$error}") AND \is_string($message)) {
 
-            } elseif ($message = Mii::message($file, "{$field}.{$error}") AND is_string($message)) {
+            } elseif ($message = Mii::message($file, "{$field}.{$error}") AND \is_string($message)) {
 
                 // Found a message for this field and error
-            } elseif ($message = Mii::message($file, "{$field}.default") AND is_string($message)) {
+            } elseif ($message = Mii::message($file, "{$field}.default") AND \is_string($message)) {
                 // Found a default message for this field
-            } elseif ($message = Mii::message($file, $error) AND is_string($message)) {
+            } elseif ($message = Mii::message($file, $error) AND \is_string($message)) {
                 // Found a default message for this error
-            } elseif ($message = Mii::message('validation', $error) AND is_string($message)) {
+            } elseif ($message = Mii::message('validation', $error) AND \is_string($message)) {
                 // Found a default message for this error
             } else {
                 // No message exists, display the path expected

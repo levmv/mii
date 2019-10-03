@@ -22,11 +22,11 @@ class Debug
      * @return  string
      */
     public static function vars() {
-        if (func_num_args() === 0)
+        if (\func_num_args() === 0)
             return '';
 
         // Get all passed variables
-        $variables = func_get_args();
+        $variables = \func_get_args();
 
         $output = array();
         foreach ($variables as $var) {
@@ -62,11 +62,11 @@ class Debug
     protected static function _dump(& $var, $length = 128, $limit = 10, $level = 0) {
         if ($var === NULL) {
             return '<small>NULL</small>';
-        } elseif (is_bool($var)) {
+        } elseif (\is_bool($var)) {
             return '<small>bool</small> ' . ($var ? 'TRUE' : 'FALSE');
         } elseif (is_float($var)) {
             return '<small>float</small> ' . $var;
-        } elseif (is_resource($var)) {
+        } elseif (\is_resource($var)) {
             if (($type = get_resource_type($var)) === 'stream' AND $meta = stream_get_meta_data($var)) {
                 $meta = stream_get_meta_data($var);
 
@@ -82,7 +82,7 @@ class Debug
             } else {
                 return '<small>resource</small><span>(' . $type . ')</span>';
             }
-        } elseif (is_string($var)) {
+        } elseif (\is_string($var)) {
             // Clean invalid multibyte characters. iconv is only invoked
             // if there are non ASCII characters in the string, so this
             // isn't too much of a hit.
@@ -97,7 +97,7 @@ class Debug
             }
 
             return '<small>string</small><span>(' . strlen($var) . ')</span> "' . $str . '"';
-        } elseif (is_array($var)) {
+        } elseif (\is_array($var)) {
             $output = array();
 
             // Indentation for this variable
@@ -120,7 +120,7 @@ class Debug
                 $var[$marker] = TRUE;
                 foreach ($var as $key => & $val) {
                     if ($key === $marker) continue;
-                    if (!is_int($key)) {
+                    if (!\is_int($key)) {
                         $key = '"' . htmlspecialchars($key, ENT_NOQUOTES, 'utf-8') . '"';
                     }
 
@@ -135,7 +135,7 @@ class Debug
             }
 
             return '<small>array</small><span>(' . count($var) . ')</span> ' . implode("\n", $output);
-        } elseif (is_object($var)) {
+        } elseif (\is_object($var)) {
             // Copy the object as an array
             $array = (array)$var;
 
@@ -178,7 +178,7 @@ class Debug
                 $output[] = "{\n$space$s...\n$space}";
             }
 
-            return '<small>object</small> <span>' . get_class($var) . '(' . count($array) . ')</span> ' . implode("\n", $output);
+            return '<small>object</small> <span>' . \get_class($var) . '(' . count($array) . ')</span> ' . implode("\n", $output);
         } else {
             return '<small>' . gettype($var) . '</small> ' . htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
         }
@@ -304,7 +304,7 @@ class Debug
             // function()
             $function = $step['function'];
 
-            if (in_array($step['function'], $statements)) {
+            if (\in_array($step['function'], $statements)) {
                 if (empty($step['args'])) {
                     // No arguments
                     $args = array();
@@ -313,7 +313,7 @@ class Debug
                     $args = array($step['args'][0]);
                 }
             } elseif (isset($step['args'])) {
-                if (!function_exists($step['function']) OR strpos($step['function'], '{closure}') !== FALSE) {
+                if (!\function_exists($step['function']) OR strpos($step['function'], '{closure}') !== FALSE) {
                     // Introspection on closures or language constructs in a stack trace is impossible
                     $params = NULL;
                 } else {
@@ -376,17 +376,17 @@ class Debug
             $args = [];
             foreach($step['args'] as $arg) {
 
-                if (is_string($arg)) {
+                if (\is_string($arg)) {
                     $args[] = "'" . Text::limit_chars($arg, 40) . "'";
-                } elseif (is_array($arg)) {
+                } elseif (\is_array($arg)) {
                     $args[] = "Array";
-                } elseif (is_null($arg)) {
+                } elseif (\is_null($arg)) {
                     $args[] = 'null';
-                } elseif (is_bool($arg)) {
+                } elseif (\is_bool($arg)) {
                     $args[] = ($arg) ? "true" : "false";
-                } elseif (is_object($arg)) {
-                    $args[] = get_class($arg);
-                } elseif (is_resource($arg)) {
+                } elseif (\is_object($arg)) {
+                    $args[] = \get_class($arg);
+                } elseif (\is_resource($arg)) {
                     $args[] = get_resource_type($arg);
                 } else {
                     $args[] = $arg;

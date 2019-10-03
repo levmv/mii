@@ -44,7 +44,7 @@ class Help extends Controller
 
             $desc = ($class->description) ? " " . $class->description . " " : '';
             $this->stdout($controller['command'], Console::FG_GREEN);
-            $padding = max(1, 12-strlen($controller['command']));
+            $padding = max(1, 12-\strlen($controller['command']));
             $this->stdout(str_pad(" ", $padding, " ").$desc . "\n\n", Console::FG_GREY);
 
         }
@@ -81,7 +81,7 @@ class Help extends Controller
                 foreach($data as $prefix => $path) {
                     if(strpos($ns, $prefix) === 0) {
 
-                        $path[0] .= str_replace('\\', '/', substr($ns, strlen($prefix)-1));
+                        $path[0] .= str_replace('\\', '/', substr($ns, \strlen($prefix)-1));
                         $paths[$ns] = $path[0];
                     }
                 }

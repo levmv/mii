@@ -3,7 +3,6 @@
 namespace mii\web;
 
 use Mii;
-use mii\core\ACL;
 
 class PageController extends Controller
 {
@@ -93,7 +92,7 @@ class PageController extends Controller
             if ($content === null)
                 $content = $this->content;
 
-            if (is_array($content) AND $this->request->is_ajax()) {
+            if (\is_array($content) AND $this->request->is_ajax()) {
                 Mii::$app->response->format = Response::FORMAT_JSON;
             }
             Mii::$app->response->content($content);
@@ -105,7 +104,7 @@ class PageController extends Controller
     protected function setup_index($block_name = false): void {
         $name = ($block_name) ? $block_name : $this->index_block_name;
 
-        $this->index_block = block($name)
+        $this->index_block = \block($name)
             ->bind('title', $this->title)
             ->bind('description', $this->description)
             ->bind('og', $this->og)
@@ -120,20 +119,20 @@ class PageController extends Controller
         if ($depends === null)
             $depends = $this->layout_depends;
 
-        $this->layout = block($block_name)
+        $this->layout = \block($block_name)
             ->depends($depends)
             ->bind('content', $this->content);
     }
 
     protected function on_access_denied() {
-        throw new ForbiddenHttpException('User has no rights to access '.$this->request->uri());
+        throw new ForbiddenHttpException('User has no rights to access ' . $this->request->uri());
     }
 
     public function execute(string $action, $params) {
 
         $this->access_rules();
 
-        if($this->acl !== null) {
+        if ($this->acl !== null) {
             $roles = Mii::$app->auth->get_user() ? Mii::$app->auth->get_user()->get_roles() : '*';
 
             if (empty($roles))

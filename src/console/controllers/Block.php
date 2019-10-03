@@ -37,7 +37,7 @@ class Block extends Controller
                 foreach ($blocks as $index => $value) {
                     // Block can be defined either by simply name or by name => func_name
 
-                    if (is_int($index)) {
+                    if (\is_int($index)) {
                         $index = $value;
 
                         // Drop 'i_' prefix.
@@ -243,7 +243,7 @@ class Block extends Controller
      * @throws CliException
      */
     protected function to_block($from, $block_name, $ext, $callback = null) {
-        if (!is_array($from))
+        if (!\is_array($from))
             $from = array($from);
 
         $dir = $this->output_path . '/' . implode('/', explode('_', $block_name));
@@ -275,7 +275,7 @@ class Block extends Controller
             $text = file_get_contents($this->input_path . '/' . $f);
 
             if ($callback)
-                $text = call_user_func($callback, $text);
+                $text = \call_user_func($callback, $text);
 
             $out .= $text . "\n";
         }
@@ -286,7 +286,7 @@ class Block extends Controller
     }
 
     protected function to_assets($from, $block_name, $callback = null) {
-        if (!is_array($from))
+        if (!\is_array($from))
             $from = array($from);
 
         $dir = $this->output_path . '/' . implode('/', explode('_', $block_name)) . '/assets';
@@ -301,7 +301,7 @@ class Block extends Controller
 
             if ($callback) {
                 $file = file_get_contents($this->input_path . '/' . $f);
-                file_put_contents($dir . '/' . $filename, call_user_func($callback, $file));
+                file_put_contents($dir . '/' . $filename, \call_user_func($callback, $file));
             } else {
                 copy($this->input_path . '/' . $f, $dir . '/' . $filename);
             }
@@ -314,7 +314,7 @@ class Block extends Controller
             if ($item === '.' OR $item === '..')
                 return;
 
-            call_user_func($callback, $item);
+            \call_user_func($callback, $item);
         }, $files);
     }
 }

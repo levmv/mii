@@ -41,12 +41,12 @@ class Form
 
         $this->_fields = $this->fields();
 
-        if (is_object($data) AND $data instanceof ORM) {
+        if (\is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
             $data = $data->to_array();
         }
 
-        if (is_array($data)) {
+        if (\is_array($data)) {
             foreach (array_intersect_key($data, $this->_fields) as $key => $value) {
                 $this->set($key, $value);
             }
@@ -66,12 +66,12 @@ class Form
         if ($this->_loaded AND $data === null)
             return true;
 
-        if (is_object($data) AND $data instanceof ORM) {
+        if (\is_object($data) AND $data instanceof ORM) {
             $this->_model = $data;
             $data = $data->to_array();
         }
 
-        if (is_array($data) AND count($data)) {
+        if (\is_array($data) AND \count($data)) {
 
             $this->load_fields($data);
 
@@ -157,11 +157,11 @@ class Form
 
     public function changed($field_name = null): bool {
         if ($field_name === null) {
-            return count($this->_changed) > 0;
+            return \count($this->_changed) > 0;
         }
 
-        if (is_array($field_name)) {
-            return count(array_intersect($field_name, array_keys($this->_changed)));
+        if (\is_array($field_name)) {
+            return \count(array_intersect($field_name, array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);
@@ -182,7 +182,7 @@ class Form
 
     public function set($name, $value = null) {
 
-        if (!is_array($name)) {
+        if (!\is_array($name)) {
             $name = [$name => $value];
         }
 

@@ -5,7 +5,6 @@ namespace mii\db;
 class DB
 {
 
-
     static function raw(string $q, array $params = []) {
         return static::query(null, $q, $params);
     }
@@ -89,7 +88,6 @@ class DB
         return new Expression($value, $params);
     }
 
-
     static function begin(): void {
         \Mii::$app->db->begin();
     }
@@ -101,6 +99,5 @@ class DB
     static function rollback(): void {
         \Mii::$app->db->rollback();
     }
-
 
 }

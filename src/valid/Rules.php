@@ -36,13 +36,13 @@ class Rules
      * @return  boolean
      */
     public static function not_empty($value) {
-        if (is_object($value) AND $value instanceof \ArrayObject) {
+        if (\is_object($value) AND $value instanceof \ArrayObject) {
             // Get the array from the ArrayObject
             $value = $value->getArrayCopy();
         }
 
         // Value cannot be NULL, FALSE, '', or an empty array
-        return !in_array($value, array(NULL, FALSE, '', array()), TRUE);
+        return !\in_array($value, array(NULL, FALSE, '', array()), TRUE);
     }
 
     /**
@@ -81,10 +81,10 @@ class Rules
 
 
     public static function _check_size($value, $length, $dir) {
-        if(is_object($value) && $value instanceof UploadedFile)
+        if(\is_object($value) && $value instanceof UploadedFile)
             return static::file_size($value, $length, $dir);
 
-        if(is_string($value)) {
+        if(\is_string($value)) {
             return (mb_strlen($value) <=> $length) === $dir;
         }
 
@@ -100,7 +100,7 @@ class Rules
      * @return  boolean
      */
     public static function exact_length($value, $length) {
-        if (is_array($length)) {
+        if (\is_array($length)) {
             foreach ($length as $strlen) {
                 if (mb_strlen($value) === $strlen)
                     return TRUE;
@@ -224,7 +224,7 @@ class Rules
 
         // Check maximum length of the whole hostname
         // http://en.wikipedia.org/wiki/Domain_name#cite_note-0
-        if (strlen($matches[1]) > 253)
+        if (\strlen($matches[1]) > 253)
             return FALSE;
 
         // An extra check for the top level domain
@@ -260,7 +260,7 @@ class Rules
      * @return  boolean
      */
     public static function phone($number, $lengths = NULL) {
-        if (!is_array($lengths)) {
+        if (!\is_array($lengths)) {
             $lengths = array(7, 10, 11);
         }
 
@@ -268,7 +268,7 @@ class Rules
         $number = preg_replace('/\D+/', '', $number);
 
         // Check if the number is within range
-        return in_array(strlen($number), $lengths);
+        return \in_array(strlen($number), $lengths);
     }
 
     /**
@@ -341,7 +341,7 @@ class Rules
         if ($utf8 === TRUE) {
             return (bool)preg_match('/^\pN++$/uD', $str);
         } else {
-            return (is_int($str) AND $str >= 0) OR ctype_digit($str);
+            return (\is_int($str) AND $str >= 0) OR ctype_digit($str);
         }
     }
 
@@ -437,7 +437,7 @@ class Rules
 
 
     public static function uploaded( $file): bool {
-        return is_object($file) &&
+        return \is_object($file) &&
             $file instanceof UploadedFile &&
             !$file->has_error() &&
             $file->is_uploaded_file();
@@ -463,7 +463,7 @@ class Rules
 
         $ext = strtolower(pathinfo($file->name, PATHINFO_EXTENSION));
 
-        return in_array($ext, $allowed);
+        return \in_array($ext, $allowed);
     }
 
     /**

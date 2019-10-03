@@ -242,7 +242,7 @@ class Query
             'using' => []
         ];
 
-        $this->_last_join = count($this->_joins) - 1;
+        $this->_last_join = \count($this->_joins) - 1;
 
         return $this;
     }
@@ -268,7 +268,7 @@ class Query
      * @return  $this
      */
     public function using(...$columns) {
-        call_user_func_array([$this->_last_join, 'using'], $columns);
+        \call_user_func_array([$this->_last_join, 'using'], $columns);
 
         return $this;
     }
@@ -309,7 +309,7 @@ class Query
         if ($column === null) {
             $this->_having[] = ['AND' => '('];
             $this->_last_condition_where = false;
-        } elseif (is_array($column)) {
+        } elseif (\is_array($column)) {
             foreach ($column as $row) {
                 $this->_having[] = ['AND' => $row];
             }
@@ -332,7 +332,7 @@ class Query
         if ($column === null) {
             $this->_having[] = ['OR' => '('];
             $this->_last_condition_where = false;
-        } elseif (is_array($column)) {
+        } elseif (\is_array($column)) {
             foreach ($column as $row) {
                 $this->_having[] = ['OR' => $row];
             }
@@ -355,7 +355,7 @@ class Query
     public function union($select, $all = true) {
 
         // TODO
-        if (is_string($select)) {
+        if (\is_string($select)) {
             $select = (new Query)->select()->from($select);
         }
         if (!$select instanceof Query)
@@ -433,7 +433,7 @@ class Query
         if ($column === null) {
             $this->_where[] = ['AND' => '('];
             $this->_last_condition_where = true;
-        } elseif (is_array($column)) {
+        } elseif (\is_array($column)) {
             foreach ($column as $row) {
                 $this->_where[] = ['AND' => $row];
             }
@@ -454,7 +454,7 @@ class Query
      * @return  $this
      */
     public function and_filter($column, $op, $value) {
-        if ($value === null || $value === "" || !Rules::not_empty((is_string($value) ? trim($value) : $value)))
+        if ($value === null || $value === "" || !Rules::not_empty((\is_string($value) ? trim($value) : $value)))
             return $this;
 
         return $this->and_where($column, $op, $value);
@@ -475,7 +475,7 @@ class Query
             $this->_where[] = ['OR' => '('];
             $this->_last_condition_where = true;
 
-        } elseif (is_array($column)) {
+        } elseif (\is_array($column)) {
 
             foreach ($column as $row) {
                 $this->_where[] = ['OR' => $row];
@@ -497,7 +497,7 @@ class Query
      * @return  $this
      */
     public function or_filter($column, $op, $value) {
-        if ($value === null || $value === "" || !Rules::not_empty((is_string($value) ? trim($value) : $value)))
+        if ($value === null || $value === "" || !Rules::not_empty((\is_string($value) ? trim($value) : $value)))
             return $this;
 
         return $this->or_where($column, $op, $value);
@@ -566,7 +566,7 @@ class Query
      * @return  $this
      */
     public function order_by($column, $direction = null) {
-        if (is_array($column) AND $direction === null) {
+        if (\is_array($column) AND $direction === null) {
             $this->_order_by = $column;
         } elseif($column !== null) {
             $this->_order_by[] = [$column, $direction];
@@ -626,7 +626,7 @@ class Query
      * @return  $this
      */
     public function values(...$values) {
-        if (!is_array($this->_values)) {
+        if (!\is_array($this->_values)) {
             throw new DatabaseException('INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
         }
 
@@ -707,7 +707,7 @@ class Query
         // Add the column names
         $query .= ' (' . implode(', ', array_map([$this->db, 'quote_column'], $this->_columns)) . ') ';
 
-        if (is_array($this->_values)) {
+        if (\is_array($this->_values)) {
 
             $groups = [];
 
@@ -832,7 +832,7 @@ class Query
             $columns = $this->_quoted_select;
 
             foreach ($this->_select as $column) {
-                if (is_array($column)) {
+                if (\is_array($column)) {
                     // Use the column alias
                     $column = $this->db->quote_identifier($column);
                 } else {
@@ -868,7 +868,7 @@ class Query
             $group = [];
 
             foreach ($this->_group_by as $column) {
-                if (is_array($column)) {
+                if (\is_array($column)) {
                     // Use the column alias
                     $column = $this->db->quote_identifier(end($column));
                 } else {
@@ -1017,24 +1017,24 @@ class Query
                     // Database operators are always uppercase
                     $op = strtoupper($op);
 
-                    if ($op === 'BETWEEN' AND is_array($value)) {
+                    if ($op === 'BETWEEN' AND \is_array($value)) {
                         // BETWEEN always has exactly two arguments
                         list($min, $max) = $value;
 
-                        if (is_string($min)) {
+                        if (\is_string($min)) {
                             $min = $this->db->quote($min);
                         }
 
-                        if (is_string($max)) {
+                        if (\is_string($max)) {
                             $max = $this->db->quote($max);
                         }
 
                         // Quote the min and max value
                         $value = $min . ' AND ' . $max;
-                    } elseif ($op === 'IN' AND is_array($value)) {
+                    } elseif ($op === 'IN' AND \is_array($value)) {
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
 
-                    } elseif ($op === 'NOT IN' AND is_array($value)) {
+                    } elseif ($op === 'NOT IN' AND \is_array($value)) {
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
 
                     } else {
@@ -1042,7 +1042,7 @@ class Query
                     }
 
                     if ($column) {
-                        if (is_array($column)) {
+                        if (\is_array($column)) {
                             // Use the column name
                             $column = $this->db->quote_identifier(reset($column));
                         } else {
@@ -1073,7 +1073,7 @@ class Query
         foreach ($this->_order_by as $group) {
             list ($column, $direction) = $group;
 
-            if (is_array($column)) {
+            if (\is_array($column)) {
                 // Use the column alias
                 $column = $this->db->quote_identifier(end($column));
             } else {
@@ -1255,7 +1255,7 @@ class Query
         $old_order = $this->_order_by;
 
         if ($this->_distinct) {
-            $dt_column = count($this->_quoted_select)
+            $dt_column = \count($this->_quoted_select)
                 ? $this->_quoted_select[0]
                 : $db->quote_column($this->_select[0]);
             $this->select([
@@ -1294,7 +1294,7 @@ class Query
         $this->limit(1);
         $result = $this->execute();
 
-        return count($result) > 0 ? $result->current() : null;
+        return \count($result) > 0 ? $result->current() : null;
     }
 
     public function all() {

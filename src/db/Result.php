@@ -61,7 +61,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * Result destruction cleans up all open result sets.
      */
     public function __destruct() {
-        if (is_resource($this->_result)) {
+        if (\is_resource($this->_result)) {
             $this->_result->free();
         }
     }
@@ -101,22 +101,22 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
             return $this->_as_object
                 ? $this->index($this)
-                : $this->index($this->_result->fetch_all(MYSQLI_ASSOC));
+                : $this->index($this->_result->fetch_all(\MYSQLI_ASSOC));
         }
 
         return $this->_as_object
             ? $this->to_array()
-            : $this->_result->fetch_all(MYSQLI_ASSOC);
+            : $this->_result->fetch_all(\MYSQLI_ASSOC);
     }
 
 
     public function index($rows): array {
         $result = [];
 
-        if (!is_string($this->_index_by)) {
+        if (!\is_string($this->_index_by)) {
 
             foreach ($rows as $row) {
-                $result[call_user_func($this->_index_by, $row)] = $row;
+                $result[\call_user_func($this->_index_by, $row)] = $row;
             }
 
             return $result;
@@ -145,7 +145,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         $rows = [];
 
         if ($first) {
-            if (is_array($first)) {
+            if (\is_array($first)) {
                 $rows = $first;
             } else {
                 $rows[0] = $first;
@@ -182,10 +182,10 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         foreach ($this as $object) {
             $result = [];
             foreach ($properties as $key => $name) {
-                if (is_int($key)) {
+                if (\is_int($key)) {
                     $result[$name] = $object->$name;
                 } else {
-                    if (is_string($name)) {
+                    if (\is_string($name)) {
                         $result[$key] = $object->$name;
                     } elseif ($name instanceof \Closure) {
                         $result[$key] = $name($object);
@@ -246,8 +246,8 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
     public function scalar() {
-        $value = $this->_result->fetch_array(MYSQLI_NUM);
-        return is_array($value) ? $value[0] : "";
+        $value = $this->_result->fetch_array(\MYSQLI_NUM);
+        return \is_array($value) ? $value[0] : "";
     }
 
     /**

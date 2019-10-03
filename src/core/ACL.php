@@ -74,7 +74,7 @@ class ACL
      * @return bool
      */
     public function check($role, $action = '*'): bool {
-        if (is_array($role)) {
+        if (\is_array($role)) {
             foreach ($role as $r) {
                 if ($this->match($r, $action))
                     return true;
@@ -98,10 +98,10 @@ class ACL
 
         $allow = false;
 
-        if ($role != '*')
-            array_unshift($roles, $role);
-        if ($action != '*')
-            array_unshift($actions, $action);
+        if ($role !== '*')
+            \array_unshift($roles, $role);
+        if ($action !== '*')
+            \array_unshift($actions, $action);
 
         // Ищем наиболее подходящее правило. Идем от частного к общему.
         foreach ($roles as $_role) {

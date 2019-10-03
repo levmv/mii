@@ -42,7 +42,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
            if(config('debug')) {
                $params = [
-                   'class' => $exception instanceof ErrorException ? $exception->get_name() : get_class($exception),
+                   'class' => $exception instanceof ErrorException ? $exception->get_name() : \get_class($exception),
                    'code' => $exception->getCode(),
                    'message' => $exception->getMessage(),
                    'file' => $exception->getFile(),
@@ -85,7 +85,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         ];
 
         if ($e instanceof UserException || config('debug')) {
-            $arr['name'] = get_class($e);
+            $arr['name'] = \get_class($e);
             $arr['message'] = $e->getMessage();
         }
 
@@ -94,7 +94,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         }
 
         if (config('debug')) {
-            $arr['type'] = get_class($e);
+            $arr['type'] = \get_class($e);
             $arr['file'] = $e->getFile();
             $arr['line'] = $e->getLine();
             $arr['stack-trace'] = explode("\n", Debug::short_text_trace($e->getTrace()));

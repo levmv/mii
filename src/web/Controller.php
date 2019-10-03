@@ -46,8 +46,8 @@ class Controller
             $name = $param->getName();
             if (\array_key_exists($name, $params)) {
                 if ($param->isArray()) {
-                    $args[] = is_array($params[$name]) ? $params[$name] : [$params[$name]];
-                } elseif (!is_array($params[$name])) {
+                    $args[] = \is_array($params[$name]) ? $params[$name] : [$params[$name]];
+                } elseif (!\is_array($params[$name])) {
                     $args[] = $params[$name];
                 } else {
                     throw new HttpException(500, "Invalid data received for parameter \"$name\".");
@@ -60,10 +60,10 @@ class Controller
             }
         }
         if (!empty($missing)) {
-            throw new HttpException(500, 'Missing required parameters: "'.implode(', ', $missing).'"');
+            throw new HttpException(500, 'Missing required parameters: "' . implode(', ', $missing) . '"');
         }
 
-        return call_user_func_array([$this, $action], $args);
+        return \call_user_func_array([$this, $action], $args);
     }
 
 

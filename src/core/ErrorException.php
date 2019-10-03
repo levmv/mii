@@ -18,8 +18,8 @@ class ErrorException extends \ErrorException
     public function __construct($message = '', $code = 0, $severity = 1, $filename = __FILE__, $lineno = __LINE__, \Exception $previous = null) {
         parent::__construct($message, $code, $severity, $filename, $lineno, $previous);
 
-        if (function_exists('xdebug_get_function_stack')) {
-            $trace = array_slice(array_reverse(xdebug_get_function_stack()), 3, -1);
+        if (\function_exists('xdebug_get_function_stack')) {
+            $trace = \array_slice(array_reverse(xdebug_get_function_stack()), 3, -1);
             foreach ($trace as &$frame) {
                 if (!isset($frame['function'])) {
                     $frame['function'] = 'unknown';

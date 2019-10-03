@@ -241,7 +241,7 @@ class Session extends Component
 
     private function update_flash_counters() {
         $counters = $this->get($this->_flash, []);
-        if (is_array($counters)) {
+        if (\is_array($counters)) {
             foreach ($counters as $key => $count) {
                 if ($count > 0) {
                     unset($counters[$key], $_SESSION[$key]);

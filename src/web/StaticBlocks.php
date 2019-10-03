@@ -10,8 +10,7 @@ class StaticBlocks extends BaseBlocks
     protected $assets_map_path = '@tmp';
     protected $_used_files = [];
 
-    public function render(): void
-    {
+    public function render(): void {
         $this->assets_map_path = Mii::resolve($this->assets_map_path);
         $this->assets = require($this->assets_map_path . "/{$this->current_set}.assets");
 
@@ -44,7 +43,7 @@ class StaticBlocks extends BaseBlocks
         if (isset($this->assets['css'][$block_name])) {
             $filename = $this->assets['css'][$block_name];
             if (!isset($this->_used_files['css'][$filename])) {
-                $this->_css[] = '<link type="text/css" href="' . $this->base_url . '/' . $filename . '.css" rel="stylesheet">';
+                $this->_css[] = "<link type=\"text/css\" href=\"{$this->base_url}/$filename.css\" rel=\"stylesheet\">";
                 $this->_used_files['css'][$filename] = true;
             }
         }
@@ -52,7 +51,7 @@ class StaticBlocks extends BaseBlocks
         if (isset($this->assets['js'][$block_name])) {
             $filename = $this->assets['js'][$block_name];
             if (!isset($this->_used_files['js'][$filename])) {
-                $this->_js[Blocks::END][] = '<script src="' . $this->base_url . '/' . $filename . '.js"></script>';
+                $this->_js[Blocks::END][] = "<script src=\"{$this->base_url}/$filename.js\"></script>";
                 $this->_used_files['js'][$filename] = true;
             }
         }
@@ -79,7 +78,7 @@ class StaticBlocks extends BaseBlocks
 
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
                 $position = (!empty($inline[1]) AND isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
-                $this->_js[$position][] = '<script type="text/javascript">' . $inline[0] . '</script>';
+                $this->_js[$position][] = "<script type=\"text/javascript\">{$inline[0]}</script>";
             }
         }
 

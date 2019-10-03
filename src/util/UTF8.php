@@ -52,12 +52,12 @@ class UTF8
             $charset = \Mii::$app->charset;
         }
 
-        if (is_array($var) OR is_object($var)) {
+        if (\is_array($var) OR \is_object($var)) {
             foreach ($var as $key => $val) {
                 // Recursion!
                 $var[self::clean($key)] = self::clean($val);
             }
-        } elseif (is_string($var) AND $var !== '') {
+        } elseif (\is_string($var) AND $var !== '') {
             // Remove control characters
             $var = self::strip_ascii_ctrl($var);
 
@@ -86,7 +86,7 @@ class UTF8
      * @return  boolean
      */
     public static function is_ascii($str) {
-        if (is_array($str)) {
+        if (\is_array($str)) {
             $str = implode($str);
         }
 

@@ -26,7 +26,7 @@ class Mii
 
 
     public static function set_path($name, $value = null): void {
-        if (is_array($name)) {
+        if (\is_array($name)) {
             static::$paths = array_replace(static::$paths, $name);
         } else {
             static::$paths[$name] = $value;
@@ -121,7 +121,7 @@ function abort(int $code = 404, string $message = '') {
 }
 
 function session($key = null, $default = null) {
-    if (is_null($key)) {
+    if (\is_null($key)) {
         return Mii::$app->session;
     }
 
@@ -158,7 +158,7 @@ function logged_in($role = 'login'): bool {
  * @return \mii\web\Block
  */
 function block(string $name, array $params = null): \mii\web\Block {
-    if ($params !== null) {
+    if (!\is_null($params)) {
         return Mii::$app->blocks->get($name)->set($params);
     }
     return Mii::$app->blocks->get($name);
@@ -180,11 +180,11 @@ function block(string $name, array $params = null): \mii\web\Block {
  */
 function get_cached($id, $default = null, $lifetime = null) {
 
-    if (is_object($default) && $default instanceof \Closure) {
+    if (\is_object($default) && $default instanceof \Closure) {
 
         $cached = Mii::$app->cache->get($id);
         if ($cached === null) {
-            $cached = call_user_func($default);
+            $cached = \call_user_func($default);
 
             Mii::$app->cache->set($id, $cached, $lifetime);
         }
@@ -243,7 +243,7 @@ function e(?string $text): string {
     return mii\util\HTML::entities($text, false);
 }
 
-if (!function_exists('dd')) {
+if (!\function_exists('dd')) {
     /**
      * Dump and die
      */
@@ -269,7 +269,7 @@ if (!function_exists('dd')) {
     }
 }
 
-if (!function_exists('__')) {
+if (!\function_exists('__')) {
     function __($string, $params = []) {
         $string = Mii::$app->i18n->translate($string);
         return empty($values) ? $string : strtr($string, $values);

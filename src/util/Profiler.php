@@ -156,7 +156,7 @@ class Profiler
         }
 
         // Determine the number of tokens
-        $count = count($tokens);
+        $count = \count($tokens);
 
         // Determine the averages
         $average = [
@@ -238,7 +238,7 @@ class Profiler
             }
 
             // Determine the number of names (subgroups)
-            $count = count($names);
+            $count = \count($names);
 
             // Determine the averages
             $groups[$group]['average']['time'] = $groups[$group]['total']['time'] / $count;
@@ -288,7 +288,7 @@ class Profiler
         // Load the stats from cache, which is valid for 12 hours
         $stats = Mii::$app->cache->get('profiler_app_stats', NULL);
 
-        if (!is_array($stats) OR $stats['count'] > Profiler::$rollover) {
+        if (!\is_array($stats) OR $stats['count'] > Profiler::$rollover) {
             // Initialize the stats array
             $stats = [
                 'min' => [

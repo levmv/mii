@@ -4,8 +4,6 @@ namespace mii\web;
 
 use Mii;
 use mii\core\Component;
-use mii\util\FS;
-use mii\util\HTML;
 
 class BaseBlocks extends Component
 {
@@ -72,7 +70,7 @@ class BaseBlocks extends Component
         foreach ($set as $key => $value)
             $this->$key = $value;
 
-        for ($i = 0; $i < count($this->libraries); $i++)
+        for ($i = 0; $i < \count($this->libraries); $i++)
             $this->libraries[$i] = Mii::resolve($this->libraries[$i]);
     }
 

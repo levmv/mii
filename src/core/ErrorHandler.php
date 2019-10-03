@@ -44,7 +44,7 @@ class ErrorHandler extends Component
 
 
     public function report($exception) {
-        \Mii::error($exception, get_class($exception));
+        \Mii::error($exception, \get_class($exception));
     }
 
 
@@ -109,7 +109,7 @@ class ErrorHandler extends Component
         unset($this->_memory_reserve);
 
         // is it fatal ?
-        if ($error = error_get_last() AND in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING])) {
+        if ($error = error_get_last() AND \in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING])) {
             $this->clear_output();
             $exception = new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']);
 
@@ -156,7 +156,7 @@ class ErrorHandler extends Component
         }
 
         if($e instanceof UserException ) {
-            return get_class($e)." : ".$e->getMessage();
+            return \get_class($e)." : ".$e->getMessage();
         }
 
         return 'An internal server error occurred.';

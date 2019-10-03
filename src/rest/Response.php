@@ -40,9 +40,9 @@ class Response {
         $line = strtok($response, "\n");
 
         do {
-            if(strlen(trim($line)) == 0){
+            if(\strlen(trim($line)) == 0){
                 // Since we tokenize on \n, use the remaining \r to detect empty lines.
-                if(count($this->headers) > 0) break; // Must be the newline after headers, move on to response body
+                if(\count($this->headers) > 0) break; // Must be the newline after headers, move on to response body
             }
             elseif(strpos($line, 'HTTP') === 0){
                 // One or more HTTP status lines
@@ -56,7 +56,7 @@ class Response {
 
                 if(empty($this->headers[$key]))
                     $this->headers[$key] = $value;
-                elseif(is_array($this->headers[$key]))
+                elseif(\is_array($this->headers[$key]))
                     $this->headers[$key][] = $value;
                 else
                     $this->headers[$key] = [$this->headers[$key], $value];
@@ -76,7 +76,7 @@ class Response {
             foreach($this->content as $value)
                 yield $value;
         } else {
-            if(!isset($this->content[$name]) || is_array($this->content))
+            if(!isset($this->content[$name]) || \is_array($this->content))
                 return;
 
             foreach($this->content[$name] as $value)

@@ -78,12 +78,12 @@ class Menu
 
             return $this->_current_item;
 
-        } elseif (is_object($current_url)) {
+        } elseif (\is_object($current_url)) {
 
             $this->_current_item = $current_url;
             $this->_current_item_url = $current_url->url();
 
-        } elseif (is_array($current_url)) {
+        } elseif (\is_array($current_url)) {
 
             $this->_current_item = $current_url;
             $this->_current_item_url = $current_url['url'];
@@ -100,12 +100,12 @@ class Menu
 
             return $this->_current_id;
 
-        } elseif (is_object($current_id)) {
+        } elseif (\is_object($current_id)) {
 
             $this->_current_item = $current_id;
             $this->_current_id = $current_id->id;
 
-        } elseif (is_array($current_id)) {
+        } elseif (\is_array($current_id)) {
 
             $this->_current_item = $current_id;
             $this->_current_id = $current_id['id'];
@@ -157,7 +157,7 @@ class Menu
     }
 
     public function set($key, $value = NULL) {
-        if (is_array($key)) {
+        if (\is_array($key)) {
             foreach ($key as $name => $value) {
                 $this->_data[$name] = $value;
             }
@@ -223,7 +223,7 @@ class Menu
             $link_pieces = explode('/', $link);
             //     array_shift($link_pieces);
 
-            for ($i = 0, $l = count($link_pieces); $i < $l; $i++) {
+            for ($i = 0, $l = \count($link_pieces); $i < $l; $i++) {
                 if ((isset($current_pieces[$i]) AND $current_pieces[$i] !== $link_pieces[$i]) OR empty($current_pieces[$i])) {
                     return 0;
                 }

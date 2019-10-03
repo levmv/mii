@@ -78,7 +78,7 @@ class Request extends Component
         $controller_class = $controller = $this->controller;
 
         $namespaces = config('console.namespaces', []);
-        if (count($namespaces)) {
+        if (\count($namespaces)) {
             $controller_class = array_shift($namespaces) . '\\' . $controller;
         }
 
@@ -86,7 +86,7 @@ class Request extends Component
 
             // Try next controller
 
-            if (count($namespaces)) {
+            if (\count($namespaces)) {
                 $controller_class = array_shift($namespaces) . '\\' . $controller;
                 continue;
             } else {

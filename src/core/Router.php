@@ -3,7 +3,6 @@
 namespace mii\core;
 
 
-use mii\util\Arr;
 use mii\util\URL;
 use mii\web\Response;
 
@@ -61,7 +60,7 @@ class Router extends Component
 
         if ($this->cache) {
 
-            list($this->_routes_list, $this->_named_routes, $this->_namespaces) = get_cached($this->cache_id, [null, null, null]);
+            list($this->_routes_list, $this->_named_routes, $this->_namespaces) = \get_cached($this->cache_id, [null, null, null]);
             if ($this->_routes_list === null)
                 $this->init_routes();
 
@@ -78,8 +77,8 @@ class Router extends Component
     public function init_routes(): void {
 
         // Sort groups
-        if ($this->order !== null && count($this->routes)) {
-            $this->routes = array_merge(array_flip($this->order), $this->routes);
+        if ($this->order !== null && \count($this->routes)) {
+            $this->routes = \array_merge(\array_flip($this->order), $this->routes);
         }
 
         $namespace_index = 0;
@@ -90,14 +89,14 @@ class Router extends Component
 
             foreach ($group as $pattern => $value) {
 
-                $pattern = mb_strtolower($pattern, 'utf-8');
+                $pattern = \mb_strtolower($pattern, 'utf-8');
                 $method = false;
 
-                if($this->rest_mode) {
-                    preg_match('/^(get|post|put|delete):/', $pattern, $matches);
-                    if(count($matches)) {
+                if ($this->rest_mode) {
+                    \preg_match('/^(get|post|put|delete):/', $pattern, $matches);
+                    if (\count($matches)) {
                         $method = $matches[1];
-                        $pattern = preg_replace('/^(get|post|put|delete):/', '', $pattern);
+                        $pattern = \preg_replace('/^(get|post|put|delete):/', '', $pattern);
                     }
                 }
 
@@ -108,26 +107,26 @@ class Router extends Component
                     //static::R_NAMESPACE => $namespace_index
                 ];
 
-                if($this->rest_mode) {
+                if ($this->rest_mode) {
                     $result[static::R_METHOD] = $method;
                 }
 
-                if($namespace_index !== 0)
+                if ($namespace_index !== 0)
                     $result[static::R_NAMESPACE] = $namespace_index;
 
                 $params = [];
                 $name = false;
 
-                $is_static = ((strpos($pattern, '{') === false AND strpos($pattern, '(') === false));
+                $is_static = ((\strpos($pattern, '{') === false AND \strpos($pattern, '(') === false));
 
-                if (is_array($value)) {
+                if (\is_array($value)) {
                     $result[static::R_PATH] = $value['path'];
 
                     if (isset($value['name']))
                         $name = $value['name'];
 
                     if (isset($value['callback'])) {
-                        if($value['callback'] instanceof \Closure) {
+                        if ($value['callback'] instanceof \Closure) {
                             assert($this->cache === false, "Closure routes not recommended with enabled cache");
                             $result[static::R_CALLBACK] = true;
                         } else {
@@ -136,17 +135,17 @@ class Router extends Component
                     }
                     if (!$is_static) {
                         $params = isset($value['params'])
-                            ? array_merge($this->default_parameters, $value['params'])
+                            ? \array_merge($this->default_parameters, $value['params'])
                             : $this->default_parameters;
                     }
                     if (isset($value['values'])) {
                         $result[static::R_VALUES] = $value['values'];
                     }
 
-                    if(isset($value['method']))
+                    if (isset($value['method']))
                         $result[static::R_METHOD] = $value['method'];
 
-                } elseif (is_string($value)) {
+                } elseif (\is_string($value)) {
                     $result[static::R_PATH] = $value;
                     if (!$is_static) {
                         $params = $this->default_parameters;
@@ -171,7 +170,7 @@ class Router extends Component
         }
 
         if ($this->cache) {
-            cache($this->cache_id, [$this->_routes_list, $this->_named_routes, $this->_namespaces], $this->cache_lifetime);
+            \cache($this->cache_id, [$this->_routes_list, $this->_named_routes, $this->_namespaces], $this->cache_lifetime);
         }
     }
 
@@ -179,15 +178,15 @@ class Router extends Component
 
         // The URI should be considered literal except for keys and optional parts
         // Escape everything preg_quote would escape except for : ( ) { }
-        $expression = preg_replace('#' . static::REGEX_ESCAPE . '#', '\\\\$0', $pattern);
+        $expression = \preg_replace('#' . static::REGEX_ESCAPE . '#', '\\\\$0', $pattern);
 
-        if (strpos($expression, '(') !== FALSE) {
+        if (\strpos($expression, '(') !== FALSE) {
             // Make optional parts of the URI non-capturing and optional
-            $expression = str_replace(['(', ')'], ['(?:', ')?'], $expression);
+            $expression = \str_replace(['(', ')'], ['(?:', ')?'], $expression);
         }
 
         // Insert default regex for keys
-        $expression = str_replace(['{', '}'], ['(?\'', '\'' . static::REGEX_SEGMENT . ')'], $expression);
+        $expression = \str_replace(['{', '}'], ['(?\'', '\'' . static::REGEX_SEGMENT . ')'], $expression);
 
         $search = $replace = [];
         foreach ($parameters as $key => $value) {
@@ -196,7 +195,7 @@ class Router extends Component
         }
 
         // Replace the default regex with the user-specified regex
-        $expression = str_replace($search, $replace, $expression);
+        $expression = \str_replace($search, $replace, $expression);
 
         return '#^' . $expression . '$#uD';
     }
@@ -205,7 +204,7 @@ class Router extends Component
     public function match(string $uri) {
 
         if ($uri !== '/') {
-            $uri = trim($uri, '//');
+            $uri = \trim($uri, '//');
         }
 
         foreach ($this->_routes_list as $index => $route) {
@@ -230,19 +229,19 @@ class Router extends Component
             $matches = [];
 
         } else {
-            if (!preg_match($route[static::R_COMPILED], $uri, $matches))
+            if (!\preg_match($route[static::R_COMPILED], $uri, $matches))
                 return false;
         }
 
-        if($this->rest_mode AND isset($route[static::R_METHOD]) AND $route[static::R_METHOD] !== false) {
-            if(strtolower(\Mii::$app->request->method()) !== $route[static::R_METHOD])
+        if ($this->rest_mode AND isset($route[static::R_METHOD]) AND $route[static::R_METHOD] !== false) {
+            if (\strtolower(\Mii::$app->request->method()) !== $route[static::R_METHOD])
                 return false;
         }
 
         $params = $route[static::R_VALUES] ?? [];
 
         foreach ($matches as $key => $value) {
-            if (is_int($key)) {
+            if (\is_int($key)) {
                 // Skip all unnamed keys
                 continue;
             }
@@ -258,13 +257,13 @@ class Router extends Component
         if (isset($route[static::R_CALLBACK])) {
             if ($route[static::R_CALLBACK] === true) { // mean its closure
                 $original_route = $this->routes[$namespace][$route[static::R_PATTERN]];
-                $callback = is_array($original_route) ? $original_route['callback'] : $original_route;
+                $callback = \is_array($original_route) ? $original_route['callback'] : $original_route;
             } else {
                 $callback = $route[static::R_CALLBACK];
             }
-            $params = call_user_func($callback, $matches);
+            $params = \call_user_func($callback, $matches);
 
-            if($params instanceof Response)
+            if ($params instanceof Response)
                 return $params;
 
             $params['controller'] = $namespace . '\\' . $params['controller'];
@@ -274,26 +273,26 @@ class Router extends Component
             $path = $route[static::R_PATH];
 
             foreach ($params as $key => $value) {
-                if (is_string($value)) {
-                    $path = str_replace('{' . $key . '}', $value, $path);
+                if (\is_string($value)) {
+                    $path = \str_replace('{' . $key . '}', $value, $path);
                 }
             }
 
             if (strpos($path, ':') !== false) {
-                list($path, $params['action']) = explode(':', $path);
+                list($path, $params['action']) = \explode(':', $path);
             }
 
-            $path = explode('/', $path);
+            $path = \explode('/', $path);
 
-            $filename = array_pop($path);
+            $filename = \array_pop($path);
 
             if (isset($params['controller'])) {
                 $filename = $params['controller'];
             }
 
-            $params['controller'] = (count($path))
-                ? $namespace . '\\' . implode("\\", $path) . "\\" . ucfirst($filename)
-                : $namespace . '\\' . ucfirst($filename);
+            $params['controller'] = (\count($path))
+                ? $namespace . '\\' . \implode("\\", $path) . "\\" . \ucfirst($filename)
+                : $namespace . '\\' . \ucfirst($filename);
         }
 
         if (!isset($params['action']))

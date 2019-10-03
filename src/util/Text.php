@@ -32,7 +32,7 @@ class Text
 
         // Only attach the end character if the matched string is shorter
         // than the starting string.
-        return rtrim($matches[0]) . ((strlen($matches[0]) === strlen($str)) ? '' : $end_char);
+        return rtrim($matches[0]) . ((\strlen($matches[0]) === \strlen($str)) ? '' : $end_char);
     }
 
     /**
@@ -66,7 +66,7 @@ class Text
         if (!preg_match('/^.{0,' . $limit . '}\s/us', $str, $matches))
             return $end_char;
 
-        return rtrim($matches[0]) . ((strlen($matches[0]) === strlen($str)) ? '' : $end_char);
+        return rtrim($matches[0]) . ((\strlen($matches[0]) === \strlen($str)) ? '' : $end_char);
     }
 
 
@@ -128,7 +128,7 @@ class Text
         $pool = str_split($pool, 1);
 
         // Largest pool key
-        $max = count($pool) - 1;
+        $max = \count($pool) - 1;
 
         $str = '';
         for ($i = 0; $i < $length; $i++) {
@@ -140,10 +140,10 @@ class Text
         if ($type === 'alnum' AND $length > 1) {
             if (ctype_alpha($str)) {
                 // Add a random digit
-                $str[mt_rand(0, $length - 1)] = chr(mt_rand(48, 57));
+                $str[\mt_rand(0, $length - 1)] = \chr(\mt_rand(48, 57));
             } elseif (ctype_digit($str)) {
                 // Add a random letter
-                $str[mt_rand(0, $length - 1)] = chr(mt_rand(65, 90));
+                $str[\mt_rand(0, $length - 1)] = \chr(\mt_rand(65, 90));
             }
         }
 
@@ -321,12 +321,12 @@ class Text
 
 
     public static function base64url_encode($data) {
-        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+        return \rtrim(\strtr(\base64_encode($data), '+/', '-_'), '=');
     }
 
 
     public static function base64url_decode($data) {
-        return base64_decode(strtr($data, '-_', '+/'));
+        return \base64_decode(\strtr($data, '-_', '+/'));
     }
 
 
@@ -395,9 +395,9 @@ class Text
 
 
     public static function UUIDv4() {
-        $data = random_bytes(16);
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+        $data = \random_bytes(16);
+        $data[6] = \chr(\ord($data[6]) & 0x0f | 0x40);
+        $data[8] = \chr(\ord($data[8]) & 0x3f | 0x80);
         return $data;
     }
 

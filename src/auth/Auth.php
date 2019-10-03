@@ -62,7 +62,7 @@ class Auth extends Component
             $this->auto_login();
         }
         // If somehow our user was corrupted
-        if(!is_object($this->_user) || !$this->_user->id)
+        if(!\is_object($this->_user) || !$this->_user->id)
             $this->_user = null;
 
         return $this->_user;
@@ -280,7 +280,7 @@ class Auth extends Component
 
                     // Complete the login with the found data
 
-                    $user = call_user_func([$this->user_model, 'one'], $new_token->user_id);
+                    $user = \call_user_func([$this->user_model, 'one'], $new_token->user_id);
 
                     $this->complete_login($user);
 

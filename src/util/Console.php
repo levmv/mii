@@ -102,7 +102,7 @@ class Console
     public static function stream_supports_ansi_colors($stream) {
         return DIRECTORY_SEPARATOR == '\\'
             ? getenv('ANSICON') !== false || getenv('ConEmuANSI') === 'ON'
-            : function_exists('posix_isatty') && @posix_isatty($stream);
+            : \function_exists('posix_isatty') && @posix_isatty($stream);
     }
 
     /**

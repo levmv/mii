@@ -16,7 +16,7 @@ class File extends Target
 
         $this->file = Mii::resolve($this->file);
 
-        FS::mkdir(dirname($this->file));
+        FS::mkdir(\dirname($this->file));
     }
 
 

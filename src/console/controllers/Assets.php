@@ -78,7 +78,7 @@ class Assets extends Controller
 
     public function test() {
 
-        if(count($this->sets)) {
+        if(\count($this->sets)) {
 
             foreach($this->sets as $name => $set) {
                 $this->test_set($name);
@@ -91,7 +91,7 @@ class Assets extends Controller
 
     public function build() {
 
-        if(count($this->sets)) {
+        if(\count($this->sets)) {
 
             foreach($this->filtered_sets as $name) {
                 $this->build_set($name);
@@ -113,10 +113,10 @@ class Assets extends Controller
         }
 
 
-        if(count($this->processed['css']) || count($this->processed['js']) ){
+        if(\count($this->processed['css']) || \count($this->processed['js']) ){
             $this->info(':N css and :M js files compiled.', [
-                ':N' => count($this->processed['css']),
-                ':M' => count($this->processed['js'])
+                ':N' => \count($this->processed['css']),
+                ':M' => \count($this->processed['js'])
             ]);
         } else {
             $this->info('No recompiled files. No need to regenerate config');
@@ -163,7 +163,7 @@ class Assets extends Controller
             foreach ($iterator as $info) {
 
                 $type = $info->getExtension();
-                $path = trim(substr( $info->getPath(),strlen($library)), '/');
+                $path = trim(substr( $info->getPath(),\strlen($library)), '/');
                 $block_name = implode('_', explode('/', $path));
                 if(!isset($blocks[$block_name])) {
                     $blocks[$block_name] = ['css' => false, 'js' => false, 'path' => []];
@@ -183,7 +183,7 @@ class Assets extends Controller
         foreach ($this->assets[$this->assets_group] as $name => $file) {
             foreach (['css', 'js'] as $type) {
                 if (isset($file[$type])) {
-                    if (!is_array($file[$type]))
+                    if (!\is_array($file[$type]))
                         $file[$type] = (array)$file[$type];
 
                     foreach ($file[$type] as $block) {
@@ -210,7 +210,7 @@ class Assets extends Controller
             }
         }
 
-        if(count($forget)) {
+        if(\count($forget)) {
             $this->warning('May be you forget these:');
             foreach($forget as $name => $block) {
                 $out = "'$name' => [";
@@ -247,7 +247,7 @@ class Assets extends Controller
         foreach($set as $key => $value)
             $this->$key = $value;
 
-        for ($i = 0; $i < count($this->libraries); $i++)
+        for ($i = 0; $i < \count($this->libraries); $i++)
             $this->libraries[$i] = Mii::resolve($this->libraries[$i]);
 
         $this->base_url = Mii::resolve($this->base_url);
@@ -279,7 +279,7 @@ class Assets extends Controller
                 if(!isset($data[$type]))
                     continue;
 
-                if(!is_array($data[$type]))
+                if(!\is_array($data[$type]))
                     $data[$type] = (array) $data[$type];
 
                 $result_file_name = $this->build_file($filename, $data[$type], $type);

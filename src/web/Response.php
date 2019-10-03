@@ -72,7 +72,6 @@ class Response extends Component
 
     public $status_message = '';
 
-
     /**
      * @var  string      The response body
      */
@@ -93,7 +92,7 @@ class Response extends Component
      * @return static object itself
      */
     public function set_header($name, $value = '') {
-        $name = strtolower($name);
+        $name = \strtolower($name);
         $this->_headers[$name] = (array)$value;
         return $this;
     }
@@ -107,15 +106,15 @@ class Response extends Component
      * @return static the collection object itself
      */
     public function add_header($name, $value) {
-        $name = strtolower($name);
+        $name = \strtolower($name);
         $this->_headers[$name][] = $value;
         return $this;
     }
 
 
     public function remove_header($name) {
-        $name = strtolower($name);
-        if(isset($this->_headers[$name]))
+        $name = \strtolower($name);
+        if (isset($this->_headers[$name]))
             unset($this->_headers[$name]);
         return $this;
     }
@@ -137,15 +136,15 @@ class Response extends Component
         }
 
         // Create the response header
-        header("HTTP/{$this->version} {$this->status} {$this->status_message}");
+        \header("HTTP/{$this->version} {$this->status} {$this->status_message}");
 
         if ($this->_headers) {
             foreach ($this->_headers as $name => $values) {
-                $name = str_replace(' ', '-', ucwords(str_replace('-', ' ', $name)));
+                $name = \str_replace(' ', '-', ucwords(\str_replace('-', ' ', $name)));
                 // set replace for first occurrence of header but false afterwards to allow multiple
                 $replace = true;
                 foreach ($values as $value) {
-                    header("$name: $value", $replace);
+                    \header("$name: $value", $replace);
                     $replace = false;
                 }
             }
@@ -158,7 +157,7 @@ class Response extends Component
     /**
      * Sets or gets the HTTP status from this response.
      *
-     * @param   integer $status Status to set to this response
+     * @param integer $status Status to set to this response
      * @return  mixed
      */
     public function status(int $status = NULL) {
@@ -169,7 +168,7 @@ class Response extends Component
             $this->status_message = Response::$messages[$this->status];
             return $this;
         } else {
-            throw new Exception(__METHOD__ . ' unknown status value: '.$status);
+            throw new Exception(__METHOD__ . ' unknown status value: ' . $status);
         }
     }
 
@@ -207,7 +206,7 @@ class Response extends Component
                 break;
             case self::FORMAT_JSON:
                 $this->set_header('content-type', 'application/json; charset=UTF-8');
-                $this->_content = json_encode($this->_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                $this->_content = \json_encode($this->_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 break;
             case self::FORMAT_XML:
                 $this->set_header('content-type', 'application/xml; charset=UTF-8');

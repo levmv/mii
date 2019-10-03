@@ -29,7 +29,7 @@ class Exception extends \Exception
      */
     public static function text(\Throwable $e) {
         return sprintf('%s [ %s ]: %s ~ %s [ %d ]',
-            get_class($e), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
+            \get_class($e), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
     }
 
 

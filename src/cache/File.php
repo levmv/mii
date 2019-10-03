@@ -66,7 +66,7 @@ class File extends Cache
         $filename = $this->cache_file($id);
 
         if ($this->directory_level > 0) {
-            FS::mkdir(dirname($filename), $this->chmode);
+            FS::mkdir(\dirname($filename), $this->chmode);
         }
         if (@file_put_contents($filename, $this->serialize ? serialize($data) : $data, LOCK_EX) !== false) {
             if ($this->chmode !== null) {

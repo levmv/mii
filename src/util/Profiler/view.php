@@ -206,7 +206,7 @@ $application_cols = array('min', 'max', 'average', 'current');
                 <tr class="mark time">
                     <?php $stats = Profiler::stats($tokens) ?>
                     <th class="name" rowspan="2"
-                        scope="rowgroup"><?php echo HTML::chars($name), ' (', count($tokens), ')' ?></th>
+                        scope="rowgroup"><?php echo HTML::chars($name), ' (', \count($tokens), ')' ?></th>
                     <?php foreach ($group_cols as $key): ?>
                         <td class="<?php echo $key ?>">
                             <div>

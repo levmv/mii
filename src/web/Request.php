@@ -37,18 +37,13 @@ class Request extends Component
      */
     protected $_uri;
 
-
     protected $_hostname;
-
 
     public $csrf_validation = true;
 
-
     public $enable_csrf_cookie = true;
 
-
     public $csrf_token_name = 'csrf_token';
-
 
     protected $_csrf_token;
 
@@ -106,12 +101,12 @@ class Request extends Component
         foreach ($config as $key => $value)
             $this->$key = $value;
 
-        $uri = parse_url('http://domain.com'.$_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $uri = \parse_url('http://domain.com' . $_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 
         if (\Mii::$app->base_url && strpos($uri, \Mii::$app->base_url) === 0) {
             // Remove the base URL from the URI
-            $uri = (string) substr($uri, strlen(\Mii::$app->base_url));
+            $uri = (string)\substr($uri, \strlen(\Mii::$app->base_url));
         }
 
         $this->uri($uri);
@@ -121,8 +116,8 @@ class Request extends Component
             $this->method($_SERVER['REQUEST_METHOD']);
         }
 
-        if($this->_method === 'PUT') {
-            parse_str($this->raw_body(), $_POST);
+        if ($this->_method === 'PUT') {
+            \parse_str($this->raw_body(), $_POST);
         }
     }
 
@@ -130,7 +125,7 @@ class Request extends Component
     /**
      * Sets and gets the uri from the request.
      *
-     * @param   string $uri
+     * @param string $uri
      * @return  string
      */
     public function uri($uri = NULL): string {
@@ -157,8 +152,7 @@ class Request extends Component
     }
 
 
-    public function get_content_type() : string
-    {
+    public function get_content_type(): string {
         return $_SERVER['CONTENT_TYPE'] ?? '';
     }
 
@@ -167,7 +161,7 @@ class Request extends Component
      * Gets or sets the HTTP method. Usually GET, POST, PUT or DELETE in
      * traditional CRUD applications.
      *
-     * @param   string $method Method to use for this request
+     * @param string $method Method to use for this request
      * @return  mixed
      */
     public function method($method = NULL) {
@@ -177,7 +171,7 @@ class Request extends Component
         }
 
         // Act as a setter
-        $this->_method = strtoupper($method);
+        $this->_method = \strtoupper($method);
 
         return $this;
     }
@@ -187,16 +181,16 @@ class Request extends Component
      * @return boolean if the request is sent via secure channel (https)
      */
     public function is_secure() {
-        return isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1)
-            || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0;
+        return isset($_SERVER['HTTPS']) && (\strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1)
+            || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && \strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0;
     }
 
 
     /**
      *  Returns GET parameter with a given name. If name isn't specified, returns an array of all GET parameters.
      *
-     * @param   string $name the parameter name
-     * @param   string $value the default parameter value if the parameter does not exist.
+     * @param string $name the parameter name
+     * @param string $value the default parameter value if the parameter does not exist.
      * @return  mixed
      */
     public function get($key = null, $default = null) {
@@ -214,11 +208,9 @@ class Request extends Component
 
     public function validate_csrf_token() {
 
-        if (!$this->csrf_validation || in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+        if (!$this->csrf_validation || \in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
             return true;
         }
-
-        $token = '';
 
         if (isset($_POST[$this->csrf_token_name])) {
 
@@ -241,7 +233,7 @@ class Request extends Component
         if ($this->_csrf_token === null || $new) {
             if ($new || ($this->_csrf_token = $this->load_csrf_token()) === null) {
                 // Generate a new unique token
-                $this->_csrf_token = bin2hex(random_bytes(20));
+                $this->_csrf_token = \bin2hex(\random_bytes(20));
 
                 // Store the new token
                 if ($this->enable_csrf_cookie) {
@@ -267,8 +259,8 @@ class Request extends Component
     /**
      * Gets HTTP POST parameters of the request.
      *
-     * @param   mixed $key Parameter name
-     * @param   string $default Default value if parameter does not exist
+     * @param mixed $key Parameter name
+     * @param string $default Default value if parameter does not exist
      * @return  mixed
      */
     public function post($key = null, $default = null) {
@@ -301,7 +293,7 @@ class Request extends Component
      */
     public function raw_body() {
         if ($this->_raw_body === null) {
-            $this->_raw_body = file_get_contents('php://input');
+            $this->_raw_body = \file_get_contents('php://input');
         }
 
         return $this->_raw_body;
@@ -312,7 +304,7 @@ class Request extends Component
 
     public function json_params() {
         if ($this->_json_params === null) {
-            $this->_json_params = file_get_contents('php://input');
+            $this->_json_params = \file_get_contents('php://input');
         }
 
         return $this->_json_params;
@@ -323,8 +315,8 @@ class Request extends Component
 
     public function json($key, $default = null) {
 
-        if(!$this->_json_items && strtolower($this->get_content_type()) === 'application/json') {
-            $this->_json_items = json_decode(file_get_contents('php://input'), true);
+        if (!$this->_json_items && \strtolower($this->get_content_type()) === 'application/json') {
+            $this->_json_items = \json_decode(\file_get_contents('php://input'), true);
         } else {
             $this->_json_items = [];
         }
@@ -342,8 +334,8 @@ class Request extends Component
      * be returned. If the cookie signature is present, but invalid, the cookie
      * will be deleted.
      *
-     * @param   string $key cookie name
-     * @param   mixed $default default value to return
+     * @param string $key cookie name
+     * @param mixed $default default value to return
      * @return  string
      */
     public function get_cookie(string $key, $default = null) {
@@ -356,11 +348,11 @@ class Request extends Component
         $cookie = $_COOKIE[$key];
 
         // Find the position of the split between salt and contents
-        $split = strlen($this->salt($key, ''));
+        $split = \strlen($this->salt($key, ''));
 
         if (isset($cookie[$split]) && $cookie[$split] === '~') {
             // Separate the salt and the value
-            list ($hash, $value) = explode('~', $cookie, 2);
+            list ($hash, $value) = \explode('~', $cookie, 2);
 
             if ($this->salt($key, $value) === $hash) {
                 // Cookie signature is valid
@@ -379,9 +371,9 @@ class Request extends Component
      * Sets a signed cookie. Note that all cookie values must be strings and no
      * automatic serialization will be performed!
      *
-     * @param   string $name name of cookie
-     * @param   string $value value of cookie
-     * @param   integer $expiration lifetime in seconds
+     * @param string $name name of cookie
+     * @param string $value value of cookie
+     * @param integer $expiration lifetime in seconds
      * @return  boolean
      */
     public function set_cookie(string $name, string $value, int $expiration = null) {
@@ -396,10 +388,10 @@ class Request extends Component
         }
 
         // Add the salt to the cookie value
-        $value = $this->salt($name, (string) $value) . '~' . $value;
+        $value = $this->salt($name, (string)$value) . '~' . $value;
 
         if (PHP_VERSION_ID >= 70300) {
-            return setcookie($name, $value,
+            return \setcookie($name, $value,
                 [
                     'expires' => $expiration,
                     'path' => $this->cookie_path,
@@ -409,7 +401,7 @@ class Request extends Component
                     'sameSite' => $this->cookie_samesite,
                 ]);
         } else {
-            return setcookie($name, $value, $expiration, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
+            return \setcookie($name, $value, $expiration, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
         }
     }
 
@@ -419,7 +411,7 @@ class Request extends Component
      *
      *     Cookie::delete('theme');
      *
-     * @param   string $name cookie name
+     * @param string $name cookie name
      * @return  boolean
      */
     public function delete_cookie($name) {
@@ -427,15 +419,15 @@ class Request extends Component
         unset($_COOKIE[$name]);
 
         // Nullify the cookie and make it expire
-        return setcookie($name, null, -86400, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
+        return \setcookie($name, null, -86400, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
     }
 
 
     /**
      * Generates a salt string for a cookie based on the name and value.
      *
-     * @param   string $name name of cookie
-     * @param   string $value value of cookie
+     * @param string $name name of cookie
+     * @param string $value value of cookie
      * @return  string
      */
     public function salt(string $name, string $value): string {
@@ -447,6 +439,6 @@ class Request extends Component
             );
         }
 
-        return sha1($name . $value . $this->cookie_salt);
+        return \sha1($name . $value . $this->cookie_salt);
     }
 }
