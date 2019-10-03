@@ -332,7 +332,7 @@ class Assets extends Controller
             }
         }
 
-        $outname = $filename.$this->hash($hashes);
+        $outname = $filename.'.'.$this->hash($hashes);
 
         if(!empty($files)) {
             if(!file_exists($out_path.$outname.'.'.$type) || $this->force_mode) {
@@ -344,9 +344,10 @@ class Assets extends Controller
     }
 
 
-    protected function hash(string $str) : string {
-        return Text::base64url_encode(hash('fnv1a64', $str, true)) .
-            Text::base64url_encode(hash('crc32b', $str, true));
+    protected function hash(string $str): string
+    {
+        return substr(Text::base64url_encode(md5($str, true)), 0, 8).
+            substr(Text::base64url_encode(sha1($str, true)), 0, 4);
     }
 
 

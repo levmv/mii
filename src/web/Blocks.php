@@ -5,6 +5,7 @@ namespace mii\web;
 use Mii;
 use mii\util\FS;
 use mii\util\HTML;
+use mii\util\Text;
 
 class Blocks extends BaseBlocks
 {
@@ -148,7 +149,7 @@ class Blocks extends BaseBlocks
 
     private function _build_block(string $block_name, string $type, array $files): void {
 
-        $result_file_name = $block_name . '.' . substr(md5(implode('', array_keys($files))), 0, 16);
+        $result_file_name = $block_name . '.' . substr(Text::base64url_encode(md5(implode('', array_keys($files)), true)), 0, 8);
 
         $web_output = $this->base_url . '/' . $result_file_name . '.' . $type;
         $output = $this->base_path . '/' . $result_file_name . '.' . $type;
