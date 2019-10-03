@@ -50,8 +50,14 @@ class Request extends Component
         foreach ($argv as $param) {
             if (preg_match('/^--(\w+)(=(.*))?$/', $param, $matches)) {
                 $name = $matches[1];
-                $params[$name] = isset($matches[3]) ? $matches[3] : true;
+                $value = isset($matches[3]) ? $matches[3] : true;
 
+                if(isset($params[$name])) {
+                    $params[$name] = (array) $params[$name];
+                    $params[$name][] = $value;
+                } else {
+                    $params[$name] = $value;
+                }
             } else {
                 if ($c === 0) {
                     $this->action = $param;
