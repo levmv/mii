@@ -3,6 +3,7 @@
 namespace mii\util;
 
 use Mii;
+use mii\core\Exception;
 
 /**
  * Provides simple benchmarking and profiling.
@@ -306,6 +307,8 @@ class Profiler
                 'count' => 0
             ];
         }
+        if(!defined('MII_START_TIME'))
+            throw new Exception("Probably you disabled asserts. Please set \"zend.assertions = 1\" in php.ini");
 
         // Get the application run time
         $time = microtime(TRUE) - MII_START_TIME;
