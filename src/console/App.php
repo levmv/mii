@@ -15,8 +15,9 @@ class App extends \mii\core\App
 {
 
     public function run() {
+
         try {
-            $this->request->execute()->send();
+            return $this->request->execute();
         } catch (\Throwable $e) {
             throw $e;
         }

@@ -73,55 +73,39 @@ class Request extends Component
     }
 
     function execute() {
-        // Controller
 
-        $controller_class = $controller = $this->controller;
+        $namespaces = config('console.namespaces', [
+            'app\\console'
+        ]);
 
-        $namespaces = config('console.namespaces', []);
-        if (\count($namespaces)) {
-            $controller_class = array_shift($namespaces) . '\\' . $controller;
+        if (!\count($namespaces)) {
+            throw new CliException("console.namespaces is empty");
         }
 
-        while (!class_exists($controller_class)) {
+        // Failback namespace
+        $namespaces[] = 'mii\\console\\controllers';
 
-            // Try next controller
+        while (count($namespaces)) {
 
-            if (\count($namespaces)) {
-                $controller_class = array_shift($namespaces) . '\\' . $controller;
-                continue;
-            } else {
+            $controller_class = array_shift($namespaces) . '\\' . $this->controller;
 
-                // try mii controller
-                $controller_class = 'mii\\console\\controllers\\' . $controller;
+            class_exists($controller_class); // always return false, but autoload class if it exist
 
-                if (!class_exists($controller_class)) {
-                    throw new CliException("Unknown command $controller");
-                }
-            }
+            // real check
+            if(class_exists($controller_class, false))
+                break;
+
+            $controller_class = false;
         }
-        // Load the controller using reflection
-        $class = new \ReflectionClass($controller_class);
 
-        if ($class->isAbstract()) {
-            throw new CliException("Cannot create instances of abstract $controller");
-        }
-        $response = new Response;
+        if(!$controller_class)
+            throw new CliException("Unknown command {$this->controller}");
 
         // Create a new instance of the controller
-        $controller = $class->newInstance($this, $response);
+        $controller = new $controller_class;
+        $controller->request = $this;
 
-        // Run the controller's execute() method
-        $response = $class->getMethod('execute')->invoke($controller, $this->params);
-
-
-        if (!$response instanceof Response) {
-            // Controller failed to return a Response.
-            throw new CliException('Controller failed to return a Response');
-        }
-
-
-        return $response;
-
+        return (int) $controller->execute();
     }
 
 

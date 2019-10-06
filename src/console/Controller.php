@@ -6,43 +6,34 @@ use mii\util\Console;
 
 class Controller
 {
-
-    public $name;
-
     public $description;
 
     public $color;
 
     public $interactive = true;
 
-    public $auto_params = false;
+    public $auto_params = true;
 
-    public function __construct(Request $request, Response $response) {
-        // Assign the request to the controller
-        $this->request = $request;
+    public $request;
 
-        // Assign a response to the controller
-        $this->response = $response;
+    public $response_code = 0;
+
+    public function __construct() {
     }
-
 
     protected function before() {
         return true;
     }
 
-
-    protected function after()
-    {
+    protected function after() {
 
     }
 
-    public function index($argv)
-    {
+    public function index($argv) {
         $this->_autogenerate_help();
     }
 
-    protected function _autogenerate_help()
-    {
+    protected function _autogenerate_help() {
         $class = new \ReflectionClass($this);
 
         $description = $class->getProperty('description')->getValue($this);
@@ -63,7 +54,7 @@ class Controller
 
 
         $max = 0;
-        foreach($methods as $method) {
+        foreach ($methods as $method) {
             $max = max(\strlen($method), $max);
         }
 
@@ -74,6 +65,7 @@ class Controller
             $this->stdout("\n\n    $method", Console::FG_YELLOW);
 
             $string = $class->getMethod($method)->getDocComment();
+
             $string = trim(str_replace(['/**', '*/'], '', $string));
             $array = explode("\n", $string);
             $comment = $array[0];
@@ -81,15 +73,14 @@ class Controller
                 $comment = trim(substr($comment, 1));
 
             if ($comment) {
-                $this->stdout(str_pad(" ", $max-strlen($method), " ")."\t$comment");
+                $this->stdout(str_pad(" ", $max - strlen($method), " ") . "\t$comment");
             }
         }
 
         $this->stdout("\n\n");
     }
 
-    protected function execute_action($action, $params)
-    {
+    protected function execute_action($action, $params) {
         $method = new \ReflectionMethod($this, $action);
 
         if (!$method->isPublic())
@@ -115,10 +106,10 @@ class Controller
             }
         }
         if (!empty($missing)) {
-            if($missing[0] === 'argv' AND $action === 'index') {
+            if ($missing[0] === 'argv' AND $action === 'index') {
                 $args = [$params]; // Emulate old behavior for backwards compatibility
             } else {
-                throw new CliException( 'Missing required parameters: "'.implode(', ', $missing).'"');
+                throw new CliException('Missing required parameters: "' . implode(', ', $missing) . '"');
             }
         }
 
@@ -136,24 +127,21 @@ class Controller
      * 3. After the controller action is called, the [Controller::after] method
      * will be called.
      *
+     * @return  int
      * @throws  CliException
-     * @return  Response
      */
-    public function execute()
-    {
-        //$method = new \ReflectionMethod($this, $this->request->action());
+    public function execute() {
 
         $this->before();
 
-        if($this->auto_params)
-            $this->execute_action($this->request->action, $this->request->params);
+        if ($this->auto_params)
+            $this->response_code = (int)$this->execute_action($this->request->action, $this->request->params);
         else
-            \call_user_func([$this, $this->request->action], $this->request->params);
+            $this->response_code = (int)\call_user_func([$this, $this->request->action], $this->request->params);
 
         $this->after();
 
-        return $this->response;
-
+        return $this->response_code;
     }
 
     public function is_color_enabled($stream = \STDOUT) {

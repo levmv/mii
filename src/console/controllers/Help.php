@@ -40,7 +40,7 @@ class Help extends Controller
             if ($controller['class'] == static::class)
                 continue;
 
-            $class = new $controller['class']($this->request, $this->response);
+            $class = new $controller['class']();
 
             $desc = ($class->description) ? " " . $class->description . " " : '';
             $this->stdout($controller['command'], Console::FG_GREEN);
