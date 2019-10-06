@@ -101,9 +101,8 @@ class Query
      * @param   integer $type query type: Database::SELECT, Database::INSERT, etc
      * @param   string $sql query string
      */
-    public function __construct($sql = NULL, $type = NULL) {
+    public function __construct($type = NULL) {
         $this->_type = $type;
-        $this->_sql = $sql;
     }
 
     /**
@@ -172,12 +171,12 @@ class Query
 
         if ($columns !== null) {
             // Set the initial columns
-            if ($already_quoted) {
-                $this->_quoted_select = $columns;
-                $this->_select = [];
-            } else {
+            if ($already_quoted === false) {
                 $this->_select = $columns;
                 $this->_quoted_select = [];
+            } else {
+                $this->_quoted_select = $columns;
+                $this->_select = [];
             }
         }
 
@@ -210,7 +209,7 @@ class Query
      * @return  $this
      */
     public function select_array(array $columns) {
-        $this->_select = array_merge($this->_select, $columns);
+        $this->_select = \array_merge($this->_select, $columns);
 
         return $this;
     }
@@ -222,7 +221,11 @@ class Query
      * @return  $this
      */
     public function from(...$tables) {
-        $this->_from = array_merge($this->_from, $tables);
+        if(empty($this->_from)) {
+            $this->_from = $tables;
+        } else {
+            $this->_from = \array_merge($this->_from, $tables);
+        }
 
         return $this;
     }
@@ -685,8 +688,6 @@ class Query
         $this->_offset =
         $this->_last_join = NULL;
 
-        $this->_sql = NULL;
-
         $this->_table = NULL;
         $this->_columns =
         $this->_values = [];
@@ -725,8 +726,6 @@ class Query
             // Add the sub-query
             $query .= (string)$this->_values;
         }
-
-        $this->_sql = $query;
 
         return $query;
     }
@@ -776,8 +775,6 @@ class Query
             $query .= ' LIMIT ' . $this->_limit;
         }
 
-        $this->_sql = $query;
-
         return $query;
     }
 
@@ -801,8 +798,6 @@ class Query
             $query .= ' LIMIT ' . $this->_limit;
         }
 
-        $this->_sql = $query;
-
         return $query;
     }
 
@@ -824,9 +819,10 @@ class Query
             $query .= 'DISTINCT ';
         }
 
-        if (empty($this->_select) AND empty($this->_quoted_select)) {
-            // Select all columns
-            $query .= '*';
+
+
+        if(empty($this->_select)) {
+            $query .= implode(', ', $this->_quoted_select);
         } else {
 
             $columns = $this->_quoted_select;
@@ -842,8 +838,6 @@ class Query
 
                 $columns[] = $column;
             }
-
-            // Select all columns
             $query .= implode(', ', array_unique($columns));
         }
 
@@ -917,7 +911,6 @@ class Query
             $query .= ' FOR UPDATE';
         }
 
-        $this->_sql = $query;
 
         return $query;
     }
@@ -989,7 +982,7 @@ class Query
                 if ($condition === '(') {
                     if (!empty($sql) AND $last_condition !== '(') {
                         // Include logic operator
-                        $sql .= ' ' . $logic . ' ';
+                        $sql .= " $logic ";
                     }
 
                     $sql .= '(';
@@ -998,7 +991,7 @@ class Query
                 } else {
                     if (!empty($sql) AND $last_condition !== '(') {
                         // Add the logic operator
-                        $sql .= ' ' . $logic . ' ';
+                        $sql .= " $logic ";
                     }
 
                     // Split the condition
@@ -1015,7 +1008,7 @@ class Query
                     }
 
                     // Database operators are always uppercase
-                    $op = strtoupper($op);
+                    $op = \strtoupper($op);
 
                     if ($op === 'BETWEEN' AND \is_array($value)) {
                         // BETWEEN always has exactly two arguments
@@ -1044,7 +1037,7 @@ class Query
                     if ($column) {
                         if (\is_array($column)) {
                             // Use the column name
-                            $column = $this->db->quote_identifier(reset($column));
+                            $column = $this->db->quote_identifier(\reset($column));
                         } else {
                             // Apply proper quoting to the column
                             $column = $this->db->quote_column($column);
@@ -1052,7 +1045,7 @@ class Query
                     }
 
                     // Append the statement to the query
-                    $sql .= trim($column . ' ' . $op . ' ' . $value);
+                    $sql .= \trim($column . ' ' . $op . ' ' . $value);
                 }
 
                 $last_condition = $condition;
@@ -1172,11 +1165,10 @@ class Query
         }
 
 
-
         // Execute the query
         $result = $this->db->query($this->_type, $sql, $as_object, $object_params);
 
-        if ($this->_index_by)
+        if (!\is_null($this->_index_by))
             $result->index_by($this->_index_by);
 
         if($this->_pagination)

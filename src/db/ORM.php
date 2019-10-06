@@ -152,7 +152,6 @@ class ORM
      */
     public function select_query($with_order = true, Query $query = null): Query
     {
-
         if ($query === null)
             $query = new Query;
 
@@ -233,9 +232,9 @@ class ORM
 
     public function __set($key, $value)
     {
-        if (\array_key_exists($key, $this->_data)) {
+        if (isset($this->_data[$key]) || \array_key_exists($key, $this->_data)) {
 
-            if($this->__loaded === null) {
+            if(\is_null($this->__loaded)) {
                 $this->_data[$key] = $value;
                 return;
             }
@@ -259,7 +258,17 @@ class ORM
 
     public function __get($key)
     {
-        return $this->get($key);
+        if (isset($this->_data[$key]) OR \array_key_exists($key, $this->_data)) {
+
+            return ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields, true))
+                ? $this->_unserialize_value($key)
+                : $this->_data[$key];
+        }
+
+        if (\array_key_exists($key, $this->_unmapped))
+            return $this->_unmapped[$key];
+
+        throw new ORMException('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
     }
 
     public function get(string $key)

@@ -277,7 +277,7 @@ class Database extends Component
      * @uses    Database::escape
      */
     public function quote($value): string {
-        if ($value === NULL) {
+        if (\is_null($value)) {
             return 'NULL';
         } elseif ($value === true) {
             return "'1'";
@@ -438,10 +438,10 @@ class Database extends Component
             $alias = \str_replace('`', '``', $alias);
         }
 
-        if ($column instanceof Query) {
+        if (\is_object($column) AND $column instanceof Query) {
             // Create a sub-query
             $column = '(' . $column->compile($this) . ')';
-        } elseif ($column instanceof Expression) {
+        } elseif (\is_object($column) AND $column instanceof Expression) {
             // Compile the expression
             $column = $column->compile($this);
         } else {
@@ -581,7 +581,7 @@ class Database extends Component
             $alias = \str_replace('`', '``', $alias);
         }
 
-        if ($value instanceof Query) {
+        if (\is_object($value) AND $value instanceof Query) {
             // Create a sub-query
             $value = '(' . $value->compile($this) . ')';
         } elseif ($value instanceof Expression) {

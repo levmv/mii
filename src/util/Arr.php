@@ -120,12 +120,12 @@ class Arr
         $keys = $path;
         if (!\is_array($path)) {
             // Split the keys by delimiter
-            $keys = explode($delimiter, $path);
+            $keys = \explode($delimiter, $path);
         }
 
         // Set current $array to inner-most array path
         while (\count($keys) > 1) {
-            $key = array_shift($keys);
+            $key = \array_shift($keys);
 
             if (\is_string($key) && ctype_digit($key)) {
                 // Make the key an integer
@@ -133,14 +133,14 @@ class Arr
             }
 
             if (!isset($array[$key])) {
-                $array[$key] = array();
+                $array[$key] = [];
             }
 
             $array =& $array[$key];
         }
 
         // Set key on inner-most array
-        $array[array_shift($keys)] = $value;
+        $array[\array_shift($keys)] = $value;
     }
 
 
@@ -161,7 +161,7 @@ class Arr
      * @return  array
      */
     public static function extract($array, array $paths, $default = null) {
-        $found = array();
+        $found = [];
         foreach ($paths as $path) {
             static::set_path($found, $path, static::path($array, $path, $default));
         }

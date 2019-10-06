@@ -51,11 +51,11 @@ class URL
      */
     public static function site(string $uri = '', $protocol = null): string {
         // Chop off possible scheme, host, port, user and pass parts
-        $path = preg_replace('~^[-a-z0-9+.]++://[^/]++/?~', '', trim($uri, '/'));
+        $path = \preg_replace('~^[-a-z0-9+.]++://[^/]++/?~', '', trim($uri, '/'));
 
-        if (preg_match('/[^\x00-\x7F]/S', $path)) {
+        if (\preg_match('/[^\x00-\x7F]/S', $path)) {
             // Encode all non-ASCII characters, as per RFC 1738
-            $path = preg_replace_callback('~([^/]+)~', '\mii\util\URL::_rawurlencode_callback', $path);
+            $path = \preg_replace_callback('~([^/]+)~', '\mii\util\URL::_rawurlencode_callback', $path);
         }
 
         // Concat the URL
@@ -70,7 +70,7 @@ class URL
      * @return string          Encoded string
      */
     protected static function _rawurlencode_callback($matches) {
-        return rawurlencode($matches[0]);
+        return \rawurlencode($matches[0]);
     }
 
     /**
@@ -106,7 +106,7 @@ class URL
         }
 
         // Note: http_build_query returns an empty string for a params array with only NULL values
-        $query = http_build_query($params, '', '&');
+        $query = \http_build_query($params, '', '&');
 
         // Don't prepend '?' to an empty string
         return ($query === '') ? '' : ('?' . $query);
@@ -120,7 +120,7 @@ class URL
 
     static public function back_url(string $default = null): string {
         if (isset($_GET['back_url']))
-            return urldecode($_GET['back_url']);
+            return \urldecode($_GET['back_url']);
 
         if ($default === null) {
             return URL::current();
