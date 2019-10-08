@@ -84,13 +84,15 @@ class Migrate extends Controller
     /**
      * Create new migration file
      */
-    public function create($argv) {
+    public function create($name = null) {
 
         $custom_name = false;
 
-        if ($argv && \count($argv)) {
+        if(count($this->request->params) && $name === null)
+            $name = $this->request->params[0];
 
-            $custom_name = mb_strtolower($argv[0], 'utf-8');
+        if ($name) {
+            $custom_name = mb_strtolower($name, 'utf-8');
         }
 
         DB::begin();
