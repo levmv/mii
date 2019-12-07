@@ -80,71 +80,56 @@ class ORM
     }
 
     /**
-     * @return \mii\db\Result
+     * @param null $value
+     * @return array
      */
     public static function all($value = null): array
     {
-        if ($value !== null) {
+        if (\is_null($value))
+            return static::find()->all();
 
-            assert(is_array($value) === true, 'Value must be an array or null');
+        assert(is_array($value), 'Value must be an array or null');
+        assert(!is_array($value[0]), "This method accepts only array of int/string's");
 
-            if (!\is_array($value[0])) {
-                return (new static)
-                    ->select_query()
-                    ->where('id', 'IN', $value)
-                    ->all();
-            }
-
-            assert(count($value[0]) === 3, "Wrong conditions array");
-
-            return (new static)
-                ->select_query(true)
-                ->where($value)
-                ->all();
-        }
-
-        return static::find()->all();
+        return (new static)
+            ->select_query()
+            ->where('id', 'IN', $value)
+            ->all();
     }
 
 
     /**
      * @return Query
      */
-    public static function find()
+    public static function find($conditions = null)
     {
-        return (new static)->select_query();
+        if(\is_null($conditions))
+            return (new static)->select_query();
+
+        assert(is_array($conditions), 'You passed not null value to find(), but not array. Its probably a bug');
+
+        if(count($conditions) === 3 && \is_string($conditions[1])) {
+            $conditions = [$conditions];
+        }
+
+        return (new static)
+            ->select_query()
+            ->where($conditions);
     }
 
     /**
      * @param mixed $id
      * @return $this|null
      */
-
-    public static function one($value = null, $find_or_fail = false)
+    public static function one($value, $find_or_fail = false)
     {
-        $result = null;
-        if (\is_array($value)) {
-
-            assert(count($value[0]) === 3, "Wrong conditions array");
-
-            $result = (new static)
-                ->select_query(false)
-                ->where($value)
-                ->one();
-
-        } elseif (\is_integer($value) || \is_string($value)) {
-            $result = (new static)->select_query(false)->where('id', '=', (int)$value)->one();
-        } else {
-            assert($find_or_fail === false, 'You passed null as value: ORM::one(null, true). Its probably a bug');
-            $result = (new static)->select_query(true)->one();
-        }
+        $result = (new static)->select_query(false)->where('id', '=', (int) $value)->one();
 
         if ($find_or_fail && $result === null)
             throw new ModelNotFoundException;
 
         return $result;
     }
-
 
     /**
      * @param bool $with_order

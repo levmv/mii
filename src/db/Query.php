@@ -1282,11 +1282,17 @@ class Query
     }
 
 
-    public function one() {
+    public function one($find_or_fail = false) {
         $this->limit(1);
         $result = $this->execute();
 
-        return \count($result) > 0 ? $result->current() : null;
+        if(\count($result) > 0)
+            return $result->current();
+
+        if($find_or_fail)
+            throw new ModelNotFoundException();
+
+        return null;
     }
 
     public function all() {
