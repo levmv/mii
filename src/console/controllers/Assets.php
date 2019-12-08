@@ -44,7 +44,12 @@ class Assets extends Controller
         $this->input_path = \path('vendor') . '/node_modules/';
         $this->output_path = \path('app') . '/blocks';
 
-        $this->sets = config('components.blocks.sets');
+        $this->sets = config('components.blocks.sets', [
+            'libraries' => [
+                '@app/blocks'
+            ],
+            'base_url' => '/assets'
+        ]);
 
         $this->assets_map_path = config('components.blocks.assets_map_path', '@tmp');
 
