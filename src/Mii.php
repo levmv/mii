@@ -129,11 +129,6 @@ function session($key = null, $default = null) {
 }
 
 
-function url(string $name, array $params = []): string {
-    return Mii::$app->router->url($name, $params);
-}
-
-
 function redirect($url, $use_back_url = false) {
 
     if ($use_back_url) {
