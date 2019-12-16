@@ -60,7 +60,7 @@ class Router extends Component
 
         if ($this->cache) {
 
-            list($this->_routes_list, $this->_named_routes, $this->_namespaces) = \get_cached($this->cache_id, [null, null, null]);
+            list($this->_routes_list, $this->_named_routes, $this->_namespaces) = \Mii::$app->get($this->cache)->get($this->cache_id, [null, null, null]);
             if ($this->_routes_list === null)
                 $this->init_routes();
 
@@ -170,7 +170,7 @@ class Router extends Component
         }
 
         if ($this->cache) {
-            \cache($this->cache_id, [$this->_routes_list, $this->_named_routes, $this->_namespaces], $this->cache_lifetime);
+            \Mii::$app->get($this->cache)->set($this->cache_id, [$this->_routes_list, $this->_named_routes, $this->_namespaces], $this->cache_lifetime);
         }
     }
 
