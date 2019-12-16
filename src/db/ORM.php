@@ -123,6 +123,8 @@ class ORM
      */
     public static function one($value, $find_or_fail = false)
     {
+        assert(!is_array($value), 'Value must be type of int or string');
+
         $result = (new static)->select_query(false)->where('id', '=', (int) $value)->one();
 
         if ($find_or_fail && $result === null)

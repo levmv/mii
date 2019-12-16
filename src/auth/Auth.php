@@ -261,9 +261,7 @@ class Auth extends Component
     public function auto_login(): ?User {
         if ($token = Mii::$app->request->get_cookie($this->token_cookie)) {
             // Load the token and user
-            $token = Token::one([
-                ['token', '=', $token]
-            ]);
+            $token = Token::find(['token', '=', $token])->one();
 
             if ($token !== null) {
 
