@@ -156,6 +156,16 @@ class Request extends Component
         return $_SERVER['CONTENT_TYPE'] ?? '';
     }
 
+    public function get_ip() : string {
+        if (!empty($_SERVER['HTTP_CLIENT_IP']))
+            return $_SERVER['HTTP_CLIENT_IP'];
+
+        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+            return $_SERVER['HTTP_X_FORWARDED_FOR'];
+
+        return $_SERVER['REMOTE_ADDR'];
+    }
+
 
     /**
      * Gets or sets the HTTP method. Usually GET, POST, PUT or DELETE in

@@ -21,10 +21,10 @@ class Logger extends Component
 
     public static $level_names = [
         1 => 'DEBUG',
-        2 => 'INFO',
+        2 => 'INF',
         4 => 'NOTICE',
         8 => 'WARNING',
-        16 => 'ERROR',
+        16 => 'ERR',
         32 => 'CRITICAL',
         64 => 'ALERT'
     ];

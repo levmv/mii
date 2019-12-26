@@ -18,13 +18,10 @@ class ErrorHandler extends Component
      */
     public $memory_reserve_size = 0;
 
-    public $report_trace = true;
-
     /**
      * @var string Used to reserve memory for fatal error handler.
      */
     private $_memory_reserve;
-
 
     public function register() {
         ini_set('display_errors', false);

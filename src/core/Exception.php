@@ -22,14 +22,14 @@ class Exception extends \Exception
     /**
      * Get a single line of text representing the exception:
      *
-     * Error [ Code ]: Message ~ File [ Line ]
+     * Error [Code]: Message ~ File [ Line ]
      *
      * @param   \Throwable $e
      * @return  string
      */
     public static function text(\Throwable $e) {
-        return sprintf('%s [ %s ]: %s ~ %s [ %d ]',
-            \get_class($e), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
+        return sprintf('%s [%s]: %s ~ %s [%d]',
+            (new \ReflectionClass($e))->getShortName(), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
     }
 
 

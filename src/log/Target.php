@@ -3,8 +3,10 @@
 namespace mii\log;
 
 
+use mii\auth\Auth;
 use mii\core\Component;
 use mii\web\App;
+use mii\web\Request;
 
 abstract class Target extends Component
 {
@@ -17,8 +19,6 @@ abstract class Target extends Component
     protected $with_trace = true;
 
     protected $with_context = true;
-
-    protected $messages = [];
 
     protected function filter(array $messages)
     {
@@ -82,7 +82,16 @@ abstract class Target extends Component
 
             if ($text instanceof \Throwable) {
 
+                if($this->with_context && \Mii::$app instanceof App) {
+                    $context = sprintf("\n%s%s %s",
+                        \Mii::$app->request->method(),
+                        \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
+                        $_SERVER['REQUEST_URI']
+                    );
+                }
+
                 if($this->with_trace) {
+
                     $trace = "\n".\mii\util\Debug::short_text_trace($text->getTrace());
                 }
 
@@ -93,15 +102,28 @@ abstract class Target extends Component
             }
         }
 
-        if($this->with_context && \Mii::$app instanceof App) {
-            $context = sprintf("\n%s%s: %s",
-                \Mii::$app->request->method(),
-                \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
-                $_SERVER['REQUEST_URI']
-            );
+        $prefix = '';
+
+        if(\Mii::$app instanceof App) {
+
+            $request = \Mii::$app->request;
+            $ip = ($request instanceof Request) ? $request->get_ip() : '-';
+
+            $user_id = '-';
+
+            if(\Mii::$app->has('auth')) {
+                $auth = \Mii::$app->auth;
+                if($auth instanceof Auth) {
+                    $user = $auth->get_user();
+                    if($user !== null) {
+                        $user_id = $user->id;
+                    }
+                }
+            }
+            $prefix = "$ip $user_id ";
         }
 
-        return date('Y-m-d H:i:s', $timestamp) . " [$level][" . $category . "] $text$context$trace";
+        return date('Y-m-d H:i:s', $timestamp) . "$prefix[$level][" . $category . "] $text$context$trace";
     }
 
 }
