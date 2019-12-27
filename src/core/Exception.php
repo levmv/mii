@@ -28,8 +28,9 @@ class Exception extends \Exception
      * @return  string
      */
     public static function text(\Throwable $e) {
-        return sprintf('%s [%s]: %s ~ %s [%d]',
-            (new \ReflectionClass($e))->getShortName(), $e->getCode(), strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
+        $code = $e->getCode();
+        return sprintf('%s[%s]: %s ~ %s[%d]',
+            (new \ReflectionClass($e))->getShortName(), $code != 0 ? "[$code]" : '', strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
     }
 
 

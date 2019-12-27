@@ -8,9 +8,11 @@ class NotFoundHttpException extends HttpException
 {
 
     public function __construct() {
-        parent::__construct(404, "Page not found ". Mii::$app->request->uri());
+        parent::__construct(404, Mii::$app->request->uri());
+    }
+
+    public static function text(\Throwable $e) {
+        return (new \ReflectionClass($e))->getShortName() .' : '.$e->getMessage();
     }
 
 }
-
-;

@@ -120,10 +120,10 @@ abstract class Target extends Component
                     }
                 }
             }
-            $prefix = "$ip $user_id ";
+            $prefix = " $ip $user_id";
         }
 
-        return date('Y-m-d H:i:s', $timestamp) . "$prefix[$level][" . $category . "] $text$context$trace";
+        return date('y-m-d H:i:s', $timestamp) . "$prefix $level.$category: $text$context$trace";
     }
 
 }

@@ -56,19 +56,14 @@ class ErrorHandler extends Component
 
         $this->current_exception = $e;
 
-
         if (PHP_SAPI !== 'cli') {
             http_response_code(500);
         }
 
         try {
-
             $this->report($e);
-
             $this->clear_output();
-
             $this->render($e);
-
         } catch (\Throwable $e) {
             echo static::exception_to_text($e);
         }
