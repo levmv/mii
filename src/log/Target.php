@@ -98,7 +98,7 @@ abstract class Target extends Component
                 $text = (string) $text;
 
             } else {
-                $text = var_export($text);
+                $text = var_export($text, true);
             }
         }
 

@@ -80,13 +80,15 @@ class ErrorHandler extends Component
             // Convert the error into an ErrorException
             $exception = new ErrorException($error, $code, 0, $file, $line);
 
-            // in case error appeared in __toString method we can't throw any exception
-            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-            array_shift($trace);
-            foreach ($trace as $frame) {
-                if ($frame['function'] === '__toString') {
-                    $this->handle_exception($exception);
-                    exit(1);
+            if (PHP_VERSION_ID < 70400) {
+                // in PHP < 7.4 we can't throw exceptions inside of __toString method
+                $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+                array_shift($trace);
+                foreach ($trace as $frame) {
+                    if ($frame['function'] === '__toString') {
+                        $this->handle_exception($exception);
+                        exit(1);
+                    }
                 }
             }
 
