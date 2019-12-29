@@ -20,13 +20,13 @@ class Logger extends Component
     const ALL = 127;
 
     public static $level_names = [
-        1 => 'DEBUG',
-        2 => 'INF',
-        4 => 'NOTICE',
-        8 => 'WARNING',
-        16 => 'ERR',
-        32 => 'CRITICAL',
-        64 => 'ALERT'
+        1 => 'dbg',
+        2 => 'inf',
+        4 => 'notice',
+        8 => 'warn',
+        16 => 'err',
+        32 => 'crit',
+        64 => 'alert'
     ];
 
     protected $messages = [];

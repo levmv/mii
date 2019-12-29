@@ -16,9 +16,8 @@ abstract class Target extends Component
 
     protected $except;
 
-    protected $with_trace = true;
+    protected $exceptions_extended = true;
 
-    protected $with_context = true;
 
     protected function filter(array $messages)
     {
@@ -75,30 +74,29 @@ abstract class Target extends Component
 
         $level = Logger::$level_names[$level];
 
-        $trace = '';
-        $context = '';
+        $extended = '';
 
         if (!\is_string($text)) {
 
             if ($text instanceof \Throwable) {
 
-                if($this->with_context && \Mii::$app instanceof App) {
-                    $context = sprintf("\n%s%s %s",
-                        \Mii::$app->request->method(),
-                        \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
-                        $_SERVER['REQUEST_URI']
-                    );
-                }
+                if($this->exceptions_extended) {
 
-                if($this->with_trace) {
+                    if(\Mii::$app instanceof App) {
+                        $extended = sprintf("\n%s%s %s",
+                            \Mii::$app->request->method(),
+                            \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
+                            $_SERVER['REQUEST_URI']
+                        );
+                    }
 
-                    $trace = "\n".\mii\util\Debug::short_text_trace($text->getTrace());
+                    $extended .= "\n".\mii\util\Debug::short_text_trace($text->getTrace());
                 }
 
                 $text = (string) $text;
 
             } else {
-                $text = var_export($text);
+                $text = var_export($text, true);
             }
         }
 
@@ -120,10 +118,10 @@ abstract class Target extends Component
                     }
                 }
             }
-            $prefix = "$ip $user_id ";
+            $prefix = " $ip $user_id";
         }
 
-        return date('Y-m-d H:i:s', $timestamp) . "$prefix[$level][" . $category . "] $text$context$trace";
+        return date('y-m-d H:i:s', $timestamp) . "$prefix $level.$category: $text$extended";
     }
 
 }
