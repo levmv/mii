@@ -31,7 +31,7 @@ class Logger extends Component
 
     protected $messages = [];
 
-    protected $flush_interval = 1;
+    protected $flush_interval = 5;
 
     public function init(array $config = []): void
     {
@@ -61,6 +61,8 @@ class Logger extends Component
         foreach ($this->targets_objs as $target) {
             $target->collect($this->messages);
         }
+
+        $this->messages = [];
     }
 
 
