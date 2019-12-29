@@ -5,6 +5,7 @@ namespace mii\log;
 
 use mii\auth\Auth;
 use mii\core\Component;
+use mii\core\Exception;
 use mii\web\App;
 use mii\web\Request;
 
@@ -70,15 +71,15 @@ abstract class Target extends Component
 
     public function format_message($message)
     {
-        list($text, $level, $category, $timestamp) = $message;
+        list($msg, $level, $category, $timestamp) = $message;
 
         $level = Logger::$level_names[$level];
 
         $extended = '';
 
-        if (!\is_string($text)) {
+        if (!\is_string($msg)) {
 
-            if ($text instanceof \Throwable) {
+            if ($msg instanceof \Throwable) {
 
                 if($this->exceptions_extended) {
 
@@ -90,13 +91,13 @@ abstract class Target extends Component
                         );
                     }
 
-                    $extended .= "\n".\mii\util\Debug::short_text_trace($text->getTrace());
+                    $extended .= "\n".\mii\util\Debug::short_text_trace($msg->getTrace());
                 }
 
-                $text = (string) $text;
+                $msg = Exception::text($msg);
 
             } else {
-                $text = var_export($text, true);
+                $msg = var_export($msg, true);
             }
         }
 
@@ -121,7 +122,7 @@ abstract class Target extends Component
             $prefix = " $ip $user_id";
         }
 
-        return date('y-m-d H:i:s', $timestamp) . "$prefix $level.$category: $text$extended";
+        return date('y-m-d H:i:s', $timestamp) . "$prefix $level.$category: $msg$extended";
     }
 
 }
