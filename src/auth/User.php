@@ -24,22 +24,8 @@ class User extends ORM
 
     }
 
-    public function link_role($role_name) {
-
-        $role = Role::find()->where('name', '=', $role_name)->one();
-
-        if (!$role)
-            return false;
-
-        try {
-            DB::insert('INSERT INTO `roles_users` VALUES(:user_id, :role_id)', [
-                ':user_id' => $this->id,
-                ':role_id' => $role->id
-            ]);
-        } catch (\Exception $e) {
-            return false;
-        }
-        return true;
+    public function can_login() {
+        return $this->has_role('login');
     }
 
 

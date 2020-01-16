@@ -138,15 +138,6 @@ function redirect($url, $use_back_url = false) {
     throw new \mii\web\RedirectHttpException($url);
 }
 
-/**
- * Check if user logged in and has specified roles
- * @param mixed $role Role name or array of role names
- * @return bool
- */
-function logged_in($role = 'login'): bool {
-    return Mii::$app->auth->logged_in($role);
-}
-
 
 /**
  * @param $name string

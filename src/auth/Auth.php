@@ -27,9 +27,9 @@ class Auth extends Component
 
     protected $lifetime = 2592000;
 
-    protected $session_key = 'miiu';
+    protected $session_key = 'misk';
 
-    protected $token_cookie = 'miia';
+    protected $token_cookie = 'mitc';
 
 
     /**
@@ -103,10 +103,9 @@ class Auth extends Component
         if (!$user)
             return false;
 
-
-        if ($user->id AND $user->has_role('login') AND $this->verify_password($password, $user->password)) {
+        if ($user->id AND $user->can_login() AND $this->verify_password($password, $user->password)) {
             if ($remember === true) {
-                $this->set_autologin($user);
+                $this->set_autologin($user->id);
             }
 
             // Finish the login
@@ -130,7 +129,6 @@ class Auth extends Component
     public function logout($destroy = false, $logout_all = false) {
         // Set by force_login()
         $this->_session->delete('auth_forced');
-
 
         if ($token = Mii::$app->request->get_cookie($this->token_cookie)) {
             // Delete the autologin cookie to prevent re-login
@@ -163,13 +161,12 @@ class Auth extends Component
         return !$this->logged_in();
     }
 
-    public function set_autologin($user)
+    public function set_autologin($user_id)
     {
         // Create a new autologin token
         $token = (new Token)->set([
-            'user_id' => $user->id,
-            'expires' => time() + $this->lifetime,
-            'user_agent' => sha1(Mii::$app->request->get_user_agent()),
+            'user_id' => $user_id,
+            'expires' => time() + $this->lifetime
         ]);
         $token->create();
 
@@ -182,7 +179,7 @@ class Auth extends Component
      * Check if there is an active session. Optionally allows checking for a
      * specific role. By default checking for «login» role.
      */
-    public function logged_in($role = 'login'): bool {
+    public function logged_in($role = null): bool {
         // Get the user from the session
         $user = $this->get_user();
 
@@ -259,45 +256,30 @@ class Auth extends Component
      * @return  mixed
      */
     public function auto_login(): ?User {
-        if ($token = Mii::$app->request->get_cookie($this->token_cookie)) {
-            // Load the token and user
-            $token = Token::find(['token', '=', $token])->one();
+        $token_str = Mii::$app->request->get_cookie($this->token_cookie);
 
-            if ($token !== null) {
+        if(!$token_str)
+            return null;
 
-                if ($token->user_agent === sha1(Mii::$app->request->get_user_agent())) {
-                    $new_token = (new Token)->set([
-                        'user_id' => $token->user_id,
-                        'user_agent' => $token->user_agent,
-                        'expires' => time() + $this->lifetime
-                    ]);
-                    $new_token->create();
+        // Load the token and user
+        $token = Token::find(['token', '=', $token_str])->one();
+        $user = \call_user_func([$this->user_model, 'one'], $token->user_id);
 
-                    // Set the new token
-                    Mii::$app->request->set_cookie($this->token_cookie, $new_token->token, $new_token->expires - time());
-
-                    // Complete the login with the found data
-
-                    $user = \call_user_func([$this->user_model, 'one'], $new_token->user_id);
-
-                    $this->complete_login($user);
-
-                    $token->delete();
-
-                    // Automatic login was successful
-                    return $user;
-                }
-
-                // Token is invalid
-                if ($token->loaded())
-                    $token->delete();
-            } else {
-
-                // Token is invalid
-                Mii::$app->request->delete_cookie($this->token_cookie);
-            }
+        if($token === null || $user === null) {
+            // Token is invalid
+            Mii::$app->request->delete_cookie($this->token_cookie);
+            return null;
         }
 
-        return null;
+        // Gen new token
+        $this->set_autologin($token->user_id);
+
+        // Complete the login with the found data
+        $this->complete_login($user);
+
+        $token->delete();
+
+        // Automatic login was successful
+        return $user;
     }
 }

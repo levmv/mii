@@ -4,29 +4,21 @@ namespace mii\auth;
 
 use mii\db\ORM;
 use mii\db\Query;
+use mii\util\Text;
 
 class Token extends ORM
 {
     protected static $table = 'user_tokens';
 
-    protected $_order_by = ['expires' => 'asc'];
-
     protected $_data = [
         'id' => 0,
-        'user_agent' => '',
         'token' => '',
-        'type' => '',
-        'created' => 0, // auto_now_create
         'expires' => 0,
         'user_id' => 0,
     ];
 
     public function on_create() {
-        $this->created = time();
-
-        do {
-            $this->token = bin2hex(random_bytes(20));
-        } while ($this->get_token($this->token) !== null);
+        $this->token = Text::base64url_encode(random_bytes(24));
 
         if (mt_rand(1, 100) === 1) {
             // Do garbage collection
@@ -58,5 +50,13 @@ class Token extends ORM
     public function get_token($token) {
         return static::find()->where('token', '=', $token)->one();
     }
+
+    public static function delete_all_by_user($user_id) {
+        return static::query()
+            ->delete()
+            ->where('user_id', '=', $user_id)
+            ->execute();
+    }
+
 
 }
