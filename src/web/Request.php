@@ -41,6 +41,8 @@ class Request extends Component
 
     public $csrf_validation = true;
 
+    public $cookie_validation = true;
+
     public $enable_csrf_cookie = true;
 
     public $csrf_token_name = 'csrf_token';
@@ -50,7 +52,7 @@ class Request extends Component
     /**
      * @var  string  Magic salt to add to the cookie
      */
-    protected $cookie_salt = null;
+    protected $cookie_salt;
 
     /**
      * @var  integer  Number of seconds before the cookie expires
@@ -75,7 +77,7 @@ class Request extends Component
     /**
      * @var  boolean  Only transmit cookies over HTTP, disabling Javascript access
      */
-    public $cookie_httponly = false;
+    public $cookie_httponly = true;
 
 
     public $cookie_samesite = self::SAME_SITE_LAX;
@@ -354,17 +356,20 @@ class Request extends Component
             return $default;
         }
 
+        if(!$this->cookie_validation)
+            return $_COOKIE[$key];
+
         // Get the cookie value
         $cookie = $_COOKIE[$key];
 
         // Find the position of the split between salt and contents
-        $split = \strlen($this->salt($key, ''));
+        $sign_len = \strlen($this->salt($key, ''));
 
-        if (isset($cookie[$split]) && $cookie[$split] === '~') {
-            // Separate the salt and the value
-            list ($hash, $value) = \explode('~', $cookie, 2);
+        if(strlen($cookie) > $sign_len) {
+            $sign = substr($cookie, 0, $sign_len);
+            $value = substr($cookie, $sign_len);
 
-            if ($this->salt($key, $value) === $hash) {
+            if ($this->salt($key, $value) === $sign) {
                 // Cookie signature is valid
                 return $value;
             }
@@ -397,8 +402,10 @@ class Request extends Component
             $expiration += time();
         }
 
-        // Add the salt to the cookie value
-        $value = $this->salt($name, (string)$value) . '~' . $value;
+        if($this->cookie_validation) {
+            // Add the salt to the cookie value
+            $value = $this->salt($name, (string)$value) .  $value;
+        }
 
         if (PHP_VERSION_ID >= 70300) {
             return \setcookie($name, $value,
@@ -449,6 +456,6 @@ class Request extends Component
             );
         }
 
-        return \sha1($name . $value . $this->cookie_salt);
+        return substr(\mii\util\Text::base64url_encode(\md5($name . $value . $this->cookie_salt, true)), 0, 20);
     }
 }
