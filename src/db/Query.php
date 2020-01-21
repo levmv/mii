@@ -815,8 +815,7 @@ class Query
 
 
         if(empty($this->_select)) {
-            //$query .= implode(', ', $this->_quoted_select);
-            $query .= '*';
+            $query .= implode(', ', $this->_quoted_select);
         } else {
 
             $columns = $this->_quoted_select;

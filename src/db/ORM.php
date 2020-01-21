@@ -136,7 +136,7 @@ class ORM
         if ($query === null)
             $query = new Query;
 
-        $query->select()->from($this->get_table())->as_object(static::class, [null, true]);
+        $query->select(['`'.$this->get_table().'`.*'], true)->from($this->get_table())->as_object(static::class, [null, true]);
 
         if ($this->_order_by AND $with_order) {
             foreach ($this->_order_by as $column => $direction) {
@@ -242,11 +242,10 @@ class ORM
 
     public function get(string $key)
     {
-        if (isset($this->_data[$key]) OR \array_key_exists($key, $this->_data)) {
-
+        if (isset($this->attributes[$key]) OR \array_key_exists($key, $this->attributes)) {
             return ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields, true))
                 ? $this->_unserialize_value($key)
-                : $this->_data[$key];
+                : $this->attributes[$key];
         }
 
         throw new ORMException('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
@@ -263,19 +262,13 @@ class ORM
         }
 
         foreach ($values as $key => $value) {
-            if (\array_key_exists($key, $this->_data)) {
-
-                if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
-                    $this->_serialize_cache[$key] = $value;
-                } else {
-                    if ($value !== $this->_data[$key]) {
-                        $this->_changed[$key] = true;
-                    }
-                    $this->attributes[$key] = $value;
-                }
-
+            if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
+                $this->_serialize_cache[$key] = $value;
             } else {
-                $this->_unmapped[$key] = $value;
+                if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
+                    $this->_changed[$key] = true;
+                }
+                $this->attributes[$key] = $value;
             }
         }
         return $this;
@@ -301,7 +294,7 @@ class ORM
     public function to_array(array $properties = []): array
     {
         if (empty($properties)) {
-            return $this->_data;
+            return $this->attributes;
         }
 
         return Arr::to_array($this, $properties);
@@ -364,12 +357,12 @@ class ORM
 
         $this->on_change();
 
-        $data = array_intersect_key($this->_data, $this->_changed);
+        $data = array_intersect_key($this->attributes, $this->_changed);
 
         $this->raw_query()
             ->update($this->get_table())
             ->set($data)
-            ->where('id', '=', $this->_data['id'])
+            ->where('id', '=', (int) $this->attributes['id'])
             ->execute();
 
         $this->on_after_update();
