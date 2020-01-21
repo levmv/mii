@@ -222,6 +222,8 @@ class Database extends Component
             throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
         }
 
+        $this->_connection->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
+
         if (!empty($this->_config['charset'])) {
             // Set the character set
             $this->_connection->set_charset($this->_config['charset']);
