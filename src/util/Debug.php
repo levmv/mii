@@ -12,31 +12,6 @@ class Debug
 {
 
     /**
-     * Returns an HTML string of debugging information about any number of
-     * variables, each wrapped in a "pre" tag:
-     *
-     *     // Displays the type and value of each variable
-     *     echo Debug::vars($foo, $bar, $baz);
-     *
-     * @param   mixed $var,... variable to debug
-     * @return  string
-     */
-    public static function vars() {
-        if (\func_num_args() === 0)
-            return '';
-
-        // Get all passed variables
-        $variables = \func_get_args();
-
-        $output = array();
-        foreach ($variables as $var) {
-            $output[] = Debug::_dump($var, 1024);
-        }
-
-        return '<pre class="debug">' . implode("\n", $output) . '</pre>';
-    }
-
-    /**
      * Returns an HTML string of information about a single variable.
      *
      * Borrows heavily on concepts from the Debug class of [Nette](http://nettephp.com/).
@@ -269,8 +244,9 @@ class Debug
      *     // Displays the entire current backtrace
      *     echo implode('<br/>', Debug::trace());
      *
-     * @param   array $trace
+     * @param array $trace
      * @return  array
+     * @throws \ReflectionException
      */
     public static function trace(array $trace = NULL) {
         if ($trace === NULL) {

@@ -184,12 +184,7 @@ class Menu
 
 
     public function __toString() {
-        try {
-            return $this->render();
-        } catch (\Throwable $e) {
-            ErrorHandler::convert_to_error($e);
-            return '';
-        }
+        return $this->render();
     }
 
 

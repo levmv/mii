@@ -273,12 +273,7 @@ class Pagination
      * @return  string  pagination output (HTML)
      */
     public function __toString() {
-        try {
-            return $this->render();
-        } catch (\Throwable $e) {
-            ErrorHandler::convert_to_error($e);
-            return '';
-        }
+        return $this->render();
     }
 
     /**

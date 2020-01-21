@@ -78,21 +78,7 @@ class ErrorHandler extends Component
 
             // This error is not suppressed by current error reporting settings
             // Convert the error into an ErrorException
-            $exception = new ErrorException($error, $code, 0, $file, $line);
-
-            if (PHP_VERSION_ID < 70400) {
-                // in PHP < 7.4 we can't throw exceptions inside of __toString method
-                $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-                array_shift($trace);
-                foreach ($trace as $frame) {
-                    if ($frame['function'] === '__toString') {
-                        $this->handle_exception($exception);
-                        exit(1);
-                    }
-                }
-            }
-
-            throw $exception;
+            throw new ErrorException($error, $code, 0, $file, $line);
         }
         // Do not execute the PHP error handler (?)
         return true;
@@ -130,17 +116,6 @@ class ErrorHandler extends Component
                 ob_clean();
             }
         }
-    }
-
-    /**
-     * Converts an exception into a PHP error.
-     *
-     * This method can be used to convert exceptions inside of methods like `__toString()`
-     * to PHP errors because exceptions cannot be thrown inside of them.
-     * @param \Exception $exception the exception to convert to a PHP error.
-     */
-    public static function convert_to_error($exception) {
-        trigger_error(Exception::text($exception), E_USER_ERROR);
     }
 
 

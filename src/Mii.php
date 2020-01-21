@@ -62,10 +62,6 @@ class Mii
         static::log(Logger::INFO, $msg, $category);
     }
 
-    public static function notice($msg, $category = 'app') {
-        static::log(Logger::NOTICE, $msg, $category);
-    }
-
     public static function log($level, $msg, $category) {
         if (static::$app->has(static::$log_component_name))
             static::$app->get(static::$log_component_name)->log($level, $msg, $category);
@@ -241,7 +237,7 @@ if (!\function_exists('dd')) {
             echo "</style><pre>\n";
 
             array_map(function ($a) {
-                echo \mii\util\Debug::dump($a);
+                echo \mii\util\Debug::dump($a, 400);
             }, $params);
 
             echo "</pre>\n";

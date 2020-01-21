@@ -11,8 +11,7 @@ class HTML
     /**
      * @var  array  preferred order of attributes
      */
-    public static $attribute_order = array
-    (
+    public static $attribute_order = [
         'action',
         'method',
         'type',
@@ -41,7 +40,7 @@ class HTML
         'checked',
         'readonly',
         'disabled',
-    );
+    ];
 
     public static $void_elements = [
         'area' => 1,

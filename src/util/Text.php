@@ -359,7 +359,6 @@ class Text
         'GB' => 30
     );
 
-
     /**
      * Converts a file size number to a byte value. File sizes are defined in
      * the format: SB, where S is the size (1, 8.5, 300, etc.) and B is the

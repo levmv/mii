@@ -39,7 +39,7 @@ class Request extends Component
 
     protected $_hostname;
 
-    public $csrf_validation = true;
+    public $csrf_validation = false;
 
     public $cookie_validation = true;
 
@@ -342,7 +342,9 @@ class Request extends Component
 
 
     /**
-     * Gets the value of a signed cookie. Cookies without signatures will not
+     * Gets the value of a cookie.
+     *
+     * If $cookie_validation set, then cookies without signatures will not
      * be returned. If the cookie signature is present, but invalid, the cookie
      * will be deleted.
      *
@@ -407,19 +409,15 @@ class Request extends Component
             $value = $this->salt($name, (string)$value) .  $value;
         }
 
-        if (PHP_VERSION_ID >= 70300) {
-            return \setcookie($name, $value,
-                [
-                    'expires' => $expiration,
-                    'path' => $this->cookie_path,
-                    'domain' => $this->cookie_domain,
-                    'secure' => $this->cookie_secure,
-                    'httpOnly' => $this->cookie_httponly,
-                    'sameSite' => $this->cookie_samesite,
-                ]);
-        } else {
-            return \setcookie($name, $value, $expiration, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
-        }
+        return \setcookie($name, $value,
+            [
+                'expires' => $expiration,
+                'path' => $this->cookie_path,
+                'domain' => $this->cookie_domain,
+                'secure' => $this->cookie_secure,
+                'httpOnly' => $this->cookie_httponly,
+                'sameSite' => $this->cookie_samesite,
+            ]);
     }
 
 

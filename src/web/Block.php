@@ -109,14 +109,7 @@ class Block
      * @return  string
      */
     public function __toString(): string {
-        try {
-
-            return $this->render();
-
-        } catch (\Throwable $e) {
-            ErrorHandler::convert_to_error($e);
-            return '';
-        }
+        return $this->render();
     }
 
     public function depends(array $depends): Block {

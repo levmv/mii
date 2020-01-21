@@ -21,7 +21,7 @@ class Profiler
     /**
      * @var  array  collected benchmarks
      */
-    protected static $_marks = array();
+    protected static $_marks = [];
 
     /**
      * Starts a new benchmark and returns a unique token. The returned token
