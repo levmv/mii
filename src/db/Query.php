@@ -14,7 +14,6 @@ use mii\web\Pagination;
  */
 class Query
 {
-
     /**
      * @var Database
      */
@@ -111,12 +110,7 @@ class Query
      * @return  string
      */
     public function __toString() {
-        try {
-            // Return the SQL string
-            return $this->compile();
-        } catch (DatabaseException $e) {
-            return ErrorHandler::convert_to_error($e);
-        }
+        return $this->compile();
     }
 
     /**
@@ -820,9 +814,9 @@ class Query
         }
 
 
-
         if(empty($this->_select)) {
-            $query .= implode(', ', $this->_quoted_select);
+            //$query .= implode(', ', $this->_quoted_select);
+            $query .= '*';
         } else {
 
             $columns = $this->_quoted_select;

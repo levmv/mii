@@ -21,7 +21,7 @@ class ORM
     /**
      * @var array The database fields
      */
-    protected $_data = [];
+    protected array $attributes = [];
 
     /**
      * @var array Auto-serialize and unserialize columns on get/set
@@ -31,10 +31,6 @@ class ORM
 
     protected $_serialize_cache = [];
 
-    /**
-     * @var  array  Unmapped data that is still accessible
-     */
-    protected $_unmapped = [];
 
     /**
      * @var  array  Data that's changed since the object was loaded
@@ -57,10 +53,10 @@ class ORM
      * @param mixed
      * @return void
      */
-    public function __construct($values = [], $loaded = false)
+    public function __construct(array $values = null, bool $loaded = false)
     {
-        if ($values) {
-            foreach (array_intersect_key($values, $this->_data) as $key => $value) {
+        if (!\is_null($values)) {
+            foreach ($values as $key => $value) {
                 $this->$key = $value;
             }
         }
@@ -80,15 +76,14 @@ class ORM
     }
 
     /**
-     * @param null $value
+     * @param array $value
      * @return array
      */
-    public static function all($value = null): array
+    public static function all(array $value = null): array
     {
         if (\is_null($value))
             return static::find()->all();
 
-        assert(is_array($value), 'Value must be an array or null');
         assert(!is_array($value[0]), "This method accepts only array of int/string's");
 
         return (new static)
@@ -99,14 +94,13 @@ class ORM
 
 
     /**
+     * @param array|null $conditions
      * @return Query
      */
-    public static function find($conditions = null)
+    public static function find(array $conditions = null) : Query
     {
         if(\is_null($conditions))
             return (new static)->select_query();
-
-        assert(is_array($conditions), 'You passed not null value to find(), but not array. Its probably a bug');
 
         if(count($conditions) === 3 && \is_string($conditions[1])) {
             $conditions = [$conditions];
@@ -118,14 +112,14 @@ class ORM
     }
 
     /**
-     * @param mixed $id
+     * @param int $value
+     * @param bool $find_or_fail
      * @return $this|null
+     * @throws ModelNotFoundException
      */
-    public static function one($value, $find_or_fail = false)
+    public static function one(int $value, bool $find_or_fail = false)
     {
-        assert(!is_array($value), 'Value must be type of int or string');
-
-        $result = (new static)->select_query(false)->where('id', '=', (int) $value)->one();
+        $result = (new static)->select_query(false)->where('id', '=', $value)->one();
 
         if ($find_or_fail && $result === null)
             throw new ModelNotFoundException;
@@ -142,7 +136,7 @@ class ORM
         if ($query === null)
             $query = new Query;
 
-        $query->select($this->fields(), true)->from($this->get_table())->as_object(static::class, [[], true]);
+        $query->select()->from($this->get_table())->as_object(static::class, [null, true]);
 
         if ($this->_order_by AND $with_order) {
             foreach ($this->_order_by as $column => $direction) {
@@ -169,7 +163,7 @@ class ORM
 
         $table = $this->get_table();
 
-        foreach ($this->_data as $key => $value) {
+        foreach ($this->attributes as $key => $value) {
             if (!\in_array($key, $this->_exclude_fields)) {
                 $fields[] = "`$table`.`$key`"; // TODO: support for table prefixes
             }
@@ -219,41 +213,29 @@ class ORM
 
     public function __set($key, $value)
     {
-        if (isset($this->_data[$key]) || \array_key_exists($key, $this->_data)) {
-
-            if(\is_null($this->__loaded)) {
-                $this->_data[$key] = $value;
-                return;
-            }
-
-            if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
-                $this->_serialize_cache[$key] = $value;
-                return;
-            }
-
-            if ($this->__loaded === true) {
-                if ($value !== $this->_data[$key]) {
-                    $this->_changed[$key] = true;
-                }
-            }
-            $this->_data[$key] = $value;
-
-        } else {
-            $this->_unmapped[$key] = $value;
+        if(\is_null($this->__loaded)) {
+            $this->attributes[$key] = $value;
+            return;
         }
+
+
+        if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
+            $this->_serialize_cache[$key] = $value;
+            return;
+        }
+
+        if ($this->__loaded === true) {
+            if ($value !== $this->attributes[$key]) {
+                $this->_changed[$key] = true;
+            }
+        }
+        $this->attributes[$key] = $value;
     }
 
     public function __get($key)
     {
-        if (isset($this->_data[$key]) OR \array_key_exists($key, $this->_data)) {
+        return $this->attributes[$key];
 
-            return ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields, true))
-                ? $this->_unserialize_value($key)
-                : $this->_data[$key];
-        }
-
-        if (\array_key_exists($key, $this->_unmapped))
-            return $this->_unmapped[$key];
 
         throw new ORMException('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
     }
@@ -266,9 +248,6 @@ class ORM
                 ? $this->_unserialize_value($key)
                 : $this->_data[$key];
         }
-
-        if (\array_key_exists($key, $this->_unmapped))
-            return $this->_unmapped[$key];
 
         throw new ORMException('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
     }
@@ -292,7 +271,7 @@ class ORM
                     if ($value !== $this->_data[$key]) {
                         $this->_changed[$key] = true;
                     }
-                    $this->_data[$key] = $value;
+                    $this->attributes[$key] = $value;
                 }
 
             } else {
@@ -311,7 +290,7 @@ class ORM
      */
     public function __isset($key)
     {
-        return \array_key_exists($key, $this->_data) OR \array_key_exists($key, $this->_unmapped);
+        return \array_key_exists($key, $this->attributes);
     }
 
     /**
@@ -387,8 +366,6 @@ class ORM
 
         $data = array_intersect_key($this->_data, $this->_changed);
 
-        $this->cast_types($data);
-
         $this->raw_query()
             ->update($this->get_table())
             ->set($data)
@@ -450,25 +427,23 @@ class ORM
 
         $this->on_change();
 
-        $this->cast_types($this->_data);
-
-        $columns = array_keys($this->_data);
+        $columns = array_keys($this->attributes);
         $this->raw_query()
             ->insert($this->get_table())
             ->columns($columns)
-            ->values($this->_data)
+            ->values($this->attributes)
             ->execute();
 
         $this->__loaded = true;
 
-        $this->_data['id'] = \Mii::$app->db->inserted_id();
+        $this->attributes['id'] = \Mii::$app->db->inserted_id();
 
         $this->on_after_create();
         $this->on_after_change();
 
         $this->_changed = [];
 
-        return $this->_data['id'];
+        return $this->attributes['id'];
     }
 
 
@@ -484,7 +459,7 @@ class ORM
 
             $this->raw_query()
                 ->delete($this->get_table())
-                ->where('id', '=', $this->_data['id'])
+                ->where('id', '=', $this->attributes['id'])
                 ->execute();
 
             $this->on_after_delete();
@@ -504,10 +479,10 @@ class ORM
 
             $value = isset($this->_serialize_cache[$key])
                 ? $this->_serialize_value($this->_serialize_cache[$key])
-                : $this->_serialize_value($this->_data[$key]);
+                : $this->_serialize_value($this->attributes[$key]);
 
-            if ($value !== $this->_data[$key]) {
-                $this->_data[$key] = $value;
+            if ($value !== $this->attributes[$key]) {
+                $this->attributes[$key] = $value;
 
                 if ($this->__loaded)
                     $this->_changed[$key] = true;
@@ -524,117 +499,9 @@ class ORM
     protected function _unserialize_value($key)
     {
         if (!\array_key_exists($key, $this->_serialize_cache)) {
-            assert(is_string($this->_data[$key]), 'Unserialized field must have a string value');
-            $this->_serialize_cache[$key] = json_decode($this->_data[$key], TRUE);
+            assert(is_string($this->attributes[$key]), 'Unserialized field must have a string value');
+            $this->_serialize_cache[$key] = json_decode($this->attributes[$key], TRUE);
         }
         return $this->_serialize_cache[$key];
     }
-
-    private function cast_types(array &$data): void
-    {
-        $schema = $this->get_tables_schema();
-
-        foreach ($data as $key => $value) {
-            if (!isset($schema[$key]))
-                continue;
-
-            if ($schema[$key]['allow_null'] && $value === null)
-                continue;
-
-            switch ($schema[$key]['type']) {
-                case 'int':
-                    $data[$key] = (int)$value;
-                    break;
-                case 'bigint':
-                    if (!$value)
-                        $data[$key] = 0;
-                    break;
-                case 'double':
-                case 'float':
-                    if (!$value)
-                        $data[$key] = 0.0;
-                    break;
-            }
-        }
-    }
-
-    private function convert_type_names($type)
-    {
-
-        if ($type === 'int' || $type === 'smallint' || $type === 'tinyint')
-            return 'int';
-
-        if ($type === 'bigint')
-            return 'bigint';
-
-        if ($type === 'double' || $type === 'float')
-            return 'float';
-
-        return 'string';
-    }
-
-
-    private function get_tables_schema()
-    {
-        static $table_infos = [];
-
-        $cache_id = 'db_schema_140' . $this->get_table();
-
-        if (isset($table_infos[$cache_id]))
-            return $table_infos[$cache_id];
-
-
-        if (null === ($columns = get_cached($cache_id))) {
-            $table_info = DB::select("SHOW FULL COLUMNS FROM " . $this->get_table())->to_array();
-
-
-            $columns = [];
-            foreach ($table_info as $info) {
-                $column = [];
-
-                $info = array_change_key_case($info, CASE_LOWER);
-
-
-                $column_name = $info['field'];
-                $column['allow_null'] = $info['null'] === 'YES';
-                $column['type'] = $info['type'];
-
-                if (preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $info['type'], $matches)) {
-
-                    $column['type'] = $this->convert_type_names(strtolower($matches[1]));
-
-                    $type = strtolower($matches[1]);
-
-
-                    if (!empty($matches[2])) {
-                        if ($type === 'enum') {
-                        } else {
-                            $values = explode(',', $matches[2]);
-                            $column['size'] = (int)$values[0];
-                            if (isset($values[1])) {
-                                $column['scale'] = (int)$values[1];
-                            }
-                            if ($column['size'] === 1 && $type === 'bit') {
-                                $column['type'] = 'boolean';
-                            } elseif ($type === 'bit') {
-                                if ($column['size'] > 32) {
-                                    $column['type'] = 'bigint';
-                                } elseif ($column['size'] === 32) {
-                                    $column['type'] = 'integer';
-                                }
-                            }
-                        }
-                    }
-                }
-                $columns[$column_name] = $column;
-            }
-
-            cache($cache_id, $columns, 3600);
-            $table_infos[$cache_id] = $columns;
-        }
-
-        return $columns;
-    }
-
-
 }
