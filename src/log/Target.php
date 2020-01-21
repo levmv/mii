@@ -3,7 +3,6 @@
 namespace mii\log;
 
 
-use mii\auth\Auth;
 use mii\core\Component;
 use mii\core\Exception;
 use mii\web\App;
@@ -111,12 +110,9 @@ abstract class Target extends Component
             $user_id = '-';
 
             if(\Mii::$app->has('auth')) {
-                $auth = \Mii::$app->auth;
-                if($auth instanceof Auth) {
-                    $user = $auth->get_user();
-                    if($user !== null) {
-                        $user_id = $user->id;
-                    }
+                $user = \Mii::$app->auth->get_user();
+                if($user !== null) {
+                    $user_id = $user->id;
                 }
             }
             $prefix = " $ip $user_id";

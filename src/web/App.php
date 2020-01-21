@@ -70,10 +70,8 @@ class App extends \mii\core\App
         return [
             'log' => 'mii\log\Logger',
             'blocks' => 'mii\web\Blocks',
-            'auth' => 'mii\auth\Auth',
             'db' => 'mii\db\Database',
             'cache' => 'mii\cache\Apcu',
-            'mailer' => 'mii\email\PHPMailer',
             'session' => 'mii\web\Session',
             'router' => 'mii\core\Router',
             'request' => 'mii\web\Request',
