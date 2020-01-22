@@ -22,6 +22,16 @@ class Database extends Component
 
     public const MULTI = 5;
 
+    protected string $hostname = '127.0.0.1';
+    protected string $username = '';
+    protected ?string $password = '';
+    protected string $database = '';
+    protected int $port = 3306;
+
+    protected ?string $charset = 'utf8';
+
+    protected string $table_prefix = '';
+
     /**
      * @var  string  the last query executed
      */
@@ -32,31 +42,6 @@ class Database extends Component
      */
     protected $_connection;
 
-    /**
-     * @var array configuration array
-     */
-    protected $_config;
-
-    protected $_dbname;
-
-    /**
-     * Stores the database configuration locally and name the instance.
-     *
-     * [!!] This method cannot be accessed directly, you must use [Database::instance].
-     *
-     * @return  void
-     */
-    public function init(array $config = []): void {
-        // Set the instance name
-        //$this->_instance = $name;
-
-        // Store the config locally
-        $this->_config = $config;
-
-        if (empty($this->_config['table_prefix'])) {
-            $this->_config['table_prefix'] = '';
-        }
-    }
 
     /**
      * Disconnect from the database when the object is destroyed.
@@ -122,7 +107,7 @@ class Database extends Component
      */
     public function query(?int $type, string $sql, $as_object = false, array $params = NULL): ?Result {
         // Make sure the database is connected
-        $this->_connection or $this->connect();
+        ! \is_null($this->_connection) or $this->connect();
 
         assert(
             config('debug') &&
@@ -131,16 +116,7 @@ class Database extends Component
         );
 
         // Execute the query
-        if ($type === Database::MULTI) {
-            $result = $this->_connection->multi_query($sql);
-            $affected_rows = 0;
-            do {
-                $affected_rows += $this->_connection->affected_rows;
-            } while ($this->_connection->more_results() && $this->_connection->next_result());
-
-        } else {
-            $result = $this->_connection->query($sql);
-        }
+        $result = $this->_connection->query($sql);
 
         if ($result === false || $this->_connection->errno) {
             assert(isset($benchmark) && \mii\util\Profiler::delete($benchmark) || true);
@@ -181,55 +157,33 @@ class Database extends Component
      * @throws  DatabaseException
      */
     public function connect() {
-        if ($this->_connection)
-            return;
-
-        // Extract the connection parameters, adding required variables
-
-        $config = [
-            'database' => '',
-            'hostname' => '',
-            'username' => '',
-            'password' => '',
-            'socket' => '',
-            'port' => 3306,
-        ];
-
-        foreach ($config as $k => $v) {
-            if (isset($this->_config['connection'][$k]))
-                $config[$k] = $this->_config['connection'][$k];
-        }
-
-        // Prevent this information from showing up in traces
-        unset($this->_config['connection']['username'], $this->_config['connection']['password']);
-
-        $this->_dbname = $config['database'];
 
         try {
             $this->_connection = mysqli_connect(
-                $config['hostname'],
-                $config['username'],
-                $config['password'],
-                $config['database'],
-                $config['port'],
-                $config['socket']
+                $this->hostname,
+                $this->username,
+                $this->password,
+                $this->database,
+                $this->port
             );
 
         } catch (\Exception $e) {
             // No connection exists
             $this->_connection = NULL;
-
+            $this->password = null;
             throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
         }
 
+        $this->password = null;
+
         $this->_connection->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
 
-        if (!empty($this->_config['charset'])) {
+        if (! \is_null($this->charset)) {
             // Set the character set
-            $this->_connection->set_charset($this->_config['charset']);
+            $this->_connection->set_charset($this->charset);
         }
 
-        if (!empty($this->_config['connection']['variables'])) {
+     /*   if (!empty($this->variables)) {
             // Set session variables
             $variables = [];
 
@@ -238,29 +192,10 @@ class Database extends Component
             }
 
             $this->_connection->query('SET ' . implode(', ', $variables));
-        }
+        }*/
 
     }
 
-    /**
-     * Set the connection character set. This is called automatically by [Database::connect].
-     *
-     *     $db->set_charset('utf8');
-     *
-     * @param string $charset character set name
-     * @return  void
-     * @throws  DatabaseException
-     */
-    public function set_charset($charset) {
-        // Make sure the database is connected
-        $this->_connection or $this->connect();
-
-        $status = $this->_connection->set_charset($charset);
-
-        if ($status === false) {
-            throw new DatabaseException($this->_connection->error, $this->_connection->errno);
-        }
-    }
 
     /**
      * Quote a value for an SQL query.
@@ -316,10 +251,11 @@ class Database extends Component
      *
      * @param string $value value to quote
      * @return  string
+     * @throws DatabaseException
      */
     public function escape($value): string {
         // Make sure the database is connected
-        $this->_connection or $this->connect();
+        ! \is_null($this->_connection) or $this->connect();
 
         if (($value = $this->_connection->real_escape_string((string)$value)) === false) {
             throw new DatabaseException($this->_connection->error, $this->_connection->errno);
@@ -493,13 +429,9 @@ class Database extends Component
      * @return  string
      */
     public function table_prefix(): string {
-        return $this->_config['table_prefix'];
+        return $this->table_prefix;
     }
 
-
-    public function db_name(): string {
-        return $this->_dbname;
-    }
 
     /**
      * Quote a database table name and adds the table prefix if needed.

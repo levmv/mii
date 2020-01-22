@@ -1000,9 +1000,6 @@ class Query
                         }
                     }
 
-                    // Database operators are always uppercase
-                    $op = \strtoupper($op);
-
                     if ($op === 'BETWEEN' AND \is_array($value)) {
                         // BETWEEN always has exactly two arguments
                         list($min, $max) = $value;
@@ -1024,7 +1021,7 @@ class Query
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
 
                     } else {
-                        $value = $this->db->quote($value);
+                        $value = \is_int($value) ? $value : $this->db->quote($value);
                     }
 
                     if ($column) {

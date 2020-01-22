@@ -41,7 +41,7 @@ class Request extends Component
 
     public $csrf_validation = false;
 
-    public $cookie_validation = true;
+    public $cookie_validation = false;
 
     public $enable_csrf_cookie = true;
 
