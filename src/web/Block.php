@@ -274,17 +274,19 @@ class Block
      */
     protected function capture(string $block_filename): string {
 
-        // Import the view variables to local namespace
-        extract($this->_data, EXTR_OVERWRITE);
+        if(!empty($this->_data)) {
+            // Import the view variables to local namespace
+            \extract($this->_data, EXTR_OVERWRITE);
+        }
 
-        if (Block::$_global_data) {
+        if (!empty(Block::$_global_data)) {
             // Import the global view variables to local namespace
-            extract(Block::$_global_data, EXTR_SKIP | EXTR_REFS);
+            \extract(Block::$_global_data, EXTR_SKIP | EXTR_REFS);
         }
 
         // Capture the view output
-        ob_start();
-        ob_implicit_flush(0);
+        \ob_start();
+        \ob_implicit_flush(0);
 
         try {
 
@@ -294,14 +296,14 @@ class Block
         } catch (\Throwable $e) {
 
             // Delete the output buffer
-            ob_end_clean();
+            \ob_end_clean();
 
             // Re-throw the exception
             throw $e;
         }
 
         // Get the captured output and close the buffer
-        return ob_get_clean();
+        return \ob_get_clean();
     }
 
 

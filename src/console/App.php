@@ -24,11 +24,16 @@ class App extends \mii\core\App
     }
 
     public function default_components() : array {
-        return array_merge(parent::default_components(), [
+        return [
+            'log' => 'mii\log\Logger',
+            'blocks' => 'mii\web\Blocks',
+            'router' => 'mii\core\Router',
+            'db' => 'mii\db\Database',
+            'cache' => 'mii\cache\Apcu',
             'request' => 'mii\console\Request',
             'response' => 'mii\console\Response',
             'error' => 'mii\console\ErrorHandler'
-        ]);
+        ];
     }
 
 

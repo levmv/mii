@@ -7,81 +7,26 @@ use mii\core\Component;
 
 class Response extends Component
 {
+    const FORMAT_RAW = 0;
+    const FORMAT_HTML = 1;
+    const FORMAT_JSON = 2;
+    const FORMAT_XML = 3;
 
-    // HTTP status codes and messages
-    public static $messages = [
-        // Informational 1xx
-        100 => 'Continue',
-        101 => 'Switching Protocols',
-        102 => 'Processing',
-
-        // Success 2xx
-        200 => 'OK',
-        201 => 'Created',
-        202 => 'Accepted',
-        204 => 'No Content',
-        205 => 'Reset Content',
-        206 => 'Partial Content',
-
-        // Redirection 3xx
-        300 => 'Multiple Choices',
-        301 => 'Moved Permanently',
-        302 => 'Found', // 1.1
-        303 => 'See Other',
-        304 => 'Not Modified',
-        307 => 'Temporary Redirect',
-
-        // Client Error 4xx
-        400 => 'Bad Request',
-        401 => 'Unauthorized',
-        403 => 'Forbidden',
-        404 => 'Not Found',
-        405 => 'Method Not Allowed',
-        408 => 'Request Timeout',
-        409 => 'Conflict',
-        410 => 'Gone',
-        411 => 'Length Required',
-        412 => 'Precondition Failed',
-        413 => 'Request Entity Too Large',
-        418 => 'Im a teapot',
-        422 => 'Unprocessable Entity',
-        429 => 'Too many requests',
-        // Server Error 5xx
-        500 => 'Internal Server Error',
-        501 => 'Not Implemented',
-        502 => 'Bad Gateway',
-        503 => 'Service Unavailable',
-        504 => 'Gateway Timeout',
-        505 => 'HTTP Version Not Supported'
-    ];
-
-
-    const FORMAT_RAW = 'raw';
-    const FORMAT_HTML = 'html';
-    const FORMAT_JSON = 'json';
-    const FORMAT_XML = 'xml';
-
-    public $format = self::FORMAT_HTML;
-
-    public $version;
+    public int $format = self::FORMAT_HTML;
 
     /**
      * @var  integer     The response http status
      */
-    public $status = 200;
+    public int $status = 200;
 
-    public $status_message = '';
+    public string $status_message = '';
 
     /**
      * @var  string      The response body
      */
-    protected $_content = '';
+    protected string $_content = '';
 
-
-    protected $_content_type = 'text/html';
-
-
-    protected $_headers = [];
+    protected array $_headers = [];
 
 
     /**
@@ -91,7 +36,8 @@ class Response extends Component
      * @param string $value the value of the header
      * @return static object itself
      */
-    public function set_header($name, $value = '') {
+    public function set_header($name, $value = '')
+    {
         $name = \strtolower($name);
         $this->_headers[$name] = (array)$value;
         return $this;
@@ -105,14 +51,16 @@ class Response extends Component
      * @param string $value the value of the header
      * @return static the collection object itself
      */
-    public function add_header($name, $value) {
+    public function add_header($name, $value)
+    {
         $name = \strtolower($name);
         $this->_headers[$name][] = $value;
         return $this;
     }
 
 
-    public function remove_header($name) {
+    public function remove_header($name)
+    {
         $name = \strtolower($name);
         if (isset($this->_headers[$name]))
             unset($this->_headers[$name]);
@@ -120,23 +68,23 @@ class Response extends Component
     }
 
 
-    public function send_headers() {
+    public function send_headers()
+    {
         assert(headers_sent() === false, "Headers were already sent");
 
         if (!isset($this->_headers['content-type'])) {
-            $this->set_header('content-type', $this->_content_type . '; charset=UTF-8');
-        }
-
-        if ($this->version === null) {
-            if (isset($_SERVER['SERVER_PROTOCOL']) && $_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.0') {
-                $this->version = '1.0';
-            } else {
-                $this->version = '1.1';
-            }
+            $this->set_header('content-type', 'text/html; charset=UTF-8');
         }
 
         // Create the response header
-        \header("HTTP/{$this->version} {$this->status} {$this->status_message}");
+        if ($this->status !== 200) {
+            if (empty($this->status_message)) {
+                \http_response_code($this->status);
+            } else {
+                \header("HTTP/1.1 {$this->status} {$this->status_message}");
+            }
+        }
+
 
         if ($this->_headers) {
             foreach ($this->_headers as $name => $values) {
@@ -159,22 +107,19 @@ class Response extends Component
      *
      * @param integer $status Status to set to this response
      * @return  mixed
+     * @throws Exception
      */
-    public function status(int $status = NULL) {
+    public function status(int $status = NULL)
+    {
         if ($status === NULL) {
             return $this->status;
-        } elseif (isset(Response::$messages[$status])) {
-            $this->status = (int)$status;
-            $this->status_message = Response::$messages[$this->status];
-            return $this;
-        } else {
-            throw new Exception(__METHOD__ . ' unknown status value: ' . $status);
         }
+        $this->status = $status;
     }
 
 
-    public function redirect($url, $code = 302) {
-
+    public function redirect($url, $code = 302)
+    {
         // todo: process url
 
         if (\Mii::$app->request->is_ajax()) {
@@ -189,7 +134,8 @@ class Response extends Component
     }
 
 
-    public function content($content = null) {
+    public function content($content = null)
+    {
         if ($content === null)
             return $this->_content;
 
@@ -199,7 +145,8 @@ class Response extends Component
     }
 
 
-    public function send() {
+    public function send()
+    {
         switch ($this->format) {
             case self::FORMAT_HTML:
                 $this->set_header('content-type', 'text/html; charset=UTF-8');
@@ -218,7 +165,8 @@ class Response extends Component
     }
 
 
-    protected function send_content() {
+    protected function send_content()
+    {
         echo $this->_content;
     }
 }

@@ -23,7 +23,6 @@ class Session extends Component
     /**
      * @var  bool  session destroyed?
      */
-    protected $_destroyed = false;
 
     protected $_flash = '__flash';
 

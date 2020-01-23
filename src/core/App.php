@@ -25,7 +25,7 @@ abstract class App
 
     public $_config;
 
-    public $base_url = '/';
+    public $base_url;
 
 
     public function __construct(array $config = []) {
@@ -38,10 +38,10 @@ abstract class App
                 $this->$key = $value;
         }
 
-        if ($this->locale)
+        if ($this->locale !== null)
             \setlocale(LC_ALL, $this->locale);
 
-        if ($this->timezone)
+        if ($this->timezone !== null)
             \date_default_timezone_set($this->timezone);
 
         $default_components = $this->default_components();
@@ -63,24 +63,16 @@ abstract class App
 
     abstract function run();
 
-    public function default_components(): array {
-        return [
-            'log' => 'mii\log\Logger',
-            'blocks' => 'mii\web\Blocks',
-            'router' => 'mii\core\Router',
-            'db' => 'mii\db\Database',
-            'cache' => 'mii\cache\Apcu',
-        ];
-    }
+    abstract function default_components(): array;
 
-    private $_instances = [];
+    private array $_instances = [];
 
-    public function __get($name) {
-        return $this->get($name);
-    }
+    public function __get($id) {
+        if (!isset($this->_instances[$id])) {
+            $this->_instances[$id] = $this->load_component($id);
+        }
 
-    public function has(string $id): bool {
-        return isset($this->_instances[$id]) || isset($this->_config['components'][$id]);
+        return $this->_instances[$id];
     }
 
 
@@ -92,6 +84,11 @@ abstract class App
 
         return $this->_instances[$id];
     }
+
+    public function has(string $id): bool {
+        return isset($this->_instances[$id]) || isset($this->_config['components'][$id]);
+    }
+
 
     public function __isset($name) {
         return $this->has($name);

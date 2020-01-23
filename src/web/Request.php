@@ -98,15 +98,16 @@ class Request extends Component
     public $action;
 
 
-    public function init(array $config = []): void {
-
+    public function init(array $config = []): void
+    {
         foreach ($config as $key => $value)
             $this->$key = $value;
 
         $uri = \parse_url('http://domain.com' . $_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-
-        if (\Mii::$app->base_url && strpos($uri, \Mii::$app->base_url) === 0) {
+        if (\is_null(\Mii::$app->base_url)) {
+            $uri = ltrim($uri, '/');
+        } elseif (strpos($uri, \Mii::$app->base_url) === 0) {
             // Remove the base URL from the URI
             $uri = (string)\substr($uri, \strlen(\Mii::$app->base_url));
         }
@@ -130,7 +131,8 @@ class Request extends Component
      * @param string $uri
      * @return  string
      */
-    public function uri($uri = NULL): string {
+    public function uri($uri = NULL): string
+    {
         if ($uri === NULL) {
             return empty($this->_uri) ? '/' : $this->_uri;
         }
@@ -138,7 +140,8 @@ class Request extends Component
         return $this->_uri = $uri;
     }
 
-    public function get_hostname(): string {
+    public function get_hostname(): string
+    {
 
         if (!$this->_hostname) {
             $http = $this->is_secure() ? 'https' : 'http';
@@ -149,16 +152,19 @@ class Request extends Component
         return $this->_hostname;
     }
 
-    public function get_user_agent(): string {
+    public function get_user_agent(): string
+    {
         return $_SERVER['HTTP_USER_AGENT'] ?? '';
     }
 
 
-    public function get_content_type(): string {
+    public function get_content_type(): string
+    {
         return $_SERVER['CONTENT_TYPE'] ?? '';
     }
 
-    public function get_ip() : string {
+    public function get_ip(): string
+    {
         if (!empty($_SERVER['HTTP_CLIENT_IP']))
             return $_SERVER['HTTP_CLIENT_IP'];
 
@@ -176,7 +182,8 @@ class Request extends Component
      * @param string $method Method to use for this request
      * @return  mixed
      */
-    public function method($method = NULL) {
+    public function method($method = NULL)
+    {
         if ($method === NULL) {
             // Act as a getter
             return $this->_method;
@@ -192,7 +199,8 @@ class Request extends Component
      * Return if the request is sent via secure channel (https).
      * @return boolean if the request is sent via secure channel (https)
      */
-    public function is_secure() {
+    public function is_secure()
+    {
         return isset($_SERVER['HTTPS']) && (\strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1)
             || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && \strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0;
     }
@@ -205,7 +213,8 @@ class Request extends Component
      * @param string $value the default parameter value if the parameter does not exist.
      * @return  mixed
      */
-    public function get($key = null, $default = null) {
+    public function get($key = null, $default = null)
+    {
         if ($key) {
             return $_GET[$key] ?? $default;
         }
@@ -213,12 +222,14 @@ class Request extends Component
         return $_GET;
     }
 
-    public function param($key, $default = null) {
+    public function param($key, $default = null)
+    {
         return $this->params[$key] ?? $default;
     }
 
 
-    public function validate_csrf_token() {
+    public function validate_csrf_token()
+    {
 
         if (!$this->csrf_validation || \in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
             return true;
@@ -240,7 +251,8 @@ class Request extends Component
     }
 
 
-    public function csrf_token($new = false) {
+    public function csrf_token($new = false)
+    {
 
         if ($this->_csrf_token === null || $new) {
             if ($new || ($this->_csrf_token = $this->load_csrf_token()) === null) {
@@ -259,7 +271,8 @@ class Request extends Component
         return $this->_csrf_token;
     }
 
-    public function load_csrf_token() {
+    public function load_csrf_token()
+    {
         if ($this->enable_csrf_cookie) {
             return $this->get_cookie($this->csrf_token_name);
         } else {
@@ -275,7 +288,8 @@ class Request extends Component
      * @param string $default Default value if parameter does not exist
      * @return  mixed
      */
-    public function post($key = null, $default = null) {
+    public function post($key = null, $default = null)
+    {
         if ($key === null) {
             return $_POST;
         }
@@ -287,12 +301,14 @@ class Request extends Component
      * Returns whether this is an AJAX (XMLHttpRequest) request.
      * @return boolean whether this is an AJAX (XMLHttpRequest) request.
      */
-    public function is_ajax() {
+    public function is_ajax()
+    {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
 
-    public function is_post() {
+    public function is_post()
+    {
         return $this->method() === 'POST';
     }
 
@@ -303,7 +319,8 @@ class Request extends Component
      * Returns the raw HTTP request body.
      * @return string the request body
      */
-    public function raw_body() {
+    public function raw_body()
+    {
         if ($this->_raw_body === null) {
             $this->_raw_body = \file_get_contents('php://input');
         }
@@ -314,7 +331,8 @@ class Request extends Component
     private $_json_params;
 
 
-    public function json_params() {
+    public function json_params()
+    {
         if ($this->_json_params === null) {
             $this->_json_params = \file_get_contents('php://input');
         }
@@ -325,7 +343,8 @@ class Request extends Component
 
     private $_json_items;
 
-    public function json($key, $default = null) {
+    public function json($key, $default = null)
+    {
 
         if (!$this->_json_items && \strtolower($this->get_content_type()) === 'application/json') {
             $this->_json_items = \json_decode(\file_get_contents('php://input'), true);
@@ -352,13 +371,14 @@ class Request extends Component
      * @param mixed $default default value to return
      * @return  string
      */
-    public function get_cookie(string $key, $default = null) {
+    public function get_cookie(string $key, $default = null)
+    {
         if (!isset($_COOKIE[$key])) {
             // The cookie does not exist
             return $default;
         }
 
-        if(!$this->cookie_validation)
+        if (!$this->cookie_validation)
             return $_COOKIE[$key];
 
         // Get the cookie value
@@ -367,7 +387,7 @@ class Request extends Component
         // Find the position of the split between salt and contents
         $sign_len = \strlen($this->salt($key, ''));
 
-        if(strlen($cookie) > $sign_len) {
+        if (strlen($cookie) > $sign_len) {
             $sign = substr($cookie, 0, $sign_len);
             $value = substr($cookie, $sign_len);
 
@@ -393,7 +413,8 @@ class Request extends Component
      * @param integer $expiration lifetime in seconds
      * @return  boolean
      */
-    public function set_cookie(string $name, string $value, int $expiration = null) {
+    public function set_cookie(string $name, string $value, int $expiration = null)
+    {
         if ($expiration === null) {
             // Use the default expiration
             $expiration = $this->cookie_expiration;
@@ -404,9 +425,9 @@ class Request extends Component
             $expiration += time();
         }
 
-        if($this->cookie_validation) {
+        if ($this->cookie_validation) {
             // Add the salt to the cookie value
-            $value = $this->salt($name, (string)$value) .  $value;
+            $value = $this->salt($name, (string)$value) . $value;
         }
 
         return \setcookie($name, $value,
@@ -429,7 +450,8 @@ class Request extends Component
      * @param string $name cookie name
      * @return  boolean
      */
-    public function delete_cookie($name) {
+    public function delete_cookie($name)
+    {
         // Remove the cookie
         unset($_COOKIE[$name]);
 
@@ -445,12 +467,12 @@ class Request extends Component
      * @param string $value value of cookie
      * @return  string
      */
-    public function salt(string $name, string $value): string {
+    public function salt(string $name, string $value): string
+    {
         // Require a valid salt
         if (!$this->cookie_salt) {
             throw new \InvalidArgumentException(
-                'A valid cookie salt is required. Please set Cookie::$salt before calling this method.' .
-                'For more information check the documentation'
+                'A valid cookie salt is required. Please set Request::$cookie_salt.'
             );
         }
 
