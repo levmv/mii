@@ -28,7 +28,6 @@ class HTML
         'maxlength',
         'rel',
         'media',
-        'accept-charset',
         'accept',
         'tabindex',
         'accesskey',
@@ -52,7 +51,6 @@ class HTML
         'hr' => 1,
         'img' => 1,
         'input' => 1,
-        'keygen' => 1,
         'link' => 1,
         'meta' => 1,
         'param' => 1,
@@ -238,7 +236,7 @@ class HTML
      * @uses    HTML::attributes
      */
     public static function script($file, array $attributes = NULL, $protocol = NULL) {
-        if (strpos($file, '://') === FALSE && strpos($file, '//') !== 0) {
+        if (\strpos($file, '://') === FALSE && \strpos($file, '//') !== 0) {
             // Add the base URL
             $file = URL::site($file, $protocol);
         }

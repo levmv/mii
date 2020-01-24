@@ -12,10 +12,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
     public function render($exception) {
 
-        if ($exception instanceof CliException && !config('debug')) {
-            $message = $this->formatMessage(\get_class($exception) . ': ') . $exception->getMessage();
-        } elseif (config('debug')) {
-
+        if (config('debug')) {
             if ($exception instanceof ErrorException) {
                 $message = $this->formatMessage($exception->get_name());
             } else {

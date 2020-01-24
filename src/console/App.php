@@ -9,7 +9,6 @@ namespace mii\console;
 /**
  * Class App
  * @property \mii\console\Request $request
- * @property \mii\console\Response $response
  */
 class App extends \mii\core\App
 {
@@ -31,7 +30,6 @@ class App extends \mii\core\App
             'db' => 'mii\db\Database',
             'cache' => 'mii\cache\Apcu',
             'request' => 'mii\console\Request',
-            'response' => 'mii\console\Response',
             'error' => 'mii\console\ErrorHandler'
         ];
     }

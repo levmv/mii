@@ -4,8 +4,8 @@ namespace mii\console\controllers;
 
 
 use Mii;
-use mii\console\CliException;
 use mii\console\Controller;
+use mii\core\Exception;
 use mii\util\Console;
 use mii\util\FS;
 use mii\util\Text;
@@ -244,7 +244,7 @@ class Assets extends Controller
         } elseif(isset($this->sets[$set_name])) {
             $set = $this->sets[$set_name];
         } else {
-            throw new CliException("Unknow blocks set name: $set_name");
+            throw new Exception("Unknow blocks set name: $set_name");
         }
 
         $set = array_replace_recursive($default_set, $set);

@@ -251,19 +251,12 @@ if (!\function_exists('dd')) {
     }
 }
 
-if (!\function_exists('__')) {
-    function __($string, $params = []) {
-        $string = Mii::$app->i18n->translate($string);
-        return empty($values) ? $string : strtr($string, $values);
-    }
-}
-
 
 function config(string $key, $default = null) {
     if (isset(Mii::$app->_config[$key]))
         return Mii::$app->_config[$key];
 
-    if (strpos($key, '.') !== false)
+    if (\strpos($key, '.') !== false)
         return \mii\util\Arr::path(Mii::$app->_config, $key, $default);
 
     return $default;

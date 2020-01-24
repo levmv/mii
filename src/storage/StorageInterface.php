@@ -3,7 +3,7 @@
 namespace mii\storage;
 
 
-interface FileSystemInterface {
+interface StorageInterface {
 
     public function exist(string $path);
 

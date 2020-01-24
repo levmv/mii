@@ -26,5 +26,3 @@ class HttpException extends Exception
     }
 
 }
-
-;

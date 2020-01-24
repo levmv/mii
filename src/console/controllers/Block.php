@@ -4,8 +4,8 @@ namespace mii\console\controllers;
 
 
 use Mii;
-use mii\console\CliException;
 use mii\console\Controller;
+use mii\core\Exception;
 use mii\util\FS;
 
 class Block extends Controller
@@ -74,7 +74,7 @@ class Block extends Controller
                     try {
                         $this->{$func}($block);
                         $this->info($block);
-                    } catch (CliException $e) {
+                    } catch (Exception $e) {
                         $this->error($e->getMessage());
                     }
                 }
@@ -240,7 +240,7 @@ class Block extends Controller
      * @param $block_name
      * @param $ext
      * @param null $callback
-     * @throws CliException
+     * @throws Exception
      */
     protected function to_block($from, $block_name, $ext, $callback = null) {
         if (!\is_array($from))
@@ -261,7 +261,7 @@ class Block extends Controller
         foreach ($from as $f) {
 
             if (!file_exists($this->input_path . '/' . $f))
-                throw new CliException("Source for $block_name not found. Skip.");
+                throw new Exception("Source for $block_name not found. Skip.");
 
             if (!$exist OR filemtime($this->input_path . '/' . $f) > filemtime($to))
                 $same = false;

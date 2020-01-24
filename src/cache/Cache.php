@@ -19,7 +19,6 @@ abstract class Cache extends Component
      * @param   string $id id of cache to entry
      * @param   string $default default value to return if cache miss
      * @return  mixed
-     * @throws  CacheException
      */
     abstract public function get($id, $default = null);
 

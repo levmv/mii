@@ -337,7 +337,7 @@ class Form
             case 'file':
                 return HTML::file($name, $attributes);
         }
-        throw new FormException("Wrong field type $type");
+        throw new \mii\core\Exception("Wrong field type $type");
     }
 
     public function label($field_name, $label_name, $attributes = null): string {

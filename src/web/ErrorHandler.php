@@ -27,31 +27,31 @@ class ErrorHandler extends \mii\core\ErrorHandler
             $response->status(500);
         }
 
-        if ($this->route && !\config('debug')) {
+        if($response->format === Response::FORMAT_HTML) {
 
-            \Mii::$app->request->uri($this->route);
+            if($this->route && !\config('debug')) {
+                \Mii::$app->request->uri($this->route);
 
-            try {
-                \Mii::$app->run();
-                return;
-            } catch (\Throwable $t) {
-                $response->content(static::exception_to_text($exception));
-            }
-
-        } elseif ($response->format === Response::FORMAT_HTML) {
-
-           if(config('debug')) {
-               $params = [
-                   'class' => $exception instanceof ErrorException ? $exception->get_name() : \get_class($exception),
-                   'code' => $exception->getCode(),
-                   'message' => $exception->getMessage(),
-                   'file' => $exception->getFile(),
-                   'line' => $exception->getLine(),
-                   'trace' => $exception->getTrace()
-               ];
-               $response->content($this->render_file(__DIR__ . '/Exception/error.php', $params));
+                try {
+                    \Mii::$app->run();
+                    return;
+                } catch (\Throwable $t) {
+                    $response->content(static::exception_to_text($exception));
+                }
             } else {
-               $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');
+                if(config('debug')) {
+                    $params = [
+                        'class' => $exception instanceof ErrorException ? $exception->get_name() : \get_class($exception),
+                        'code' => $exception->getCode(),
+                        'message' => $exception->getMessage(),
+                        'file' => $exception->getFile(),
+                        'line' => $exception->getLine(),
+                        'trace' => $exception->getTrace()
+                    ];
+                    $response->content($this->render_file(__DIR__ . '/Exception/error.php', $params));
+                } else {
+                    $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');
+                }
             }
 
         } elseif ($response->format === Response::FORMAT_JSON) {
@@ -74,9 +74,6 @@ class ErrorHandler extends \mii\core\ErrorHandler
     }
 
     protected function exception_to_array($e) {
-        if (!config('debug')) {
-            return ['message' => 'An internal server error occurred.'];
-        }
 
         $arr = [
             'name' => 'Exception',
@@ -95,9 +92,8 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
         if (config('debug')) {
             $arr['type'] = \get_class($e);
-            $arr['file'] = $e->getFile();
+            $arr['file'] = Debug::path($e->getFile());
             $arr['line'] = $e->getLine();
-            $arr['stack-trace'] = explode("\n", Debug::short_text_trace($e->getTrace()));
         }
         if (($prev = $e->getPrevious()) !== null) {
             $arr['previous'] = $this->exception_to_array($prev);

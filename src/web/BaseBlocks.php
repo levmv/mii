@@ -51,7 +51,7 @@ class BaseBlocks extends Component
             ];
         }
 
-        $this->load_set(key($this->sets));
+        $this->load_set(\key($this->sets));
     }
 
 
@@ -61,7 +61,7 @@ class BaseBlocks extends Component
 
         $this->current_set = $setname;
 
-        $set = array_replace([
+        $set = \array_replace([
             'libraries' => [],
             'base_url' => $this->base_url,
             'base_path' => null
@@ -95,7 +95,7 @@ class BaseBlocks extends Component
         $block_path = $this->get_block_path($name).$name;
 
         foreach ($this->libraries as $library_path) {
-            if (is_readable($library_path . $block_path . '.php')) {
+            if (\is_readable($library_path . $block_path . '.php')) {
                 return $library_path . $block_path . '.php';
             }
         }
@@ -104,7 +104,7 @@ class BaseBlocks extends Component
     }
 
     public function get_block_path(string $name): ?string {
-        return '/' . implode('/', explode('_', $name)) . '/';
+        return '/' . \implode('/', \explode('_', $name)) . '/';
     }
 
 
@@ -124,12 +124,12 @@ class BaseBlocks extends Component
             $out = [];
             foreach ($this->_js as $js) {
                 if (!empty($js))
-                    $out[] = implode("\n", $js);
+                    $out[] = \implode("\n", $js);
             }
-            return implode("\n", $out);
+            return \implode("\n", $out);
         }
 
-        return implode("\n", $this->_js[$position]);
+        return \implode("\n", $this->_js[$position]);
     }
 
 
@@ -141,7 +141,7 @@ class BaseBlocks extends Component
 
         foreach ($this->libraries as $base_path) {
 
-            if (is_dir($base_path . $block_path . 'assets')) {
+            if (\is_dir($base_path . $block_path . 'assets')) {
                 return $base_path . $block_path . 'assets';
             }
         }

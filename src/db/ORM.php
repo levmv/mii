@@ -2,12 +2,11 @@
 
 namespace mii\db;
 
-
+use mii\core\Exception;
 use mii\util\Arr;
 
 class ORM
 {
-
     /**
      * @var string database table name
      */
@@ -36,9 +35,6 @@ class ORM
      * @var  array  Data that's changed since the object was loaded
      */
     protected $_changed = [];
-
-
-    protected $_exclude_fields = [];
 
     /**
      * @var boolean Is this model loaded from DB
@@ -213,11 +209,11 @@ class ORM
 
     public function __set($key, $value)
     {
+        // check if its setted by mysqli right now
         if(\is_null($this->__loaded)) {
             $this->attributes[$key] = $value;
             return;
         }
-
 
         if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
             $this->_serialize_cache[$key] = $value;
@@ -225,7 +221,7 @@ class ORM
         }
 
         if ($this->__loaded === true) {
-            if ($value !== $this->attributes[$key]) {
+            if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
                 $this->_changed[$key] = true;
             }
         }
@@ -235,9 +231,6 @@ class ORM
     public function __get($key)
     {
         return $this->attributes[$key];
-
-
-        throw new ORMException('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
     }
 
     public function get(string $key)
@@ -248,7 +241,7 @@ class ORM
                 : $this->attributes[$key];
         }
 
-        throw new ORMException('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
+        throw new Exception('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
     }
 
     public function set($values, $value = NULL): ORM
@@ -460,7 +453,7 @@ class ORM
             return;
         }
 
-        throw new ORMException('Cannot delete a non-loaded model ' . \get_class($this) . '!');
+        throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!');
     }
 
     protected function _invalidate_serialize_cache(): void

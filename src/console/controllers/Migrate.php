@@ -107,7 +107,7 @@ class Migrate extends Controller
 use mii\db\Migration;
 use mii\db\DB;
 
-class ' . $name . ' extends Migration {
+class ' . $name . ' {
 
     public function up() {
 

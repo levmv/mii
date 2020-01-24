@@ -18,13 +18,13 @@ class Router extends Component
     // What must be escaped in the route regex
     const REGEX_ESCAPE = '[.\\+*?[^\\]$<>=!|]';
 
-    const R_COMPILED = 0;
-    const R_PATTERN = 1;
-    const R_PATH = 2;
-    const R_NAMESPACE = 3;
-    const R_VALUES = 4;
-    const R_CALLBACK = 5;
-    const R_METHOD = 6;
+    private const R_COMPILED = 0;
+    private const R_PATTERN = 1;
+    private const R_PATH = 2;
+    private const R_NAMESPACE = 3;
+    private const R_VALUES = 4;
+    private const R_CALLBACK = 5;
+    private const R_METHOD = 6;
 
 
     protected $default_parameters = [

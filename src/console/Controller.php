@@ -2,6 +2,7 @@
 
 namespace mii\console;
 
+use mii\core\Exception;
 use mii\util\Console;
 
 class Controller
@@ -84,7 +85,7 @@ class Controller
         $method = new \ReflectionMethod($this, $action);
 
         if (!$method->isPublic())
-            throw new CliException("Cannot access not public method");
+            throw new Exception("Cannot access not public method");
 
         $args = [];
         $missing = [];
@@ -96,7 +97,7 @@ class Controller
                 } elseif (!\is_array($params[$name])) {
                     $args[] = $params[$name];
                 } else {
-                    throw new CliException("Invalid data received for parameter \"$name\".");
+                    throw new Exception("Invalid data received for parameter \"$name\".");
                 }
                 unset($params[$name]);
             } elseif ($param->isDefaultValueAvailable()) {
@@ -109,7 +110,7 @@ class Controller
             if ($missing[0] === 'argv' AND $action === 'index') {
                 $args = [$params]; // Emulate old behavior for backwards compatibility
             } else {
-                throw new CliException('Missing required parameters: "' . implode(', ', $missing) . '"');
+                throw new Exception('Missing required parameters: "' . implode(', ', $missing) . '"');
             }
         }
 
@@ -128,7 +129,7 @@ class Controller
      * will be called.
      *
      * @return  int
-     * @throws  CliException
+     * @throws  Exception
      */
     public function execute() {
 

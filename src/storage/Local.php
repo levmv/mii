@@ -1,12 +1,11 @@
 <?php
 
-namespace mii\storage\FileSystems;
+namespace mii\storage;
 
-use mii\storage\Storage;
-use mii\storage\FileSystemInterface;
+use mii\core\Component;
 use mii\web\UploadedFile;
 
-class Local extends Storage implements FileSystemInterface {
+class Local extends Component implements StorageInterface {
 
     protected $path = '';
     protected $url = '';

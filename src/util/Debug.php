@@ -61,7 +61,17 @@ class Debug
             // Clean invalid multibyte characters. iconv is only invoked
             // if there are non ASCII characters in the string, so this
             // isn't too much of a hit.
-            $var = UTF8::clean($var);
+            // Remove control characters
+            $var = UTF8::strip_ascii_ctrl($var);
+
+            if (!UTF8::is_ascii($var)) {
+                // Disable notices
+                $error_reporting = error_reporting(~E_NOTICE);
+                // iconv is expensive, so it is only used when needed
+                $var = iconv(\Mii::$app->charset, \Mii::$app->charset . '//IGNORE', $var);
+                // Turn notices back on
+                error_reporting($error_reporting);
+            }
 
             if (mb_strlen($var) > $length) {
                 // Encode the truncated string
@@ -133,7 +143,7 @@ class Debug
 
                 $objects[$hash] = TRUE;
                 foreach ($array as $key => & $val) {
-                    if ($key[0] === "\x00") {
+                    if (!\is_int($key) && $key[0] === "\x00") {
                         // Determine if the access is protected or protected
                         $access = '<small>' . (($key[1] === '*') ? 'protected' : 'private') . '</small>';
 

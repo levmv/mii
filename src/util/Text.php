@@ -52,21 +52,21 @@ class Text
 
         $limit = (int)$limit;
 
-        if (trim($str) === '' OR mb_strlen($str, 'utf-8') <= $limit)
+        if (\trim($str) === '' OR \mb_strlen($str, 'utf-8') <= $limit)
             return $str;
 
         if ($limit <= 0)
             return $end_char;
 
         if ($preserve_words === FALSE)
-            return rtrim(mb_substr($str, 0, $limit, 'utf-8')) . $end_char;
+            return \rtrim(\mb_substr($str, 0, $limit, 'utf-8')) . $end_char;
 
         // Don't preserve words. The limit is considered the top limit.
         // No strings with a length longer than $limit should be returned.
-        if (!preg_match('/^.{0,' . $limit . '}\s/us', $str, $matches))
+        if (!\preg_match('/^.{0,' . $limit . '}\s/us', $str, $matches))
             return $end_char;
 
-        return rtrim($matches[0]) . ((\strlen($matches[0]) === \strlen($str)) ? '' : $end_char);
+        return \rtrim($matches[0]) . ((\strlen($matches[0]) === \strlen($str)) ? '' : $end_char);
     }
 
 
@@ -80,14 +80,8 @@ class Text
      * alnum
      * :  Upper and lower case a-z, 0-9 (default)
      *
-     * alpha
-     * :  Upper and lower case a-z
-     *
      * hexdec
      * :  Hexadecimal characters a-f, 0-9
-     *
-     * distinct
-     * :  Uppercase characters and numbers that cannot be confused
      *
      * You can also create a custom type by providing the "pool" of characters
      * as the type.
@@ -107,17 +101,8 @@ class Text
             case 'alnum':
                 $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
                 break;
-            case 'alpha':
-                $pool = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                break;
             case 'hexdec':
                 $pool = '0123456789abcdef';
-                break;
-            case 'numeric':
-                $pool = '0123456789';
-                break;
-            case 'distinct':
-                $pool = '2345679ACDEFHJKLMNPRSTUVWXYZ';
                 break;
             default:
                 $pool = (string) $type;
@@ -162,20 +147,9 @@ class Text
      */
     public static function ucfirst($string, $delimiter = '-') {
         // Put the keys back the Case-Convention expected
-        return implode($delimiter, array_map('ucfirst', explode($delimiter, $string)));
+        return \implode($delimiter, \array_map('ucfirst', \explode($delimiter, $string)));
     }
 
-    /**
-     * Reduces multiple slashes in a string to single slashes.
-     *
-     *     $str = Text::reduce_slashes('foo//bar/baz'); // "foo/bar/baz"
-     *
-     * @param   string $str string to reduce slashes of
-     * @return  string
-     */
-    public static function reduce_slashes($str) {
-        return preg_replace('#(?<!:)//+#', '/', $str);
-    }
 
     /**
      * Replaces the given words with a string.
@@ -343,7 +317,7 @@ class Text
         if ($number % 100 > 4 AND $number % 100 < 20) {
             return $array[2];
         } else {
-            return $array[$cases[min($number % 10, 5)]];
+            return $array[$cases[\min($number % 10, 5)]];
         }
     }
 
@@ -370,8 +344,9 @@ class Text
      *     echo Text::bytes('1000');  // 1000
      *     echo Text::bytes('2.5GB'); // 2684354560
      *
-     * @param   string $bytes file size in SB format
+     * @param string $bytes file size in SB format
      * @return  float
+     * @throws Exception
      */
     public static function bytes($size) {
         // Prepare the size

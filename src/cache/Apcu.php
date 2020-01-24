@@ -10,7 +10,6 @@ class Apcu extends Cache
      * @param   string $id id of cache to entry
      * @param   string $default default value to return if cache miss
      * @return  mixed
-     * @throws  CacheException
      */
     public function get($id, $default = NULL) {
         $data = \apcu_fetch($this->_sanitize_id($id), $success);

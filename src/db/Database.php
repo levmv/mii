@@ -20,8 +20,6 @@ class Database extends Component
     public const UPDATE = 3;
     public const DELETE = 4;
 
-    public const MULTI = 5;
-
     protected string $hostname = '127.0.0.1';
     protected string $username = '';
     protected ?string $password = '';
@@ -29,8 +27,6 @@ class Database extends Component
     protected int $port = 3306;
 
     protected ?string $charset = 'utf8';
-
-    protected string $table_prefix = '';
 
     /**
      * @var  string  the last query executed
@@ -131,7 +127,7 @@ class Database extends Component
 
         if ($type === Database::SELECT) {
             // Return an iterator of results
-            return new Result($result, $sql, $as_object, $params);
+            return new Result($result, $as_object, $params);
         }
 
         return null;
@@ -367,7 +363,6 @@ class Database extends Component
      * @param mixed $column column name or array(column, alias)
      * @return  string
      * @uses    Database::quote_identifier
-     * @uses    Database::table_prefix
      */
     public function quote_column($column): string {
 
@@ -393,14 +388,6 @@ class Database extends Component
             } elseif (\strpos($column, '.') !== false) {
                 $parts = \explode('.', $column);
 
-                if ($prefix = $this->table_prefix()) {
-                    // Get the offset of the table name, 2nd-to-last part
-                    $offset = \count($parts) - 2;
-
-                    // Add the table prefix to the table name
-                    $parts[$offset] = $prefix . $parts[$offset];
-                }
-
                 foreach ($parts as & $part) {
                     if ($part !== '*') {
                         // Quote each of the parts
@@ -421,17 +408,6 @@ class Database extends Component
         return $column;
     }
 
-    /**
-     * Return the table prefix defined in the current configuration.
-     *
-     *     $prefix = $db->table_prefix();
-     *
-     * @return  string
-     */
-    public function table_prefix(): string {
-        return $this->table_prefix;
-    }
-
 
     /**
      * Quote a database table name and adds the table prefix if needed.
@@ -446,7 +422,6 @@ class Database extends Component
      * @param mixed $table table name or array(table, alias)
      * @return  string
      * @uses    Database::quote_identifier
-     * @uses    Database::table_prefix
      */
     public function quote_table($table): string {
         if (\is_array($table)) {
@@ -469,14 +444,6 @@ class Database extends Component
             if (strpos($table, '.') !== false) {
                 $parts = explode('.', $table);
 
-                if ($prefix = $this->table_prefix()) {
-                    // Get the offset of the table name, last part
-                    $offset = \count($parts) - 1;
-
-                    // Add the table prefix to the table name
-                    $parts[$offset] = $prefix . $parts[$offset];
-                }
-
                 foreach ($parts as & $part) {
                     // Quote each of the parts
                     $part = '`' . $part . '`';
@@ -485,13 +452,12 @@ class Database extends Component
                 $table = implode('.', $parts);
             } else {
                 // Add the table prefix
-                $table = '`' . $this->table_prefix() . $table . '`';
+                $table = "`$table`";
             }
         }
 
         if (isset($alias)) {
-            // Attach table prefix to alias
-            $table .= ' AS ' . '`' . $this->table_prefix() . $alias . '`';
+            $table .= " AS `$alias`";
         }
 
         return $table;

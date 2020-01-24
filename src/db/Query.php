@@ -2,8 +2,8 @@
 
 namespace mii\db;
 
-use mii\core\ErrorHandler;
 use mii\valid\Rules;
+use mii\web\Exception;
 use mii\web\Pagination;
 
 /**
@@ -21,9 +21,6 @@ class Query
 
     // Query type
     protected $_type;
-
-    // SQL statement
-    protected $_sql;
 
     // Return results as associative arrays or objects
     protected $_as_object = false;
@@ -72,9 +69,6 @@ class Query
     // OFFSET ...
     protected $_offset;
 
-    // UNION ...
-    protected $_union = [];
-
     // The last JOIN statement created
     protected $_last_join;
 
@@ -111,15 +105,6 @@ class Query
      */
     public function __toString() {
         return $this->compile();
-    }
-
-    /**
-     * Get the type of the query.
-     *
-     * @return  integer
-     */
-    public function type() {
-        return $this->_type;
     }
 
 
@@ -342,28 +327,6 @@ class Query
 
 
     /**
-     * Adds an other UNION clause.
-     *
-     * @param mixed $select if string, it must be the name of a table. Else
-     *  must be an instance of Query
-     * @param boolean $all decides if it's an UNION or UNION ALL clause
-     * @return $this
-     */
-    public function union($select, $all = true) {
-
-        // TODO
-        if (\is_string($select)) {
-            $select = (new Query)->select()->from($select);
-        }
-        if (!$select instanceof Query)
-            throw new DatabaseException('first parameter must be a string or an instance of Query');
-
-        $this->_union [] = ['select' => $select, 'all' => $all];
-
-        return $this;
-    }
-
-    /**
      * Start returning results after "OFFSET ..."
      *
      * @param   integer $number starting result number or NULL to reset
@@ -504,10 +467,10 @@ class Query
 
         if ($this->_last_condition_where) {
             if ($check_for_empty !== false) {
-                $group = end($this->_where);
+                $group = \end($this->_where);
 
-                if ($group AND reset($group) === '(') {
-                    array_pop($this->_where);
+                if ($group AND \reset($group) === '(') {
+                    \array_pop($this->_where);
                     return $this;
                 }
             }
@@ -517,10 +480,10 @@ class Query
         } else {
 
             if ($check_for_empty !== false) {
-                $group = end($this->_having);
+                $group = \end($this->_having);
 
-                if ($group AND reset($group) === '(') {
-                    array_pop($this->_having);
+                if ($group AND \reset($group) === '(') {
+                    \array_pop($this->_having);
                     return $this;
                 }
             }
@@ -624,7 +587,7 @@ class Query
      */
     public function values(...$values) {
         if (!\is_array($this->_values)) {
-            throw new DatabaseException('INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
+            throw new Exception('INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
         }
 
         $this->_values = array_merge($this->_values, $values);
@@ -654,9 +617,7 @@ class Query
      * @return  $this
      */
     public function subselect(Query $query) {
-        if ($query->type() !== Database::SELECT) {
-            throw new DatabaseException('Only SELECT queries can be combined with INSERT queries');
-        }
+        assert($query->_type === Database::SELECT, 'Only SELECT queries can be combined with INSERT queries');
 
         $this->_values = $query;
 
@@ -672,8 +633,7 @@ class Query
         $this->_where =
         $this->_group_by =
         $this->_having =
-        $this->_order_by =
-        $this->_union = [];
+        $this->_order_by = [];
 
         $this->_for_update = false;
         $this->_distinct = false;
@@ -831,12 +791,12 @@ class Query
 
                 $columns[] = $column;
             }
-            $query .= implode(', ', array_unique($columns));
+            $query .= \implode(', ', \array_unique($columns));
         }
 
         if (!empty($this->_from)) {
             // Set tables to select from
-            $query .= ' FROM ' . implode(', ', array_map($quote_table, $this->_from));
+            $query .= ' FROM ' . \implode(', ', \array_map($quote_table, $this->_from));
         }
 
         if (!empty($this->_joins)) {
@@ -866,7 +826,7 @@ class Query
                 $group[] = $column;
             }
 
-            $query .= ' GROUP BY ' . implode(', ', $group);
+            $query .= ' GROUP BY ' . \implode(', ', $group);
         }
 
         if (!empty($this->_having)) {
@@ -889,21 +849,9 @@ class Query
             $query .= ' OFFSET ' . $this->_offset;
         }
 
-        if (!empty($this->_union)) {
-            $query = '(' . $query . ')';
-            foreach ($this->_union as $u) {
-                $query .= ' UNION ';
-                if ($u['all'] === true) {
-                    $query .= 'ALL ';
-                }
-                $query .= '(' . $u['select']->compile_select() . ')';
-            }
-        }
-
         if($this->_for_update) {
             $query .= ' FOR UPDATE';
         }
-
 
         return $query;
     }
@@ -919,9 +867,8 @@ class Query
 
         foreach ($this->_joins as $join) {
 
-
             if ($join['type']) {
-                $sql = strtoupper($this->_type) . ' JOIN';
+                $sql = \strtoupper($this->_type) . ' JOIN';
             } else {
                 $sql = 'JOIN';
             }
@@ -931,7 +878,7 @@ class Query
 
             if (!empty($join['using'])) {
                 // Quote and concat the columns
-                $sql .= ' USING (' . implode(', ', array_map(array($this->db, 'quote_column'), $join['using'])) . ')';
+                $sql .= ' USING (' . \implode(', ', \array_map(array($this->db, 'quote_column'), $join['using'])) . ')';
             } else {
                 $conditions = array();
                 foreach ($join['on'] as $condition) {
@@ -940,7 +887,7 @@ class Query
 
                     if ($op) {
                         // Make the operator uppercase and spaced
-                        $op = ' ' . strtoupper($op);
+                        $op = ' ' . \strtoupper($op);
                     }
 
                     // Quote each of the columns used for the condition
@@ -948,13 +895,13 @@ class Query
                 }
 
                 // Concat the conditions "... AND ..."
-                $sql .= ' ON (' . implode(' AND ', $conditions) . ')';
+                $sql .= ' ON (' . \implode(' AND ', $conditions) . ')';
             }
 
             $statements[] = $sql;
         }
 
-        return implode(' ', $statements);
+        return \implode(' ', $statements);
     }
 
 
@@ -1058,7 +1005,7 @@ class Query
 
             if (\is_array($column)) {
                 // Use the column alias
-                $column = $this->db->quote_identifier(end($column));
+                $column = $this->db->quote_identifier(\end($column));
             } else {
                 // Apply proper quoting to the column
                 $column = $this->db->quote_column($column);
@@ -1066,13 +1013,13 @@ class Query
 
             if ($direction) {
                 // Make the direction uppercase
-                $direction = ' ' . strtoupper($direction);
+                $direction = ' ' . \strtoupper($direction);
             }
 
-            $sort[] = $column . $direction;
+            $sort[] = $column . ' ' . $direction;
         }
 
-        return 'ORDER BY ' . implode(', ', $sort);
+        return 'ORDER BY ' . \implode(', ', $sort);
     }
 
 

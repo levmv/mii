@@ -1,80 +1,9 @@
 <?php
 
-/**
- * A port of [phputf8](http://phputf8.sourceforge.net/) to a unified set
- * of files. Provides multi-byte aware replacement string functions.
- *
- * For UTF-8 support to work correctly, the following requirements must be met:
- *
- * - PCRE needs to be compiled with UTF-8 support (--enable-utf8)
- * - Support for [Unicode properties](http://php.net/manual/reference.pcre.pattern.modifiers.php)
- *   is highly recommended (--enable-unicode-properties)
- * - UTF-8 conversion will be much more reliable if the
- *   [iconv extension](http://php.net/iconv) is loaded
- * - The [mbstring extension](http://php.net/mbstring) is highly recommended,
- *   but must not be overloading string functions
- *
- * [!!] This file is licensed differently from the rest of Kohana. As a port of
- * [phputf8](http://phputf8.sourceforge.net/), this file is released under the LGPL.
- *
- * @package    Kohana
- * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2007-2012 Kohana Team
- * @copyright  (c) 2005 Harry Fuecks
- * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
- */
-
 namespace mii\util;
 
 class UTF8
 {
-
-
-    /**
-     * Recursively cleans arrays, objects, and strings. Removes ASCII control
-     * codes and converts to the requested charset while silently discarding
-     * incompatible characters.
-     *
-     *     UTF8::clean($_GET); // Clean GET data
-     *
-     * [!!] This method requires [Iconv](http://php.net/iconv)
-     *
-     * @param   mixed $var variable to clean
-     * @param   string $charset character set, defaults to Kohana::$charset
-     * @return  mixed
-     * @uses    UTF8::strip_ascii_ctrl
-     * @uses    UTF8::is_ascii
-     */
-    public static function clean($var, $charset = NULL) {
-        if (!$charset) {
-            // Use the application character set
-            $charset = \Mii::$app->charset;
-        }
-
-        if (\is_array($var) OR \is_object($var)) {
-            foreach ($var as $key => $val) {
-                // Recursion!
-                $var[self::clean($key)] = self::clean($val);
-            }
-        } elseif (\is_string($var) AND $var !== '') {
-            // Remove control characters
-            $var = self::strip_ascii_ctrl($var);
-
-            if (!self::is_ascii($var)) {
-                // Disable notices
-                $error_reporting = error_reporting(~E_NOTICE);
-
-                // iconv is expensive, so it is only used when needed
-                $var = iconv($charset, $charset . '//IGNORE', $var);
-
-                // Turn notices back on
-                error_reporting($error_reporting);
-            }
-        }
-
-        return $var;
-    }
 
     /**
      * Tests whether a string contains only 7-bit ASCII bytes. This is used to
@@ -85,11 +14,7 @@ class UTF8
      * @param   mixed $str string or array of strings to check
      * @return  boolean
      */
-    public static function is_ascii($str) {
-        if (\is_array($str)) {
-            $str = implode($str);
-        }
-
+    public static function is_ascii(string $str) : bool {
         return !preg_match('/[^\x00-\x7F]/S', $str);
     }
 
@@ -101,7 +26,7 @@ class UTF8
      * @param   string $str string to clean
      * @return  string
      */
-    public static function strip_ascii_ctrl($str) {
+    public static function strip_ascii_ctrl(string $str) {
         return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $str);
     }
 
@@ -113,7 +38,7 @@ class UTF8
      * @param   string $str string to clean
      * @return  string
      */
-    public static function strip_non_ascii($str) {
+    public static function strip_non_ascii(string $str) {
         return preg_replace('/[^\x00-\x7F]+/S', '', $str);
     }
 
@@ -223,7 +148,10 @@ class UTF8
      * @return  string
      */
     public static function trim($str, $charlist = NULL) {
-        return self::_trim($str, $charlist);
+        if ($charlist === NULL)
+            return trim($str);
+
+        return UTF8::ltrim(UTF8::rtrim($str, $charlist), $charlist);
     }
 
     /**
@@ -270,14 +198,6 @@ class UTF8
         $charlist = preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
 
         return preg_replace('/[' . $charlist . ']++$/uD', '', $str);
-    }
-
-
-    public static function _trim($str, $charlist = NULL) {
-        if ($charlist === NULL)
-            return trim($str);
-
-        return UTF8::ltrim(UTF8::rtrim($str, $charlist), $charlist);
     }
 
 

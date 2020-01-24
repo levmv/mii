@@ -7,10 +7,6 @@ namespace mii\db;
  */
 class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 {
-
-    // Executed SQL for this result
-    protected $_query;
-
     // Raw result resource
     protected $_result;
 
@@ -39,12 +35,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param   array $params
      * @return  void
      */
-    public function __construct($result, $sql, $as_object = false, array $params = NULL) {
+    public function __construct($result, $as_object = false, array $params = NULL) {
         // Store the result locally
         $this->_result = $result;
-
-        // Store the SQL locally
-        $this->_query = $sql;
 
         // Results as objects or associative arrays
         $this->_as_object = $as_object;

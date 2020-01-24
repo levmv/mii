@@ -24,7 +24,7 @@ class Response extends Component
     /**
      * @var  string      The response body
      */
-    protected string $_content = '';
+    protected $_content = '';
 
     protected array $_headers = [];
 
