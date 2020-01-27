@@ -5,7 +5,7 @@ namespace mii\db;
 use mii\core\Exception;
 use mii\util\Arr;
 
-class ORM
+class ORM implements \JsonSerializable
 {
     /**
      * @var string database table name
@@ -15,13 +15,12 @@ class ORM
     /**
      * @var mixed
      */
-    protected $_order_by = false;
+    protected $order_by = false;
 
     /**
      * @var array The model attributes
      */
     protected array $attributes = [];
-
 
     /**
      * @var  array  Data that's changed since the object was loaded
@@ -43,12 +42,13 @@ class ORM
      */
     public function __construct(array $values = null, bool $loaded = false)
     {
+        $this->__loaded = $loaded;
+
         if (!\is_null($values)) {
             foreach ($values as $key => $value) {
                 $this->$key = $value;
             }
         }
-        $this->__loaded = $loaded;
     }
 
     /**
@@ -85,12 +85,12 @@ class ORM
      * @param array|null $conditions
      * @return Query
      */
-    public static function find(array $conditions = null) : Query
+    public static function find(array $conditions = null): Query
     {
-        if(\is_null($conditions))
+        if (\is_null($conditions))
             return (new static)->select_query();
 
-        if(count($conditions) === 3 && \is_string($conditions[1])) {
+        if (count($conditions) === 3 && \is_string($conditions[1])) {
             $conditions = [$conditions];
         }
 
@@ -107,7 +107,10 @@ class ORM
      */
     public static function one(int $value, bool $find_or_fail = false)
     {
-        $result = (new static)->select_query(false)->where('id', '=', $value)->one();
+        $result = (new static)
+            ->select_query(false)
+            ->where('id', '=', $value)
+            ->one();
 
         if ($find_or_fail && $result === null)
             throw new ModelNotFoundException;
@@ -124,10 +127,12 @@ class ORM
         if ($query === null)
             $query = new Query;
 
-        $query->select(['`'.$this->get_table().'`.*'], true)->from($this->get_table())->as_object(static::class, [null, true]);
+        $query->select(['`' . $this->get_table() . '`.*'], true)
+            ->from($this->get_table())
+            ->as_object(static::class, [null, true]);
 
-        if ($this->_order_by AND $with_order) {
-            foreach ($this->_order_by as $column => $direction) {
+        if ($this->order_by AND $with_order) {
+            foreach ($this->order_by as $column => $direction) {
                 $query->order_by($column, $direction);
             }
         }
@@ -160,6 +165,7 @@ class ORM
      * @param string $first first value
      *
      * @return Result
+     * @deprecated
      */
     public static function select_list($key, $display, $first = NULL)
     {
@@ -170,8 +176,8 @@ class ORM
             ->from($class->get_table())
             ->as_array();
 
-        if ($class->_order_by) {
-            foreach ($class->_order_by as $column => $direction) {
+        if ($class->order_by) {
+            foreach ($class->order_by as $column => $direction) {
                 $query->order_by($column, $direction);
             }
         }
@@ -183,7 +189,7 @@ class ORM
     public function __set($key, $value)
     {
         // check if its setted by mysqli right now
-        if(\is_null($this->__loaded)) {
+        if (\is_null($this->__loaded)) {
             $this->attributes[$key] = $value;
             return;
         }
@@ -217,17 +223,14 @@ class ORM
         }
 
         foreach ($values as $key => $value) {
-           $this->$key = $value;
+            $this->$key = $value;
         }
 
         return $this;
     }
 
     /**
-     * Magic isset method to test _data
-     *
-     * @param string $name the property to test
-     *
+     * @param string $key the property to test
      * @return bool
      */
     public function __isset($key)
@@ -269,7 +272,7 @@ class ORM
     public function changed($field_name = null): bool
     {
         // For not loaded models there is no way to detect changes.
-        if (!$this->loaded())
+        if (!$this->__loaded)
             return true;
 
         if ($field_name === null) {
@@ -277,7 +280,7 @@ class ORM
         }
 
         if (\is_array($field_name)) {
-            return \count(array_intersect($field_name, array_keys($this->_changed)));
+            return \count(\array_intersect($field_name, \array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);
@@ -288,24 +291,19 @@ class ORM
      *
      * @return bool
      */
-    public function loaded($value = null)
+    public function loaded() : bool
     {
-        if ($value !== null)
-            $this->__loaded = (bool)$value;
-
         return (bool)$this->__loaded;
     }
 
     /**
-     * Saves the model to your database.
-     *
-     * @param mixed $validation a manual validation object to combine the model properties with
+     * Perform update request. Uses value of 'id' attribute as primary key
      *
      * @return int Affected rows
      */
     public function update()
     {
-        if (!(bool)$this->_changed)
+        if (!$this->_changed)
             return 0;
 
         if ($this->on_update() === false)
@@ -313,9 +311,9 @@ class ORM
 
         $this->on_change();
 
-        $data = array_intersect_key($this->attributes, $this->_changed);
+        $data = \array_intersect_key($this->attributes, $this->_changed);
 
-        $this->raw_query()
+        (new Query)
             ->update($this->get_table())
             ->set($data)
             ->where('id', '=', (int) $this->attributes['id'])
@@ -375,10 +373,9 @@ class ORM
 
         $this->on_change();
 
-        $columns = array_keys($this->attributes);
-        $this->raw_query()
+        (new Query)
             ->insert($this->get_table())
-            ->columns($columns)
+            ->columns(\array_keys($this->attributes))
             ->values($this->attributes)
             ->execute();
 
@@ -402,12 +399,12 @@ class ORM
      */
     public function delete(): void
     {
-        if ($this->loaded()) {
+        if ($this->__loaded) {
             $this->__loaded = false;
 
-            $this->raw_query()
+            (new Query)
                 ->delete($this->get_table())
-                ->where('id', '=', $this->attributes['id'])
+                ->where('id', '=', (int) $this->attributes['id'])
                 ->execute();
 
             $this->on_after_delete();
@@ -416,5 +413,16 @@ class ORM
         }
 
         throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!');
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     */
+    public function jsonSerialize()
+    {
+        return $this->to_array();
     }
 }
