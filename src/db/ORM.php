@@ -18,17 +18,9 @@ class ORM
     protected $_order_by = false;
 
     /**
-     * @var array The database fields
+     * @var array The model attributes
      */
     protected array $attributes = [];
-
-    /**
-     * @var array Auto-serialize and unserialize columns on get/set
-     */
-    protected $_serialize_fields;
-
-
-    protected $_serialize_cache = [];
 
 
     /**
@@ -148,25 +140,6 @@ class ORM
         return new Query;
     }
 
-    /**
-     * Returns an array of the columns in this object.
-     *
-     * @return array
-     */
-    public function fields(): array
-    {
-        $fields = [];
-
-        $table = $this->get_table();
-
-        foreach ($this->attributes as $key => $value) {
-            if (!\in_array($key, $this->_exclude_fields)) {
-                $fields[] = "`$table`.`$key`"; // TODO: support for table prefixes
-            }
-        }
-
-        return $fields;
-    }
 
     /**
      * Gets the table name for this object
@@ -215,11 +188,6 @@ class ORM
             return;
         }
 
-        if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
-            $this->_serialize_cache[$key] = $value;
-            return;
-        }
-
         if ($this->__loaded === true) {
             if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
                 $this->_changed[$key] = true;
@@ -235,13 +203,7 @@ class ORM
 
     public function get(string $key)
     {
-        if (isset($this->attributes[$key]) OR \array_key_exists($key, $this->attributes)) {
-            return ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields, true))
-                ? $this->_unserialize_value($key)
-                : $this->attributes[$key];
-        }
-
-        throw new Exception('Field ' . $key . ' does not exist in ' . \get_class($this) . '!');
+        return $this->$key;
     }
 
     public function set($values, $value = NULL): ORM
@@ -255,15 +217,9 @@ class ORM
         }
 
         foreach ($values as $key => $value) {
-            if ($this->_serialize_fields !== null && \in_array($key, $this->_serialize_fields)) {
-                $this->_serialize_cache[$key] = $value;
-            } else {
-                if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
-                    $this->_changed[$key] = true;
-                }
-                $this->attributes[$key] = $value;
-            }
+           $this->$key = $value;
         }
+
         return $this;
     }
 
@@ -278,6 +234,16 @@ class ORM
     {
         return \array_key_exists($key, $this->attributes);
     }
+
+
+    public function __sleep()
+    {
+        return [
+            'attributes',
+            '__loaded'
+        ];
+    }
+
 
     /**
      * Gets an array version of the model
@@ -339,9 +305,6 @@ class ORM
      */
     public function update()
     {
-        if ($this->_serialize_fields !== null && !empty($this->_serialize_fields))
-            $this->_invalidate_serialize_cache();
-
         if (!(bool)$this->_changed)
             return 0;
 
@@ -365,6 +328,7 @@ class ORM
 
         return \Mii::$app->db->affected_rows();
     }
+
 
     protected function on_create()
     {
@@ -401,12 +365,10 @@ class ORM
      * database INSERT and assign the inserted row id to $data['id'].
      *
      * @return int Inserted row id
+     * @throws \mii\web\Exception
      */
     public function create()
     {
-        if ($this->_serialize_fields !== null && !empty($this->_serialize_fields))
-            $this->_invalidate_serialize_cache();
-
         if ($this->on_create() === false) {
             return 0;
         }
@@ -454,40 +416,5 @@ class ORM
         }
 
         throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!');
-    }
-
-    protected function _invalidate_serialize_cache(): void
-    {
-        if ($this->_serialize_fields === null || empty($this->_serialize_cache))
-            return;
-
-        foreach ($this->_serialize_fields as $key) {
-
-            $value = isset($this->_serialize_cache[$key])
-                ? $this->_serialize_value($this->_serialize_cache[$key])
-                : $this->_serialize_value($this->attributes[$key]);
-
-            if ($value !== $this->attributes[$key]) {
-                $this->attributes[$key] = $value;
-
-                if ($this->__loaded)
-                    $this->_changed[$key] = true;
-            }
-
-        }
-    }
-
-    protected function _serialize_value($value)
-    {
-        return json_encode($value, JSON_UNESCAPED_UNICODE);
-    }
-
-    protected function _unserialize_value($key)
-    {
-        if (!\array_key_exists($key, $this->_serialize_cache)) {
-            assert(is_string($this->attributes[$key]), 'Unserialized field must have a string value');
-            $this->_serialize_cache[$key] = json_decode($this->attributes[$key], TRUE);
-        }
-        return $this->_serialize_cache[$key];
     }
 }

@@ -39,11 +39,11 @@ class Mii
             return $path;
         }
 
-        $pos = strpos($path, '/');
-        $alias = $pos === false ? substr($path, 1) : substr($path, 1, $pos - 1);
+        $pos = \strpos($path, '/');
+        $alias = $pos === false ? \substr($path, 1) : \substr($path, 1, $pos - 1);
 
         if (isset(static::$paths[$alias])) {
-            return $pos === false ? static::$paths[$alias] : static::$paths[$alias] . substr($path, $pos);
+            return $pos === false ? static::$paths[$alias] : static::$paths[$alias] . \substr($path, $pos);
         }
         return $path;
     }
