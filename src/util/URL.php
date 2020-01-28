@@ -5,6 +5,55 @@ namespace mii\util;
 class URL
 {
 
+    public const CURRENT = 1;
+    public const ACTIVE = 2;
+
+    private static bool $inited = false;
+    private static string $uri = '';
+    private static array $uri_pieces = [];
+    private static int $uri_size;
+
+    public static function status(string $link): int
+    {
+        if (!self::$inited) {
+            self::$uri = \trim(\Mii::$app->request->uri(), '/');
+            self::$uri_pieces = \explode('/', self::$uri);
+            self::$uri_size = \strlen(self::$uri);
+        }
+
+        $link = \trim($link, '/');
+        $link_size = \strlen($link);
+
+        if ($link_size > self::$uri_size)
+            return 0;
+
+        // Exact match
+        if (self::$uri === $link)
+            return self::CURRENT;
+
+        // Checks if it is part of active path
+        $link_pieces = \explode('/', $link);
+
+        for ($i = 0; $i < \count($link_pieces); $i++) {
+            if ((isset(self::$uri_pieces[$i]) AND self::$uri_pieces[$i] !== $link_pieces[$i])
+                OR empty(self::$uri_pieces[$i])) {
+                return 0;
+            }
+        }
+        return self::ACTIVE;
+    }
+
+    public static function is_current(string $link) : bool
+    {
+        return self::status($link) === self::CURRENT;
+    }
+
+    public static function is_active(string $link) : bool
+    {
+        return self::status($link) === self::ACTIVE;
+    }
+
+
     /**
      * Gets the base URL to the application.
      * To specify a protocol, provide the protocol as a string or request object.
@@ -20,10 +69,11 @@ class URL
      *     // Absolute URL path with '//'
      *     echo URL::base('//');
      *
-     * @param   mixed $protocol Protocol string or boolean
+     * @param mixed $protocol Protocol string or boolean
      * @return  string
      */
-    public static function base($protocol = null): string {
+    public static function base($protocol = null): string
+    {
         $base = \Mii::$app->base_url ?? '/';
         if ($protocol === null) {
             return $base;
@@ -46,11 +96,12 @@ class URL
      *
      *     echo URL::site('foo/bar');
      *
-     * @param   string $uri Site URI to convert
-     * @param   mixed $protocol Protocol string or true
+     * @param string $uri Site URI to convert
+     * @param mixed $protocol Protocol string or true
      * @return  string
      */
-    public static function site(string $uri = '', $protocol = null): string {
+    public static function site(string $uri = '', $protocol = null): string
+    {
         // Chop off possible scheme, host, port, user and pass parts
         $path = \preg_replace('~^[-a-z0-9+.]++://[^/]++/?~', '', trim($uri, '/'));
 
@@ -67,10 +118,11 @@ class URL
      * Callback used for encoding all non-ASCII characters, as per RFC 1738
      * Used by URL::site()
      *
-     * @param  array $matches Array of matches from preg_replace_callback()
+     * @param array $matches Array of matches from preg_replace_callback()
      * @return string          Encoded string
      */
-    protected static function _rawurlencode_callback($matches) {
+    protected static function _rawurlencode_callback($matches)
+    {
         return \rawurlencode($matches[0]);
     }
 
@@ -86,11 +138,12 @@ class URL
      *
      * [!!] Parameters with a NULL value are left out.
      *
-     * @param   array $params Array of GET parameters
-     * @param   boolean $use_get Include current request GET parameters
+     * @param array $params Array of GET parameters
+     * @param boolean $use_get Include current request GET parameters
      * @return  string
      */
-    public static function query(array $params = null, $use_get = null) {
+    public static function query(array $params = null, $use_get = null)
+    {
         if ($use_get) {
             if ($params === NULL) {
                 // Use only the current parameters
@@ -114,12 +167,14 @@ class URL
     }
 
 
-    static public function current(array $params = null): string {
+    static public function current(array $params = null): string
+    {
         return static::site(\Mii::$app->request->uri()) . static::query($params, true);
     }
 
 
-    static public function back_url(string $default = null): string {
+    static public function back_url(string $default = null): string
+    {
         if (isset($_GET['back_url']))
             return \urldecode($_GET['back_url']);
 
