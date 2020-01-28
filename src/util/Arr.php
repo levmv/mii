@@ -27,22 +27,6 @@ class Arr
     }
 
     /**
-     * Test if a value is an array with an additional check for array-like objects.
-     *
-     *
-     * @param   mixed $value value to check
-     * @return  boolean
-     */
-    public static function is_array($value) {
-        if (\is_array($value)) {
-            return true;
-        }
-        // Traversable is the interface that makes an object foreach'able,
-        // it is implemented by the SPL Iterator and IteratorAggregate classes.
-        return (\is_object($value) && $value instanceof \Traversable);
-    }
-
-    /**
      * Gets a value from an array using a dot separated path.
      *
      *     // Get the value of $array['foo']['bar']
@@ -79,19 +63,22 @@ class Arr
         do {
             $key = \array_shift($keys);
 
-            if (\ctype_digit($key)) {
+           /* if (\ctype_digit($key)) {
                 // Make the key an integer
                 $key = (int)$key;
-            }
+            }*/
 
             if (isset($array[$key])) {
                 if (!$keys) {
                     // Found the path requested
                     return $array[$key];
                 }
-                if (!static::is_array($array[$key])) {
-                    // Unable to dig deeper
-                    break;
+
+                if (!is_array($array[$key])) {
+                    if(!\is_iterable($array[$key])) {
+                        // Unable to dig deeper
+                        break;
+                    }
                 }
                 // Dig down into the next part of the path
                 $array = $array[$key];
@@ -295,7 +282,7 @@ class Arr
      * @return  array
      */
     public static function overwrite($array1, $array2) {
-        foreach (array_intersect_key($array2, $array1) as $key => $value) {
+        foreach (\array_intersect_key($array2, $array1) as $key => $value) {
             $array1[$key] = $value;
         }
 
@@ -310,45 +297,6 @@ class Arr
         return $array1;
     }
 
-    /**
-     * Creates a callable function and parameter list from a string representation.
-     * Note that this function does not validate the callback string.
-     *
-     *     // Get the callback function and parameters
-     *     list($func, $params) = Arr::callback('Foo::bar(apple,orange)');
-     *
-     *     // Get the result of the callback
-     *     $result = call_user_func_array($func, $params);
-     *
-     * @param   string $str callback string
-     * @return  array   function, params
-     */
-    public static function callback($str) {
-        // Overloaded as parts are found
-        $command = $params = null;
-
-        // command[param,param]
-        if (preg_match('/^([^\(]*+)\((.*)\)$/', $str, $match)) {
-            // command
-            $command = $match[1];
-
-            if ($match[2] !== '') {
-                // param,param
-                $params = preg_split('/(?<!\\\\),/', $match[2]);
-                $params = str_replace('\,', ',', $params);
-            }
-        } else {
-            // command
-            $command = $str;
-        }
-
-        if (strpos($command, '::') !== false) {
-            // Create a static method callable command
-            $command = explode('::', $command, 2);
-        }
-
-        return array($command, $params);
-    }
 
     /**
      * Convert a multi-dimensional array into a single-dimensional array.
@@ -365,7 +313,6 @@ class Arr
      *
      * @param   array $array array to flatten
      * @return  array
-     * @since   3.0.6
      */
     public static function flatten($array) {
         $is_assoc = static::is_assoc($array);

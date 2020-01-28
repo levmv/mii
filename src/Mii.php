@@ -93,19 +93,6 @@ class Mii
             return \mii\util\Arr::path($messages[$file], $path, $default);
         }
     }
-
-
-    public static function t($category, $message, $params = [], $language = null) {
-        if (static::$app !== null) {
-            return static::$app->I18n->translate($category, $message, $params, $language ?: static::$app->language);
-        } else {
-            $p = [];
-            foreach ((array)$params as $name => $value) {
-                $p['{' . $name . '}'] = $value;
-            }
-            return ($p === []) ? $message : strtr($message, $p);
-        }
-    }
 }
 
 
@@ -114,14 +101,6 @@ function abort(int $code = 404, string $message = '') {
         throw new \mii\web\NotFoundHttpException();
     }
     throw new \mii\web\HttpException($code, $message);
-}
-
-function session($key = null, $default = null) {
-    if (\is_null($key)) {
-        return Mii::$app->session;
-    }
-
-    return Mii::$app->session->get($key, $default);
 }
 
 
@@ -256,8 +235,31 @@ function config(string $key, $default = null) {
     if (isset(Mii::$app->_config[$key]))
         return Mii::$app->_config[$key];
 
-    if (\strpos($key, '.') !== false)
-        return \mii\util\Arr::path(Mii::$app->_config, $key, $default);
+    $keys = \explode('.', $key);
+    $array = Mii::$app->_config;
+
+    do {
+        $key = \array_shift($keys);
+
+        if (isset($array[$key])) {
+            if (!$keys) {
+                // Found the path requested
+                return $array[$key];
+            }
+
+            if (!is_array($array[$key])) {
+                if(!\is_iterable($array[$key])) {
+                    // Unable to dig deeper
+                    break;
+                }
+            }
+            // Dig down into the next part of the path
+            $array = $array[$key];
+        } else {
+            // Unable to dig deeper
+            break;
+        }
+    } while ($keys);
 
     return $default;
 }
