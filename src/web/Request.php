@@ -39,8 +39,6 @@ class Request extends Component
 
     protected $_hostname;
 
-    public $csrf_validation = false;
-
     public $cookie_validation = false;
 
     public $enable_csrf_cookie = true;
@@ -231,7 +229,7 @@ class Request extends Component
     public function validate_csrf_token()
     {
 
-        if (!$this->csrf_validation || \in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+        if (\in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
             return true;
         }
 

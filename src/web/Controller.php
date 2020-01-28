@@ -2,7 +2,6 @@
 
 namespace mii\web;
 
-use Mii;
 
 class Controller
 {
@@ -23,7 +22,7 @@ class Controller
     }
 
     protected function after($content = null) {
-        Mii::$app->response->content($content);
+        $this->response->content($content);
     }
 
     public function execute(string $action, $params) {

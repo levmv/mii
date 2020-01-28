@@ -230,18 +230,7 @@ class Form
 
     public function open($action = null, ?array $attributes = null): string {
 
-        $out = HTML::open($action, $attributes);
-
-        $is_post = $attributes === null ||
-            !isset($attributes['method']) ||
-            strcasecmp($attributes['method'], 'post') === 0;
-
-        if (\Mii::$app->request->csrf_validation && $is_post) {
-
-            $out .= HTML::hidden(\Mii::$app->request->csrf_token_name, \Mii::$app->request->csrf_token());
-        }
-
-        return $out;
+        return HTML::open($action, $attributes);
     }
 
     public function close(): string {

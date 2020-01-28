@@ -47,21 +47,10 @@ class PageController extends Controller
      */
     public $links = [];
 
-    /**
-     * @var string
-     */
-    public $content = '';
-
     public $render_layout = true;
-
-    public $breadcrumbs = '';
-
-    public $csrf_validation = true;
-
 
     protected function access_rules() {
     }
-
 
     protected function before() {
 
@@ -74,28 +63,27 @@ class PageController extends Controller
 
 
     protected function after($content = null): Response {
-        if ($this->render_layout AND $this->response->format === Response::FORMAT_HTML AND !Mii::$app->request->is_ajax()) {
-
-            if ($content !== null)
-                $this->content = $content;
+        if ($this->render_layout AND $this->response->format === Response::FORMAT_HTML) {
 
             $this->setup_index();
 
             if (!$this->layout) {
                 $this->setup_layout();
             }
-            $this->index_block->set('layout', $this->layout->render(true));
+            $this->index_block->set('layout',
+                $this->layout
+                    ->set('content', $content)
+                    ->render(true)
+            );
 
-            Mii::$app->response->content($this->index_block->render(true));
+            $this->response->content($this->index_block->render(true));
 
         } else {
-            if ($content === null)
-                $content = $this->content;
 
             if (\is_array($content) AND $this->request->is_ajax()) {
-                Mii::$app->response->format = Response::FORMAT_JSON;
+                $this->response->format = Response::FORMAT_JSON;
             }
-            Mii::$app->response->content($content);
+            $this->response->content($content);
         }
 
         return $this->response;
@@ -120,8 +108,7 @@ class PageController extends Controller
             $depends = $this->layout_depends;
 
         $this->layout = \block($block_name)
-            ->depends($depends)
-            ->bind('content', $this->content);
+            ->depends($depends);
     }
 
     protected function on_access_denied() {
@@ -141,10 +128,6 @@ class PageController extends Controller
             if (!$this->acl->check($roles, $action)) {
                 return $this->on_access_denied();
             }
-        }
-
-        if ($this->csrf_validation && !Mii::$app->request->validate_csrf_token()) {
-            throw new BadRequestHttpException('Token mismatch error');
         }
 
         $method = new \ReflectionMethod($this, $action);
