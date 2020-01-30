@@ -3,22 +3,41 @@
 namespace mii\storage;
 
 use mii\core\Component;
+use mii\util\FS;
 use mii\web\UploadedFile;
 
 class Local extends Component implements StorageInterface {
 
-    protected $path = '';
-    protected $url = '';
+    protected string $path = '';
+    protected string $url = '';
+
+    protected int $levels = 0;
 
     protected function resolve(string $path) : string {
-        return $this->path.DIRECTORY_SEPARATOR.ltrim($path, DIRECTORY_SEPARATOR);
+
+        $path = ltrim($path, DIRECTORY_SEPARATOR);
+
+        if($this->levels) {
+            $level = '';
+
+            for($i=0;$i<$this->levels;$i++) {
+                $level .= substr($path, $i, 1).DIRECTORY_SEPARATOR;
+            }
+
+            if(!is_dir($this->path.$path))
+                FS::mkdir($this->path.$level);
+
+            $path = $level.$path;
+        }
+
+        return $this->path.$path;
     }
 
     public function init(array $config = []): void
     {
         parent::init($config);
         if($this->path) {
-            $this->path = \Mii::resolve($this->path);
+            $this->path = \Mii::resolve($this->path).DIRECTORY_SEPARATOR;
         }
     }
 
