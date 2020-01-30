@@ -24,7 +24,9 @@ class Local extends Component implements StorageInterface {
                 $level .= substr($path, $i, 1).DIRECTORY_SEPARATOR;
             }
 
-            if(!is_dir($this->path.$path))
+            $path = substr($path, $i);
+
+            if(!is_dir($this->path.$level))
                 FS::mkdir($this->path.$level);
 
             $path = $level.$path;
