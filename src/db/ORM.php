@@ -194,11 +194,10 @@ class ORM implements \JsonSerializable
             return;
         }
 
-        if ($this->__loaded === true) {
-            if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
-                $this->_changed[$key] = true;
-            }
+        if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
+            $this->_changed[$key] = true;
         }
+
         $this->attributes[$key] = $value;
     }
 
@@ -324,6 +323,13 @@ class ORM implements \JsonSerializable
         $this->_changed = [];
 
         return \Mii::$app->db->affected_rows();
+    }
+
+
+    public function refresh()
+    {
+        $model = self::one($this->id);
+        $this->attributes = $model->attributes;
     }
 
 
