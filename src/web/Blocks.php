@@ -52,7 +52,7 @@ class Blocks extends BaseBlocks
 
                     if ($type === 'js') {
                         foreach ($block['inline'] as $position => $inline) {
-                            $this->_js[$position][] = '<script type="text/javascript">' . implode("\n", $inline) . '</script>';
+                            $this->_js[$position][] = '<script>' . implode("\n", $inline) . '</script>';
                         }
 
                     } else {

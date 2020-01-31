@@ -76,7 +76,7 @@ class HTML
      * @return  string
      */
     public static function chars($value, $double_encode = TRUE) {
-        return htmlspecialchars((string)$value, ENT_QUOTES, 'utf-8', $double_encode);
+        return \htmlspecialchars((string)$value, ENT_QUOTES, 'utf-8', $double_encode);
     }
 
     /**
@@ -243,9 +243,6 @@ class HTML
 
         // Set the script link
         $attributes['src'] = $file;
-
-        // Set the script type
-        $attributes['type'] = 'text/javascript';
 
         return '<script' . HTML::attributes($attributes) . '></script>';
     }
