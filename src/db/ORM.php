@@ -274,9 +274,6 @@ class ORM implements \JsonSerializable
             return \count($this->_changed) > 0;
         }
 
-        if(!\array_key_exists($field_name, $this->attributes))
-            return false;
-
         if (\is_array($field_name)) {
             return \count(\array_intersect($field_name, \array_keys($this->_changed)));
         }
