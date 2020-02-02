@@ -166,7 +166,6 @@ class ' . $name . ' {
             $this->info('Loading migration #:name', [':name' => $name]);
 
             $obj = $this->load_migration($migration);
-            $obj->init();
             if ($obj->up() === false) {
                 $this->error('Migration #:name failed. Stop.', [':name' => $name]);
                 return;
