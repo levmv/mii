@@ -137,7 +137,6 @@ function block(string $name, array $params = null): \mii\web\Block {
  * @param   string $id id of cache to entry
  * @param   string $default default value to return if cache miss
  * @return  mixed
- * @throws  \mii\cache\CacheException
  */
 function get_cached($id, $default = null, $lifetime = null) {
 

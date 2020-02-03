@@ -76,20 +76,15 @@ class Pagination
      *
      * @return  void
      */
-    public function __construct(array $config = [], Query &$query = null) {
+    public function __construct(array $config = []) {
         foreach ($config as $key => $val)
             $this->$key = $val;
 
         if (!$this->request)
             $this->request = \Mii::$app->request;
 
-
         // Pagination setup
         $this->calculate();
-
-        if($query) {
-
-        }
     }
 
     /**
@@ -276,27 +271,6 @@ class Pagination
         return $this->render();
     }
 
-    /**
-     * Returns a Pagination property.
-     *
-     * @param   string $key property name
-     * @return  mixed   Pagination property; NULL if not found
-     */
-    public function __get(string $key) {
-        return isset($this->$key) ? $this->$key : NULL;
-    }
-
-    /**
-     * Updates a single config setting, and recalculates pagination if needed.
-     *
-     * @param   string $key config key
-     * @param   mixed $value config value
-     * @return  void
-     */
-    public function __set(string $key, $value) {
-        $this->setup(array($key => $value));
-    }
-
-} // End Pagination
+}
 
 

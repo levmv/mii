@@ -43,6 +43,8 @@ class Block extends Controller
                         // Drop 'i_' prefix.
                         if (strpos($value, 'i_') === 0) {
                             $name = substr($index, 2);
+                        } else {
+                            $name = $index;
                         }
                         $value = 'do_' . str_replace('-', '_', $name);
                     }

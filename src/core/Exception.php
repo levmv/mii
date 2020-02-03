@@ -11,10 +11,11 @@ class Exception extends \Exception
      *
      *     echo $exception;
      *
-     * @uses    Exception::text
      * @return  string
+     * @uses    Exception::text
      */
-    public function __toString() {
+    public function __toString()
+    {
         return static::text($this);
     }
 
@@ -24,10 +25,11 @@ class Exception extends \Exception
      *
      * Error [Code]: Message ~ File [ Line ]
      *
-     * @param   \Throwable $e
+     * @param \Throwable $e
      * @return  string
      */
-    public static function text(\Throwable $e) {
+    public static function text(\Throwable $e)
+    {
         $code = $e->getCode();
         return sprintf('%s%s: %s ~ %s[%d]',
             (new \ReflectionClass($e))->getShortName(), $code != 0 ? "[$code]" : '', strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());

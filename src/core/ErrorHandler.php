@@ -3,8 +3,6 @@
 namespace mii\core;
 
 
-use mii\util\Debug;
-
 class ErrorHandler extends Component
 {
 
@@ -23,7 +21,8 @@ class ErrorHandler extends Component
      */
     private $_memory_reserve;
 
-    public function register() {
+    public function register()
+    {
         ini_set('display_errors', false);
         set_exception_handler([$this, 'handle_exception']);
         set_error_handler([$this, 'handle_error']);
@@ -34,23 +33,27 @@ class ErrorHandler extends Component
         register_shutdown_function([$this, 'handle_fatal_error']);
     }
 
-    public function unregister() {
+    public function unregister()
+    {
         restore_error_handler();
         restore_exception_handler();
     }
 
 
-    public function report($exception) {
+    public function report($exception)
+    {
         \Mii::error($exception, \get_class($exception));
     }
 
 
-    public function render($exception) {
+    public function render($exception)
+    {
 
     }
 
 
-    public function handle_exception($e) {
+    public function handle_exception($e)
+    {
         // disable error capturing to avoid recursive errors while handling exceptions
         $this->unregister();
 
@@ -71,7 +74,8 @@ class ErrorHandler extends Component
     }
 
 
-    public function handle_error($code, $error, $file, $line) {
+    public function handle_error($code, $error, $file, $line)
+    {
         if (error_reporting() & $code) {
 
             unset($this->_memory_reserve);
@@ -85,7 +89,8 @@ class ErrorHandler extends Component
     }
 
 
-    public function handle_fatal_error() {
+    public function handle_fatal_error()
+    {
         unset($this->_memory_reserve);
 
         // is it fatal ?
@@ -109,7 +114,8 @@ class ErrorHandler extends Component
     /**
      * Removes all output echoed before calling this method.
      */
-    public function clear_output() {
+    public function clear_output()
+    {
         // the following manual level counting is to deal with zlib.output_compression set to On
         for ($level = ob_get_level(); $level > 0; --$level) {
             if (!@ob_end_clean()) {
@@ -119,13 +125,14 @@ class ErrorHandler extends Component
     }
 
 
-    public static function exception_to_text($e) {
-        if(\config('debug')) {
-            return (string) $e;
+    public static function exception_to_text($e)
+    {
+        if (\config('debug')) {
+            return (string)$e;
         }
 
-        if($e instanceof UserException ) {
-            return \get_class($e)." : ".$e->getMessage();
+        if ($e instanceof UserException) {
+            return \get_class($e) . " : " . $e->getMessage();
         }
 
         return 'An internal server error occurred.';

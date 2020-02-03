@@ -76,10 +76,4 @@ class UploadHandler extends Component
             ]);
         }
     }
-
-
-    private function make_upload_dir() {
-
-    }
-
 }

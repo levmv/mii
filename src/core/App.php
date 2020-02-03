@@ -28,7 +28,8 @@ abstract class App
     public $base_url;
 
 
-    public function __construct(array $config = []) {
+    public function __construct(array $config = [])
+    {
         Mii::$app = $this;
 
         $this->_config = $config;
@@ -67,7 +68,8 @@ abstract class App
 
     private array $_instances = [];
 
-    public function __get($id) {
+    public function __get($id)
+    {
         if (!isset($this->_instances[$id])) {
             $this->_instances[$id] = $this->load_component($id);
         }
@@ -76,7 +78,8 @@ abstract class App
     }
 
 
-    public function get(string $id) {
+    public function get(string $id)
+    {
 
         if (!isset($this->_instances[$id])) {
             $this->_instances[$id] = $this->load_component($id);
@@ -85,16 +88,19 @@ abstract class App
         return $this->_instances[$id];
     }
 
-    public function has(string $id): bool {
+    public function has(string $id): bool
+    {
         return isset($this->_instances[$id]) || isset($this->_config['components'][$id]);
     }
 
 
-    public function __isset($name) {
+    public function __isset($name)
+    {
         return $this->has($name);
     }
 
-    protected function load_component($id) {
+    protected function load_component($id)
+    {
 
         $params = [];
 

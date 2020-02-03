@@ -4,7 +4,6 @@ namespace mii\web;
 
 use mii\db\ORM;
 use mii\util\HTML;
-use mii\util\Upload;
 use mii\valid\Validation;
 
 class Form
@@ -19,8 +18,6 @@ class Form
     public $labels = [];
 
     public $message_file;
-
-    protected $scenario;
 
     protected $_changed = [];
 
@@ -57,7 +54,7 @@ class Form
 
     /**
      * Load form from _POST values or $data values
-     * Return true if request method is post
+     * Return true if form is loaded
      * @return bool
      */
 
@@ -193,11 +190,9 @@ class Form
     }
 
 
-    public function validate($scenario = null): bool {
+    public function validate(): bool {
 
         $this->before_validate();
-
-        $this->scenario = $scenario;
 
         $this->validation->rules($this->rules());
 

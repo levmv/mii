@@ -18,7 +18,8 @@ class ACL
      * @param string $action
      * @return $this
      */
-    public function allow($role, $action = '*') {
+    public function allow($role, $action = '*')
+    {
         $this->add_rule(true, $role, $action);
 
         return $this;
@@ -31,7 +32,8 @@ class ACL
      * @param string $action
      * @return $this
      */
-    public function deny($role, $action = '*') {
+    public function deny($role, $action = '*')
+    {
         $this->add_rule(false, $role, $action);
 
         return $this;
@@ -42,7 +44,8 @@ class ACL
      *
      * @return $this
      */
-    public function clear() {
+    public function clear()
+    {
         $this->_rules = [];
 
         return $this;
@@ -55,7 +58,8 @@ class ACL
      * @param mixed $role single role or array of roles
      * @param string $action
      */
-    public function add_rule($access, $role, $action): void {
+    public function add_rule($access, $role, $action): void
+    {
         $roles = (array)$role;
 
         foreach ($roles as $r) {
@@ -73,7 +77,8 @@ class ACL
      * @param string $action
      * @return bool
      */
-    public function check($role, $action = '*'): bool {
+    public function check($role, $action = '*'): bool
+    {
         if (\is_array($role)) {
             foreach ($role as $r) {
                 if ($this->match($r, $action))
@@ -93,7 +98,8 @@ class ACL
      * @param $action
      * @return bool
      */
-    protected function match($role, $action): bool {
+    protected function match($role, $action): bool
+    {
         $roles = $actions = ['*'];
 
         $allow = false;

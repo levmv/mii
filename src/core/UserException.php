@@ -2,4 +2,8 @@
 
 namespace mii\core;
 
-class UserException extends Exception {};
+class UserException extends Exception
+{
+}
+
+;

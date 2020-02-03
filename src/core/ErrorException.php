@@ -15,7 +15,8 @@ class ErrorException extends \ErrorException
      * @param $lineno [optional]
      * @param $previous [optional]
      */
-    public function __construct($message = '', $code = 0, $severity = 1, $filename = __FILE__, $lineno = __LINE__, \Exception $previous = null) {
+    public function __construct($message = '', $code = 0, $severity = 1, $filename = __FILE__, $lineno = __LINE__, \Exception $previous = null)
+    {
         parent::__construct($message, $code, $severity, $filename, $lineno, $previous);
 
         if (\function_exists('xdebug_get_function_stack')) {
@@ -48,7 +49,8 @@ class ErrorException extends \ErrorException
     /**
      * @return string the user-friendly name of this exception
      */
-    public function get_name() {
+    public function get_name()
+    {
         static $names = [
             E_COMPILE_ERROR => 'PHP Compile Error',
             E_COMPILE_WARNING => 'PHP Compile Warning',

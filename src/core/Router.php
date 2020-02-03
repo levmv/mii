@@ -54,7 +54,8 @@ class Router extends Component
     protected $_current_route;
 
 
-    public function init(array $config = []): void {
+    public function init(array $config = []): void
+    {
 
         parent::init($config);
 
@@ -74,7 +75,8 @@ class Router extends Component
      * Process route list.
      * As result: $this->_routes_list and $this->_named_routes
      */
-    public function init_routes(): void {
+    public function init_routes(): void
+    {
 
         // Sort groups
         if ($this->order !== null && \count($this->routes)) {
@@ -174,7 +176,8 @@ class Router extends Component
         }
     }
 
-    protected function compile_route(string $pattern, array $parameters): string {
+    protected function compile_route(string $pattern, array $parameters): string
+    {
 
         // The URI should be considered literal except for keys and optional parts
         // Escape everything preg_quote would escape except for : ( ) { }
@@ -201,7 +204,8 @@ class Router extends Component
     }
 
 
-    public function match(string $uri) {
+    public function match(string $uri)
+    {
 
         if ($uri !== '/') {
             $uri = \trim($uri, '//');
@@ -219,7 +223,8 @@ class Router extends Component
         return false;
     }
 
-    protected function match_route(string $uri, array $route) {
+    protected function match_route(string $uri, array $route)
+    {
 
         if (empty($route[static::R_COMPILED])) {
 
@@ -302,12 +307,14 @@ class Router extends Component
     }
 
 
-    public function current_route() {
+    public function current_route()
+    {
         return $this->_routes_list[$this->_current_route];
     }
 
 
-    public function url(string $name, array $params = []): string {
+    public function url(string $name, array $params = []): string
+    {
 
         if (!isset($this->_named_routes[$name])) {
             throw new InvalidRouteException('Route :name doesnt exist', [':name' => $name]);
