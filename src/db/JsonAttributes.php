@@ -14,6 +14,7 @@ trait JsonAttributes
 {
 
     protected array $_serialize_cache = [];
+    protected bool $_serialize_cache_dirty = false;
 
     public function __set($key, $value)
     {
@@ -25,6 +26,7 @@ trait JsonAttributes
 
         if ($this->json_attributes && \in_array($key, $this->json_attributes)) {
             $this->_serialize_cache[$key] = $value;
+            $this->_serialize_cache_dirty = true;
             return;
         }
 
@@ -49,31 +51,38 @@ trait JsonAttributes
 
     public function create()
     {
-        if ($this->json_attributes)
+        if ($this->_serialize_cache_dirty)
             $this->_invalidate_serialize_cache();
         return parent::create();
     }
 
     public function update()
     {
-        if ($this->json_attributes)
+        if ($this->_serialize_cache_dirty)
             $this->_invalidate_serialize_cache();
         return parent::update();
+    }
+
+    public function changed($field_name = null): bool
+    {
+        if($this->_serialize_cache_dirty)
+            $this->_invalidate_serialize_cache();
+
+        return parent::changed($field_name);
     }
 
 
     protected function _invalidate_serialize_cache(): void
     {
-        if (!$this->json_attributes || !$this->_serialize_cache)
-            return;
+        $this->_serialize_cache_dirty = false;
 
-        foreach ($this->json_attributes as $key) {
+        foreach ($this->_serialize_cache as $key => $value) {
 
-            $value = isset($this->_serialize_cache[$key])
-                ? $this->_serialize_value($this->_serialize_cache[$key])
-                : $this->_serialize_value($this->attributes[$key]);
+            $value = \is_null($value)
+                ? null
+                : $this->_serialize_value($value);
 
-            if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
+            if (!array_key_exists($key, $this->attributes) || $value !== $this->attributes[$key]) {
                 $this->attributes[$key] = $value;
 
                 if ($this->__loaded)
@@ -90,7 +99,9 @@ trait JsonAttributes
     protected function _unserialize_value($key)
     {
         if (!\array_key_exists($key, $this->_serialize_cache)) {
-            assert(is_string($this->attributes[$key]), 'Source field must exist and have string type');
+            assert(array_key_exists($key, $this->attributes) &&
+                (is_string($this->attributes[$key]) || is_null($this->attributes[$key])), 'Source field must exist and have string type or be null');
+
             $this->_serialize_cache[$key] = \json_decode($this->attributes[$key], TRUE);
         }
         return $this->_serialize_cache[$key];
@@ -99,7 +110,7 @@ trait JsonAttributes
 
     public function jsonSerialize()
     {
-        if ($this->_serialize_cache) {
+        if ($this->_serialize_cache_dirty) {
             $this->_invalidate_serialize_cache();
         }
 
