@@ -676,15 +676,35 @@ class HTML
 
 
     public static function csrf_meta() {
-        $request = \Mii::$app->get('request');
-        if ($request->csrf_validation && \Mii::$app->controller && \Mii::$app->controller->csrf_validation) {
-            $token = $request->csrf_token();
-            $name = $request->csrf_token_name;
-            return "<meta name='csrf-token-name' content='$name'>\n<meta name='csrf-token' content='$token'>";
+        $token = \Mii::$app->get('request')->csrf_token();
+        $name = \Mii::$app->get('request')->csrf_token_name;
+        return "<meta name='csrf-token-name' content='$name'>\n<meta name='csrf-token' content='$token'>";
+    }
+
+    public static function text_avatar($name, array $attributes = []) : string
+    {
+        $fl = '';
+
+        if(is_array($name)) {
+            $fl = \mb_strtoupper(\mb_substr($name[0], 0, 1)).
+                \mb_strtoupper(\mb_substr($name[1], 0, 1));
+            $name = $name[0].' '.$name[1];
         } else {
-            return '';
+            $words = \preg_split('/\W+/u', $name, -1, PREG_SPLIT_NO_EMPTY);
+
+            for ($i = 0; $i < 2; $i++) {
+                if (isset($words[$i]))
+                    $fl .= \mb_strtoupper(\mb_substr($words[$i], 0, 1));
+            }
         }
 
+        $color =  'hsl(' . (\crc32($name) % 360) . ', 34%, 77%)';
+
+        $params = [
+            'style' => 'background-color:'.$color
+        ];
+
+        return static::tag('span', $fl, \array_replace($params, $attributes));
     }
 
 }

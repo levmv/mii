@@ -344,18 +344,27 @@ class ORM implements \JsonSerializable
     {
     }
 
+    /**
+     * @deprecated
+     */
     protected function on_after_create(): void
     {
     }
-
+    /**
+     * @deprecated
+     */
     protected function on_after_update(): void
     {
     }
-
+    /**
+     * @deprecated
+     */
     protected function on_after_change(): void
     {
     }
-
+    /**
+     * @deprecated
+     */
     protected function on_after_delete(): void
     {
     }
