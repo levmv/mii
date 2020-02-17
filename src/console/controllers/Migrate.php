@@ -81,6 +81,70 @@ class Migrate extends Controller
 
     }
 
+
+    public function table($name) {
+        $table_info = DB::select("SHOW FULL COLUMNS FROM " . $name)->to_array();
+
+        $columns = [];
+        foreach ($table_info as $info) {
+            $column = [];
+
+            $info = array_change_key_case($info, CASE_LOWER);
+
+            $column_name = $info['field'];
+            $column['allow_null'] = $info['null'] === 'YES';
+            $column['type'] = $info['type'];
+
+            if (preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $info['type'], $matches)) {
+
+                $column['type'] = $this->convert_type_names(strtolower($matches[1]));
+
+                $type = strtolower($matches[1]);
+
+
+                if (!empty($matches[2])) {
+                    if ($type === 'enum') {
+                    } else {
+                        $values = explode(',', $matches[2]);
+                        $column['size'] = (int)$values[0];
+                        if (isset($values[1])) {
+                            $column['scale'] = (int)$values[1];
+                        }
+                        if ($column['size'] === 1 && $type === 'bit') {
+                            $column['type'] = 'boolean';
+                        } elseif ($type === 'bit') {
+                            if ($column['size'] > 32) {
+                                $column['type'] = 'bigint';
+                            } elseif ($column['size'] === 32) {
+                                $column['type'] = 'integer';
+                            }
+                        }
+                    }
+                }
+            }
+            $columns[$column_name] = $column;
+        }
+
+        foreach($columns as $column_name => $column) {
+            $this->stdout("* @property ".str_pad($column['type'], 7)."$".$column_name."\n");
+        }
+    }
+
+    private function convert_type_names($type)
+    {
+
+        if ($type === 'int' || $type === 'smallint' || $type === 'tinyint')
+            return 'int';
+
+        if ($type === 'bigint')
+            return 'bigint';
+
+        if ($type === 'double' || $type === 'float')
+            return 'float';
+
+        return 'string';
+    }
+
     /**
      * Create new migration file
      */
