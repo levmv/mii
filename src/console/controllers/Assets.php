@@ -316,7 +316,7 @@ class Assets extends Controller
                 if (is_file($result_filename)) {
 
                     $files[] = $result_filename;
-                    $hashes .= sha1_file($result_filename, true) . pack('L', filesize($result_filename));
+                    $hashes .= hash_file('sha256', $result_filename, true) . pack('L', filesize($result_filename));
 
                     break;
                 }
@@ -351,8 +351,10 @@ class Assets extends Controller
 
     protected function hash(string $str): string
     {
-        return substr(Text::base64url_encode(md5($str, true)), 0, 8).
-            substr(Text::base64url_encode(sha1($str, true)), 0, 4);
+        return Text::base64url_encode(
+            substr(md5($str, true), 0, 6).
+            substr(sha1($str, true), 0, 1)
+        );
     }
 
 
