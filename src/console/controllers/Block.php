@@ -87,6 +87,17 @@ class Block extends Controller
     }
 
 
+    protected function do_fetch($block)
+    {
+        $this->to_block('unfetch/polyfill/index.js', $block, 'js');
+    }
+
+    protected function do_promise($block)
+    {
+        $this->to_block('promise-polyfill/dist/polyfill.js', $block, 'js');
+    }
+
+
     protected function do_jquery($block) {
         $this->to_block('jquery/dist/jquery.min.js', $block, 'js');
     }
