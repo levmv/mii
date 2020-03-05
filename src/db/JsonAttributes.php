@@ -99,10 +99,13 @@ trait JsonAttributes
     protected function _unserialize_value($key)
     {
         if (!\array_key_exists($key, $this->_serialize_cache)) {
-            assert(array_key_exists($key, $this->attributes) &&
-                (is_string($this->attributes[$key]) || is_null($this->attributes[$key])), 'Source field must exist and have string type or be null');
 
-            $this->_serialize_cache[$key] = \json_decode($this->attributes[$key], TRUE);
+            assert(array_key_exists($key, $this->attributes), 'Source field must exist');
+            assert(is_string($this->attributes[$key]) || is_null($this->attributes[$key]), 'Source field must have string type or be null');
+
+            $this->_serialize_cache[$key] = \is_null($this->attributes[$key])
+                ? null
+                : \json_decode($this->attributes[$key], TRUE);
         }
         return $this->_serialize_cache[$key];
     }
