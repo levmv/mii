@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\db;
 
@@ -15,7 +15,7 @@ class ORM implements \JsonSerializable
     /**
      * @var mixed
      */
-    protected $order_by = false;
+    protected $order_by = null;
 
     /**
      * @var array The model attributes
@@ -25,12 +25,12 @@ class ORM implements \JsonSerializable
     /**
      * @var  array  Data that's changed since the object was loaded
      */
-    protected $_changed = [];
+    protected array $_changed = [];
 
     /**
      * @var boolean Is this model loaded from DB
      */
-    public $__loaded;
+    public ?bool $__loaded = null;
 
 
     /**
@@ -235,6 +235,18 @@ class ORM implements \JsonSerializable
     public function __isset($key)
     {
         return \array_key_exists($key, $this->attributes);
+    }
+
+
+    public function __unset($key) {
+
+        if(\array_key_exists($key, $this->attributes)) {
+            unset($this->attributes[$key]);
+
+            if(isset($this->_changed[$key])) {
+                unset($this->_changed[$key]);
+            }
+        }
     }
 
 

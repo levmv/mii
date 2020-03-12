@@ -1,7 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\log;
-
 
 use mii\core\Component;
 use mii\core\Exception;
@@ -10,13 +9,13 @@ use mii\web\Request;
 
 abstract class Target extends Component
 {
-    protected $levels = Logger::ALL;
+    protected int $levels = Logger::ALL;
 
-    protected $categories;
+    protected array $categories = [];
 
-    protected $except;
+    protected array $except = [];
 
-    protected $exceptions_extended = true;
+    protected bool $exceptions_extended = true;
 
 
     protected function filter(array $messages)
@@ -31,7 +30,7 @@ abstract class Target extends Component
             if (!empty($this->categories)) {
                 foreach ($this->categories as $category) {
                     if ($message[2] === $category ||
-                        substr_compare($category, '*', -1, 1) === 0 && strpos($message[2], rtrim($category, '*')) === 0) {
+                        (\substr_compare($category, '*', -1, 1) === 0 && \strpos($message[2], \rtrim($category, '*')) === 0)) {
 
                         $pass = true;
                         break;
@@ -41,7 +40,7 @@ abstract class Target extends Component
 
             if ($pass && !empty($this->except)) {
                 foreach ($this->except as $category) {
-                    $prefix = rtrim($category, '*');
+                    $prefix = \rtrim($category, '*');
                     if (($message[2] === $category || $prefix !== $category) && strpos($message[2], $prefix) === 0) {
                         $pass = false;
                         break;
@@ -58,7 +57,7 @@ abstract class Target extends Component
         return $messages;
     }
 
-    public function collect(array $messages)
+    public function collect(array $messages) : void
     {
         $messages = $this->filter($messages);
 
@@ -80,9 +79,9 @@ abstract class Target extends Component
 
             if ($msg instanceof \Throwable) {
 
-                if($this->exceptions_extended) {
+                if ($this->exceptions_extended) {
 
-                    if(\Mii::$app instanceof App) {
+                    if (\Mii::$app instanceof App) {
                         $extended = sprintf("\n%s%s %s",
                             \Mii::$app->request->method(),
                             \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
@@ -90,7 +89,7 @@ abstract class Target extends Component
                         );
                     }
 
-                    $extended .= "\n".\mii\util\Debug::short_text_trace($msg->getTrace());
+                    $extended .= "\n" . \mii\util\Debug::short_text_trace($msg->getTrace());
                 }
 
                 $msg = Exception::text($msg);
@@ -102,16 +101,16 @@ abstract class Target extends Component
 
         $prefix = '';
 
-        if(\Mii::$app instanceof App) {
+        if (\Mii::$app instanceof App) {
 
             $request = \Mii::$app->request;
             $ip = ($request instanceof Request) ? $request->get_ip() : '-';
 
             $user_id = '-';
 
-            if(\Mii::$app->has('auth')) {
+            if (\Mii::$app->has('auth')) {
                 $user = \Mii::$app->auth->get_user();
-                if($user !== null) {
+                if ($user !== null) {
                     $user_id = $user->id;
                 }
             }

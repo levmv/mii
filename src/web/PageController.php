@@ -1,53 +1,54 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\web;
 
 use Mii;
+use mii\core\ACL;
 
 class PageController extends Controller
 {
     /**
      * @var \mii\core\ACL Access Control List object
      */
-    public $acl;
+    public ?ACL $acl = null;
 
     /**
      * @var Block
      */
     public $index_block;
 
-    public $index_block_name = 'index';
+    public string $index_block_name = 'index';
 
     /**
      * @var Block
      */
     public $layout = false;
 
-    public $layout_block_name = 'layout';
+    public string $layout_block_name = 'layout';
 
-    public $layout_depends = [];
+    public array $layout_depends = [];
 
     /**
      * @var string Site title
      */
-    public $title = '';
+    public string $title = '';
 
     /**
      * @var string Site description
      */
-    public $description = '';
+    public string $description = '';
 
     /**
      * @var array OpenGraph parameters
      */
-    public $og = [];
+    public array $og = [];
 
     /**
      * @var array Links (rel="prev|next")
      */
-    public $links = [];
+    public array $links = [];
 
-    public $render_layout = true;
+    public bool $render_layout = true;
 
     protected function access_rules() {
     }

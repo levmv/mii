@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\util;
 
@@ -320,7 +320,7 @@ class Arr
         $flat = array();
         foreach ($array as $key => $value) {
             if (\is_array($value)) {
-                $flat = array_merge($flat, static::flatten($value));
+                $flat = \array_merge($flat, static::flatten($value));
             } else {
                 if ($is_assoc) {
                     $flat[$key] = $value;
@@ -333,7 +333,7 @@ class Arr
     }
 
 
-    public static function to_array($object, $properties = [], $recursive = true) {
+    public static function to_array($object, array $properties = [], bool $recursive = true) {
         if (\is_array($object)) {
             if ($recursive) {
                 foreach ($object as $key => $value) {

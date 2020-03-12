@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\db;
 
@@ -58,15 +58,17 @@ trait JsonAttributes
 
     public function update()
     {
-        if ($this->_serialize_cache_dirty)
+        if ($this->_serialize_cache_dirty) {
             $this->_invalidate_serialize_cache();
+        }
         return parent::update();
     }
 
     public function changed($field_name = null): bool
     {
-        if($this->_serialize_cache_dirty)
+        if($this->_serialize_cache_dirty) {
             $this->_invalidate_serialize_cache();
+        }
 
         return parent::changed($field_name);
     }
@@ -101,7 +103,7 @@ trait JsonAttributes
         if (!\array_key_exists($key, $this->_serialize_cache)) {
 
             assert(array_key_exists($key, $this->attributes), 'Source field must exist');
-            assert(is_string($this->attributes[$key]) || is_null($this->attributes[$key]), 'Source field must have string type or be null');
+            assert(is_string($this->attributes[$key]) || \is_null($this->attributes[$key]), 'Source field must have string type or be null');
 
             $this->_serialize_cache[$key] = \is_null($this->attributes[$key])
                 ? null

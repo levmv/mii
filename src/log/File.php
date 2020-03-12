@@ -14,23 +14,24 @@ class File extends Target
     {
         parent::init($config);
 
-        $this->file = Mii::resolve($this->file);
-
-        FS::mkdir(\dirname($this->file));
     }
 
 
     public function process(array $messages)
     {
+        $this->file = Mii::resolve($this->file);
+        FS::mkdir(\dirname($this->file));
+
         $text = implode("\n", array_map([$this, 'format_message'], $messages)) . "\n";
 
-        if (($fp = @fopen($this->file, 'a')) === false) {
-            throw new ErrorException("Unable to append to log file: {$this->file}");
+        if (($fp = fopen($this->file, 'a')) === false) {
+            error_log("Unable to append to log file: {$this->file}");
+            return;
         }
-        @flock($fp, LOCK_EX);
-        @fwrite($fp, $text);
-        @flock($fp, LOCK_UN);
-        @fclose($fp);
+        flock($fp, LOCK_EX);
+        fwrite($fp, $text);
+        flock($fp, LOCK_UN);
+        fclose($fp);
     }
 
 

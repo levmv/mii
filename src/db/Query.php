@@ -52,10 +52,10 @@ class Query
     protected $_quoted_select = [];
 
     // DISTINCT
-    protected $_distinct = false;
+    protected bool $_distinct = false;
 
     // FROM ...
-    protected $_from = [];
+    protected array $_from = [];
 
     // JOIN ...
     protected $_joins = [];
@@ -199,12 +199,9 @@ class Query
      * @param   mixed $table table name or array($table, $alias) or object
      * @return  $this
      */
-    public function from(...$tables) {
-        if(empty($this->_from)) {
-            $this->_from = $tables;
-        } else {
-            $this->_from = \array_merge($this->_from, $tables);
-        }
+    public function from($table) {
+
+        $this->_from[] = $table;
 
         return $this;
     }
@@ -762,9 +759,6 @@ class Query
      */
     public function compile_select(): string {
 
-        // Callback to quote tables
-        $quote_table = [$this->db, 'quote_table'];
-
         // Start a selection query
         $query = 'SELECT ';
 
@@ -775,7 +769,7 @@ class Query
 
 
         if(empty($this->_select)) {
-            $query .= implode(', ', $this->_quoted_select);
+            $query .= \implode(', ', $this->_quoted_select);
         } else {
 
             $columns = $this->_quoted_select;
@@ -794,10 +788,14 @@ class Query
             $query .= \implode(', ', \array_unique($columns));
         }
 
-        if (!empty($this->_from)) {
-            // Set tables to select from
-            $query .= ' FROM ' . \implode(', ', \array_map($quote_table, $this->_from));
+        if(\count($this->_from) === 1) {
+            $query .= ' FROM '.$this->db->quote_table($this->_from[0]);
+        } else {
+            if (!empty($this->_from)) {
+                $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quote_table'], $this->_from));
+            }
         }
+
 
         if (!empty($this->_joins)) {
             // Add tables to join
@@ -1009,11 +1007,6 @@ class Query
             } else {
                 // Apply proper quoting to the column
                 $column = $this->db->quote_column($column);
-            }
-
-            if ($direction) {
-                // Make the direction uppercase
-                $direction = ' ' . \strtoupper($direction);
             }
 
             $sort[] = $column . ' ' . $direction;

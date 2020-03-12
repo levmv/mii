@@ -43,7 +43,7 @@ class BaseBlocks extends Component
         parent::init($config);
 
         if (empty($this->sets)) {
-            $this->sets[] = [
+            $this->sets['default'] = [
                 'libraries' => [
                     '@app/blocks'
                 ],

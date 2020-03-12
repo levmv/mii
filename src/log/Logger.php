@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\log;
 
@@ -6,32 +6,32 @@ use mii\core\Component;
 
 class Logger extends Component
 {
-    public $targets = [];
+    public array $targets = [];
 
-    public $targets_objs = [];
+    public array $targets_objs = [];
 
-    const DEBUG = 1;
-    const INFO = 2;
-    const NOTICE = 4;
-    const WARNING = 8;
-    const ERROR = 16;
-    const CRITICAL = 32;
-    const ALERT = 64;
-    const ALL = 127;
+    public const DEBUG = 1;
+    public const INFO = 2;
+    public const NOTICE = 4;
+    public const WARNING = 8;
+    public const ERROR = 16;
+    public const CRITICAL = 32;
+    public const ALERT = 64;
+    public const ALL = 127;
 
-    public static $level_names = [
-        1 => 'dbg',
-        2 => 'inf',
+    public static array $level_names = [
+        1 => 'debug',
+        2 => 'info',
         4 => 'notice',
         8 => 'warn',
-        16 => 'err',
+        16 => 'error',
         32 => 'crit',
         64 => 'alert'
     ];
 
-    protected $messages = [];
+    protected array $messages = [];
 
-    protected $flush_interval = 5;
+    protected int $flush_interval = 5;
 
     public function init(array $config = []): void
     {

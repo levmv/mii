@@ -212,12 +212,12 @@ class Database extends Component
     public function quote($value): string {
         if (\is_null($value)) {
             return 'NULL';
+        } elseif (\is_int($value)) {
+            return (int)$value;
         } elseif ($value === true) {
             return "'1'";
         } elseif ($value === false) {
             return "'0'";
-        } elseif (\is_int($value)) {
-            return (int)$value;
         } elseif (\is_float($value)) {
             // Convert to non-locale aware float to prevent possible commas
             return sprintf('%F', $value);
@@ -426,7 +426,7 @@ class Database extends Component
     public function quote_table($table): string {
         if (\is_array($table)) {
             list($table, $alias) = $table;
-            $alias = str_replace('`', '``', $alias);
+            $alias = \str_replace('`', '``', $alias);
         }
 
         if ($table instanceof Query) {
@@ -439,17 +439,17 @@ class Database extends Component
             // Convert to a string
             $table = (string)$table;
 
-            $table = str_replace('`', '``', $table);
+            $table = \str_replace('`', '``', $table);
 
-            if (strpos($table, '.') !== false) {
-                $parts = explode('.', $table);
+            if (\strpos($table, '.') !== false) {
+                $parts = \explode('.', $table);
 
                 foreach ($parts as & $part) {
                     // Quote each of the parts
                     $part = '`' . $part . '`';
                 }
 
-                $table = implode('.', $parts);
+                $table = \implode('.', $parts);
             } else {
                 // Add the table prefix
                 $table = "`$table`";

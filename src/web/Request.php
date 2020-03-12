@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\web;
 
@@ -15,8 +15,6 @@ class Request extends Component
     const DELETE = 'DELETE';
     const HEAD = 'HEAD';
     const OPTIONS = 'OPTIONS';
-    const TRACE = 'TRACE';
-    const CONNECT = 'CONNECT';
 
     /**
      * @var  string  method: GET, POST, PUT, DELETE, HEAD, etc
@@ -385,9 +383,9 @@ class Request extends Component
         // Find the position of the split between salt and contents
         $sign_len = \strlen($this->salt($key, ''));
 
-        if (strlen($cookie) > $sign_len) {
-            $sign = substr($cookie, 0, $sign_len);
-            $value = substr($cookie, $sign_len);
+        if (\strlen($cookie) > $sign_len) {
+            $sign = \substr($cookie, 0, $sign_len);
+            $value = \substr($cookie, $sign_len);
 
             if ($this->salt($key, $value) === $sign) {
                 // Cookie signature is valid
@@ -454,7 +452,7 @@ class Request extends Component
         unset($_COOKIE[$name]);
 
         // Nullify the cookie and make it expire
-        return \setcookie($name, null, -86400, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
+        return \setcookie($name, '', -86400, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
     }
 
 
@@ -474,6 +472,6 @@ class Request extends Component
             );
         }
 
-        return substr(\mii\util\Text::base64url_encode(\md5($name . $value . $this->cookie_salt, true)), 0, 20);
+        return \substr(\mii\util\Text::base64url_encode(\md5($name . $value . $this->cookie_salt, true)), 0, 20);
     }
 }

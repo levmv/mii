@@ -63,8 +63,8 @@ class Opcache extends Cache
         $val = var_export($data, true);
         // Write to temp file first to ensure atomicity
         $tmp = tempnam("/tmp", "ocache");
-        if(@file_put_contents($tmp, '<?php $ttl = '.(time()+$lifetime).'; $val = ' . $val . ';', LOCK_EX)
-            && @rename($tmp, $filename)) {
+        if(file_put_contents($tmp, '<?php $ttl = '.(time()+$lifetime).'; $val = ' . $val . ';', LOCK_EX)
+            && rename($tmp, $filename)) {
 
             opcache_invalidate($filename, true);
             return true;
@@ -85,7 +85,7 @@ class Opcache extends Cache
      */
     public function delete($id) {
         $filename = $this->cache_file($id);
-        @unlink($filename);
+        unlink($filename);
 
         return opcache_invalidate($filename, true);
     }

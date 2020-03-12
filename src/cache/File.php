@@ -34,15 +34,15 @@ class File extends Cache
 
         $filename = $this->cache_file($id);
 
-        if (@filemtime($filename) > time()) {
-            $fp = @fopen($filename, 'r');
+        if (\filemtime($filename) > time()) {
+            $fp = \fopen($filename, 'r');
             if ($fp !== false) {
-                @flock($fp, LOCK_SH);
-                $value = @stream_get_contents($fp);
-                @flock($fp, LOCK_UN);
-                @fclose($fp);
+                \flock($fp, LOCK_SH);
+                $value = stream_get_contents($fp);
+                \flock($fp, LOCK_UN);
+                \fclose($fp);
 
-                return $this->serialize ? unserialize($value) : $value;
+                return $this->serialize ? \unserialize($value) : $value;
             }
         }
 
@@ -67,14 +67,14 @@ class File extends Cache
         if ($this->directory_level > 0) {
             FS::mkdir(\dirname($filename), $this->chmode);
         }
-        if (@file_put_contents($filename, $this->serialize ? serialize($data) : $data, LOCK_EX) !== false) {
+        if (\file_put_contents($filename, $this->serialize ? \serialize($data) : $data, LOCK_EX) !== false) {
             if ($this->chmode !== null) {
-                @chmod($filename, $this->chmode);
+                \chmod($filename, $this->chmode);
             }
             if ($lifetime <= 0) {
                 $lifetime = 60*60*24*7;
             }
-            return @touch($filename, $lifetime + time());
+            return touch($filename, $lifetime + time());
         }
         $error = error_get_last();
 
@@ -90,7 +90,7 @@ class File extends Cache
      * @return  boolean
      */
     public function delete($id) {
-        return @unlink($this->cache_file($id));
+        return unlink($this->cache_file($id));
     }
 
     /**

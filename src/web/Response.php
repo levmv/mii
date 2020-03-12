@@ -162,6 +162,8 @@ class Response extends Component
 
         $this->send_headers();
         $this->send_content();
+
+        // todo: fastcgi_finish_request();
     }
 
 
