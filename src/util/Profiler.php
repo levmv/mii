@@ -45,8 +45,8 @@ class Profiler
             'name' => (string)$name,
 
             // Start the benchmark
-            'start_time' => microtime(true),
-            'start_memory' => memory_get_usage(),
+            'start_time' => \hrtime(true)/1e9,
+            'start_memory' => \memory_get_usage(),
 
             // Set the stop keys without values
             'stop_time' => false,
@@ -66,8 +66,8 @@ class Profiler
      */
     public static function stop($token) {
         // Stop the benchmark
-        Profiler::$_marks[$token]['stop_time'] = microtime(true);
-        Profiler::$_marks[$token]['stop_memory'] = memory_get_usage();
+        Profiler::$_marks[$token]['stop_time'] = \hrtime(true)/1e9;
+        Profiler::$_marks[$token]['stop_memory'] = \memory_get_usage();
     }
 
     /**
@@ -263,8 +263,8 @@ class Profiler
 
         if ($mark['stop_time'] === false) {
             // The benchmark has not been stopped yet
-            $mark['stop_time'] = microtime(true);
-            $mark['stop_memory'] = memory_get_usage();
+            $mark['stop_time'] = \hrtime(true)/1e9;
+            $mark['stop_memory'] = \memory_get_usage();
         }
 
         return [
@@ -311,10 +311,10 @@ class Profiler
             throw new Exception("Probably you disabled asserts. Please set \"zend.assertions = 1\" in php.ini");
 
         // Get the application run time
-        $time = microtime(TRUE) - MII_START_TIME;
+        $time = \hrtime(TRUE)/1e9 - MII_START_TIME;
 
         // Get the total memory usage
-        $memory = memory_get_usage() - MII_START_MEMORY;
+        $memory = \memory_get_usage() - MII_START_MEMORY;
 
         // Calculate max time
         if ($stats['max']['time'] === null OR $time > $stats['max']['time']) {
