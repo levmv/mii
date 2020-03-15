@@ -280,6 +280,8 @@ class Text
         // Transliterate value to ASCII
         $value = UTF8::transliterate_to_ascii($value);
 
+        $value = UTF8::strip_non_ascii($value);
+
         // Set preserved characters
         $preserved_characters = preg_quote($separator);
 
