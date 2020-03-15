@@ -94,7 +94,7 @@ trait JsonAttributes
 
     protected function _serialize_value($value)
     {
-        return \json_encode($value, JSON_UNESCAPED_UNICODE);
+        return \json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     protected function _unserialize_value($key)
