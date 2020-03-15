@@ -30,11 +30,10 @@ trait JsonAttributes
             return;
         }
 
-        if ($this->__loaded === true) {
-            if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
-                $this->_changed[$key] = true;
-            }
+        if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
+            $this->_changed[$key] = true;
         }
+
         $this->attributes[$key] = $value;
     }
 
