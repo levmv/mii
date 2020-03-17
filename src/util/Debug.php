@@ -68,7 +68,7 @@ class Debug
                 // Disable notices
                 $error_reporting = error_reporting(~E_NOTICE);
                 // iconv is expensive, so it is only used when needed
-                $var = iconv(\Mii::$app->charset, \Mii::$app->charset . '//IGNORE', $var);
+                $var = iconv('UTF-8', 'UTF-8//IGNORE', $var);
                 // Turn notices back on
                 error_reporting($error_reporting);
             }

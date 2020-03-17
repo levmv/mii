@@ -180,7 +180,7 @@ class Text
 
         $regex = '!' . $regex . '!ui';
 
-        if (mb_strlen($replacement, \Mii::$app->charset) == 1) {
+        if (\mb_strlen($replacement) == 1) {
             $regex .= 'e';
             return preg_replace($regex, 'str_repeat($replacement, UTF8::strlen(\'$1\'))', $str);
         }

@@ -12,9 +12,6 @@ use Mii;
  */
 abstract class App
 {
-
-    public $charset = 'UTF-8';
-
     public $locale; //'ru_RU.UTF-8';
 
     public $language = 'ru';

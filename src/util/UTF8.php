@@ -132,7 +132,7 @@ class UTF8
             return ucfirst($str);
 
         preg_match('/^(.?)(.*)$/us', $str, $matches);
-        return mb_strtoupper($matches[1], \Mii::$app->charset) . $matches[2];
+        return mb_strtoupper($matches[1]) . $matches[2];
     }
 
 
