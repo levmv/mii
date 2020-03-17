@@ -193,6 +193,12 @@ class Database extends Component
     }
 
 
+    public function auto_native_types(bool $enable) : void
+    {
+        $this->_connection->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, $enable);
+    }
+
+
     /**
      * Quote a value for an SQL query.
      *
