@@ -34,8 +34,8 @@ class File extends Cache
 
         $filename = $this->cache_file($id);
 
-        if (\filemtime($filename) > time()) {
-            $fp = \fopen($filename, 'r');
+        if (@\file_exists($filename) && @\filemtime($filename) > time()) {
+            $fp = @\fopen($filename, 'r');
             if ($fp !== false) {
                 \flock($fp, LOCK_SH);
                 $value = stream_get_contents($fp);
