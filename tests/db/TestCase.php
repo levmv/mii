@@ -6,6 +6,7 @@ use mii\db\ORM;
 use yiiunit\TestCase as TestCase;
 
 class User extends ORM {};
+
 abstract class DatabaseTestCase extends TestCase
 {
     protected $database;

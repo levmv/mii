@@ -6,9 +6,10 @@ use mii\core\ACL;
 use mii\db\Query;
 use mii\tests\TestCase;
 use mii\util\URL;
+use mii\web\Request;
 
 
-class BuilderTest extends TestCase
+class UrlTest extends TestCase
 {
 
 
@@ -17,11 +18,12 @@ class BuilderTest extends TestCase
         parent::setUp();
 
         $_SERVER['HTTP_HOST'] = 'test.com';
+        $_SERVER['SERVER_NAME'] = '';
+        $_SERVER['REQUEST_URI'] = "/";
 
         $this->mockWebApplication(
             [
-                'app' => [
-                ]
+
             ]
         );
     }
@@ -61,8 +63,5 @@ class BuilderTest extends TestCase
         \Mii::$app->request->uri("/test");
         $this->assertEquals('/test', URL::current());
     }
-
-
-
 
 }

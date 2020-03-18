@@ -24,7 +24,7 @@ class BuilderTest extends TestCase
                             'hostname'   => 'localhost',
                             'username'   => 'root',
                             'password'   => 'localroot',
-                            'database'   => 'storetest',
+                            'database'   => 'miitest',
                         ],
                         'charset'      => 'utf8'
                     ],
@@ -46,11 +46,21 @@ class BuilderTest extends TestCase
             "SELECT `name` FROM `table` WHERE `field` = 1");
     }
 
+    public function testEscape() {
+        $this->assertEquals(
+
+            (new Query())
+                ->select(['name"\''])
+                ->from('table"\"`')
+                ->where('field`\'', '=', '",`')
+                ->compile(),
+
+            'SELECT `name"\'` FROM `table"\"``` WHERE `field``\'` = \'\",`\''
+        );
+    }
+
 
     public function testExtSelect() {
-        \Mii::$app->db->escape('%sdfsdf%%sfg%_');
-        echo \Mii::$app->db;
-        exit;
 
         $this->assertEquals(
 

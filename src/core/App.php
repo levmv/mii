@@ -12,11 +12,11 @@ use Mii;
  */
 abstract class App
 {
-    public $locale; //'ru_RU.UTF-8';
+    public $locale = null; //'ru_RU.UTF-8';
 
     public $language = 'ru';
 
-    public $timezone;
+    public $timezone = null;
 
     public $controller;
 
@@ -37,7 +37,7 @@ abstract class App
         }
 
         if ($this->locale !== null)
-            \setlocale(LC_ALL, $this->locale);
+            \setlocale(LC_COLLATE | LC_CTYPE | LC_TIME, $this->locale);
 
         if ($this->timezone !== null)
             \date_default_timezone_set($this->timezone);

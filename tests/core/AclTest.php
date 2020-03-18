@@ -18,20 +18,19 @@ class AclTest extends TestCase
 
     public function testRules() {
         $acl = new ACL();
-        $acl->allow('admin', '*', '*');
-        $acl->allow('guest', AclTest::class, 'testRules');
-        $acl->allow('foo', '*', 'bar');
+        $acl->allow('admin', '*');
+        $acl->allow('guest', 'testRules');
+        $acl->allow('foo', 'bar');
 
 
         $this->assertTrue($acl->check('admin'));
-        $this->assertTrue($acl->check('guest', AclTest::class, 'testRules'));
-        $this->assertFalse($acl->check('guest', AclTest::class, 'bar'));
-        $this->assertFalse($acl->check('guest', 'SomethingElse', 'testRules'));
-        $this->assertTrue($acl->check('foo', AclTest::class, 'bar'));
-        $this->assertFalse($acl->check('foo', '*', 'bar2'));
+        $this->assertTrue($acl->check('guest', 'testRules'));
+        $this->assertFalse($acl->check('guest', 'bar'));
+        $this->assertTrue($acl->check('foo', 'bar'));
+        $this->assertFalse($acl->check('foo',  'bar2'));
+
+        $this->assertTrue($acl->check(['admin', 'foo'], 'bar'));
     }
-
-
 
 
 }
