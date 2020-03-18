@@ -155,7 +155,7 @@ class Session extends Component
      *
      *     $session->delete('foo');
      *
-     * @param   string $key,... variable name
+     * @param array $args
      * @return  $this
      */
     public function delete(...$args) {
@@ -173,6 +173,7 @@ class Session extends Component
      *
      *     $id = $session->regenerate();
      *
+     * @param bool $delete_old
      * @return  string
      */
     public function regenerate($delete_old = false) {

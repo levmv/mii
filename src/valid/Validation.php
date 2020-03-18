@@ -312,15 +312,16 @@ class Validation
      *     // Get errors from messages/forms/login.php
      *     $errors = $Validation->errors('forms/login');
      *
-     * @param   string $file file to load error messages from
-     * @param   mixed $translate translate the message
+     * @param string $file file to load error messages from
+     * @param mixed $translate translate the message
      * @return  array
+     * @throws \Exception
      */
     public function errors($file = null, $translate = false) {
         if ($file === NULL) {
             // Return the error list
             return $this->_errors;
-        };
+        }
 
         // Create a new message list
         $messages = [];

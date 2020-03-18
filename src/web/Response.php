@@ -107,7 +107,6 @@ class Response extends Component
      *
      * @param integer $status Status to set to this response
      * @return  mixed
-     * @throws Exception
      */
     public function status(int $status = NULL)
     {

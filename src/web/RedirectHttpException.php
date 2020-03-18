@@ -14,5 +14,3 @@ class RedirectHttpException extends Exception
     }
 
 }
-
-;

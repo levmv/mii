@@ -29,11 +29,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     /**
      * Sets the total number of rows and stores the result locally.
      *
-     * @param   mixed $result query result
-     * @param   string $sql SQL query
-     * @param   mixed $as_object
-     * @param   array $params
-     * @return  void
+     * @param mixed $result query result
+     * @param mixed $as_object
+     * @param array $params
      */
     public function __construct($result, $as_object = false, array $params = NULL) {
         // Store the result locally
@@ -158,7 +156,8 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     /**
      * Return all of the rows in the result as an array.
-     *
+     * @param array $properties
+     * @return array
      */
     public function to_array(array $properties = []): array {
         if (empty($properties)) {

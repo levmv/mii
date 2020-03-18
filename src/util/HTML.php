@@ -255,15 +255,14 @@ class HTML
      * @param   string $file file name
      * @param   array $attributes default attributes
      * @param   mixed $protocol protocol to pass to URL::base()
-     * @param   boolean $index include the index page
      * @return  string
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function image($file, array $attributes = NULL, $protocol = NULL, $index = FALSE) {
+    public static function image($file, array $attributes = NULL, $protocol = NULL) {
         if (strpos($file, '://') === FALSE) {
             // Add the base URL
-            $file = URL::site($file, $protocol, $index);
+            $file = URL::site($file, $protocol);
         }
 
         // Add the image link

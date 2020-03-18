@@ -33,6 +33,7 @@ class Rules
     /**
      * Checks if a field is not empty.
      *
+     * @param $value
      * @return  boolean
      */
     public static function not_empty($value) {
@@ -475,9 +476,11 @@ class Rules
      *     $array->rule('file', 'file_size', array(':value', '1M'))
      *     $array->rule('file', 'file_size', array(':value', '2.5KiB'))
      *
-     * @param   array $file $_FILES item
-     * @param   string $size maximum file size allowed
+     * @param UploadedFile $file $_FILES item
+     * @param string $size maximum file size allowed
+     * @param int $dir
      * @return  bool
+     * @throws \mii\core\Exception
      */
     public static function file_size(UploadedFile $file, $size, $dir = -1) {
         if ($file->error === UPLOAD_ERR_INI_SIZE) {

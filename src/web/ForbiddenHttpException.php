@@ -13,5 +13,3 @@ class ForbiddenHttpException extends HttpException
     }
 
 }
-
-;

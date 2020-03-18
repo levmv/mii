@@ -91,8 +91,7 @@ class Query
     /**
      * Creates a new SQL query of the specified type.
      *
-     * @param   integer $type query type: Database::SELECT, Database::INSERT, etc
-     * @param   string $sql query string
+     * @param integer $type query type: Database::SELECT, Database::INSERT, etc
      */
     public function __construct($type = NULL) {
         $this->_type = $type;
@@ -142,7 +141,8 @@ class Query
     /**
      * Sets the initial columns to select
      *
-     * @param   array $columns column list
+     * @param array $columns column list
+     * @param bool $already_quoted
      * @return  Query
      */
     public function select(array $columns = null, bool $already_quoted = false) {
@@ -243,7 +243,7 @@ class Query
     /**
      * Adds "USING ..." conditions for the last created JOIN statement.
      *
-     * @param   string $columns column name
+     * @param mixed ...$columns column name
      * @return  $this
      */
     public function using(...$columns) {
@@ -610,7 +610,7 @@ class Query
     /**
      * Use a sub-query to for the inserted values.
      *
-     * @param   object $query Database_Query of SELECT type
+     * @param Query $query Database_Query of SELECT type
      * @return  $this
      */
     public function subselect(Query $query) {
@@ -1050,12 +1050,13 @@ class Query
     /**
      * Execute the current query on the given database.
      *
-     * @param   mixed $db Database instance or name of instance
-     * @param   mixed   result object classname or null for array
-     * @param   array    result object constructor arguments
+     * @param mixed $db Database instance or name of instance
+     * @param mixed   result object classname or null for array
+     * @param array    result object constructor arguments
      * @return  Result   Result for SELECT queries
      * @return  mixed    the insert id for INSERT queries
      * @return  integer  number of affected rows for all other queries
+     * @throws DatabaseException
      */
     public function execute(Database $db = NULL, $as_object = null, $object_params = NULL) {
 

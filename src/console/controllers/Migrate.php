@@ -233,7 +233,7 @@ class ' . $name . ' {
             if ($obj->up() === false) {
                 $this->error('Migration #:name failed. Stop.', [':name' => $name]);
                 return;
-            };
+            }
 
             DB::begin();
             try {

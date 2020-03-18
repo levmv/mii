@@ -33,7 +33,7 @@ class Router extends Component
         'path' => '[a-zA-Z0-9-_./]+'
     ];
 
-    protected $cache = false;
+    protected ?string $cache = null;
 
     protected $cache_id = 'mii_core_router_routes';
 
