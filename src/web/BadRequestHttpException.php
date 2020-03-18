@@ -15,5 +15,3 @@ class BadRequestHttpException extends HttpException
     }
 
 }
-
-;

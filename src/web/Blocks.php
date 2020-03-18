@@ -70,7 +70,9 @@ class Blocks extends BaseBlocks
     /**
      * Recursively process a block and its dependencies
      *
-     * @param $block_name
+     * @param string $block_name
+     * @param string $parent_block
+     * @param array $depends
      */
     public function process_block_assets($block_name, $parent_block, $depends): void {
 
@@ -114,7 +116,7 @@ class Blocks extends BaseBlocks
                     $position = $settings['position'];
                     unset($settings['position']);
                 } else {
-                    $position = Blocks::END;;
+                    $position = Blocks::END;
                 }
                 $this->_files['js'][$parent_block]['remote'][$position][] = HTML::script($link, $settings);
             }

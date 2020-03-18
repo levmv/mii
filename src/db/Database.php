@@ -330,7 +330,7 @@ class Database extends Component
     }
 
 
-    public function get_lock($name, $timeout = 0) {
+    public function get_lock($name, $timeout = 0) : bool {
 
         return (bool)$this->query(
             static::SELECT,
@@ -342,7 +342,7 @@ class Database extends Component
     }
 
 
-    public function release_lock($name) {
+    public function release_lock($name) : bool {
         return (bool)$this->query(
             static::SELECT,
             strtr('SELECT RELEASE_LOCK(:name)', [

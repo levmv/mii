@@ -12,17 +12,17 @@ use Mii;
  */
 abstract class App
 {
-    public $locale; //'ru_RU.UTF-8';
+    public ?string $locale = null; //'ru_RU.UTF-8';
 
-    public $language = 'ru';
+    public string $language = 'ru';
 
-    public $timezone;
+    public ?string $timezone = null;
 
     public $controller;
 
     public $_config;
 
-    public $base_url;
+    public ?string $base_url = null;
 
 
     public function __construct(array $config = [])

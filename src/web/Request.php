@@ -205,8 +205,8 @@ class Request extends Component
     /**
      *  Returns GET parameter with a given name. If name isn't specified, returns an array of all GET parameters.
      *
-     * @param string $name the parameter name
-     * @param string $value the default parameter value if the parameter does not exist.
+     * @param null $key
+     * @param null $default
      * @return  mixed
      */
     public function get($key = null, $default = null)

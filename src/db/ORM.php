@@ -120,6 +120,7 @@ class ORM implements \JsonSerializable
 
     /**
      * @param bool $with_order
+     * @param Query|null $query
      * @return Query
      */
     public function select_query($with_order = true, Query $query = null): Query
@@ -164,7 +165,7 @@ class ORM implements \JsonSerializable
      * @param string $display the value to use for the display
      * @param string $first first value
      *
-     * @return Result
+     * @return array
      * @deprecated
      */
     public static function select_list($key, $display, $first = NULL)
@@ -262,6 +263,7 @@ class ORM implements \JsonSerializable
     /**
      * Gets an array version of the model
      *
+     * @param array $properties
      * @return array
      */
     public function to_array(array $properties = []): array
@@ -287,7 +289,7 @@ class ORM implements \JsonSerializable
         }
 
         if (\is_array($field_name)) {
-            return \count(\array_intersect($field_name, \array_keys($this->_changed)));
+            return (bool) \count(\array_intersect($field_name, \array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);

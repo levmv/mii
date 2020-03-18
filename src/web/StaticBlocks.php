@@ -26,7 +26,9 @@ class StaticBlocks extends BaseBlocks
     /**
      * Recursively process a block and its dependencies
      *
-     * @param $block_name
+     * @param string $block_name
+     * @param string $parent_block
+     * @param array $depends
      */
     public function static_process_block_assets($block_name, $parent_block, $depends): void {
         if (isset($this->_used_blocks[$block_name])) {

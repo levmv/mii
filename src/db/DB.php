@@ -11,6 +11,7 @@ class DB
 
     /**
      * @param string $q
+     * @param array $params
      * @return Result
      */
     static function select(string $q, array $params = []) {
@@ -49,6 +50,7 @@ class DB
 
     /**
      * @param string $q
+     * @param array $params
      * @return int
      */
     static function alter(string $q, array $params = []): int {
@@ -57,6 +59,7 @@ class DB
 
     /**
      * @param string $q
+     * @param array $params
      * @return int
      */
     static function update(string $q, array $params = []): int {
@@ -65,6 +68,7 @@ class DB
 
     /**
      * @param string $q
+     * @param array $params
      * @return Result
      */
     static function insert(string $q, array $params = []) {
@@ -73,6 +77,7 @@ class DB
 
     /**
      * @param string $q
+     * @param array $params
      * @return int
      */
     static function delete(string $q, array $params = []): int {

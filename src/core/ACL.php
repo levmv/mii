@@ -8,7 +8,7 @@ class ACL
     /**
      * @var array ACL rules
      */
-    public $_rules = [];
+    private array $_rules = [];
 
 
     /**

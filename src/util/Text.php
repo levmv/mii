@@ -266,8 +266,8 @@ class Text
      *
      *     echo Text::title('Мой блог пост'); // "moi-blog-post"
      *
-     * @param   string $title Phrase to convert
-     * @param   string $separator Word separator (any single character)
+     * @param $text
+     * @param string $separator Word separator (any single character)
      * @return  string
      * @uses    UTF8::ru_translit
      * @uses    UTF8::transliterate_to_ascii
@@ -365,8 +365,7 @@ class Text
         // Find the actual unit, assume B if no unit specified
         $unit = $matches[2] ?? 'B';
         // Convert the size into bytes
-        $bytes = $size * pow(2, Text::$byte_units[$unit]);
-        return $bytes;
+        return $size * pow(2, Text::$byte_units[$unit]);
     }
 
 
