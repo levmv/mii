@@ -100,6 +100,7 @@ class Database extends Component
      * @param mixed $as_object result object class string, TRUE for stdClass, FALSE for assoc array
      * @param array $params object construct parameters for result class
      * @return  Result|null   Result for SELECT queries or null
+     * @throws DatabaseException
      */
     public function query(?int $type, string $sql, $as_object = false, array $params = NULL): ?Result {
         // Make sure the database is connected
@@ -129,6 +130,35 @@ class Database extends Component
             // Return an iterator of results
             return new Result($result, $as_object, $params);
         }
+
+        return null;
+    }
+
+
+    public function multi_query(string $sql): ?Result {
+        // Make sure the database is connected
+        $this->_connection or $this->connect();
+
+        assert(
+            config('debug') &&
+            ($benchmark = \mii\util\Profiler::start("Database", $sql)) ||
+            true
+        );
+
+        // Execute the query
+        $result = $this->_connection->multi_query($sql);
+        $affected_rows = 0;
+        do {
+            $affected_rows += $this->_connection->affected_rows;
+        } while ($this->_connection->more_results() && $this->_connection->next_result());
+
+        if ($result === false || $this->_connection->errno) {
+            assert(isset($benchmark) && \mii\util\Profiler::delete($benchmark) || true);
+
+            throw new DatabaseException("{$this->_connection->error} [ $sql ]", $this->_connection->errno);
+        }
+
+        assert(isset($benchmark) && \mii\util\Profiler::stop($benchmark) || true);
 
         return null;
     }
@@ -213,6 +243,7 @@ class Database extends Component
      *
      * @param mixed $value any value to quote
      * @return  string
+     * @throws DatabaseException
      * @uses    Database::escape
      */
     public function quote($value): string {
@@ -287,6 +318,7 @@ class Database extends Component
      *
      * @param string $mode transaction mode
      * @return  boolean
+     * @throws DatabaseException
      */
     public function begin($mode = NULL) {
         // Make sure the database is connected
@@ -306,6 +338,7 @@ class Database extends Component
      *     $db->commit();
      *
      * @return  boolean
+     * @throws DatabaseException
      */
     public function commit() {
         // Make sure the database is connected
@@ -321,6 +354,7 @@ class Database extends Component
      *     $db->rollback();
      *
      * @return  boolean
+     * @throws DatabaseException
      */
     public function rollback() {
         // Make sure the database is connected
