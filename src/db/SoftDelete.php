@@ -16,7 +16,20 @@ trait SoftDelete
 
     public static function find_deleted()
     {
-        return parent::select_query()->where('deleted', 'is not', null);
+        $model = (new static);
+
+        $query = $model->raw_query()->select(['`' . $model->get_table() . '`.*'], true)
+            ->from($model->get_table())
+            ->as_object(static::class, [null, true])
+            ->where('deleted', 'is not', null);
+
+        if ($model->order_by) {
+            foreach ($model->order_by as $column => $direction) {
+                $query->order_by($column, $direction);
+            }
+        }
+
+        return $query;
     }
 
     public function restore()
