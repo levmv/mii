@@ -151,7 +151,7 @@ class Blocks extends BaseBlocks
 
     private function _build_block(string $block_name, string $type, array $files): void {
 
-        $result_file_name = $block_name . '.' . substr(Text::base64url_encode(md5(implode('', array_keys($files)), true)), 0, 8);
+        $result_file_name = $block_name . '.' . substr(md5(implode('', array_values($files))), 0, 10);
 
         $web_output = $this->base_url . '/' . $result_file_name . '.' . $type;
         $output = $this->base_path . '/' . $result_file_name . '.' . $type;
