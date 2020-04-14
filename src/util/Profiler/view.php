@@ -3,6 +3,7 @@
 <style type="text/css">
     .mii {
         padding: 5px;
+        overflow: auto;
     }
 
     .mii table.profiler {
