@@ -203,6 +203,13 @@ class Assets extends Controller
                             ]);
                         }
                         $reverse[$type][$block] = $name;
+
+                        if(!isset($blocks[$block])) {
+                            $this->error('Unknow block: :b in :f asset', [
+                                ':b' => $block,
+                                ':f' => $name.'.'.$type
+                            ]);
+                        }
                     }
                 }
             }
