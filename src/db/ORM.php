@@ -119,6 +119,20 @@ class ORM implements \JsonSerializable
     }
 
     /**
+     * @param int $id
+     * @return static
+     * @throws ModelNotFoundException
+     */
+    public static function one_or_fail(int $id)
+    {
+        $obj = static::one($id);
+        if ($obj === null)
+            throw new ModelNotFoundException;
+
+        return $obj;
+    }
+
+    /**
      * @param bool $with_order
      * @param Query|null $query
      * @return Query
