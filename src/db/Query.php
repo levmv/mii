@@ -1226,6 +1226,16 @@ class Query
         return null;
     }
 
+    public function one_or_fail()
+    {
+        $result = $this->one();
+
+        if($result === null)
+            throw new ModelNotFoundException();
+
+        return $result;
+    }
+
     public function all() {
         return $this->execute()->all();
     }
