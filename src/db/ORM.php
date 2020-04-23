@@ -28,6 +28,11 @@ class ORM implements \JsonSerializable
     protected array $_changed = [];
 
     /**
+     * @var  array  Data that's changed during update/create
+     */
+    protected array $_was_changed = [];
+
+    /**
      * @var boolean Is this model loaded from DB
      */
     public ?bool $__loaded = null;
@@ -309,6 +314,29 @@ class ORM implements \JsonSerializable
         return isset($this->_changed[$field_name]);
     }
 
+
+    /**
+     * Checks if the field (or any) was changed during update/create
+     *
+     * @param string|array $field_name
+     * @return bool
+     */
+
+    public function was_changed($field_name = null): bool
+    {
+        if ($field_name === null) {
+            return \count($this->_was_changed) > 0;
+        }
+
+        if (\is_array($field_name)) {
+            return (bool) \count(\array_intersect($field_name, \array_keys($this->_was_changed)));
+        }
+
+        return isset($this->_was_changed[$field_name]);
+    }
+
+
+
     /**
      * Determine if this model is loaded.
      *
@@ -326,8 +354,10 @@ class ORM implements \JsonSerializable
      */
     public function update()
     {
-        if (!$this->_changed)
+        if (!$this->_changed) {
+            $this->_was_changed = [];
             return 0;
+        }
 
         if ($this->on_update() === false)
             return 0;
@@ -345,6 +375,7 @@ class ORM implements \JsonSerializable
         $this->on_after_update();
         $this->on_after_change();
 
+        $this->_was_changed = $this->_changed;
         $this->_changed = [];
 
         return \Mii::$app->db->affected_rows();
@@ -425,6 +456,7 @@ class ORM implements \JsonSerializable
         $this->on_after_create();
         $this->on_after_change();
 
+        $this->_was_changed = $this->_changed;
         $this->_changed = [];
 
         return $this->attributes['id'];
