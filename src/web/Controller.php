@@ -3,6 +3,8 @@
 namespace mii\web;
 
 
+use mii\core\InvalidRouteException;
+
 class Controller
 {
 
@@ -26,6 +28,10 @@ class Controller
     }
 
     public function execute(string $action, $params) {
+
+        if (!\method_exists($this, $action)) {
+            throw new InvalidRouteException('Method "'.get_class($this)."::$action\" does not exists");
+        }
 
         $method = new \ReflectionMethod($this, $action);
 

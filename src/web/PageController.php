@@ -131,14 +131,7 @@ class PageController extends Controller
             }
         }
 
-        $method = new \ReflectionMethod($this, $action);
-
-        if (!$method->isPublic())
-            throw new BadRequestHttpException("Cannot access not public method");
-
-        $this->before();
-
-        $this->after($this->execute_action($method, $action, $params));
+        parent::execute($action, $params);
     }
 
 }
