@@ -22,6 +22,8 @@ class Assets extends Controller
     private $assets;
     private $libraries;
 
+    private array $sets = [];
+
     private $base_path;
     private $base_url = '/assets';
 
@@ -40,9 +42,6 @@ class Assets extends Controller
 
         $this->_time = microtime(true);
         $this->_memory = memory_get_usage();
-
-        $this->input_path = \path('vendor') . '/node_modules/';
-        $this->output_path = \path('app') . '/blocks';
 
         $this->sets = config('components.blocks.sets', [
             'default' => [

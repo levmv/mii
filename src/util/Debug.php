@@ -179,6 +179,11 @@ class Debug
      */
     public static function path($file) {
         if(!isset(\Mii::$paths['mii'])) {
+
+            if(!isset(\Mii::$paths['vendor'])) {
+                \Mii::$paths['vendor'] = path('root').'/vendor';
+            }
+
             \Mii::$paths['mii'] = path('vendor').'/levmorozov/mii';
             uasort(\Mii::$paths, static function($a, $b) {
                 return \strlen($b) - \strlen($a);
