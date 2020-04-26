@@ -12,13 +12,9 @@ class Mii
      */
     public static $app;
 
-
     public static $log_component_name = 'log';
 
-
-    public static $paths = [
-        'mii' => __DIR__
-    ];
+    public static array $paths = [];
 
     public static function get_path(string $name): string {
         return static::$paths[$name];
@@ -27,7 +23,11 @@ class Mii
 
     public static function set_path($name, $value = null): void {
         if (\is_array($name)) {
-            static::$paths = array_replace(static::$paths, $name);
+            if(empty(static::$paths)) {
+                static::$paths = $name;
+            } else {
+                static::$paths = \array_replace(static::$paths, $name);
+            }
         } else {
             static::$paths[$name] = $value;
         }
