@@ -164,21 +164,25 @@ class Request extends Component
 
     private function get_paths_from_composer($namespaces) {
 
+        $compdir = realpath(__DIR__ . '/../../../../composer');
+        if(!$compdir) {
+            $compdir = path('root').'/vendor/composer';
+        }
         try {
             $loader = new \Composer\Autoload\ClassLoader();
 
-            $map = require __DIR__ . '/../../../../composer/autoload_namespaces.php';
+            $map = require $compdir.'/autoload_namespaces.php';
             foreach ($map as $namespace => $path) {
                 $loader->set($namespace, $path);
             }
 
-            $map = require __DIR__ . '/../../../../composer/autoload_psr4.php';
+            $map = require $compdir.'/autoload_psr4.php';
 
             foreach ($map as $namespace => $path) {
                 $loader->setPsr4($namespace, $path);
             }
 
-            $classMap = require __DIR__ . '/../../../../composer/autoload_classmap.php';
+            $classMap = require $compdir.'/autoload_classmap.php';
             if ($classMap) {
                 $loader->addClassMap($classMap);
             }
@@ -200,6 +204,7 @@ class Request extends Component
 
             return $paths;
         } catch (\Throwable $t) {
+            Console::stderr(Exception::text($t));
             return [];
         }
     }
