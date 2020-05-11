@@ -154,43 +154,6 @@ class Text
 
 
     /**
-     * Replaces the given words with a string.
-     *
-     *     // Displays "What the #####, man!"
-     *     echo Text::censor('What the frick, man!', array(
-     *         'frick' => '#####',
-     *     ));
-     *
-     * @param string  $str phrase to replace words in
-     * @param array   $badwords words to replace
-     * @param string  $replacement replacement string
-     * @param boolean $replace_partial_words replace words across word boundries (space, period, etc)
-     * @return  string
-     */
-    public static function censor(string $str, array $badwords, string $replacement = '#', bool $replace_partial_words = TRUE): string
-    {
-        foreach ((array)$badwords as $key => $badword) {
-            $badwords[$key] = str_replace('\*', '\S*?', preg_quote((string)$badword));
-        }
-
-        $regex = '(' . implode('|', $badwords) . ')';
-
-        if ($replace_partial_words === FALSE) {
-            // Just using \b isn't sufficient when we need to replace a badword that already contains word boundaries itself
-            $regex = '(?<=\b|\s|^)' . $regex . '(?=\b|\s|$)';
-        }
-
-        $regex = '!' . $regex . '!ui';
-
-        if (\mb_strlen($replacement) == 1) {
-            $regex .= 'e';
-            return preg_replace($regex, 'str_repeat($replacement, UTF8::strlen(\'$1\'))', $str);
-        }
-
-        return preg_replace($regex, $replacement, $str);
-    }
-
-    /**
      * Automatically applies "p" and "br" markup to text.
      * Basically [nl2br](http://php.net/nl2br) on steroids.
      *
