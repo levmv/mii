@@ -137,19 +137,17 @@ class Text
     }
 
     /**
-     * Uppercase words that are not separated by spaces, using a custom
-     * delimiter or the default.
-     *
-     *      $str = Text::ucfirst('content-type'); // returns "Content-Type"
+     * А unicode-safe implementation of built-in PHP function `ucfirst()`
      *
      * @param string $string string to transform
-     * @param string $delimiter delemiter to use
      * @return  string
      */
-    public static function ucfirst($string, $delimiter = '-')
+    public static function ucfirst(string $string) : string
     {
-        // Put the keys back the Case-Convention expected
-        return \implode($delimiter, \array_map('ucfirst', \explode($delimiter, $string)));
+        $first = \mb_substr($string, 0, 1);
+        $rest = \mb_substr($string, 1);
+
+        return \mb_strtoupper($first) . $rest;
     }
 
 
