@@ -276,13 +276,12 @@ class Text
 
     /**
      * Declination of number
-     * @param       $number
+     * @param int   $number
      * @param mixed $array
      * @return mixed
      */
-    public static function decl(int $number, array $array)
+    public static function decl($number, array $array)
     {
-
         $cases = array(2, 0, 1, 1, 1, 2);
 
         if ($number % 100 > 4 and $number % 100 < 20) {
