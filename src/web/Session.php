@@ -10,21 +10,19 @@ class Session extends Component
     /**
      * @var  string  cookie name
      */
-    protected $name = 'session';
+    protected string $name = 'session';
     /**
      * @var  int  cookie lifetime
      */
-    protected $lifetime = 0;
+    protected int $lifetime = 0;
 
     /**
      * @var  array  session data
      */
-    protected $_data = [];
-    /**
-     * @var  bool  session destroyed?
-     */
+    protected array $_data = [];
 
-    protected $_flash = '__flash';
+
+    protected string $_flash = '__flash';
 
     /**
      *
@@ -33,7 +31,8 @@ class Session extends Component
      * @return bool
      */
 
-    public function check_cookie() {
+    public function check_cookie(): bool
+    {
         return isset($_COOKIE[$this->name]);
     }
 
@@ -44,7 +43,8 @@ class Session extends Component
      *
      * @return  string
      */
-    public function name() {
+    public function name(): string
+    {
         return $this->name;
     }
 
@@ -53,49 +53,55 @@ class Session extends Component
      *
      *     $foo = $session->get('foo');
      *
-     * @param   string $key variable name
-     * @param   mixed $default default value to return
+     * @param string $key variable name
+     * @param mixed  $default default value to return
      * @return  mixed
      */
-    public function get($key, $default = null) {
+    public function get($key, $default = null)
+    {
         $this->open();
 
         return \array_key_exists($key, $this->_data) ? $this->_data[$key] : $default;
     }
 
 
-    public function has($key) {
+    public function has($key)
+    {
         $this->open();
 
         return \array_key_exists($key, $this->_data);
     }
 
 
-    public function open($id = null) {
+    public function open($id = null)
+    {
 
         if ($this->is_active())
             return;
 
-        if($this->lifetime > 0) {
-            ini_set('session.gc_maxlifetime', $this->lifetime);
+        if (\headers_sent())
+            return;
+
+        if ($this->lifetime > 0) {
+            \ini_set('session.gc_maxlifetime', $this->lifetime);
         }
 
         // Sync up the session cookie with Cookie parameters
-        session_set_cookie_params($this->lifetime,
+        \session_set_cookie_params($this->lifetime,
             \Mii::$app->request->cookie_path,
             \Mii::$app->request->cookie_domain,
             \Mii::$app->request->cookie_secure,
             \Mii::$app->request->cookie_httponly);
 
         // Do not allow PHP to send Cache-Control headers
-        session_cache_limiter(false);
+        \session_cache_limiter(false);
 
         // Set the session cookie name
-        session_name($this->name);
+        \session_name($this->name);
 
         if ($id) {
             // Set the session id
-            session_id($id);
+            \session_id($id);
         }
 
         // Start the session
@@ -105,15 +111,16 @@ class Session extends Component
         $this->_data =& $_SESSION;
 
         // Write the session at shutdown
-        register_shutdown_function([$this, 'close']);
+        \register_shutdown_function([$this, 'close']);
 
         $this->update_flash_counters();
 
         return;
     }
 
-    public function is_active() {
-        return session_status() === PHP_SESSION_ACTIVE;
+    public function is_active(): bool
+    {
+        return \session_status() === PHP_SESSION_ACTIVE;
     }
 
     /**
@@ -121,11 +128,12 @@ class Session extends Component
      *
      *     $session->set('foo', 'bar');
      *
-     * @param   string $key variable name
-     * @param   mixed $value value
+     * @param string $key variable name
+     * @param mixed  $value value
      * @return  $this
      */
-    public function set($key, $value) {
+    public function set($key, $value): self
+    {
         $this->open();
 
         $this->_data[$key] = $value;
@@ -138,11 +146,12 @@ class Session extends Component
      *
      *     $session->bind('foo', $foo);
      *
-     * @param   string $key variable name
-     * @param   mixed $value referenced value
+     * @param string $key variable name
+     * @param mixed  $value referenced value
      * @return  $this
      */
-    public function bind($key, & $value) {
+    public function bind($key, &$value): self
+    {
         $this->open();
 
         $this->_data[$key] =& $value;
@@ -158,7 +167,8 @@ class Session extends Component
      * @param array $args
      * @return  $this
      */
-    public function delete(...$args) {
+    public function delete(...$args): self
+    {
         $this->open();
 
         foreach ($args as $key) {
@@ -176,7 +186,8 @@ class Session extends Component
      * @param bool $delete_old
      * @return  string
      */
-    public function regenerate($delete_old = false) {
+    public function regenerate($delete_old = false): string
+    {
         if ($this->is_active()) {
             // Regenerate the session id
             @session_regenerate_id($delete_old);
@@ -197,7 +208,8 @@ class Session extends Component
      * been sent.
      *
      */
-    public function close(): void {
+    public function close(): void
+    {
         if ($this->is_active()) {
 
             // Set the last active timestamp
@@ -212,7 +224,8 @@ class Session extends Component
      * Completely destroy the current session.
      *
      */
-    public function destroy(): void {
+    public function destroy(): void
+    {
         if ($this->is_active()) {
 
             session_unset();
@@ -224,12 +237,14 @@ class Session extends Component
         }
     }
 
-    public function id(): string {
+    public function id(): string
+    {
         return session_id();
     }
 
 
-    public function flash($key, $value = true) {
+    public function flash($key, $value = true): void
+    {
         $this->open();
 
         $counters = $this->get($this->_flash, []);
@@ -239,7 +254,8 @@ class Session extends Component
     }
 
 
-    private function update_flash_counters() {
+    private function update_flash_counters(): void
+    {
         $counters = $this->get($this->_flash, []);
         if (\is_array($counters)) {
             foreach ($counters as $key => $count) {
