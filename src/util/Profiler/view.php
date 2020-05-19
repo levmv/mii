@@ -215,7 +215,7 @@ $application_cols = array('min', 'max', 'average', 'current');
                                             title="seconds">ms</abbr></div>
                                 <?php if ($key === 'total'): ?>
                                     <div class="graph"
-                                         style="left: <?php echo max(0, 100 - $stats[$key]['time'] / $group_stats[$group]['max']['time'] * 100) ?>%"></div>
+                                         style="left: <?php echo max(0, 100 - $stats[$key]['time'] / max(1, $group_stats[$group]['max']['time']) * 100) ?>%"></div>
                                 <?php endif ?>
                             </div>
                         </td>
@@ -229,7 +229,7 @@ $application_cols = array('min', 'max', 'average', 'current');
                                             title="kilobyte">kB</abbr></div>
                                 <?php if ($key === 'total'): ?>
                                     <div class="graph"
-                                         style="left: <?php echo max(0, 100 - $stats[$key]['memory'] / $group_stats[$group]['max']['memory'] * 100) ?>%"></div>
+                                         style="left: <?php echo max(0, 100 - $stats[$key]['memory'] / max(1,$group_stats[$group]['max']['memory']) * 100) ?>%"></div>
                                 <?php endif ?>
                             </div>
                         </td>
