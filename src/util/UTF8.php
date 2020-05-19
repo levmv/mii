@@ -6,6 +6,18 @@ class UTF8
 {
 
     /**
+     * Replaces all 4-bytes characters in utf8 string
+     *
+     * Note: it's may be a good idea to use "\xEF\xBF\xBD" for $replace
+     * @param string $str
+     * @param string $replace
+     * @return string
+     */
+    public static function strip_4b(string $str, string $replace = '') : string {
+        return preg_replace('/[\xF0-\xF7].../s', $replace, $str);
+    }
+
+    /**
      * Tests whether a string contains only 7-bit ASCII bytes. This is used to
      * determine when to use native functions or UTF-8 functions.
      *
