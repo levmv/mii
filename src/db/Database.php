@@ -250,7 +250,7 @@ class Database extends Component
         if (\is_null($value)) {
             return 'NULL';
         } elseif (\is_int($value)) {
-            return (string)((int)$value);
+            return (string) $value;
         } elseif ($value === true) {
             return "'1'";
         } elseif ($value === false) {
