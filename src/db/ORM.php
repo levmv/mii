@@ -105,7 +105,7 @@ class ORM implements \JsonSerializable
     }
 
     /**
-     * @param int $value
+     * @param int  $value
      * @param bool $find_or_fail
      * @return $this|null
      * @throws ModelNotFoundException
@@ -138,7 +138,7 @@ class ORM implements \JsonSerializable
     }
 
     /**
-     * @param bool $with_order
+     * @param bool       $with_order
      * @param Query|null $query
      * @return Query
      */
@@ -151,7 +151,7 @@ class ORM implements \JsonSerializable
             ->from($this->get_table())
             ->as_object(static::class, [null, true]);
 
-        if ($this->order_by AND $with_order) {
+        if ($this->order_by and $with_order) {
             foreach ($this->order_by as $column => $direction) {
                 $query->order_by($column, $direction);
             }
@@ -233,7 +233,7 @@ class ORM implements \JsonSerializable
 
     public function set($values, $value = NULL): ORM
     {
-        if (\is_object($values) AND $values instanceof \mii\web\Form) {
+        if (\is_object($values) and $values instanceof \mii\web\Form) {
 
             $values = $values->changed_fields();
 
@@ -258,12 +258,13 @@ class ORM implements \JsonSerializable
     }
 
 
-    public function __unset($key) {
+    public function __unset($key)
+    {
 
-        if(\array_key_exists($key, $this->attributes)) {
+        if (\array_key_exists($key, $this->attributes)) {
             unset($this->attributes[$key]);
 
-            if(isset($this->_changed[$key])) {
+            if (isset($this->_changed[$key])) {
                 unset($this->_changed[$key]);
             }
         }
@@ -308,7 +309,7 @@ class ORM implements \JsonSerializable
         }
 
         if (\is_array($field_name)) {
-            return (bool) \count(\array_intersect($field_name, \array_keys($this->_changed)));
+            return (bool)\count(\array_intersect($field_name, \array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);
@@ -329,12 +330,11 @@ class ORM implements \JsonSerializable
         }
 
         if (\is_array($field_name)) {
-            return (bool) \count(\array_intersect($field_name, \array_keys($this->_was_changed)));
+            return (bool)\count(\array_intersect($field_name, \array_keys($this->_was_changed)));
         }
 
         return isset($this->_was_changed[$field_name]);
     }
-
 
 
     /**
@@ -342,7 +342,7 @@ class ORM implements \JsonSerializable
      *
      * @return bool
      */
-    public function loaded() : bool
+    public function loaded(): bool
     {
         return (bool)$this->__loaded;
     }
@@ -369,7 +369,7 @@ class ORM implements \JsonSerializable
         (new Query)
             ->update($this->get_table())
             ->set($data)
-            ->where('id', '=', (int) $this->attributes['id'])
+            ->where('id', '=', (int)$this->attributes['id'])
             ->execute();
 
         $this->on_after_update();
@@ -409,18 +409,21 @@ class ORM implements \JsonSerializable
     protected function on_after_create(): void
     {
     }
+
     /**
      * @deprecated
      */
     protected function on_after_update(): void
     {
     }
+
     /**
      * @deprecated
      */
     protected function on_after_change(): void
     {
     }
+
     /**
      * @deprecated
      */
@@ -475,7 +478,7 @@ class ORM implements \JsonSerializable
 
             (new Query)
                 ->delete($this->get_table())
-                ->where('id', '=', (int) $this->attributes['id'])
+                ->where('id', '=', (int)$this->attributes['id'])
                 ->execute();
 
             $this->on_after_delete();
