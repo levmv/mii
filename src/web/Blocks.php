@@ -11,15 +11,17 @@ class Blocks extends BaseBlocks
 {
     public $base_path;
 
-    public function render(): void {
-
+    public function render(): void
+    {
         if ($this->base_path === null) {
-            $this->base_path = '@pub' . $this->base_url;
+            $this->base_path = isset(Mii::$paths['pub'])
+                ? '@pub' . $this->base_url
+                : '@root/public' . $this->base_url;
         }
         $this->base_path = Mii::resolve($this->base_path);
 
         if (!is_dir($this->base_path))
-            FS::mkdir($this->base_path, 0777, true);
+            FS::mkdir($this->base_path, 0777);
 
         foreach ($this->_blocks as $block_name => $block) {
             if ($block->__has_parent)
@@ -72,9 +74,10 @@ class Blocks extends BaseBlocks
      *
      * @param string $block_name
      * @param string $parent_block
-     * @param array $depends
+     * @param array  $depends
      */
-    public function process_block_assets($block_name, $parent_block, $depends): void {
+    public function process_block_assets($block_name, $parent_block, $depends): void
+    {
 
         if (isset($this->_used_blocks[$block_name]))
             return;
@@ -112,7 +115,7 @@ class Blocks extends BaseBlocks
 
         if ($this->_blocks[$block_name]->__remote_js !== null) {
             foreach ($this->_blocks[$block_name]->__remote_js as $link => $settings) {
-                if (!empty($settings) AND isset($settings['position'])) {
+                if (!empty($settings) and isset($settings['position'])) {
                     $position = $settings['position'];
                     unset($settings['position']);
                 } else {
@@ -134,7 +137,7 @@ class Blocks extends BaseBlocks
         if (!empty($this->_blocks[$block_name]->__inline_js)) {
 
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
-                $position = (!empty($inline[1]) AND isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
+                $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
                 if (!isset($this->_files['js'][$parent_block]['inline'][$position]))
                     $this->_files['js'][$parent_block]['inline'][$position] = [];
                 $this->_files['js'][$parent_block]['inline'][$position][] = $inline[0];
@@ -149,7 +152,8 @@ class Blocks extends BaseBlocks
         }
     }
 
-    private function _build_block(string $block_name, string $type, array $files): void {
+    private function _build_block(string $block_name, string $type, array $files): void
+    {
 
         $result_file_name = $block_name . '.' . substr(md5(implode('', array_values($files))), 0, 10);
 
@@ -158,7 +162,7 @@ class Blocks extends BaseBlocks
 
         $need_recompile = !is_file($output);
 
-        if(!$need_recompile) {
+        if (!$need_recompile) {
             $mtime_output = filemtime($output);
             foreach ($files as $file) {
                 if ($mtime_output < filemtime($file)) {
@@ -188,7 +192,8 @@ class Blocks extends BaseBlocks
     }
 
 
-    private function _build_assets_dir(string $blockname, string $path): void {
+    private function _build_assets_dir(string $blockname, string $path): void
+    {
 
         $output = $this->base_path . '/' . $blockname;
 

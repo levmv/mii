@@ -38,7 +38,8 @@ class Assets extends Controller
         'js' => [],
     ];
 
-    protected function before() {
+    protected function before()
+    {
 
         $this->_time = microtime(true);
         $this->_memory = memory_get_usage();
@@ -57,9 +58,9 @@ class Assets extends Controller
         $this->config_file = $this->request->params['config'] ?? '@app/config/assets.php';
         $this->json_output = $this->request->params['json'] ?? false;
         $this->force_mode = $this->request->params['force'] ?? false;
-        $this->filtered_sets = (array) ($this->request->params['set'] ?? array_keys($this->sets));
+        $this->filtered_sets = (array)($this->request->params['set'] ?? array_keys($this->sets));
 
-        if(!file_exists(Mii::resolve($this->config_file))) {
+        if (!file_exists(Mii::resolve($this->config_file))) {
             $this->error("Config {$this->config_file} does not exist.");
             exit(1);
         }
@@ -67,7 +68,8 @@ class Assets extends Controller
         $this->assets = require(Mii::resolve($this->config_file));
     }
 
-    public function usage($argv) {
+    public function usage($argv)
+    {
         $this->stdout(
             "\nUsage: ./mii assets (build|test|gen-config) [options]\n\n" .
             "Options:\n" .
@@ -82,11 +84,12 @@ class Assets extends Controller
     }
 
 
-    public function test() {
+    public function test()
+    {
 
-        if(\count($this->sets)) {
+        if (\count($this->sets)) {
 
-            foreach($this->sets as $name => $set) {
+            foreach ($this->sets as $name => $set) {
                 $this->test_set($name);
             }
         } else {
@@ -95,31 +98,32 @@ class Assets extends Controller
 
     }
 
-    public function build() {
+    public function build()
+    {
 
-        if(\count($this->sets)) {
+        if (\count($this->sets)) {
 
-            foreach($this->filtered_sets as $name) {
+            foreach ($this->filtered_sets as $name) {
                 $this->build_set($name);
             }
         } else {
             $this->build_set('default');
         }
 
-        foreach($this->results as $set_name => $list) {
+        foreach ($this->results as $set_name => $list) {
             file_put_contents(
-                $this->assets_map_path."/".$set_name.'.assets',
-                "<?php return ".var_export($list, true).';'
+                $this->assets_map_path . "/" . $set_name . '.assets',
+                "<?php return " . var_export($list, true) . ';'
             );
         }
 
-        if($this->json_output) {
+        if ($this->json_output) {
             $this->stdout(json_encode($this->processed));
             return;
         }
 
 
-        if(\count($this->processed['css']) || \count($this->processed['js']) ){
+        if (\count($this->processed['css']) || \count($this->processed['js'])) {
             $this->info(':N css and :M js files compiled.', [
                 ':N' => \count($this->processed['css']),
                 ':M' => \count($this->processed['js'])
@@ -130,12 +134,13 @@ class Assets extends Controller
 
         $this->info('All done. Spent :Ts and :MMb', [
             ':T' => number_format(microtime(true) - $this->_time, 1),
-            ':M' => number_format((memory_get_usage()-$this->_memory) / 1024 / 1024, 1)
+            ':M' => number_format((memory_get_usage() - $this->_memory) / 1024 / 1024, 1)
         ]);
     }
 
 
-    protected function test_set($set_name) {
+    protected function test_set($set_name)
+    {
         $this->info("==========================");
         $this->info("Testing of set «:name»", [":name" => $set_name]);
         $this->info("==========================");
@@ -144,10 +149,10 @@ class Assets extends Controller
 
         $blocks = [];
 
-        foreach($this->libraries as $library) {
+        foreach ($this->libraries as $library) {
 
-            if(!is_dir($library)) {
-                $this->error('Library path «'.$library.'» does not exist');
+            if (!is_dir($library)) {
+                $this->error('Library path «' . $library . '» does not exist');
                 return;
             }
 
@@ -169,9 +174,9 @@ class Assets extends Controller
             foreach ($iterator as $info) {
 
                 $type = $info->getExtension();
-                $path = trim(substr( $info->getPath(),\strlen($library)), '/');
+                $path = trim(substr($info->getPath(), \strlen($library)), '/');
                 $block_name = implode('_', explode('/', $path));
-                if(!isset($blocks[$block_name])) {
+                if (!isset($blocks[$block_name])) {
                     $blocks[$block_name] = ['css' => false, 'js' => false, 'path' => []];
                 }
                 $blocks[$block_name][$type] = true;
@@ -181,8 +186,8 @@ class Assets extends Controller
 
         $reverse = ['css' => [], 'js' => []];
 
-        if(!isset($this->assets[$this->assets_group])) {
-            $this->error('Source list with name «'.$this->assets_group.'» does not exist');
+        if (!isset($this->assets[$this->assets_group])) {
+            $this->error('Source list with name «' . $this->assets_group . '» does not exist');
             return;
         }
 
@@ -203,10 +208,10 @@ class Assets extends Controller
                         }
                         $reverse[$type][$block] = $name;
 
-                        if(!isset($blocks[$block])) {
+                        if (!isset($blocks[$block])) {
                             $this->error('Unknow block: :b in :f asset', [
                                 ':b' => $block,
-                                ':f' => $name.'.'.$type
+                                ':f' => $name . '.' . $type
                             ]);
                         }
                     }
@@ -217,17 +222,17 @@ class Assets extends Controller
         $forget = [];
         foreach ($blocks as $block_name => $block) {
             foreach (['css', 'js'] as $type) {
-                if($block[$type] && !isset($reverse[$type][$block_name])) {
-                    $forget[$block_name][] = "'".$type . "' => '" . $block_name ."'";
+                if ($block[$type] && !isset($reverse[$type][$block_name])) {
+                    $forget[$block_name][] = "'" . $type . "' => '" . $block_name . "'";
                 }
             }
         }
 
-        if(\count($forget)) {
+        if (\count($forget)) {
             $this->warning('May be you forget these:');
-            foreach($forget as $name => $block) {
+            foreach ($forget as $name => $block) {
                 $out = "'$name' => [";
-                $out .= implode(',',  $block);
+                $out .= implode(',', $block);
 
                 $this->stdout("$out],\n");
             }
@@ -236,7 +241,8 @@ class Assets extends Controller
     }
 
 
-    protected function init_set($set_name) {
+    protected function init_set($set_name)
+    {
 
         $this->base_path = null;
         $this->libraries = [];
@@ -247,9 +253,9 @@ class Assets extends Controller
             'base_path' => $this->base_path
         ];
 
-        if(!isset($this->sets[$set_name]) && $set_name === 'default') {
+        if (!isset($this->sets[$set_name]) && $set_name === 'default') {
             $set = [];
-        } elseif(isset($this->sets[$set_name])) {
+        } elseif (isset($this->sets[$set_name])) {
             $set = $this->sets[$set_name];
         } else {
             throw new Exception("Unknow blocks set name: $set_name");
@@ -257,7 +263,7 @@ class Assets extends Controller
 
         $set = array_replace_recursive($default_set, $set);
 
-        foreach($set as $key => $value)
+        foreach ($set as $key => $value)
             $this->$key = $value;
 
         for ($i = 0; $i < \count($this->libraries); $i++)
@@ -266,38 +272,41 @@ class Assets extends Controller
         $this->base_url = Mii::resolve($this->base_url);
 
         if ($this->base_path === null) {
-            $this->base_path = \path('pub') . $this->base_url;
-        } else {
-            $this->base_path = Mii::resolve($this->base_path);
+            $this->base_path = isset(Mii::$paths['pub'])
+                ? '@pub' . $this->base_url
+                : '@root/public' . $this->base_url;
         }
+
+        $this->base_path = Mii::resolve($this->base_path);
 
         $this->assets_map_path = Mii::resolve($this->assets_map_path);
 
-        if(!is_dir($this->base_path)) {
-            mkdir($this->base_path, 0777, true);
+        if (!is_dir($this->base_path)) {
+            FS::mkdir($this->base_path, 0777);
         }
 
-        if(!isset($this->assets[$this->assets_group])) {
-            $this->error('Assets group «'.$this->assets_group.'» does not exist');
+        if (!isset($this->assets[$this->assets_group])) {
+            $this->error('Assets group «' . $this->assets_group . '» does not exist');
         }
     }
 
 
-    protected function build_set($set_name) {
+    protected function build_set($set_name)
+    {
         $this->init_set($set_name);
 
         $this->results[$set_name] = [];
-        foreach($this->assets[$this->assets_group] as $filename => $data) {
+        foreach ($this->assets[$this->assets_group] as $filename => $data) {
             foreach (['css', 'js'] as $type) {
-                if(!isset($data[$type]))
+                if (!isset($data[$type]))
                     continue;
 
-                if(!\is_array($data[$type]))
-                    $data[$type] = (array) $data[$type];
+                if (!\is_array($data[$type]))
+                    $data[$type] = (array)$data[$type];
 
                 $result_file_name = $this->build_file($filename, $data[$type], $type);
 
-                foreach($data[$type] as $block_name) {
+                foreach ($data[$type] as $block_name) {
                     $this->results[$set_name][$type][$block_name] = $result_file_name;
                 }
             }
@@ -305,17 +314,18 @@ class Assets extends Controller
     }
 
 
-    protected function build_file($filename, $blocks, $type) : string {
+    protected function build_file($filename, $blocks, $type): string
+    {
 
-        $out_path = $this->base_path .'/';
+        $out_path = $this->base_path . '/';
 
         $files = [];
 
         $hashes = '';
 
-        foreach($blocks as $block_name) {
+        foreach ($blocks as $block_name) {
 
-            $block_path = '/' . implode('/', explode('_', $block_name)) ;
+            $block_path = '/' . implode('/', explode('_', $block_name));
             $block_file = $block_path . '/' . $block_name;
 
             foreach ($this->libraries as $library_path) {
@@ -335,7 +345,7 @@ class Assets extends Controller
 
                 if (is_dir($library_path . $block_path . '/assets')) {
 
-                    $output = $this->base_path .'/'.$block_name;
+                    $output = $this->base_path . '/' . $block_name;
 
                     if (!is_link($output)) {
                         symlink($library_path . $block_path . '/assets', $output);
@@ -345,11 +355,11 @@ class Assets extends Controller
             }
         }
 
-        $outname = $filename.'.'.$this->hash($hashes);
+        $outname = $filename . '.' . $this->hash($hashes);
 
-        if(!empty($files)) {
-            if(!file_exists($out_path.$outname.'.'.$type) || $this->force_mode) {
-                $this->processed[$type][] = $this->merge_files_to_one($files, $out_path, $outname .'.'.$type);
+        if (!empty($files)) {
+            if (!file_exists($out_path . $outname . '.' . $type) || $this->force_mode) {
+                $this->processed[$type][] = $this->merge_files_to_one($files, $out_path, $outname . '.' . $type);
             }
         }
 
@@ -360,13 +370,14 @@ class Assets extends Controller
     protected function hash(string $str): string
     {
         return Text::base64url_encode(
-            substr(md5($str, true), 0, 6).
+            substr(md5($str, true), 0, 6) .
             substr(sha1($str, true), 0, 1)
         );
     }
 
 
-    protected function merge_files_to_one($files, $path, $filename) {
+    protected function merge_files_to_one($files, $path, $filename)
+    {
 
         $tmp = '';
 
@@ -374,17 +385,17 @@ class Assets extends Controller
             $tmp .= file_get_contents($file) . "\n";
         }
 
-        if(!is_dir($path)) {
+        if (!is_dir($path)) {
             FS::mkdir($path, 0777, true);
         }
 
-        file_put_contents($path.$filename, $tmp);
+        file_put_contents($path . $filename, $tmp);
 
-        if(!$this->json_output) {
-            $this->info(':block compiled.', [':block' => $path.$filename]);
+        if (!$this->json_output) {
+            $this->info(':block compiled.', [':block' => $path . $filename]);
         }
 
-        return $path.$filename;
+        return $path . $filename;
     }
 
 }
