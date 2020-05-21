@@ -7,8 +7,8 @@ use mii\util\HTML;
 
 class StaticBlocks extends BaseBlocks
 {
-    protected $assets_map_path = '@tmp';
-    protected $_used_files = [];
+    protected string $assets_map_path = '@tmp';
+    protected array $_used_files = [];
 
     public function render(): void {
         $this->assets_map_path = Mii::resolve($this->assets_map_path);

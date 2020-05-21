@@ -2,7 +2,7 @@
 
 use mii\log\Logger;
 
-assert(defined('MII_START_TIME') or define('MII_START_TIME', hrtime(true)/1e9));
+assert(defined('MII_START_TIME') or define('MII_START_TIME', hrtime(true) / 1e9));
 assert(defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage()));
 
 class Mii
@@ -16,14 +16,16 @@ class Mii
 
     public static array $paths = [];
 
-    public static function get_path(string $name): string {
+    public static function get_path(string $name): string
+    {
         return static::$paths[$name];
     }
 
 
-    public static function set_path($name, $value = null): void {
+    public static function set_path($name, $value = null): void
+    {
         if (\is_array($name)) {
-            if(empty(static::$paths)) {
+            if (empty(static::$paths)) {
                 static::$paths = $name;
             } else {
                 static::$paths = \array_replace(static::$paths, $name);
@@ -34,7 +36,8 @@ class Mii
     }
 
 
-    public static function resolve(string $path): string {
+    public static function resolve(string $path): string
+    {
         if (empty($path) || $path[0] !== '@') {
             return $path;
         }
@@ -49,25 +52,30 @@ class Mii
     }
 
 
-    public static function error($msg, $category = 'app') {
+    public static function error($msg, $category = 'app')
+    {
 
         static::log(Logger::ERROR, $msg, $category);
     }
 
-    public static function warning($msg, $category = 'app') {
+    public static function warning($msg, $category = 'app')
+    {
         static::log(Logger::WARNING, $msg, $category);
     }
 
-    public static function info($msg, $category = 'app') {
+    public static function info($msg, $category = 'app')
+    {
         static::log(Logger::INFO, $msg, $category);
     }
 
-    public static function log($level, $msg, $category) {
+    public static function log($level, $msg, $category)
+    {
         if (static::$app->has(static::$log_component_name))
             static::$app->get(static::$log_component_name)->log($level, $msg, $category);
     }
 
-    public static function message(string $file, string $path = null, $default = null) {
+    public static function message(string $file, string $path = null, $default = null)
+    {
         static $messages;
         $file = self::resolve($file);
 
@@ -93,16 +101,27 @@ class Mii
     }
 }
 
-
-function abort(int $code = 404, string $message = '') {
-    if ($code == 404) {
+/**
+ * @param int    $code
+ * @param string $message
+ * @throws \mii\web\HttpException
+ * @throws \mii\web\NotFoundHttpException
+ */
+function abort(int $code = 404, string $message = '')
+{
+    if ($code === 404) {
         throw new \mii\web\NotFoundHttpException();
     }
     throw new \mii\web\HttpException($code, $message);
 }
 
-
-function redirect($url, $use_back_url = false) {
+/**
+ * @param      $url
+ * @param bool $use_back_url
+ * @throws \mii\web\RedirectHttpException
+ */
+function redirect($url, $use_back_url = false)
+{
 
     if ($use_back_url) {
         $url = \mii\util\URL::back_url($url);
@@ -116,7 +135,8 @@ function redirect($url, $use_back_url = false) {
  * @param $name string
  * @return \mii\web\Block
  */
-function block(string $name, array $params = null): \mii\web\Block {
+function block(string $name, array $params = null): \mii\web\Block
+{
     if (!\is_null($params)) {
         return Mii::$app->blocks->get($name)->set($params);
     }
@@ -132,11 +152,12 @@ function block(string $name, array $params = null): \mii\web\Block {
  *     // Retrieve cache entry and return 'bar' if miss
  *     $data = get_cached('foo', 'bar');
  *
- * @param   string $id id of cache to entry
- * @param   string $default default value to return if cache miss
+ * @param string $id id of cache to entry
+ * @param string $default default value to return if cache miss
  * @return  mixed
  */
-function get_cached($id, $default = null, $lifetime = null) {
+function get_cached($id, $default = null, $lifetime = null)
+{
 
     if (\is_object($default) && $default instanceof \Closure) {
 
@@ -164,13 +185,14 @@ function get_cached($id, $default = null, $lifetime = null) {
  *     // Set 'bar' to 'foo' for 30 seconds
  *     cache('foo', $data, 30);
  *
- * @param   string $id id of cache entry
- * @param   mixed $data data to set to cache
- * @param   integer $lifetime lifetime in seconds
+ * @param string  $id id of cache entry
+ * @param mixed   $data data to set to cache
+ * @param integer $lifetime lifetime in seconds
  * @return  boolean
  */
 
-function cache($id, $data, $lifetime = null) {
+function cache($id, $data, $lifetime = null)
+{
     return Mii::$app->cache->set($id, $data, $lifetime);
 }
 
@@ -181,11 +203,12 @@ function cache($id, $data, $lifetime = null) {
  *     // Delete 'foo' entry from the apc group
  *     Cache::instance('apc')->delete('foo');
  *
- * @param   string $id id to remove from cache
+ * @param string $id id to remove from cache
  * @return  boolean
  */
 
-function clear_cache($id = null) {
+function clear_cache($id = null)
+{
     if ($id === null)
         return Mii::$app->cache->delete_all();
 
@@ -193,11 +216,13 @@ function clear_cache($id = null) {
 }
 
 
-function path(string $name): string {
+function path(string $name): string
+{
     return Mii::$paths[$name];
 }
 
-function e(?string $text): string {
+function e(?string $text): string
+{
     return mii\util\HTML::entities($text, false);
 }
 
@@ -205,7 +230,8 @@ if (!\function_exists('dd')) {
     /**
      * Dump and die
      */
-    function dd(...$params) {
+    function dd(...$params)
+    {
         if (Mii::$app instanceof \mii\web\App && Mii::$app->response->format === \mii\web\Response::FORMAT_HTML) {
 
             echo "<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }";
@@ -228,7 +254,8 @@ if (!\function_exists('dd')) {
 }
 
 
-function config(string $key, $default = null) {
+function config(string $key, $default = null)
+{
     if (isset(Mii::$app->_config[$key]))
         return Mii::$app->_config[$key];
 
@@ -245,7 +272,7 @@ function config(string $key, $default = null) {
             }
 
             if (!is_array($array[$key])) {
-                if(!\is_iterable($array[$key])) {
+                if (!\is_iterable($array[$key])) {
                     // Unable to dig deeper
                     break;
                 }
@@ -261,6 +288,7 @@ function config(string $key, $default = null) {
     return $default;
 }
 
-function config_set(string $key, $value) {
+function config_set(string $key, $value)
+{
     \mii\util\Arr::set_path(Mii::$app->_config, $key, $value, '.');
 }

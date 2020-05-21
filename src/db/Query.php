@@ -608,9 +608,7 @@ class Query
      */
     public function values(...$values)
     {
-        if (!\is_array($this->_values)) {
-            throw new Exception('INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
-        }
+        assert(\is_array($this->_values), 'INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
 
         $this->_values = array_merge($this->_values, $values);
 
