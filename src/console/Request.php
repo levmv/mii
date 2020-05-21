@@ -26,7 +26,8 @@ class Request extends Component
     public $action;
 
 
-    public function init(array $config = []): void {
+    public function init(array $config = []): void
+    {
         foreach ($config as $key => $value)
             $this->$key = $value;
 
@@ -37,7 +38,7 @@ class Request extends Component
             $argv = [];
         }
 
-        if(empty($argv))
+        if (empty($argv))
             return;
 
         $this->controller = ucfirst($argv[0]);
@@ -50,20 +51,18 @@ class Request extends Component
         foreach ($argv as $param) {
             if (preg_match('/^--(\w+)(=(.*))?$/', $param, $matches)) {
                 $name = $matches[1];
-                $value = isset($matches[3]) ? $matches[3] : true;
+                $value = $matches[3] ?? true;
 
-                if(isset($params[$name])) {
-                    $params[$name] = (array) $params[$name];
+                if (isset($params[$name])) {
+                    $params[$name] = (array)$params[$name];
                     $params[$name][] = $value;
                 } else {
                     $params[$name] = $value;
                 }
+            } else if ($c === 0) {
+                $this->action = $param;
             } else {
-                if ($c === 0) {
-                    $this->action = $param;
-                } else {
-                    $params[] = $param;
-                }
+                $params[] = $param;
             }
             $c++;
         }
@@ -72,9 +71,10 @@ class Request extends Component
 
     }
 
-    function execute() {
+    public function execute()
+    {
 
-        if(empty($this->controller)) {
+        if (empty($this->controller)) {
             $this->gen_help();
             return 0;
         }
@@ -97,31 +97,31 @@ class Request extends Component
             class_exists($controller_class); // always return false, but autoload class if it exist
 
             // real check
-            if(class_exists($controller_class, false))
+            if (class_exists($controller_class, false))
                 break;
 
             $controller_class = false;
         }
 
-        if(!$controller_class)
+        if (!$controller_class)
             throw new Exception("Unknown command {$this->controller}");
 
         // Create a new instance of the controller
         $controller = new $controller_class;
         $controller->request = $this;
 
-        return (int) $controller->execute();
+        return (int)$controller->execute();
     }
 
 
-    public function param($name, $default = null) {
+    public function param($name, $default = null)
+    {
         return $this->params[$name] ?? $default;
     }
 
 
-
-    public function gen_help() {
-
+    public function gen_help()
+    {
         $namespaces = config('console.namespaces', [
             'app\\console',
             'mii\\console\\controllers'
@@ -136,9 +136,8 @@ class Request extends Component
         $list = [];
         foreach ($namespaces as $namespace) {
 
-            if(!isset($paths[$namespace])) {
-
-                $this->error("Dont know path for $namespace. Skip");
+            if (!isset($paths[$namespace])) {
+                Console::stderr("Dont know path for $namespace. Skip");
                 continue;
             }
 
@@ -149,40 +148,40 @@ class Request extends Component
 
         foreach ($list as $controller) {
 
-            if ($controller['class'] == static::class)
+            if ($controller['class'] === static::class)
                 continue;
 
             $class = new $controller['class']();
 
             $desc = ($class->description) ? " " . $class->description . " " : '';
             Console::stdout(Console::ansi_format($controller['command'], [Console::FG_GREEN]));
-            $padding = max(1, 12-\strlen($controller['command']));
-            Console::stdout(Console::ansi_format(str_pad(" ", $padding, " ").$desc . "\n\n", [Console::FG_GREY]));
+            $padding = max(1, 12 - \strlen($controller['command']));
+            Console::stdout(Console::ansi_format(str_pad(" ", $padding, " ") . $desc . "\n\n", [Console::FG_GREY]));
         }
     }
 
 
-    private function get_paths_from_composer($namespaces) {
-
+    private function get_paths_from_composer($namespaces)
+    {
         $compdir = realpath(__DIR__ . '/../../../../composer');
-        if(!$compdir) {
-            $compdir = path('root').'/vendor/composer';
+        if (!$compdir) {
+            $compdir = path('root') . '/vendor/composer';
         }
         try {
             $loader = new \Composer\Autoload\ClassLoader();
 
-            $map = require $compdir.'/autoload_namespaces.php';
+            $map = require $compdir . '/autoload_namespaces.php';
             foreach ($map as $namespace => $path) {
                 $loader->set($namespace, $path);
             }
 
-            $map = require $compdir.'/autoload_psr4.php';
+            $map = require $compdir . '/autoload_psr4.php';
 
             foreach ($map as $namespace => $path) {
                 $loader->setPsr4($namespace, $path);
             }
 
-            $classMap = require $compdir.'/autoload_classmap.php';
+            $classMap = require $compdir . '/autoload_classmap.php';
             if ($classMap) {
                 $loader->addClassMap($classMap);
             }
@@ -191,12 +190,12 @@ class Request extends Component
             $paths = [];
 
 
-            foreach($namespaces as $ns) {
+            foreach ($namespaces as $ns) {
 
-                foreach($data as $prefix => $path) {
-                    if(strpos($ns, $prefix) === 0) {
+                foreach ($data as $prefix => $path) {
+                    if (strpos($ns, $prefix) === 0) {
 
-                        $path[0] .= str_replace('\\', '/', substr($ns, \strlen($prefix)-1));
+                        $path[0] .= str_replace('\\', '/', substr($ns, \strlen($prefix) - 1));
                         $paths[$ns] = $path[0];
                     }
                 }
@@ -209,7 +208,8 @@ class Request extends Component
         }
     }
 
-    protected function find_controllers($namespace, $path, &$files) {
+    protected function find_controllers($namespace, $path, &$files)
+    {
 
         $dir = dir($path);
         while (false !== $entry = $dir->read()) {
