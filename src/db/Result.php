@@ -8,7 +8,7 @@ namespace mii\db;
 class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 {
     // Raw result resource
-    protected $_result;
+    protected \mysqli_result $_result;
 
     // Total number of rows and current row
     protected int $_total_rows = 0;
@@ -18,7 +18,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     protected $_as_object;
 
     // Parameters for __construct when using object results
-    protected $_object_params = NULL;
+    protected ?array $_object_params = null;
 
     protected $_internal_row = 0;
 
@@ -83,7 +83,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
         if ($this->_as_object) {
             // Return an object of given class name
-            return $this->_result->fetch_object($this->_as_object, (array)$this->_object_params);
+            return $this->_result->fetch_object($this->_as_object, $this->_object_params);
 
         } else {
             // Return an array of the row

@@ -222,13 +222,15 @@ class Database extends Component
             if ($value instanceof Query) {
                 // Create a sub-query
                 return '(' . $value->compile($this) . ')';
-            } elseif ($value instanceof Expression) {
+            }
+
+            if ($value instanceof Expression) {
                 // Compile the expression
                 return $value->compile($this);
-            } else {
-                // Convert the object to a string
-                return $this->quote((string)$value);
             }
+
+            // Convert the object to a string
+            return $this->quote((string)$value);
         }
 
         return $this->escape($value);
@@ -365,10 +367,11 @@ class Database extends Component
      * All other objects will be converted using the `__toString` method.
      *
      * @param mixed $column column name or array(column, alias)
+     * @param null  $table
      * @return  string
      * @uses    Database::quote_identifier
      */
-    public function quote_column($column): string
+    public function quote_column($column, $table = null): string
     {
         if (\is_array($column)) {
             list($column, $alias) = $column;
@@ -387,9 +390,7 @@ class Database extends Component
 
             $column = \str_replace('`', '``', $column);
 
-            if ($column === '*') {
-                return $column;
-            } elseif (\strpos($column, '.') !== false) {
+            if (\strpos($column, '.') !== false) {
                 $parts = \explode('.', $column);
 
                 foreach ($parts as & $part) {
@@ -401,7 +402,9 @@ class Database extends Component
 
                 $column = \implode('.', $parts);
             } else {
-                $column = '`' . $column . '`';
+                $column = $table === null
+                    ? "`$column`"
+                    : "$table.`$column`";
             }
         }
 
@@ -481,12 +484,6 @@ class Database extends Component
      */
     public function quote_identifier($value): string
     {
-
-        if (\is_array($value)) {
-            list($value, $alias) = $value;
-            $alias = \str_replace('`', '``', $alias);
-        }
-
         if (\is_object($value) and $value instanceof Query) {
             // Create a sub-query
             $value = '(' . $value->compile($this) . ')';
@@ -495,7 +492,7 @@ class Database extends Component
             $value = $value->compile($this);
         } else {
             // Convert to a string
-            $value = (string)$value;
+            $value = (string) $value;
 
             $value = \str_replace('`', '``', $value);
 
@@ -511,10 +508,6 @@ class Database extends Component
             } else {
                 $value = "`$value`";
             }
-        }
-
-        if (isset($alias)) {
-            $value .= " AS `$alias`";
         }
 
         return $value;

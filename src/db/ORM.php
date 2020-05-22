@@ -147,8 +147,8 @@ class ORM implements \JsonSerializable
         if ($query === null)
             $query = new Query;
 
-        $query->select(['`' . $this->get_table() . '`.*'], true)
-            ->from($this->get_table())
+        $query->from($this->get_table())
+            ->select(['*'], true)
             ->as_object(static::class, [null, true]);
 
         if ($this->order_by and $with_order) {

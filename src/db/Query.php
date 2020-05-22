@@ -17,7 +17,7 @@ class Query
     /**
      * @var Database
      */
-    protected $db;
+    protected Database $db;
 
     // Query type
     protected $_type;
@@ -29,13 +29,13 @@ class Query
     /**
      * @var array
      */
-    protected $_object_params = [];
+    protected ?array $_object_params = null;
 
 
     protected $_table;
 
     // (...)
-    protected $_columns = [];
+    protected array $_columns = [];
 
     // VALUES (...)
     protected $_values = [];
@@ -45,11 +45,11 @@ class Query
 
 
     // SELECT ...
-    protected $_select = [];
+    protected array $_select = [];
 
-    protected $_for_update = false;
+    protected ?string $_select_any = null;
 
-    protected $_quoted_select = [];
+    protected bool $_for_update = false;
 
     // DISTINCT
     protected bool $_distinct = false;
@@ -111,7 +111,7 @@ class Query
     public function as_array(): self
     {
         $this->_as_object = false;
-        $this->_object_params = [];
+        // note, we doesnt clean here _object_params value
 
         return $this;
     }
@@ -127,11 +127,7 @@ class Query
     public function as_object($class, array $params = null): self
     {
         $this->_as_object = $class;
-
-        if ($params) {
-            // Add object parameters
-            $this->_object_params = $params;
-        }
+        $this->_object_params = $params;
 
         return $this;
     }
@@ -142,29 +138,23 @@ class Query
     /**
      * Sets the initial columns to select
      *
-     * @param array $columns column list
-     * @param bool  $already_quoted
+     * Second argument used for optimization purpose. Most common use is call from ORM for
+     * select like 'table.*'
+     *
+     * @param array     $columns column list
+     * @param bool|null $any String like `table`.*
      * @return  Query
      */
-    public function select(array $columns = null, bool $already_quoted = false): self
+    public function select(array $columns, bool $any = false): self
     {
         $this->_type = Database::SELECT;
-
-        if ($columns !== null) {
-            // Set the initial columns
-            if ($already_quoted === false) {
-                $this->_select = $columns;
-                $this->_quoted_select = [];
-            } else {
-                $this->_quoted_select = $columns;
-                $this->_select = [];
-            }
-        }
+        $this->_select = $columns;
+        $this->_select_any = $any;
 
         return $this;
     }
 
-    public function for_update($enable = true): self
+    public function for_update(bool $enable = true): self
     {
         $this->_for_update = $enable;
 
@@ -186,14 +176,26 @@ class Query
 
     /**
      * Choose the columns to select from, using an array.
-     *
      * @param array $columns list of column names or aliases
      * @return  $this
+     * @deprecated
      */
     public function select_array(array $columns)
     {
         $this->_select = \array_merge($this->_select, $columns);
+        $this->_select_any = false;
 
+        return $this;
+    }
+
+    /**
+     * @param mixed ...$columns
+     * @return $this
+     */
+    public function select_also(...$columns): self
+    {
+        $this->_select = \array_merge($this->_select, $columns);
+        $this->_select_any = false;
         return $this;
     }
 
@@ -462,22 +464,6 @@ class Query
         return $this;
     }
 
-    /**
-     * Creates a new "OR WHERE" condition for the query.
-     *
-     * @param mixed  $column column name or array($column, $alias) or object
-     * @param string $op logic operator
-     * @param mixed  $value column value
-     * @return  $this
-     */
-    public function or_filter($column, $op, $value): self
-    {
-        if ($value === null || $value === "" || !Rules::not_empty((\is_string($value) ? trim($value) : $value)))
-            return $this;
-
-        return $this->or_where($column, $op, $value);
-    }
-
     public function end($check_for_empty = false): self
     {
         if ($this->_last_condition_where) {
@@ -544,7 +530,7 @@ class Query
      */
     public function order_by($column, $direction = null): self
     {
-        if (\is_array($column) and $direction === null) {
+        if (\is_array($column) && $direction === null) {
             $this->_order_by = $column;
         } elseif ($column !== null) {
             $this->_order_by[] = [$column, $direction];
@@ -579,7 +565,7 @@ class Query
      * @param mixed $table table name or array($table, $alias) or object
      * @return  $this
      */
-    public function table($table)
+    public function table($table): self
     {
         $this->_table = $table;
 
@@ -592,7 +578,7 @@ class Query
      * @param array $columns column names
      * @return  $this
      */
-    public function columns(array $columns)
+    public function columns(array $columns): self
     {
         $this->_columns = $columns;
 
@@ -606,7 +592,7 @@ class Query
      * @param   ...
      * @return  $this
      */
-    public function values(...$values)
+    public function values(...$values): self
     {
         assert(\is_array($this->_values), 'INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
 
@@ -622,7 +608,7 @@ class Query
      * @param array $pairs associative (column => value) list
      * @return  $this
      */
-    public function set(array $pairs)
+    public function set(array $pairs): self
     {
         foreach ($pairs as $column => $value) {
             $this->_set[] = [$column, $value];
@@ -788,44 +774,38 @@ class Query
      */
     public function compile_select(): string
     {
+        $query = ($this->_distinct === true)
+            ? 'SELECT DISTINCT '
+            : 'SELECT ';
 
-        // Start a selection query
-        $query = 'SELECT ';
+        // Save first (by order) table for later use, flag if it aliased and quoted name (not alias)
+        $table = $this->_from[0];
+        $table_aliased = \is_array($table);
+        $table_q = $this->db->quote_table($table_aliased ? \current($table) : $table);
 
-        if ($this->_distinct === true) {
-            // Select only unique results
-            $query .= 'DISTINCT ';
-        }
-
-
-        if (empty($this->_select)) {
-            $query .= \implode(', ', $this->_quoted_select);
+        if ($this->_select_any === true) {
+            $query .= "$table_q.*";
         } else {
-
-            $columns = $this->_quoted_select;
+            $columns = [];
 
             foreach ($this->_select as $column) {
-                if (\is_array($column)) {
-                    // Use the column alias
-                    $column = $this->db->quote_identifier($column);
-                } else {
-                    // Apply proper quoting to the column
-                    $column = $this->db->quote_column($column);
-                }
-
-                $columns[] = $column;
+                $columns[] = $this->db->quote_column($column, $table_q);
             }
-            $query .= \implode(', ', \array_unique($columns));
+            assert(count($columns) === count(array_unique($columns)), 'Columns in select query must be unique');
+            $query .= \implode(', ', $columns);
         }
 
+        // One table - most common case
         if (\count($this->_from) === 1) {
-            $query .= ' FROM ' . $this->db->quote_table($this->_from[0]);
-        } else {
-            if (!empty($this->_from)) {
-                $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quote_table'], $this->_from));
-            }
-        }
+            // Why make extra function call if it not neccesary?
+            $query .= $table_aliased
+                ? ' FROM ' . $this->db->quote_table($table)
+                : " FROM $table_q";
 
+        } else if (!empty($this->_from)) {
+            assert(empty($this->_from), 'From must not be empty');
+            $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quote_table'], $this->_from));
+        }
 
         if (!empty($this->_joins)) {
             // Add tables to join
@@ -843,15 +823,7 @@ class Query
             $group = [];
 
             foreach ($this->_group_by as $column) {
-                if (\is_array($column)) {
-                    // Use the column alias
-                    $column = $this->db->quote_identifier(end($column));
-                } else {
-                    // Apply proper quoting to the column
-                    $column = $this->db->quote_column($column);
-                }
-
-                $group[] = $column;
+                $group[] = $this->db->quote_identifier($column);
             }
 
             $query .= ' GROUP BY ' . \implode(', ', $group);
@@ -910,9 +882,7 @@ class Query
                 $sql .= ' USING (' . \implode(', ', \array_map(array($this->db, 'quote_column'), $join['using'])) . ')';
             } else {
                 $conditions = array();
-                foreach ($join['on'] as $condition) {
-                    // Split the condition
-                    list($c1, $op, $c2) = $condition;
+                foreach ($join['on'] as [$c1, $op, $c2]) {
 
                     if ($op) {
                         // Make the operator uppercase and spaced
@@ -970,16 +940,16 @@ class Query
                     if ($value === null) {
                         if ($op === '=') {
                             // Convert "val = null" to "val IS null"
-                            $op = 'IS ';
+                            $op = 'IS';
                         } elseif ($op === '!=') {
                             // Convert "val != null" to "val IS NOT null"
-                            $op = 'IS NOT ';
+                            $op = 'IS NOT';
                         }
                     }
 
                     if ($op === 'BETWEEN' and \is_array($value)) {
                         // BETWEEN always has exactly two arguments
-                        list($min, $max) = $value;
+                        [$min, $max] = $value;
 
                         if (!\is_int($min)) {
                             $min = $this->db->quote($min);
@@ -989,7 +959,6 @@ class Query
                             $max = $this->db->quote($max);
                         }
 
-                        // Quote the min and max value
                         $value = "$min AND $max";
                     } elseif ($op === 'IN' and \is_array($value)) {
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
@@ -1002,17 +971,11 @@ class Query
                     }
 
                     if ($column) {
-                        if (\is_array($column)) {
-                            // Use the column name
-                            $column = $this->db->quote_identifier(\reset($column));
-                        } else {
-                            // Apply proper quoting to the column
-                            $column = $this->db->quote_column($column);
-                        }
+                        $column = $this->db->quote_column($column);
                     }
 
                     // Append the statement to the query
-                    $sql .= \trim($column . ' ' . $op . ' ' . $value);
+                    $sql .= "$column $op $value";
                 }
 
                 $last_condition = $condition;
@@ -1033,15 +996,9 @@ class Query
         $sort = [];
         foreach ($this->_order_by as [$column, $direction]) {
 
-            if (\is_array($column)) {
-                // Use the column alias
-                $column = $this->db->quote_identifier(\end($column));
-            } else {
-                // Apply proper quoting to the column
-                $column = $this->db->quote_column($column);
-            }
+            $column = $this->db->quote_identifier($column);
 
-            $sort[] = $column . ' ' . $direction;
+            $sort[] = "$column $direction";
         }
 
         return 'ORDER BY ' . \implode(', ', $sort);
