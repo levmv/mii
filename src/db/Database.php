@@ -390,6 +390,10 @@ class Database extends Component
 
             $column = \str_replace('`', '``', $column);
 
+            if ($column === '*') {
+                return $table ? "$table.$column" : $column;
+            }
+
             if (\strpos($column, '.') !== false) {
                 $parts = \explode('.', $column);
 

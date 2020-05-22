@@ -47,7 +47,7 @@ class Query
     // SELECT ...
     protected array $_select = [];
 
-    protected ?string $_select_any = null;
+    protected bool $_select_any = false;
 
     protected bool $_for_update = false;
 
