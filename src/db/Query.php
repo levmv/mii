@@ -1170,19 +1170,17 @@ class Query
         $db = \Mii::$app->db;
 
         $old_select = $this->_select;
-        $old_quoted_select = $this->_quoted_select;
+        $old_any = $this->_select_any;
         $old_order = $this->_order_by;
 
         if ($this->_distinct) {
-            $dt_column = \count($this->_quoted_select)
-                ? $this->_quoted_select[0]
-                : $db->quote_column($this->_select[0]);
+            $dt_column = $db->quote_column($this->_select[0]);
             $this->select([
-                [DB::expr("COUNT(DISTINCT $dt_column)"), 'count']
+                new Expression("COUNT(DISTINCT $dt_column)")
             ]);
         } else {
             $this->select([
-                DB::expr('COUNT(*) AS `count`')
+                new Expression('COUNT(*)')
             ]);
         }
         $as_object = $this->_as_object;
@@ -1190,10 +1188,10 @@ class Query
 
         $this->_order_by = [];
 
-        $count = $this->execute()->column('count', 0);
+        $count = $this->execute()->scalar(0);
 
         $this->_select = $old_select;
-        $this->_quoted_select = $old_quoted_select;
+        $this->_select_any = $old_any;
         $this->_order_by = $old_order;
         $this->_as_object = $as_object;
 

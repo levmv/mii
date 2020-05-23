@@ -248,10 +248,10 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     }
 
-    public function scalar()
+    public function scalar($default = 0)
     {
         $value = $this->_result->fetch_array(\MYSQLI_NUM);
-        return \is_array($value) ? $value[0] : "";
+        return \is_array($value) ? $value[0] : $default;
     }
 
     /**
