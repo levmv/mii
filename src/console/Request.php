@@ -194,9 +194,9 @@ class Request extends Component
 
                 foreach ($data as $prefix => $path) {
                     if (strpos($ns, $prefix) === 0) {
-
                         $path[0] .= str_replace('\\', '/', substr($ns, \strlen($prefix) - 1));
                         $paths[$ns] = $path[0];
+                        break;
                     }
                 }
             }
