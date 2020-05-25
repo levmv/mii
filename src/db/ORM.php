@@ -106,35 +106,33 @@ class ORM implements \JsonSerializable
 
     /**
      * @param int  $value
-     * @param bool $find_or_fail
+     * @param Deprecated $find_or_fail
      * @return $this|null
-     * @throws ModelNotFoundException
      */
-    public static function one(int $value, bool $find_or_fail = false)
+    public static function one(int $value, bool $find_or_fail = false) : ?self
     {
-        $result = (new static)
+        if($find_or_fail) {
+            return static::one_or_fail($value);
+        }
+        /** @noinspection PhpUnhandledExceptionInspection */
+        return (new static)
             ->select_query(false)
             ->where('id', '=', $value)
             ->one();
-
-        if ($find_or_fail && $result === null)
-            throw new ModelNotFoundException;
-
-        return $result;
     }
 
+    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param int $id
      * @return static
-     * @throws ModelNotFoundException
      */
-    public static function one_or_fail(int $id)
+    public static function one_or_fail(int $id) : self
     {
-        $obj = static::one($id);
-        if ($obj === null)
-            throw new ModelNotFoundException;
-
-        return $obj;
+        /** @noinspection PhpUnhandledExceptionInspection */
+        return (new static)
+            ->select_query(false)
+            ->where('id', '=', $id)
+            ->one_or_fail();
     }
 
     /**

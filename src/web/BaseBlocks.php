@@ -5,7 +5,7 @@ namespace mii\web;
 use Mii;
 use mii\core\Component;
 
-class BaseBlocks extends Component
+abstract class BaseBlocks extends Component
 {
     public const HEAD = 0;
     public const BEGIN = 1;
@@ -35,9 +35,6 @@ class BaseBlocks extends Component
         'js' => [
         ],
     ];
-
-    protected $assets;
-
 
     public function init(array $config = []): void
     {
@@ -138,24 +135,7 @@ class BaseBlocks extends Component
     }
 
 
-    public function render(): void
-    {
-    }
-
-
-    public function assets_path_by_name($block_name)
-    {
-        $block_path = $this->get_block_path($block_name);
-
-        foreach ($this->libraries as $base_path) {
-
-            if (\is_dir($base_path . $block_path . 'assets')) {
-                return $base_path . $block_path . 'assets';
-            }
-        }
-        return false;
-    }
-
+    abstract public function render(): void;
 
 }
 
