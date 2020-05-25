@@ -11,6 +11,13 @@ class Blocks extends BaseBlocks
 {
     public $base_path;
 
+    protected array $_files = [
+        'css' => [
+        ],
+        'js' => [
+        ],
+    ];
+
     public function render(): void
     {
         if ($this->base_path === null) {

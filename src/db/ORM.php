@@ -404,13 +404,6 @@ class ORM implements \JsonSerializable
     /**
      * @deprecated
      */
-    protected function on_after_create(): void
-    {
-    }
-
-    /**
-     * @deprecated
-     */
     protected function on_after_update(): void
     {
     }
@@ -422,19 +415,12 @@ class ORM implements \JsonSerializable
     {
     }
 
-    /**
-     * @deprecated
-     */
-    protected function on_after_delete(): void
-    {
-    }
 
     /**
      * Saves the model to your database. It will do a
      * database INSERT and assign the inserted row id to $data['id'].
      *
      * @return int Inserted row id
-     * @throws \mii\web\Exception
      */
     public function create()
     {
@@ -454,7 +440,6 @@ class ORM implements \JsonSerializable
 
         $this->attributes['id'] = \Mii::$app->db->inserted_id();
 
-        $this->on_after_create();
         $this->on_after_change();
 
         $this->_was_changed = $this->_changed;
@@ -478,8 +463,6 @@ class ORM implements \JsonSerializable
                 ->delete($this->get_table())
                 ->where('id', '=', (int)$this->attributes['id'])
                 ->execute();
-
-            $this->on_after_delete();
 
             return;
         }

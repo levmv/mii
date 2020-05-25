@@ -29,13 +29,6 @@ abstract class BaseBlocks extends Component
 
     protected array $_used_blocks = [];
 
-    protected array $_files = [
-        'css' => [
-        ],
-        'js' => [
-        ],
-    ];
-
     public function init(array $config = []): void
     {
         parent::init($config);

@@ -11,7 +11,6 @@ class StaticBlocks extends BaseBlocks
     protected array $_used_files = [];
     protected array $assets;
 
-
     public function render(): void
     {
         $this->assets_map_path = Mii::resolve($this->assets_map_path);
