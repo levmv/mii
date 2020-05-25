@@ -144,6 +144,16 @@ function block(string $name, array $params = null): \mii\web\Block
 }
 
 /**
+ * @param string $name
+ * @return string
+ * @throws \mii\web\Exception
+ */
+function render_block(string $name) : string
+{
+    return Mii::$app->blocks->get($name)->render(true);
+}
+
+/**
  * Retrieve a cached value entry by id.
  *
  *     // Retrieve cache entry with id foo

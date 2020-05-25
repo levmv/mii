@@ -7,29 +7,29 @@ use mii\core\Component;
 
 class BaseBlocks extends Component
 {
-    const HEAD = 0;
-    const BEGIN = 1;
-    const END = 2;
+    public const HEAD = 0;
+    public const BEGIN = 1;
+    public const END = 2;
 
-    protected $base_url = '/assets';
+    protected string $base_url = '/assets';
 
     protected $current_set;
 
-    protected $sets = [];
+    protected array $sets = [];
 
-    protected $_blocks = [];
+    protected array $_blocks = [];
 
     protected $libraries;
 
-    protected $_rendered = false;
+    protected bool $_rendered = false;
 
-    protected $_css = [];
+    protected array $_css = [];
 
-    protected $_js = [[], [], []];
+    protected array $_js = [[], [], []];
 
-    protected $_used_blocks = [];
+    protected array $_used_blocks = [];
 
-    protected $_files = [
+    protected array $_files = [
         'css' => [
         ],
         'js' => [
@@ -39,7 +39,8 @@ class BaseBlocks extends Component
     protected $assets;
 
 
-    public function init(array $config = []): void {
+    public function init(array $config = []): void
+    {
         parent::init($config);
 
         if (empty($this->sets)) {
@@ -55,8 +56,8 @@ class BaseBlocks extends Component
     }
 
 
-    public function load_set(string $setname): void {
-
+    public function load_set(string $setname): void
+    {
         assert(isset($this->sets[$setname]), "Unknown blocks set name: $setname");
 
         $this->current_set = $setname;
@@ -70,7 +71,7 @@ class BaseBlocks extends Component
         foreach ($set as $key => $value)
             $this->$key = $value;
 
-        for ($i = 0; $i < \count($this->libraries); $i++)
+        for ($i = 0, $imx = \count($this->libraries); $i < $imx; $i++)
             $this->libraries[$i] = Mii::resolve($this->libraries[$i]);
     }
 
@@ -80,7 +81,8 @@ class BaseBlocks extends Component
      * @param $name string Block name
      * @return Block
      */
-    public function get(string $name): Block {
+    public function get(string $name): Block
+    {
         if (!isset($this->_blocks[$name])) {
             $this->_blocks[$name] = new Block($name);
         }
@@ -89,10 +91,10 @@ class BaseBlocks extends Component
     }
 
 
-    public function get_block_php_file(string $name): ?string {
-
+    public function get_block_php_file(string $name): ?string
+    {
         $block_file = null;
-        $block_path = $this->get_block_path($name).$name;
+        $block_path = $this->get_block_path($name) . $name;
 
         foreach ($this->libraries as $library_path) {
             if (\is_readable($library_path . $block_path . '.php')) {
@@ -103,12 +105,14 @@ class BaseBlocks extends Component
         return null;
     }
 
-    public function get_block_path(string $name): ?string {
+    public function get_block_path(string $name): ?string
+    {
         return '/' . \implode('/', \explode('_', $name)) . '/';
     }
 
 
-    public function css(): string {
+    public function css(): string
+    {
         if (!$this->_rendered)
             $this->render();
 
@@ -116,7 +120,8 @@ class BaseBlocks extends Component
     }
 
 
-    public function js(int $position = null): string {
+    public function js(int $position = null): string
+    {
         if (!$this->_rendered)
             $this->render();
 
@@ -133,10 +138,13 @@ class BaseBlocks extends Component
     }
 
 
-    public function render(): void {}
+    public function render(): void
+    {
+    }
 
 
-    public function assets_path_by_name($block_name) {
+    public function assets_path_by_name($block_name)
+    {
         $block_path = $this->get_block_path($block_name);
 
         foreach ($this->libraries as $base_path) {
