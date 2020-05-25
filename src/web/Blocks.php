@@ -201,5 +201,11 @@ class Blocks extends BaseBlocks
             symlink($path, $output);
         }
     }
+
+    private function get_block_path(string $name): ?string
+    {
+        return '/' . \implode('/', \explode('_', $name)) . '/';
+    }
+
 }
 

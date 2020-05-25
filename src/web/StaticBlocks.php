@@ -12,14 +12,15 @@ class StaticBlocks extends BaseBlocks
     protected array $assets;
 
 
-    public function render(): void {
+    public function render(): void
+    {
         $this->assets_map_path = Mii::resolve($this->assets_map_path);
         $this->assets = require($this->assets_map_path . "/{$this->current_set}.assets");
 
         foreach ($this->_blocks as $block_name => $block) {
             if ($block->__has_parent)
                 continue;
-            $this->static_process_block_assets($block_name, $block_name, $block->_depends);
+            $this->process_assets($block_name, $block_name, $block->_depends);
         }
 
         $this->_rendered = true;
@@ -30,16 +31,17 @@ class StaticBlocks extends BaseBlocks
      *
      * @param string $block_name
      * @param string $parent_block
-     * @param array $depends
+     * @param array  $depends
      */
-    public function static_process_block_assets($block_name, $parent_block, $depends): void {
+    public function process_assets($block_name, $parent_block, $depends): void
+    {
         if (isset($this->_used_blocks[$block_name])) {
             return;
         }
 
         if (!empty($depends)) {
             foreach ($depends as $depend) {
-                $this->static_process_block_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
+                $this->process_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
                 $this->_used_blocks[$depend] = true;
             }
         }
@@ -62,7 +64,7 @@ class StaticBlocks extends BaseBlocks
 
         if ($this->_blocks[$block_name]->__remote_js !== null) {
             foreach ($this->_blocks[$block_name]->__remote_js as $link => $settings) {
-                if (!empty($settings) AND isset($settings['position'])) {
+                if (!empty($settings) and isset($settings['position'])) {
                     $position = $settings['position'];
                     unset($settings['position']);
                 } else {
@@ -81,7 +83,7 @@ class StaticBlocks extends BaseBlocks
         if (!empty($this->_blocks[$block_name]->__inline_js)) {
 
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
-                $position = (!empty($inline[1]) AND isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
+                $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
                 $this->_js[$position][] = "<script>{$inline[0]}</script>";
             }
         }

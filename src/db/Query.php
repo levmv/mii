@@ -20,7 +20,7 @@ class Query
     protected Database $db;
 
     // Query type
-    protected $_type;
+    protected int $_type;
 
     // Return results as associative arrays or objects
     protected $_as_object = false;
@@ -30,7 +30,6 @@ class Query
      * @var array
      */
     protected ?array $_object_params = null;
-
 
     protected $_table;
 
@@ -92,7 +91,7 @@ class Query
      *
      * @param integer $type query type: Database::SELECT, Database::INSERT, etc
      */
-    public function __construct($type = null)
+    public function __construct($type = Database::SELECT)
     {
         $this->_type = $type;
     }
@@ -869,7 +868,7 @@ class Query
         foreach ($this->_joins as $join) {
 
             if ($join['type']) {
-                $sql = \strtoupper($this->_type) . ' JOIN';
+                $sql = \strtoupper($join['type']) . ' JOIN';
             } else {
                 $sql = 'JOIN';
             }
@@ -1046,21 +1045,11 @@ class Query
      * @return  Result   Result for SELECT queries
      * @return  mixed    the insert id for INSERT queries
      * @return  integer  number of affected rows for all other queries
-     * @throws DatabaseException
      */
-    public function execute(Database $db = null, $as_object = null, $object_params = null)
+    public function execute(Database $db = null): Result
     {
-
         if ($db === null) {
             $this->db = \Mii::$app->db;
-        }
-
-        if ($as_object === null) {
-            $as_object = $this->_as_object;
-        }
-
-        if ($object_params === null) {
-            $object_params = $this->_object_params;
         }
 
         assert(in_array($this->_type, [
@@ -1086,9 +1075,9 @@ class Query
                 break;
         }
 
-
+        /** @noinspection PhpUnhandledExceptionInspection */
         // Execute the query
-        $result = $this->db->query($this->_type, $sql, $as_object, $object_params);
+        $result = $this->db->query($this->_type, $sql, $this->_as_object, $this->_object_params);
 
         if (!\is_null($this->_index_by))
             $result->index_by($this->_index_by);
@@ -1163,7 +1152,7 @@ class Query
         return $this;
     }
 
-    public function count()
+    public function count(): int
     {
         $this->_type = Database::SELECT;
 
@@ -1201,13 +1190,15 @@ class Query
     /**
      * @return Result|\array
      */
-
     public function get()
     {
         return $this->execute();
     }
 
-
+    /**
+     * @param Deprecated $find_or_fail
+     * @return array|mixed|object|\stdClass|null
+     */
     public function one($find_or_fail = false)
     {
         $this->limit(1);
@@ -1232,7 +1223,7 @@ class Query
         return $result;
     }
 
-    public function all()
+    public function all(): array
     {
         return $this->execute()->all();
     }

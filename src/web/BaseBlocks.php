@@ -90,23 +90,17 @@ abstract class BaseBlocks extends Component
 
     public function get_block_php_file(string $name): ?string
     {
-        $block_file = null;
-        $block_path = $this->get_block_path($name) . $name;
+        $path = \implode('/', \explode('_', $name));
+        $block_path = "/$path/$name.php";
 
         foreach ($this->libraries as $library_path) {
-            if (\is_readable($library_path . $block_path . '.php')) {
-                return $library_path . $block_path . '.php';
+            if (\is_readable($library_path . $block_path)) {
+                return $library_path . $block_path;
             }
         }
 
         return null;
     }
-
-    public function get_block_path(string $name): ?string
-    {
-        return '/' . \implode('/', \explode('_', $name)) . '/';
-    }
-
 
     public function css(): string
     {
