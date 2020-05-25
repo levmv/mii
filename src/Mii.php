@@ -143,13 +143,14 @@ function block(string $name, array $params = null): \mii\web\Block
     return Mii::$app->blocks->get($name);
 }
 
+/** @noinspection PhpDocMissingThrowsInspection */
 /**
  * @param string $name
  * @return string
- * @throws \mii\web\Exception
  */
 function render_block(string $name) : string
 {
+    /** @noinspection PhpUnhandledExceptionInspection */
     return Mii::$app->blocks->get($name)->render(true);
 }
 
