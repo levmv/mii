@@ -54,13 +54,13 @@ class App extends \mii\core\App
 
             $this->response->redirect($e->url);
 
-        } catch (InvalidRouteException | ForbiddenHttpException | ModelNotFoundException $e) {
+        }/* catch (InvalidRouteException | ForbiddenHttpException | ModelNotFoundException $e) {
             if (\config('debug')) {
                 throw $e;
             } else {
-                throw new NotFoundHttpException();
+                throw new NotFoundHttpException($e);
             }
-        }
+        }*/
 
         $this->response->send();
     }

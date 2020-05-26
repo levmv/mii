@@ -3,8 +3,9 @@
 namespace mii\web;
 
 use mii\core\ErrorException;
-use mii\core\Exception;
+use mii\core\InvalidRouteException;
 use mii\core\UserException;
+use mii\db\ModelNotFoundException;
 use mii\util\Debug;
 
 class ErrorHandler extends \mii\core\ErrorHandler
@@ -16,13 +17,19 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
         if (\Mii::$app->has('response')) {
             $response = \Mii::$app->response;
-            $response->content("");
+            $response->clear();
         } else {
             $response = new Response();
         }
 
         if ($exception instanceof HttpException) {
             $response->status($exception->status_code);
+        } else if(
+            $exception instanceof InvalidRouteException ||
+            $exception instanceof ModelNotFoundException) {
+
+            $response->status(404);
+
         } else {
             $response->status(500);
         }
@@ -31,7 +38,6 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
             if($this->route && !\config('debug')) {
                 \Mii::$app->request->uri($this->route);
-
                 try {
                     \Mii::$app->run();
                     return;
@@ -48,6 +54,12 @@ class ErrorHandler extends \mii\core\ErrorHandler
                         'line' => $exception->getLine(),
                         'trace' => $exception->getTrace()
                     ];
+                    /*if($exception instanceof ModelNotFoundException) {
+                        array_shift($params['trace']);
+                        $params['file'] = $params['trace'][0]['file'];
+                        $params['line'] = $params['trace'][0]['line'];
+                    }*/
+
                     $response->content($this->render_file(__DIR__ . '/Exception/error.php', $params));
                 } else {
                     $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');

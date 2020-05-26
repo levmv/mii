@@ -29,6 +29,15 @@ class Response extends Component
     protected array $_headers = [];
 
 
+
+    public function clear() : void
+    {
+        $this->_content = '';
+        $this->_headers = [];
+        $this->status = 200;
+        $this->status_message = '';
+    }
+
     /**
      * Adds a new header.
      * If there is already a header with the same name, it will be replaced.
