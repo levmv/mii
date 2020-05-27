@@ -498,7 +498,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return $this->to_array();
     }
 
-    public function getIterator() : \Generator
+    public function getIterator() : \Traversable
     {
         return new \ArrayIterator($this->attributes);
     }

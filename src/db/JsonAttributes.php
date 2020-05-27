@@ -121,7 +121,7 @@ trait JsonAttributes
         return parent::jsonSerialize();
     }
 
-    public function getIterator() : \Generator
+    public function getIterator() : \Traversable
     {
         return (function () {
             foreach($this->attributes as $column => $value) {
