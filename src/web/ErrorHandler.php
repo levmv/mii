@@ -102,7 +102,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
             $arr['file'] = Debug::path($e->getFile());
             $arr['line'] = $e->getLine();
         }
-        if (($prev = $e->getPrevious()) !== null) {
+        if (config('debug') && ($prev = $e->getPrevious()) !== null) {
             $arr['previous'] = $this->exception_to_array($prev);
         }
         return $arr;
