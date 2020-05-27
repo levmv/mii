@@ -1,9 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\log;
 
 use Mii;
-use mii\core\ErrorException;
 use mii\util\FS;
 
 class File extends Target
@@ -13,14 +12,16 @@ class File extends Target
     public function init(array $config = []): void
     {
         parent::init($config);
-
     }
 
 
     public function process(array $messages)
     {
         $this->file = Mii::resolve($this->file);
-        FS::mkdir(\dirname($this->file));
+        $log_dir = \dirname($this->file);
+        if(!\is_dir($log_dir)) {
+            FS::mkdir(\dirname($this->file));
+        }
 
         $text = implode("\n", array_map([$this, 'format_message'], $messages)) . "\n";
 

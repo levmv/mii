@@ -132,6 +132,18 @@ $error_id = uniqid('error');
     }
 </script>
 <div id="mii_error">
+    <?php
+        $ex = 0;
+        do {
+        $ex++;
+        $class = $exception instanceof \mii\core\ErrorException ? $exception->get_name() : \get_class($exception);
+        $code = $exception->getCode();
+        $message = $exception->getMessage();
+        $file = $exception->getFile();
+        $line = $exception->getLine();
+        $trace = $exception->getTrace();
+    ?>
+
     <h1><span class="type"><?php echo $class ?> [ <?php echo $code ?> ]:</span> <span
                 class="message"><?php echo \mii\util\HTML::chars($message) ?></span></h1>
     <div id="<?php echo $error_id ?>" class="content">
@@ -142,7 +154,7 @@ $error_id = uniqid('error');
                 <li>
                     <p>
 					<span class="file">
-						<?php if ($step['file']): $source_id = $error_id . 'source' . $i; ?>
+						<?php if ($step['file']): $source_id = $error_id . 'source' . $ex . '_' .$i; ?>
                             <a href="#<?php echo $source_id ?>"
                                onclick="return koggle('<?php echo $source_id ?>')"><?php echo \mii\util\Debug::path($step['file']) ?>
                                 [ <?php echo $step['line'] ?> ]</a>
@@ -179,6 +191,8 @@ $error_id = uniqid('error');
             <?php endforeach ?>
         </ol>
     </div>
+    <?php } while(null !== ($exception = $exception->getPrevious()));?>
+
     <h2><a href="#<?php echo $env_id = $error_id . 'environment' ?>"
            onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Environment' ?></a></h2>
     <div id="<?php echo $env_id ?>" class="content collapsed">

@@ -28,10 +28,9 @@ class Exception extends \Exception
      * @param \Throwable $e
      * @return  string
      */
-    public static function text(\Throwable $e)
+    public static function text(\Throwable $e): string
     {
         $code = $e->getCode();
-
 
         return sprintf('%s%s: %s ~ %s[%d]',
             (new \ReflectionClass($e))->getShortName(),

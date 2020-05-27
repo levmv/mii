@@ -13,6 +13,22 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
     public $route;
 
+    public function prepare_exception(\Throwable $e) : \Throwable
+    {
+        if(config('debug'))
+            return $e;
+
+        if($e instanceof ModelNotFoundException) {
+            return new NotFoundHttpException($e->getMessage(), $e);
+        }
+
+        if($e instanceof InvalidRouteException) {
+            return new NotFoundHttpException($e->getMessage(), $e);
+        }
+
+        return $e;
+    }
+
     public function render($exception) {
 
         if (\Mii::$app->has('response')) {
@@ -24,12 +40,6 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
         if ($exception instanceof HttpException) {
             $response->status($exception->status_code);
-        } else if(
-            $exception instanceof InvalidRouteException ||
-            $exception instanceof ModelNotFoundException) {
-
-            $response->status(404);
-
         } else {
             $response->status(500);
         }
@@ -44,26 +54,11 @@ class ErrorHandler extends \mii\core\ErrorHandler
                 } catch (\Throwable $t) {
                     $response->content(static::exception_to_text($exception));
                 }
-            } else {
-                if(config('debug')) {
-                    $params = [
-                        'class' => $exception instanceof ErrorException ? $exception->get_name() : \get_class($exception),
-                        'code' => $exception->getCode(),
-                        'message' => $exception->getMessage(),
-                        'file' => $exception->getFile(),
-                        'line' => $exception->getLine(),
-                        'trace' => $exception->getTrace()
-                    ];
-                    /*if($exception instanceof ModelNotFoundException) {
-                        array_shift($params['trace']);
-                        $params['file'] = $params['trace'][0]['file'];
-                        $params['line'] = $params['trace'][0]['line'];
-                    }*/
+            } else if(config('debug')) {
 
-                    $response->content($this->render_file(__DIR__ . '/Exception/error.php', $params));
-                } else {
-                    $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');
-                }
+                $response->content($this->render_file(__DIR__ . '/Exception/error.php', ['exception' => $exception]));
+            } else {
+                $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');
             }
 
         } elseif ($response->format === Response::FORMAT_JSON) {

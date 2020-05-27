@@ -9,17 +9,18 @@ use mii\db\ModelNotFoundException;
 /**
  * Class App
  *
- * @property Session $session The session component.
- * @property Request $request
- * @property Blocks $blocks
- * @property Router $router
- * @property Response $response
+ * @property Session       $session The session component.
+ * @property Request       $request
+ * @property Blocks        $blocks
+ * @property Router        $router
+ * @property Response      $response
  * @property UploadHandler $upload
  *
  */
 class App extends \mii\core\App
 {
-    public function run() {
+    public function run()
+    {
         try {
 
             $uri = $this->request->uri();
@@ -27,7 +28,7 @@ class App extends \mii\core\App
             $params = $this->router->match($uri);
 
             if ($params === false) {
-                throw new InvalidRouteException("Unable to find a route to match the URI: $uri");
+                throw new InvalidRouteException("No routes found");
             }
 
             $this->request->controller = $controller_name = $params['controller'];
@@ -54,19 +55,14 @@ class App extends \mii\core\App
 
             $this->response->redirect($e->url);
 
-        }/* catch (InvalidRouteException | ForbiddenHttpException | ModelNotFoundException $e) {
-            if (\config('debug')) {
-                throw $e;
-            } else {
-                throw new NotFoundHttpException($e);
-            }
-        }*/
+        }
 
         $this->response->send();
     }
 
 
-    public function default_components(): array {
+    public function default_components(): array
+    {
         return [
             'log' => 'mii\log\Logger',
             'blocks' => 'mii\web\Blocks',

@@ -146,6 +146,7 @@ class ORM implements \JsonSerializable
             $query = new Query;
 
         $query->from($this->get_table())
+            ->model($this)
             ->select(['*'], true)
             ->as_object(static::class, [null, true]);
 
@@ -160,7 +161,7 @@ class ORM implements \JsonSerializable
 
     public function raw_query(): Query
     {
-        return new Query;
+        return (new Query)->model($this);
     }
 
 

@@ -86,6 +86,8 @@ class Query
 
     protected $_pagination;
 
+    protected $_model = null;
+
     /**
      * Creates a new SQL query of the specified type.
      *
@@ -112,6 +114,13 @@ class Query
         $this->_as_object = false;
         // note, we doesnt clean here _object_params value
 
+        return $this;
+    }
+
+
+    public function model($model) : self
+    {
+        $this->_model = $model;
         return $this;
     }
 
@@ -1046,7 +1055,7 @@ class Query
      * @return  mixed    the insert id for INSERT queries
      * @return  integer  number of affected rows for all other queries
      */
-    public function execute(Database $db = null): Result
+    public function execute(Database $db = null): ?Result
     {
         if ($db === null) {
             $this->db = \Mii::$app->db;
@@ -1217,9 +1226,9 @@ class Query
     {
         $result = $this->one();
 
-        if ($result === null)
-            throw new ModelNotFoundException();
-
+        if ($result === null) {
+            throw (new ModelNotFoundException("Model not found"))->set_model(get_class($this->_model));
+        }
         return $result;
     }
 

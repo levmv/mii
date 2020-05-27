@@ -17,20 +17,22 @@ abstract class Target extends Component
 
     protected bool $exceptions_extended = true;
 
+    private string $last_date = '';
+    private int $last_time = 0;
 
-    protected function filter(array $messages)
+    protected function filter(array $messages): array
     {
-        foreach ($messages as $i => $message) {
+        foreach ($messages as $i => $msg) {
 
-            if (!($this->levels & $message[1]))
+            if (!($this->levels & $msg[1]))
                 continue;
 
             $pass = empty($this->categories);
 
-            if (!empty($this->categories)) {
+            if (!$pass) {
                 foreach ($this->categories as $category) {
-                    if ($message[2] === $category ||
-                        (\substr_compare($category, '*', -1, 1) === 0 && \strpos($message[2], \rtrim($category, '*')) === 0)) {
+                    if ($msg[2] === $category ||
+                        (\substr_compare($category, '*', -1, 1) === 0 && \strpos($msg[2], \rtrim($category, '*')) === 0)) {
 
                         $pass = true;
                         break;
@@ -41,7 +43,7 @@ abstract class Target extends Component
             if ($pass && !empty($this->except)) {
                 foreach ($this->except as $category) {
                     $prefix = \rtrim($category, '*');
-                    if (($message[2] === $category || $prefix !== $category) && strpos($message[2], $prefix) === 0) {
+                    if (($msg[2] === $category || $prefix !== $category) && strpos($msg[2], $prefix) === 0) {
                         $pass = false;
                         break;
                     }
@@ -57,7 +59,7 @@ abstract class Target extends Component
         return $messages;
     }
 
-    public function collect(array $messages) : void
+    public function collect(array $messages): void
     {
         $messages = $this->filter($messages);
 
@@ -67,9 +69,9 @@ abstract class Target extends Component
 
     abstract public function process(array $messages);
 
-    public function format_message($message)
+    public function format_message(array $message): string
     {
-        list($msg, $level, $category, $timestamp) = $message;
+        [$msg, $level, $category, $timestamp] = $message;
 
         $level = Logger::$level_names[$level];
 
@@ -92,7 +94,11 @@ abstract class Target extends Component
                     $extended .= "\n" . \mii\util\Debug::short_text_trace($msg->getTrace());
                 }
 
-                $msg = Exception::text($msg);
+                if ($msg instanceof \mii\web\NotFoundHttpException) {
+                    $msg = static::short404_exeption_text($msg);
+                } else {
+                    $msg = Exception::text($msg);
+                }
 
             } else {
                 $msg = var_export($msg, true);
@@ -117,7 +123,27 @@ abstract class Target extends Component
             $prefix = " $ip $user_id";
         }
 
-        return date('y-m-d H:i:s', $timestamp) . "$prefix $level.$category: $msg$extended";
+        if ($timestamp !== $this->last_time) {
+            $this->last_time = $timestamp;
+            $this->last_date = \date('y-m-d H:i:s', $timestamp);
+        }
+
+        return "{$this->last_date}$prefix $level $msg$extended";
+    }
+
+    public static function short404_exeption_text(\Throwable $e): string
+    {
+        $name = get_class($e);
+        $msg = $e->getMessage();
+        $file = \mii\util\Debug::path($e->getFile());
+
+        if (strpos($file, '/src/web/App.php') !== false) {
+            $file = '';
+        } else {
+            $file = ' ~' . $file . '[' . $e->getLine() . ']';
+        }
+
+        return $name . ': ' . $msg . $file;
     }
 
 }
