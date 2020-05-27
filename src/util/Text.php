@@ -345,4 +345,17 @@ class Text
         return $data;
     }
 
+
+    public static function first_letters(array $words) : string
+    {
+        $fl = '';
+        for ($i = 0; $i < 2; $i++) {
+            if (isset($words[$i])) {
+                $fl .= \mb_substr($words[$i], 0, 1);
+            }
+        }
+
+        return \mb_strtoupper($fl);
+    }
+
 }
