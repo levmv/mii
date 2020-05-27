@@ -24,8 +24,10 @@ abstract class Target extends Component
     {
         foreach ($messages as $i => $msg) {
 
-            if (!($this->levels & $msg[1]))
+            if (!($this->levels & $msg[1])) {
+                unset($messages[$i]);
                 continue;
+            }
 
             $pass = empty($this->categories);
 
