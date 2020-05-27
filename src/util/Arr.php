@@ -343,15 +343,9 @@ class Arr
                 }
             }
             return $object;
-        } elseif ($object instanceof \Traversable) {
+        }
 
-            $result = [];
-            foreach ($object as $obj) {
-                $result[] = static::to_array($obj, $properties, $recursive);
-            }
-            return $result;
-
-        } elseif (\is_object($object)) {
+        if (\is_object($object)) {
             if (!empty($properties)) {
                 $result = [];
                 foreach ($properties as $key => $name) {
@@ -375,9 +369,9 @@ class Arr
             }
 
             return $recursive ? static::to_array($result) : $result;
-        } else {
-            return [$object];
         }
+
+        return $object;
     }
 
 }

@@ -121,4 +121,12 @@ trait JsonAttributes
         return parent::jsonSerialize();
     }
 
+    public function getIterator() : \Generator
+    {
+        return (function () {
+            foreach($this->attributes as $column => $value) {
+                yield $column => $this->$column;
+            }
+        })();
+    }
 }

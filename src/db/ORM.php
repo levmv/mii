@@ -3,9 +3,8 @@
 namespace mii\db;
 
 use mii\core\Exception;
-use mii\util\Arr;
 
-class ORM implements \JsonSerializable
+class ORM implements \JsonSerializable, \IteratorAggregate
 {
     /**
      * @var string database table name
@@ -287,11 +286,28 @@ class ORM implements \JsonSerializable
      */
     public function to_array(array $properties = []): array
     {
-        if (empty($properties)) {
-            return $this->attributes;
+        if (!empty($properties)) {
+            $result = [];
+            foreach ($properties as $key => $name) {
+                if (\is_int($key)) {
+                    $result[$name] = $this->$name;
+                } else {
+                    if (\is_string($name)) {
+                        $result[$key] = $this->$name;
+                    } elseif ($name instanceof \Closure) {
+                        $result[$key] = $name($this);
+                    }
+                }
+            }
+
+            return $result;
         }
 
-        return Arr::to_array($this, $properties);
+        $result = [];
+        foreach ($this as $key => $value) {
+            $result[$key] = $value;
+        }
+        return $result;
     }
 
     /**
@@ -480,5 +496,10 @@ class ORM implements \JsonSerializable
     public function jsonSerialize()
     {
         return $this->to_array();
+    }
+
+    public function getIterator() : \Generator
+    {
+        return new \ArrayIterator($this->attributes);
     }
 }

@@ -18,7 +18,8 @@ trait SoftDelete
     {
         $model = (new static);
 
-        $query = $model->raw_query()->select(['`' . $model->get_table() . '`.*'], true)
+        $query = $model->raw_query()
+            ->select(['*'], true)
             ->from($model->get_table())
             ->as_object(static::class, [null, true])
             ->where('deleted', 'is not', null);
