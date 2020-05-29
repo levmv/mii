@@ -105,8 +105,17 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             : $this->_result->fetch_all(\MYSQLI_ASSOC);
     }
 
+    public function each(\Closure $callback) : self
+    {
+        foreach($this as $row) {
+            $callback($row);
+        }
 
-    public function index($rows): array
+        return $this;
+    }
+
+
+    protected function index($rows): array
     {
         $result = [];
 

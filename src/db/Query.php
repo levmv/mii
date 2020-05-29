@@ -1197,9 +1197,9 @@ class Query
     }
 
     /**
-     * @return Result|\array
+     * @return Result
      */
-    public function get()
+    public function get() : Result
     {
         return $this->execute();
     }
