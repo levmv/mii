@@ -22,7 +22,13 @@ class Log {
 
     private static function log(int $level, array $args) : void
     {
+        if(count($args) === 1 && $args[0] instanceof \Throwable) {
+            \Mii::log($level, $args[0], 'app');
+            return;
+        }
+
         $message = [];
+        $exceptions = [];
 
         $trace = \debug_backtrace(\DEBUG_BACKTRACE_IGNORE_ARGS, 3);
         $message[] = ($trace[2]['class'] ? $trace[2]['class'] . "->" : '') . $trace[2]['function'];
@@ -36,6 +42,10 @@ class Log {
             if (\is_object($arg)) {
                 $classname = \get_class($arg);
 
+                if($arg instanceof \Throwable) {
+                    $exceptions[] = $arg;
+                }
+
                 if (($arg instanceof \mii\db\ORM) && isset($arg->id)) {
                     $classname .= "({$arg->id})";
                 }
@@ -46,6 +56,10 @@ class Log {
         }
 
         \Mii::log($level, \implode(' ', $message), 'app');
+
+        foreach($exceptions as $e) {
+            \Mii::log($level, $e, 'app');
+        }
     }
 
 
