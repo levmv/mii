@@ -226,7 +226,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function get(string $key)
     {
-        return $this->$key;
+        return $this->$key ?? null;
     }
 
     public function set($values, $value = NULL): ORM
