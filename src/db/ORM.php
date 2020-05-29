@@ -469,22 +469,21 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     /**
      * Deletes the current object's associated database row.
      * The object will still contain valid data until it is destroyed.
-     *
      */
     public function delete(): void
     {
-        if ($this->__loaded) {
+        if ($this->__loaded && isset($this->id)) {
             $this->__loaded = false;
 
             (new Query)
                 ->delete($this->get_table())
-                ->where('id', '=', (int)$this->attributes['id'])
+                ->where('id', '=', (int)$this->id)
                 ->execute();
 
             return;
         }
 
-        throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!');
+        throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . ' or model without id pk!');
     }
 
     /**

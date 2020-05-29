@@ -50,7 +50,7 @@ trait SoftDelete
             throw new \Exception('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
         }
 
-        $this->_loaded = false;
+        $this->__loaded = false;
 
         $this->raw_query()
             ->update($this->get_table())
