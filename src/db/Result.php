@@ -157,14 +157,17 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             } else {
                 $rows[0] = $first;
             }
-
         }
-        foreach ($this as $row) {
-            if ($this->_as_object)
-                $rows[$row->$key] = $row->$display;
-            else
-                $rows[$row[$key]] = $row[$display];
 
+        if ($this->_as_object) {
+            foreach ($this as $row) {
+                $rows[$row->$key] = $row->$display;
+            }
+            return $rows;
+        }
+
+        foreach ($this as $row) {
+            $rows[$row[$key]] = $row[$display];
         }
         return $rows;
     }
