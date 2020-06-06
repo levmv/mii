@@ -8,9 +8,14 @@ use mii\console\Controller;
 use mii\core\Exception;
 use mii\util\FS;
 
+/**
+ * Blocks builder
+ *
+ * @package mii\console\controllers
+ */
 class Block extends Controller
 {
-    public $description = 'Blocks builder';
+    public static $description = 'Blocks builder';
 
     protected $input_path;
 
@@ -22,7 +27,7 @@ class Block extends Controller
 
     private $changed_files = 0;
 
-    public function before() {
+    protected function before() {
 
         $list = config('console.block.rules', []);
 
@@ -321,10 +326,9 @@ class Block extends Controller
         }
     }
 
-    protected function iterate_dir($from, $callback): void
-    {
+    protected function iterate_dir($from, $callback) {
         $files = scandir($this->input_path . '/' . $from);
-        array_map(static function ($item) use ($callback) {
+        array_map(function ($item) use ($callback) {
             if ($item === '.' OR $item === '..')
                 return;
 

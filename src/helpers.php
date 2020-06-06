@@ -1,16 +1,29 @@
 <?php
 
 if (!\function_exists('abort')) {
+
+    /**
+     * @param int    $code
+     * @param string $message
+     * @throws \mii\web\HttpException
+     * @throws \mii\web\NotFoundHttpException
+     */
     function abort(int $code = 404, string $message = '')
     {
-        if ($code == 404) {
+        if ($code === 404) {
             throw new \mii\web\NotFoundHttpException();
         }
         throw new \mii\web\HttpException($code, $message);
     }
+
 }
 
-if (!\function_exists('redirect')) {
+if (!\function_exists('abort')) {
+    /**
+     * @param      $url
+     * @param bool $use_back_url
+     * @throws \mii\web\RedirectHttpException
+     */
     function redirect($url, $use_back_url = false)
     {
 
@@ -22,12 +35,11 @@ if (!\function_exists('redirect')) {
     }
 }
 
-
-/**
- * @param $name string
- * @return \mii\web\Block
- */
-if (!\function_exists('block')) {
+if (!\function_exists('abort')) {
+    /**
+     * @param $name string
+     * @return \mii\web\Block
+     */
     function block(string $name, array $params = null): \mii\web\Block
     {
         if (!\is_null($params)) {
@@ -37,20 +49,33 @@ if (!\function_exists('block')) {
     }
 }
 
-/**
- * Retrieve a cached value entry by id.
- *
- *     // Retrieve cache entry with id foo
- *     $data = get_cached('foo');
- *
- *     // Retrieve cache entry and return 'bar' if miss
- *     $data = get_cached('foo', 'bar');
- *
- * @param string $id id of cache to entry
- * @param string $default default value to return if cache miss
- * @return  mixed
- */
-if (!\function_exists('get_cached')) {
+if (!\function_exists('abort')) {
+    /** @noinspection PhpDocMissingThrowsInspection */
+    /**
+     * @param string $name
+     * @return string
+     */
+    function render_block(string $name): string
+    {
+        /** @noinspection PhpUnhandledExceptionInspection */
+        return Mii::$app->blocks->get($name)->render(true);
+    }
+}
+
+if (!\function_exists('abort')) {
+    /**
+     * Retrieve a cached value entry by id.
+     *
+     *     // Retrieve cache entry with id foo
+     *     $data = get_cached('foo');
+     *
+     *     // Retrieve cache entry and return 'bar' if miss
+     *     $data = get_cached('foo', 'bar');
+     *
+     * @param string $id id of cache to entry
+     * @param string $default default value to return if cache miss
+     * @return  mixed
+     */
     function get_cached($id, $default = null, $lifetime = null)
     {
 
@@ -66,42 +91,45 @@ if (!\function_exists('get_cached')) {
         }
 
         return Mii::$app->cache->get($id, $default);
+
     }
 }
 
-/**
- * Set a value to cache with id and lifetime
- *
- *     $data = 'bar';
- *
- *     // Set 'bar' to 'foo', using default expiry
- *     cache('foo', $data);
- *
- *     // Set 'bar' to 'foo' for 30 seconds
- *     cache('foo', $data, 30);
- *
- * @param string  $id id of cache entry
- * @param mixed   $data data to set to cache
- * @param integer $lifetime lifetime in seconds
- * @return  boolean
- */
-if (!\function_exists('cache')) {
+if (!\function_exists('abort')) {
+    /**
+     * Set a value to cache with id and lifetime
+     *
+     *     $data = 'bar';
+     *
+     *     // Set 'bar' to 'foo', using default expiry
+     *     cache('foo', $data);
+     *
+     *     // Set 'bar' to 'foo' for 30 seconds
+     *     cache('foo', $data, 30);
+     *
+     * @param string  $id id of cache entry
+     * @param mixed   $data data to set to cache
+     * @param integer $lifetime lifetime in seconds
+     * @return  boolean
+     */
+
     function cache($id, $data, $lifetime = null)
     {
         return Mii::$app->cache->set($id, $data, $lifetime);
     }
 }
 
-/**
- * Delete a cache entry based on id, or delete all cache entries.
- *
- *     // Delete 'foo' entry from the apc group
- *     Cache::instance('apc')->delete('foo');
- *
- * @param string $id id to remove from cache
- * @return  boolean
- */
-if (!\function_exists('clear_cache')) {
+if (!\function_exists('abort')) {
+    /**
+     * Delete a cache entry based on id, or delete all cache entries.
+     *
+     *     // Delete 'foo' entry from the apc group
+     *     Cache::instance('apc')->delete('foo');
+     *
+     * @param string $id id to remove from cache
+     * @return  boolean
+     */
+
     function clear_cache($id = null)
     {
         if ($id === null)
@@ -111,13 +139,14 @@ if (!\function_exists('clear_cache')) {
     }
 }
 
-if (!\function_exists('path')) {
+if (!\function_exists('abort')) {
     function path(string $name): string
     {
         return Mii::$paths[$name];
     }
 }
-if (!\function_exists('e')) {
+
+if (!\function_exists('abort')) {
     function e(?string $text): string
     {
         return mii\util\HTML::entities($text, false);
@@ -151,7 +180,7 @@ if (!\function_exists('dd')) {
     }
 }
 
-if (!\function_exists('config')) {
+if (!\function_exists('abort')) {
     function config(string $key, $default = null)
     {
         if (isset(Mii::$app->_config[$key]))
@@ -186,10 +215,10 @@ if (!\function_exists('config')) {
         return $default;
     }
 }
-if (!\function_exists('config_set')) {
+
+if (!\function_exists('abort')) {
     function config_set(string $key, $value)
     {
         \mii\util\Arr::set_path(Mii::$app->_config, $key, $value, '.');
     }
 }
-

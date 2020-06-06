@@ -14,7 +14,6 @@ class Request extends Component
      */
     public $params = [];
 
-
     /**
      * @var  string  controller to be executed
      */
@@ -51,7 +50,7 @@ class Request extends Component
         foreach ($argv as $param) {
             if (preg_match('/^--(\w+)(=(.*))?$/', $param, $matches)) {
                 $name = $matches[1];
-                $value = $matches[3] ?? true;
+                $value = isset($matches[3]) ? $matches[3] : true;
 
                 if (isset($params[$name])) {
                     $params[$name] = (array)$params[$name];
@@ -122,22 +121,25 @@ class Request extends Component
 
     public function gen_help()
     {
-        $namespaces = config('console.namespaces', [
+
+        $namespaces = array_unique(array_merge(config('console.namespaces', [
             'app\\console',
             'mii\\console\\controllers'
-        ]);
+        ]), ['mii\\console\\controllers']));
+
 
         $paths = array_replace([
             'app\\console' => '@app/console',
-            'mii\\console\\controllers' => __DIR__
-        ], config('console.ns_paths', $this->get_paths_from_composer($namespaces)));
-
+            'mii\\console\\controllers' => __DIR__//.'\\controllers'
+        ], config('console.ns_paths', static::get_paths_from_composer($namespaces)));
+;
 
         $list = [];
         foreach ($namespaces as $namespace) {
 
             if (!isset($paths[$namespace])) {
-                Console::stderr("Dont know path for $namespace. Skip");
+
+                $this->error("Dont know path for $namespace. Skip");
                 continue;
             }
 
@@ -146,22 +148,60 @@ class Request extends Component
 
         Console::stdout("\n");
 
-        foreach ($list as $controller) {
+        $out = [];
+        $max = 0;
 
-            if ($controller['class'] === static::class)
-                continue;
+        foreach ($list as ['class' => $class, 'command' => $command]) {
 
-            $class = new $controller['class']();
+            $reflection = new \ReflectionClass($class);
 
-            $desc = ($class->description) ? " " . $class->description . " " : '';
-            Console::stdout(Console::ansi_format($controller['command'], [Console::FG_GREEN]));
-            $padding = max(1, 12 - \strlen($controller['command']));
-            Console::stdout(Console::ansi_format(str_pad(" ", $padding, " ") . $desc . "\n\n", [Console::FG_GREY]));
+            $doc = $reflection->getStaticPropertyValue('description', '');
+
+            if (!$doc) {
+                [$doc,] = static::get_phpdoc_summary($reflection);
+            }
+
+            $max = max($max, mb_strlen($command));
+
+            $result = [
+                'command' => $command,
+                'desc' => $doc,
+                'actions' => []
+            ];
+
+            $result['actions'] = static::get_controller_actions($reflection);
+            foreach ($result['actions'] as ['name' => $name]) {
+                $max = max($max, mb_strlen($name));
+            }
+
+            $out[] = $result;
+        }
+
+        foreach ($out as [
+                 'command' => $command,
+                 'desc' => $doc,
+                 'actions' => $actions]) {
+
+            Console::stdout(static::padded($command, $max), Console::FG_YELLOW);
+            Console::stdout("$doc\n");
+
+            foreach ($actions as [
+                'name' => $action,
+                'summary' => $desc
+            ]) {
+                Console::stdout(static::padded("  " . $action, $max), Console::FG_GREEN);
+                Console::stdout("$desc\n", Console::FG_GREY);
+            }
+            Console::stdout("\n");
         }
     }
 
+    private static function padded(string $string, int $length)
+    {
+        return str_pad($string, $length + 5, " ", STR_PAD_RIGHT);
+    }
 
-    private function get_paths_from_composer($namespaces)
+    private static function get_paths_from_composer($namespaces): ?array
     {
         $compdir = realpath(__DIR__ . '/../../../../composer');
         if (!$compdir) {
@@ -226,12 +266,84 @@ class Request extends Component
             if (!isset($files[$info['filename']]))
                 $files[$info['filename']] = [
                     'class' => $namespace . '\\' . $info['filename'],
-                    'command' => mb_strtolower($info['filename'], 'utf-8')
+                    'command' => mb_strtolower($info['filename'])
                 ];
         }
 
         // Clean up
         $dir->close();
+    }
+
+
+    public static function get_controller_actions($obj): array
+    {
+        $methods = $obj->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $results = [];
+
+        /**
+         * @var \ReflectionMethod $method
+         */
+        foreach ($methods as $method) {
+
+            if (in_array($method->name, ['__construct', 'index', '_execute']))
+                continue;
+
+            $args = [];
+
+            foreach ($method->getParameters() as $param) {
+                $name = $param->getName();
+                $optional = $param->isDefaultValueAvailable();
+                $type = $param->getType();
+
+                $args[] = $optional ? "[".$name."]" : "<$name>";
+            }
+
+            [$summary,$desc] = static::get_phpdoc_summary($obj->getMethod($method->name));
+
+            $results[] = [
+                'name' => $method->name,
+                'summary' => $summary,
+                'desc' => $desc,
+                'args' => $args
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * @param \ReflectionMethod|\ReflectionClass $ref
+     * @return array
+     */
+    public static function get_phpdoc_summary(\Reflector $ref): array
+    {
+        $comment = $ref->getDocComment();
+
+        if (!$comment)
+            return ['',''];
+
+        $comment = preg_replace('#[ \t]*(?:\/\*\*|\*\/|\*)?[ \t]?(.*)?#u', '$1', $comment);
+        $comment = trim($comment);
+
+        if (substr($comment, -2) === '*/') {
+            $comment = trim(substr($comment, 0, -2));
+        }
+
+        $comment = str_replace(["\r\n", "\r"], "\n", $comment);
+
+        $lines = explode("\n", $comment);
+
+        $summary = $lines[0];
+        $full = '';
+
+        for($i=1;$i<count($lines);$i++) {
+            if(mb_strpos(trim($lines[$i]), '@') === 0) {
+                break;
+            }
+            $full .= $lines[$i]."\n";
+        }
+
+        return [$summary, $full];
     }
 
 }

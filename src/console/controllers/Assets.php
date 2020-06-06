@@ -10,10 +10,20 @@ use mii\util\Console;
 use mii\util\FS;
 use mii\util\Text;
 
+/**
+ * Blocks assets builder
+ *
+ *  Global options:
+ *
+ *  --config=<path>  Path to configuration file. By default it's «@app/config/assets.php»
+ *  --set=<setname> Name of set to process
+ *  --force         Dont check if files changed
+ *  --json          To print assets paths as json
+ *
+ * @package mii\console\controllers
+ */
 class Assets extends Controller
 {
-    public $description = 'Blocks assets builder';
-
     public $config_file;
     private $json_output;
     private $force_mode;
@@ -83,13 +93,14 @@ class Assets extends Controller
         return;
     }
 
+    /**
+     * Test assets config and show missed blocks list
+     */
+    public function test() {
 
-    public function test()
-    {
+        if(\count($this->sets)) {
 
-        if (\count($this->sets)) {
-
-            foreach ($this->sets as $name => $set) {
+            foreach($this->sets as $name => $set) {
                 $this->test_set($name);
             }
         } else {
@@ -98,10 +109,12 @@ class Assets extends Controller
 
     }
 
-    public function build()
-    {
+    /**
+     * Build assets
+     */
+    public function build() {
 
-        if (\count($this->sets)) {
+        if(\count($this->sets)) {
 
             foreach ($this->filtered_sets as $name) {
                 $this->build_set($name);

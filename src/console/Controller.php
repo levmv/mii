@@ -7,8 +7,6 @@ use mii\util\Console;
 
 class Controller
 {
-    public $description;
-
     public $color;
 
     public $interactive = true;
@@ -35,47 +33,35 @@ class Controller
     }
 
     protected function _autogenerate_help() {
-        $class = new \ReflectionClass($this);
+        $ref = new \ReflectionClass($this);
 
-        $description = $class->getProperty('description')->getValue($this);
-        if ($description)
-            $this->stdout("\n  $description\n", Console::FG_GREEN);
+        $doc = $ref->getStaticPropertyValue('description', '');
+        $full = '';
 
-        $public_methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
-        $methods = [];
-
-        foreach ($public_methods as $m) {
-            if ($m->class != static::class)
-                continue;
-            $methods[] = $m->name;
+        if (!$doc) {
+            [$doc, $full] = Request::get_phpdoc_summary($ref);
         }
 
-        if (\count($methods))
-            $this->stdout("\n  Commands:");
+        if ($doc)
+            Console::stdout("\n$doc\n$full\n", Console::FG_GREEN);
 
+        $methods = Request::get_controller_actions($ref);
 
-        $max = 0;
-        foreach ($methods as $method) {
-            $max = max(\strlen($method), $max);
-        }
+        if (!\count($methods))
+            return;
 
-        $max = min($max, 30); // limit our max length to 30
+        $controller = strtolower($this->request->controller);
 
-        foreach ($methods as $method) {
+        foreach ($methods as [
+            'name' => $method,
+            'summary' => $summary,
+            'desc' => $desc,
+            'args' => $args]
+        ) {
+            $args = implode(' ', $args);
+            Console::stdout("\n$controller $method $args", Console::FG_YELLOW);
 
-            $this->stdout("\n\n    $method", Console::FG_YELLOW);
-
-            $string = $class->getMethod($method)->getDocComment();
-
-            $string = trim(str_replace(['/**', '*/'], '', $string));
-            $array = explode("\n", $string);
-            $comment = $array[0];
-            if (strpos($comment, '*') === 0)
-                $comment = trim(substr($comment, 1));
-
-            if ($comment) {
-                $this->stdout(str_pad(" ", $max - strlen($method), " ") . "\t$comment");
-            }
+            $this->stdout("\n$summary\n$desc", Console::FG_GREY);
         }
 
         $this->stdout("\n\n");
@@ -131,7 +117,7 @@ class Controller
      * @return  int
      * @throws  Exception
      */
-    public function execute() {
+    public function _execute() {
 
         $this->before();
 
@@ -145,42 +131,20 @@ class Controller
         return $this->response_code;
     }
 
-    public function is_color_enabled($stream = \STDOUT) {
-        return $this->color === null ? Console::stream_supports_ansi_colors($stream) : $this->color;
-    }
 
-    public function ansi_format($string) {
-        if ($this->is_color_enabled()) {
-            $args = \func_get_args();
-            array_shift($args);
-            $string = Console::ansi_format($string, $args);
-        }
-        return $string;
-    }
-
-    public function stdout($string) {
-        if ($this->is_color_enabled()) {
-            $args = \func_get_args();
-            array_shift($args);
-            $string = Console::ansi_format($string, $args);
-        }
+    protected function stdout($string) {
         return Console::stdout($string);
     }
 
-    public function stderr($string) {
-        if ($this->is_color_enabled(\STDERR)) {
-            $args = \func_get_args();
-            array_shift($args);
-            $string = Console::ansi_format($string, $args);
-        }
+    protected function stderr($string) {
         return Console::stderr($string);
     }
 
-    public function stdin() {
+    protected function stdin() {
         return Console::stdin();
     }
 
-    public function confirm($message, $default = false) {
+    protected function confirm($message, $default = false) {
         if ($this->interactive) {
             return Console::confirm($message, $default);
         } else {
@@ -190,19 +154,19 @@ class Controller
 
     protected function info($msg, $options = []) {
         $msg = strtr($msg, $options);
-        $this->stdout($msg . "\n", Console::FG_GREEN);
+        Console::stdout($msg . "\n", Console::FG_GREEN);
         \Mii::info($msg, 'console');
     }
 
     protected function warning($msg, $options = []) {
         $msg = strtr($msg, $options);
-        $this->stdout($msg . "\n", Console::FG_PURPLE);
+        Console::stdout($msg . "\n", Console::FG_PURPLE);
         \Mii::warning(strtr($msg, $options), 'console');
     }
 
     protected function error($msg, $options = []) {
         $msg = strtr($msg, $options);
-        $this->stderr($msg . "\n", Console::FG_RED);
+        Console::stderr($msg . "\n", Console::FG_RED);
         \Mii::error(strtr($msg, $options), 'console');
     }
 

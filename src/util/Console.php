@@ -50,7 +50,7 @@ class Console
      * and also [[xtermFgColor]] and [[xtermBgColor]] to specify a format.
      * @return string
      */
-    public static function ansi_format($string, $format = []) {
+    public static function ansi_format(string $string, array $format = []) :string {
         $code = implode(';', $format);
 
         return "\033[0m" . ($code !== '' ? "\033[" . $code . "m" : '') . $string . "\033[0m";
@@ -62,17 +62,8 @@ class Console
      * @param string $string String to strip
      * @return string
      */
-    public static function stripAnsiFormat($string) {
+    public static function strip_ansi_format(string $string) : string {
         return preg_replace('/\033\[[\d;?]*\w/', '', $string);
-    }
-
-    /**
-     * Returns the length of the string without ANSI color codes.
-     * @param string $string the string to measure
-     * @return integer the length of the string not counting ANSI format characters
-     */
-    public static function ansiStrlen($string) {
-        return mb_strlen(static::stripAnsiFormat($string));
     }
 
 
@@ -85,8 +76,7 @@ class Console
      * @access public
      * @return string
      */
-    public static function escape($string) {
-        // TODO rework/refactor according to https://github.com/yiisoft/yii2/issues/746
+    public static function escape(string $string) : string {
         return str_replace('%', '%%', $string);
     }
 
@@ -100,18 +90,11 @@ class Console
      * @return boolean true if the stream supports ANSI colors, otherwise false.
      */
     public static function stream_supports_ansi_colors($stream) {
-        return DIRECTORY_SEPARATOR == '\\'
+        return DIRECTORY_SEPARATOR === '\\'
             ? getenv('ANSICON') !== false || getenv('ConEmuANSI') === 'ON'
             : \function_exists('posix_isatty') && @posix_isatty($stream);
     }
 
-    /**
-     * Returns true if the console is running on windows
-     * @return bool
-     */
-    public static function is_running_on_windows() {
-        return DIRECTORY_SEPARATOR == '\\';
-    }
 
     /**
      * Gets input from STDIN and returns a string right-trimmed for EOLs.
@@ -119,7 +102,8 @@ class Console
      * @param boolean $raw If set to true, returns the raw string without trimming
      * @return string the string read from stdin
      */
-    public static function stdin($raw = false) {
+    public static function stdin(bool $raw = false): string
+    {
         return $raw ? fgets(\STDIN) : rtrim(fgets(\STDIN), PHP_EOL);
     }
 
@@ -127,10 +111,11 @@ class Console
      * Prints a string to STDOUT.
      *
      * @param string $string the string to print
+     * @param array  $args
      * @return int|boolean Number of bytes printed or false on error
      */
-    public static function stdout($string) {
-        return fwrite(\STDOUT, $string);
+    public static function stdout($string, ...$args) {
+        return static::write_to_stream(\STDOUT, $string, ...$args);
     }
 
     /**
@@ -139,9 +124,18 @@ class Console
      * @param string $string the string to print
      * @return int|boolean Number of bytes printed or false on error
      */
-    public static function stderr($string) {
-        return fwrite(\STDERR, $string);
+    public static function stderr($string, ...$args) {
+        return static::write_to_stream(\STDERR, $string, ...$args);
     }
+
+    public static function write_to_stream($stream, $string, ...$args)
+    {
+        if(!empty($args) && static::stream_supports_ansi_colors($stream)) {
+            $string = static::ansi_format($string, $args);
+        }
+        return fwrite($stream, $string);
+    }
+
 
     /**
      * Asks the user for input. Ends when the user types a carriage return (PHP_EOL). Optionally, It also provides a
@@ -185,7 +179,8 @@ class Console
      * @param boolean $default this value is returned if no selection is made.
      * @return boolean whether user confirmed
      */
-    public static function confirm($message, $default = false) {
+    public static function confirm($message, $default = false): ?bool
+    {
         while (true) {
             static::stdout($message . ' (yes|no) [' . ($default ? 'yes' : 'no') . ']:');
             $input = trim(static::stdin());

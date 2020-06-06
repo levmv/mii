@@ -27,7 +27,7 @@ class Router extends Component
     private const R_METHOD = 6;
 
 
-    protected $default_parameters = [
+    protected array $default_parameters = [
         'id' => '[0-9]+',
         'slug' => '[a-zA-Z0-9-_.]+',
         'path' => '[a-zA-Z0-9-_./]+'
@@ -39,17 +39,17 @@ class Router extends Component
 
     protected $cache_lifetime = 86400;
 
-    protected $rest_mode = false;
+    protected bool $rest_mode = false;
 
-    protected $routes;
+    protected array $routes;
 
     protected $order;
 
-    protected $_routes_list;
+    protected array $_routes_list;
 
-    protected $_named_routes;
+    protected array $_named_routes;
 
-    protected $_namespaces = [];
+    protected array $_namespaces = [];
 
     protected $_current_route;
 
@@ -61,8 +61,8 @@ class Router extends Component
 
         if ($this->cache) {
 
-            list($this->_routes_list, $this->_named_routes, $this->_namespaces) = \Mii::$app->get($this->cache)->get($this->cache_id, [null, null, null]);
-            if ($this->_routes_list === null)
+            list($this->_routes_list, $this->_named_routes, $this->_namespaces) = \Mii::$app->get($this->cache)->get($this->cache_id, [[], [], []]);
+            if (empty($this->_routes_list))
                 $this->init_routes();
 
         } else {
