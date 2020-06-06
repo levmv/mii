@@ -14,6 +14,12 @@
   "autoload": {
     "psr-4": {
       "mii\\": "src/"
-    }
+    },
+    "classmap" : [
+      "src/Mii.php"
+    ],
+    "files": [
+      "src/helpers.php"
+    ]
   }
 }
