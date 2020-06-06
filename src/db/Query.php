@@ -17,10 +17,10 @@ class Query
     /**
      * @var Database
      */
-    protected $db;
+    protected Database $db;
 
     // Query type
-    protected $_type;
+    protected int $_type;
 
     // Return results as associative arrays or objects
     protected $_as_object = false;
@@ -29,13 +29,12 @@ class Query
     /**
      * @var array
      */
-    protected $_object_params = [];
-
+    protected ?array $_object_params = null;
 
     protected $_table;
 
     // (...)
-    protected $_columns = [];
+    protected array $_columns = [];
 
     // VALUES (...)
     protected $_values = [];
@@ -45,11 +44,11 @@ class Query
 
 
     // SELECT ...
-    protected $_select = [];
+    protected array $_select = [];
 
-    protected $_for_update = false;
+    protected bool $_select_any = false;
 
-    protected $_quoted_select = [];
+    protected bool $_for_update = false;
 
     // DISTINCT
     protected bool $_distinct = false;
@@ -85,15 +84,17 @@ class Query
 
     protected $_last_condition_where;
 
-
     protected $_pagination;
+
+    protected $_model = null;
 
     /**
      * Creates a new SQL query of the specified type.
      *
      * @param integer $type query type: Database::SELECT, Database::INSERT, etc
      */
-    public function __construct($type = NULL) {
+    public function __construct($type = Database::SELECT)
+    {
         $this->_type = $type;
     }
 
@@ -102,15 +103,24 @@ class Query
      *
      * @return  string
      */
-    public function __toString() {
+    public function __toString(): string
+    {
         return $this->compile();
     }
 
 
-    public function as_array() {
+    public function as_array(): self
+    {
         $this->_as_object = false;
-        $this->_object_params = [];
+        // note, we doesnt clean here _object_params value
 
+        return $this;
+    }
+
+
+    public function model($model) : self
+    {
+        $this->_model = $model;
         return $this;
     }
 
@@ -118,52 +128,42 @@ class Query
     /**
      * Returns results as objects
      *
-     * @param   string $class classname
-     * @param   array $params
+     * @param string $class classname
+     * @param array  $params
      * @return  $this
      */
-    public function as_object($class, array $params = NULL) {
+    public function as_object($class, array $params = null): self
+    {
         $this->_as_object = $class;
-
-        if ($params) {
-            // Add object parameters
-            $this->_object_params = $params;
-        }
+        $this->_object_params = $params;
 
         return $this;
     }
-
 
 
     /**** SELECT ****/
 
-
     /**
      * Sets the initial columns to select
      *
-     * @param array $columns column list
-     * @param bool $already_quoted
+     * Second argument used for optimization purpose. Most common use is call from ORM for
+     * select like 'table.*'
+     *
+     * @param array     $columns column list
+     * @param bool|null $any String like `table`.*
      * @return  Query
      */
-    public function select(array $columns = null, bool $already_quoted = false) {
+    public function select(array $columns, bool $any = false): self
+    {
         $this->_type = Database::SELECT;
-
-        if ($columns !== null) {
-            // Set the initial columns
-            if ($already_quoted === false) {
-                $this->_select = $columns;
-                $this->_quoted_select = [];
-            } else {
-                $this->_quoted_select = $columns;
-                $this->_select = [];
-            }
-        }
+        $this->_select = $columns;
+        $this->_select_any = $any;
 
         return $this;
     }
 
-
-    public function for_update($enable = true) {
+    public function for_update(bool $enable = true): self
+    {
         $this->_for_update = $enable;
 
         return $this;
@@ -172,10 +172,11 @@ class Query
     /**
      * Enables or disables selecting only unique columns using "SELECT DISTINCT"
      *
-     * @param   boolean $value enable or disable distinct columns
+     * @param boolean $value enable or disable distinct columns
      * @return  $this
      */
-    public function distinct(bool $value) {
+    public function distinct(bool $value): self
+    {
         $this->_distinct = $value;
 
         return $this;
@@ -183,24 +184,37 @@ class Query
 
     /**
      * Choose the columns to select from, using an array.
-     *
-     * @param   array $columns list of column names or aliases
+     * @param array $columns list of column names or aliases
      * @return  $this
+     * @deprecated
      */
-    public function select_array(array $columns) {
+    public function select_array(array $columns)
+    {
         $this->_select = \array_merge($this->_select, $columns);
+        $this->_select_any = false;
 
+        return $this;
+    }
+
+    /**
+     * @param mixed ...$columns
+     * @return $this
+     */
+    public function select_also(...$columns): self
+    {
+        $this->_select = \array_merge($this->_select, $columns);
+        $this->_select_any = false;
         return $this;
     }
 
     /**
      * Choose the tables to select "FROM ..."
      *
-     * @param   mixed $table table name or array($table, $alias) or object
+     * @param mixed $table table name or array($table, $alias) or object
      * @return  $this
      */
-    public function from($table) {
-
+    public function from($table): self
+    {
         $this->_from[] = $table;
 
         return $this;
@@ -209,11 +223,12 @@ class Query
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param   mixed $table column name or array($column, $alias) or object
-     * @param   string $type join type (LEFT, RIGHT, INNER, etc)
+     * @param mixed  $table column name or array($column, $alias) or object
+     * @param string $type join type (LEFT, RIGHT, INNER, etc)
      * @return  $this
      */
-    public function join($table, $type = NULL) {
+    public function join($table, $type = null): self
+    {
         $this->_joins[] = [
             'table' => $table,
             'type' => $type,
@@ -229,12 +244,13 @@ class Query
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
      *
-     * @param   mixed $c1 column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $c2 column name or array($column, $alias) or object
+     * @param mixed  $c1 column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $c2 column name or array($column, $alias) or object
      * @return  $this
      */
-    public function on($c1, $op, $c2) {
+    public function on($c1, $op, $c2): self
+    {
         $this->_joins[$this->_last_join]['on'][] = [$c1, $op, $c2];
 
         return $this;
@@ -246,7 +262,8 @@ class Query
      * @param mixed ...$columns column name
      * @return  $this
      */
-    public function using(...$columns) {
+    public function using(...$columns): self
+    {
         \call_user_func_array([$this->_last_join, 'using'], $columns);
 
         return $this;
@@ -255,10 +272,11 @@ class Query
     /**
      * Creates a "GROUP BY ..." filter.
      *
-     * @param   mixed $columns column name or array($column, $alias) or object
+     * @param mixed $columns column name or object
      * @return  $this
      */
-    public function group_by(...$columns) {
+    public function group_by(...$columns): self
+    {
         $this->_group_by = array_merge($this->_group_by, $columns);
 
         return $this;
@@ -267,24 +285,26 @@ class Query
     /**
      * Alias of and_having()
      *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
+     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $value column value
      * @return  $this
      */
-    public function having($column = null, $op = null, $value = null) {
+    public function having($column = null, $op = null, $value = null): self
+    {
         return $this->and_having($column, $op, $value);
     }
 
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
+     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $value column value
      * @return  $this
      */
-    public function and_having($column, $op, $value = NULL) {
+    public function and_having($column, $op, $value = null): self
+    {
         if ($column === null) {
             $this->_having[] = ['AND' => '('];
             $this->_last_condition_where = false;
@@ -302,12 +322,13 @@ class Query
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
+     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $value column value
      * @return  $this
      */
-    public function or_having($column = null, $op = null, $value = null) {
+    public function or_having($column = null, $op = null, $value = null): self
+    {
         if ($column === null) {
             $this->_having[] = ['OR' => '('];
             $this->_last_condition_where = false;
@@ -326,17 +347,18 @@ class Query
     /**
      * Start returning results after "OFFSET ..."
      *
-     * @param   integer $number starting result number or NULL to reset
+     * @param integer $number starting result number or null to reset
      * @return  $this
      */
-    public function offset($number) {
+    public function offset(?int $number): self
+    {
         $this->_offset = $number;
 
         return $this;
     }
 
-    public function paginate($count = 100) {
-
+    public function paginate($count = 100)
+    {
         $this->_pagination = new Pagination([
             'block' => 'pagination',
             'total_items' => $this->count(),
@@ -356,36 +378,39 @@ class Query
     /**
      * Alias of and_where()
      *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
+     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $value column value
      * @return  $this
      */
-    public function where($column = null, $op = null, $value = null) {
+    public function where($column = null, $op = null, $value = null): self
+    {
         return $this->and_where($column, $op, $value);
     }
 
     /**
      * Alias of and_filter()
      *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
+     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $value column value
      * @return  $this
      */
-    public function filter($column, $op, $value) {
+    public function filter($column, $op, $value): self
+    {
         return $this->and_filter($column, $op, $value);
     }
 
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
+     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $value column value
      * @return  $this
      */
-    public function and_where($column, $op = null, $value = null) {
+    public function and_where($column, $op = null, $value = null): self
+    {
 
         if ($column === null) {
             $this->_where[] = ['AND' => '('];
@@ -405,12 +430,13 @@ class Query
     /**
      * Creates a new "AND WHERE" condition for the query. But only for not empty values.
      *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
+     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $value column value
      * @return  $this
      */
-    public function and_filter($column, $op, $value) {
+    public function and_filter($column, $op, $value): self
+    {
         if ($value === null || $value === "" || !Rules::not_empty((\is_string($value) ? trim($value) : $value)))
             return $this;
 
@@ -421,12 +447,13 @@ class Query
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
+     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $op logic operator
+     * @param mixed  $value column value
      * @return  $this
      */
-    public function or_where($column = null, $op = null, $value = null) {
+    public function or_where($column = null, $op = null, $value = null): self
+    {
         if ($column === null) {
 
             $this->_where[] = ['OR' => '('];
@@ -445,28 +472,13 @@ class Query
         return $this;
     }
 
-    /**
-     * Creates a new "OR WHERE" condition for the query.
-     *
-     * @param   mixed $column column name or array($column, $alias) or object
-     * @param   string $op logic operator
-     * @param   mixed $value column value
-     * @return  $this
-     */
-    public function or_filter($column, $op, $value) {
-        if ($value === null || $value === "" || !Rules::not_empty((\is_string($value) ? trim($value) : $value)))
-            return $this;
-
-        return $this->or_where($column, $op, $value);
-    }
-
-    public function end($check_for_empty = false) {
-
+    public function end($check_for_empty = false): self
+    {
         if ($this->_last_condition_where) {
             if ($check_for_empty !== false) {
                 $group = \end($this->_where);
 
-                if ($group AND \reset($group) === '(') {
+                if ($group and \reset($group) === '(') {
                     \array_pop($this->_where);
                     return $this;
                 }
@@ -479,7 +491,7 @@ class Query
             if ($check_for_empty !== false) {
                 $group = \end($this->_having);
 
-                if ($group AND \reset($group) === '(') {
+                if ($group and \reset($group) === '(') {
                     \array_pop($this->_having);
                     return $this;
                 }
@@ -497,7 +509,8 @@ class Query
      *
      * @return  $this
      */
-    public function and_where_close() {
+    public function and_where_close(): self
+    {
         $this->_where[] = ['AND' => ')'];
 
         return $this;
@@ -508,7 +521,8 @@ class Query
      *
      * @return  $this
      */
-    public function or_where_close() {
+    public function or_where_close(): self
+    {
         $this->_where[] = ['OR' => ')'];
 
         return $this;
@@ -518,14 +532,15 @@ class Query
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param   mixed $column column name or array($column, $alias) or array([$column, $direction], [$column, $direction], ...)
-     * @param   string $direction direction of sorting
+     * @param mixed  $column column name or array($column, $alias) or array([$column, $direction], [$column, $direction], ...)
+     * @param string $direction direction of sorting
      * @return  $this
      */
-    public function order_by($column, $direction = null) {
-        if (\is_array($column) AND $direction === null) {
+    public function order_by($column, $direction = null): self
+    {
+        if (\is_array($column) && $direction === null) {
             $this->_order_by = $column;
-        } elseif($column !== null) {
+        } elseif ($column !== null) {
             $this->_order_by[] = [$column, $direction];
         } else {
             $this->_order_by = [];
@@ -538,10 +553,11 @@ class Query
     /**
      * Return up to "LIMIT ..." results
      *
-     * @param   integer $number maximum results to return or NULL to reset
+     * @param integer $number maximum results to return or null to reset
      * @return  $this
      */
-    public function limit($number) {
+    public function limit($number): self
+    {
         $this->_limit = $number;
 
         return $this;
@@ -554,10 +570,11 @@ class Query
     /**
      * Sets the table to insert into.
      *
-     * @param   mixed $table table name or array($table, $alias) or object
+     * @param mixed $table table name or array($table, $alias) or object
      * @return  $this
      */
-    public function table($table) {
+    public function table($table): self
+    {
         $this->_table = $table;
 
         return $this;
@@ -566,10 +583,11 @@ class Query
     /**
      * Set the columns that will be inserted.
      *
-     * @param   array $columns column names
+     * @param array $columns column names
      * @return  $this
      */
-    public function columns(array $columns) {
+    public function columns(array $columns): self
+    {
         $this->_columns = $columns;
 
         return $this;
@@ -578,14 +596,13 @@ class Query
     /**
      * Adds or overwrites values. Multiple value sets can be added.
      *
-     * @param   array $values values list
+     * @param array $values values list
      * @param   ...
      * @return  $this
      */
-    public function values(...$values) {
-        if (!\is_array($this->_values)) {
-            throw new Exception('INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
-        }
+    public function values(...$values): self
+    {
+        assert(\is_array($this->_values), 'INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
 
         $this->_values = array_merge($this->_values, $values);
 
@@ -596,10 +613,11 @@ class Query
     /**
      * Set the values to update with an associative array.
      *
-     * @param   array $pairs associative (column => value) list
+     * @param array $pairs associative (column => value) list
      * @return  $this
      */
-    public function set(array $pairs) {
+    public function set(array $pairs): self
+    {
         foreach ($pairs as $column => $value) {
             $this->_set[] = [$column, $value];
         }
@@ -613,7 +631,8 @@ class Query
      * @param Query $query Database_Query of SELECT type
      * @return  $this
      */
-    public function subselect(Query $query) {
+    public function subselect(Query $query)
+    {
         assert($query->_type === Database::SELECT, 'Only SELECT queries can be combined with INSERT queries');
 
         $this->_values = $query;
@@ -622,7 +641,8 @@ class Query
     }
 
 
-    public function reset() {
+    public function reset()
+    {
         $this->db = null;
         $this->_select =
         $this->_from =
@@ -637,9 +657,9 @@ class Query
 
         $this->_limit =
         $this->_offset =
-        $this->_last_join = NULL;
+        $this->_last_join = null;
 
-        $this->_table = NULL;
+        $this->_table = null;
         $this->_columns =
         $this->_values = [];
 
@@ -652,7 +672,8 @@ class Query
      *
      * @return  string
      */
-    public function compile_insert(): string {
+    public function compile_insert(): string
+    {
         // Start an insertion query
         $query = 'INSERT INTO ' . $this->db->quote_table($this->_table);
 
@@ -684,7 +705,8 @@ class Query
     /**
      * Compile the SQL query and return it.
      */
-    public function compile_update(): string {
+    public function compile_update(): string
+    {
         // Start an update query
         $query = 'UPDATE ' . $this->db->quote_table($this->_table);
 
@@ -721,7 +743,7 @@ class Query
             $query .= ' ' . $this->_compile_order_by();
         }
 
-        if ($this->_limit !== NULL) {
+        if ($this->_limit !== null) {
             // Add limiting
             $query .= ' LIMIT ' . $this->_limit;
         }
@@ -729,7 +751,8 @@ class Query
         return $query;
     }
 
-    public function compile_delete() {
+    public function compile_delete()
+    {
 
         // Start a deletion query
         $query = 'DELETE FROM ' . $this->db->quote_table($this->_table);
@@ -744,7 +767,7 @@ class Query
             $query .= ' ' . $this->_compile_order_by();
         }
 
-        if ($this->_limit !== NULL) {
+        if ($this->_limit !== null) {
             // Add limiting
             $query .= ' LIMIT ' . $this->_limit;
         }
@@ -757,45 +780,40 @@ class Query
      *
      * @return  string
      */
-    public function compile_select(): string {
+    public function compile_select(): string
+    {
+        $query = ($this->_distinct === true)
+            ? 'SELECT DISTINCT '
+            : 'SELECT ';
 
-        // Start a selection query
-        $query = 'SELECT ';
+        // Save first (by order) table for later use, flag if it aliased and quoted name (not alias)
+        $table = $this->_from[0];
+        $table_aliased = \is_array($table);
+        $table_q = $this->db->quote_table($table_aliased ? \current($table) : $table);
 
-        if ($this->_distinct === true) {
-            // Select only unique results
-            $query .= 'DISTINCT ';
-        }
-
-
-        if(empty($this->_select)) {
-            $query .= \implode(', ', $this->_quoted_select);
+        if ($this->_select_any === true) {
+            $query .= "$table_q.*";
         } else {
-
-            $columns = $this->_quoted_select;
+            $columns = [];
 
             foreach ($this->_select as $column) {
-                if (\is_array($column)) {
-                    // Use the column alias
-                    $column = $this->db->quote_identifier($column);
-                } else {
-                    // Apply proper quoting to the column
-                    $column = $this->db->quote_column($column);
-                }
-
-                $columns[] = $column;
+                $columns[] = $this->db->quote_column($column, $table_q);
             }
-            $query .= \implode(', ', \array_unique($columns));
+            assert(count($columns) === count(array_unique($columns)), 'Columns in select query must be unique');
+            $query .= \implode(', ', $columns);
         }
 
-        if(\count($this->_from) === 1) {
-            $query .= ' FROM '.$this->db->quote_table($this->_from[0]);
-        } else {
-            if (!empty($this->_from)) {
-                $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quote_table'], $this->_from));
-            }
-        }
+        // One table - most common case
+        if (\count($this->_from) === 1) {
+            // Why make extra function call if it not neccesary?
+            $query .= $table_aliased
+                ? ' FROM ' . $this->db->quote_table($table)
+                : " FROM $table_q";
 
+        } else if (!empty($this->_from)) {
+            assert(empty($this->_from), 'From must not be empty');
+            $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quote_table'], $this->_from));
+        }
 
         if (!empty($this->_joins)) {
             // Add tables to join
@@ -813,15 +831,7 @@ class Query
             $group = [];
 
             foreach ($this->_group_by as $column) {
-                if (\is_array($column)) {
-                    // Use the column alias
-                    $column = $this->db->quote_identifier(end($column));
-                } else {
-                    // Apply proper quoting to the column
-                    $column = $this->db->quote_column($column);
-                }
-
-                $group[] = $column;
+                $group[] = $this->db->quote_identifier($column);
             }
 
             $query .= ' GROUP BY ' . \implode(', ', $group);
@@ -837,17 +847,17 @@ class Query
             $query .= ' ' . $this->_compile_order_by();
         }
 
-        if ($this->_limit !== NULL) {
+        if ($this->_limit !== null) {
             // Add limiting
             $query .= ' LIMIT ' . $this->_limit;
         }
 
-        if ($this->_offset !== NULL) {
+        if ($this->_offset !== null) {
             // Add offsets
             $query .= ' OFFSET ' . $this->_offset;
         }
 
-        if($this->_for_update) {
+        if ($this->_for_update) {
             $query .= ' FOR UPDATE';
         }
 
@@ -860,13 +870,14 @@ class Query
      *
      * @return  string
      */
-    protected function _compile_join(): string {
+    protected function _compile_join(): string
+    {
         $statements = [];
 
         foreach ($this->_joins as $join) {
 
             if ($join['type']) {
-                $sql = \strtoupper($this->_type) . ' JOIN';
+                $sql = \strtoupper($join['type']) . ' JOIN';
             } else {
                 $sql = 'JOIN';
             }
@@ -879,9 +890,7 @@ class Query
                 $sql .= ' USING (' . \implode(', ', \array_map(array($this->db, 'quote_column'), $join['using'])) . ')';
             } else {
                 $conditions = array();
-                foreach ($join['on'] as $condition) {
-                    // Split the condition
-                    list($c1, $op, $c2) = $condition;
+                foreach ($join['on'] as [$c1, $op, $c2]) {
 
                     if ($op) {
                         // Make the operator uppercase and spaced
@@ -907,18 +916,19 @@ class Query
      * Compiles an array of conditions into an SQL partial. Used for WHERE
      * and HAVING.
      *
-     * @param   array $conditions condition statements
+     * @param array $conditions condition statements
      * @return  string
      */
-    protected function _compile_conditions(array $conditions): string {
-        $last_condition = NULL;
+    protected function _compile_conditions(array $conditions): string
+    {
+        $last_condition = null;
 
         $sql = '';
         foreach ($conditions as $group) {
             // Process groups of conditions
             foreach ($group as $logic => $condition) {
                 if ($condition === '(') {
-                    if (!empty($sql) AND $last_condition !== '(') {
+                    if (!empty($sql) and $last_condition !== '(') {
                         // Include logic operator
                         $sql .= " $logic ";
                     }
@@ -927,7 +937,7 @@ class Query
                 } elseif ($condition === ')') {
                     $sql .= ')';
                 } else {
-                    if (!empty($sql) AND $last_condition !== '(') {
+                    if (!empty($sql) and $last_condition !== '(') {
                         // Add the logic operator
                         $sql .= " $logic ";
                     }
@@ -937,32 +947,31 @@ class Query
 
                     if ($value === null) {
                         if ($op === '=') {
-                            // Convert "val = NULL" to "val IS NULL"
-                            $op = 'IS ';
+                            // Convert "val = null" to "val IS null"
+                            $op = 'IS';
                         } elseif ($op === '!=') {
-                            // Convert "val != NULL" to "val IS NOT NULL"
-                            $op = 'IS NOT ';
+                            // Convert "val != null" to "val IS NOT null"
+                            $op = 'IS NOT';
                         }
                     }
 
-                    if ($op === 'BETWEEN' AND \is_array($value)) {
+                    if ($op === 'BETWEEN' and \is_array($value)) {
                         // BETWEEN always has exactly two arguments
-                        list($min, $max) = $value;
+                        [$min, $max] = $value;
 
-                        if (\is_string($min)) {
+                        if (!\is_int($min)) {
                             $min = $this->db->quote($min);
                         }
 
-                        if (\is_string($max)) {
+                        if (!\is_int($max)) {
                             $max = $this->db->quote($max);
                         }
 
-                        // Quote the min and max value
-                        $value = $min . ' AND ' . $max;
-                    } elseif ($op === 'IN' AND \is_array($value)) {
+                        $value = "$min AND $max";
+                    } elseif ($op === 'IN' and \is_array($value)) {
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
 
-                    } elseif ($op === 'NOT IN' AND \is_array($value)) {
+                    } elseif ($op === 'NOT IN' and \is_array($value)) {
                         $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
 
                     } else {
@@ -970,17 +979,11 @@ class Query
                     }
 
                     if ($column) {
-                        if (\is_array($column)) {
-                            // Use the column name
-                            $column = $this->db->quote_identifier(\reset($column));
-                        } else {
-                            // Apply proper quoting to the column
-                            $column = $this->db->quote_column($column);
-                        }
+                        $column = $this->db->quote_column($column);
                     }
 
                     // Append the statement to the query
-                    $sql .= \trim($column . ' ' . $op . ' ' . $value);
+                    $sql .= "$column $op $value";
                 }
 
                 $last_condition = $condition;
@@ -996,20 +999,14 @@ class Query
      *
      * @return  string
      */
-    protected function _compile_order_by() {
+    protected function _compile_order_by(): string
+    {
         $sort = [];
-        foreach ($this->_order_by as $group) {
-            list ($column, $direction) = $group;
+        foreach ($this->_order_by as [$column, $direction]) {
 
-            if (\is_array($column)) {
-                // Use the column alias
-                $column = $this->db->quote_identifier(\end($column));
-            } else {
-                // Apply proper quoting to the column
-                $column = $this->db->quote_column($column);
-            }
+            $column = $this->db->quote_identifier($column);
 
-            $sort[] = $column . ' ' . $direction;
+            $sort[] = "$column $direction";
         }
 
         return 'ORDER BY ' . \implode(', ', $sort);
@@ -1020,12 +1017,13 @@ class Query
      * Compile the SQL query and return it. Replaces any parameters with their
      * given values.
      *
-     * @param   mixed $db Database instance or name of instance
+     * @param mixed $db Database instance or name of instance
      * @return  string
      */
-    public function compile(Database $db = NULL): string {
+    public function compile(Database $db = null): string
+    {
 
-        $this->db = ($db === null) ? \Mii::$app->db : $db;
+        $this->db = $db ?? \Mii::$app->db;
 
         // Compile the SQL query
         switch ($this->_type) {
@@ -1056,20 +1054,11 @@ class Query
      * @return  Result   Result for SELECT queries
      * @return  mixed    the insert id for INSERT queries
      * @return  integer  number of affected rows for all other queries
-     * @throws DatabaseException
      */
-    public function execute(Database $db = NULL, $as_object = null, $object_params = NULL) {
-
+    public function execute(Database $db = null): ?Result
+    {
         if ($db === null) {
             $this->db = \Mii::$app->db;
-        }
-
-        if ($as_object === null) {
-            $as_object = $this->_as_object;
-        }
-
-        if ($object_params === null) {
-            $object_params = $this->_object_params;
         }
 
         assert(in_array($this->_type, [
@@ -1077,7 +1066,7 @@ class Query
             Database::INSERT,
             Database::UPDATE,
             Database::DELETE
-        ]), 'Wrong query type!');
+        ], true), 'Wrong query type!');
 
         // Compile the SQL query
         switch ($this->_type) {
@@ -1095,14 +1084,14 @@ class Query
                 break;
         }
 
-
+        /** @noinspection PhpUnhandledExceptionInspection */
         // Execute the query
-        $result = $this->db->query($this->_type, $sql, $as_object, $object_params);
+        $result = $this->db->query($this->_type, $sql, $this->_as_object, $this->_object_params);
 
         if (!\is_null($this->_index_by))
             $result->index_by($this->_index_by);
 
-        if($this->_pagination)
+        if ($this->_pagination)
             $result->set_pagination($this->_pagination);
 
         return $result;
@@ -1112,11 +1101,12 @@ class Query
     /**
      * Set the table and columns for an insert.
      *
-     * @param   mixed $table table name or array($table, $alias) or object
-     * @param   array $insert_data "column name" => "value" assoc list
+     * @param mixed $table table name or array($table, $alias) or object
+     * @param array $insert_data "column name" => "value" assoc list
      * @return  $this
      */
-    public function insert($table = NULL, array $insert_data = NULL) {
+    public function insert($table = null, array $insert_data = null): self
+    {
         $this->_type = Database::INSERT;
 
         if ($table) {
@@ -1138,13 +1128,14 @@ class Query
 
     /**
      *
-     * @param   string $table table name
+     * @param string $table table name
      * @return  Query
      */
-    public function update($table = NULL) {
+    public function update($table = null)
+    {
         $this->_type = Database::UPDATE;
 
-        if ($table !== NULL) {
+        if ($table !== null) {
             $this->table($table);
         }
 
@@ -1152,41 +1143,42 @@ class Query
     }
 
 
-    public function delete($table = NULL) {
+    public function delete($table = null)
+    {
         $this->_type = Database::DELETE;
 
-        if ($table !== NULL) {
+        if ($table !== null) {
             $this->table($table);
         }
 
         return $this;
     }
 
-    public function index_by($column) {
+    public function index_by($column)
+    {
         $this->_index_by = $column;
 
         return $this;
     }
 
-    public function count() {
+    public function count(): int
+    {
         $this->_type = Database::SELECT;
 
         $db = \Mii::$app->db;
 
         $old_select = $this->_select;
-        $old_quoted_select = $this->_quoted_select;
+        $old_any = $this->_select_any;
         $old_order = $this->_order_by;
 
         if ($this->_distinct) {
-            $dt_column = \count($this->_quoted_select)
-                ? $this->_quoted_select[0]
-                : $db->quote_column($this->_select[0]);
+            $dt_column = $db->quote_column($this->_select[0]);
             $this->select([
-                [DB::expr("COUNT(DISTINCT $dt_column)"), 'count']
+                new Expression("COUNT(DISTINCT $dt_column)")
             ]);
         } else {
             $this->select([
-                DB::expr('COUNT(*) AS `count`')
+                new Expression('COUNT(*)')
             ]);
         }
         $as_object = $this->_as_object;
@@ -1194,10 +1186,10 @@ class Query
 
         $this->_order_by = [];
 
-        $count = $this->execute()->column('count', 0);
+        $count = $this->execute()->scalar(0);
 
         $this->_select = $old_select;
-        $this->_quoted_select = $old_quoted_select;
+        $this->_select_any = $old_any;
         $this->_order_by = $old_order;
         $this->_as_object = $as_object;
 
@@ -1205,28 +1197,43 @@ class Query
     }
 
     /**
-     * @return Result|\array
+     * @return Result
      */
-
-    public function get() {
+    public function get() : Result
+    {
         return $this->execute();
     }
 
-
-    public function one($find_or_fail = false) {
+    /**
+     * @param Deprecated $find_or_fail
+     * @return array|mixed|object|\stdClass|null
+     */
+    public function one($find_or_fail = false)
+    {
         $this->limit(1);
         $result = $this->execute();
 
-        if(\count($result) > 0)
+        if (\count($result) > 0)
             return $result->current();
 
-        if($find_or_fail)
+        if ($find_or_fail)
             throw new ModelNotFoundException();
 
         return null;
     }
 
-    public function all() {
+    public function one_or_fail()
+    {
+        $result = $this->one();
+
+        if ($result === null) {
+            throw (new ModelNotFoundException("Model not found"))->set_model(get_class($this->_model));
+        }
+        return $result;
+    }
+
+    public function all(): array
+    {
         return $this->execute()->all();
     }
 

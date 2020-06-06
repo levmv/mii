@@ -28,11 +28,16 @@ class Exception extends \Exception
      * @param \Throwable $e
      * @return  string
      */
-    public static function text(\Throwable $e)
+    public static function text(\Throwable $e): string
     {
         $code = $e->getCode();
+
         return sprintf('%s%s: %s ~ %s[%d]',
-            (new \ReflectionClass($e))->getShortName(), $code != 0 ? "[$code]" : '', strip_tags($e->getMessage()), \mii\util\Debug::path($e->getFile()), $e->getLine());
+            (new \ReflectionClass($e))->getShortName(),
+            $code != 0 ? "[$code]" : '',
+            strip_tags($e->getMessage()),
+            \mii\util\Debug::path($e->getFile()),
+            $e->getLine());
     }
 
 

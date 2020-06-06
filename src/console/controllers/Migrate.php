@@ -168,7 +168,6 @@ class Migrate extends Controller
             $file = '<?php
 // ' . strftime('%F %T') . '
 
-use mii\db\Migration;
 use mii\db\DB;
 
 class ' . $name . ' {

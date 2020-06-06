@@ -13,14 +13,15 @@ class Text
      *
      *     $text = Text::limit_words($text);
      *
-     * @param   string $str phrase to limit words of
-     * @param   integer $limit number of words to limit to
-     * @param   string $end_char end character or entity
+     * @param string  $str phrase to limit words of
+     * @param integer $limit number of words to limit to
+     * @param string  $end_char end character or entity
      * @return  string
      */
-    public static function limit_words($str, $limit = 100, $end_char = NULL) {
+    public static function limit_words($str, $limit = 100, $end_char = NULL): string
+    {
         $limit = (int)$limit;
-        $end_char = ($end_char === NULL) ? '…' : $end_char;
+        $end_char = $end_char ?? '…';
 
         if (trim($str) === '')
             return $str;
@@ -40,26 +41,26 @@ class Text
      *
      *     $text = Text::limit_chars($text);
      *
-     * @param   string $str phrase to limit characters of
-     * @param   integer $limit number of characters to limit to
-     * @param   string $end_char end character or entity
-     * @param   boolean $preserve_words enable or disable the preservation of words while limiting
+     * @param string  $str phrase to limit characters of
+     * @param integer $limit number of characters to limit to
+     * @param string  $end_char end character or entity
+     * @param boolean $preserve_words enable or disable the preservation of words while limiting
      * @return  string
-     * @uses    UTF8::strlen
      */
-    public static function limit_chars($str, $limit = 100, $end_char = NULL, $preserve_words = FALSE) {
-        $end_char = ($end_char === NULL) ? '…' : $end_char;
+    public static function limit_chars($str, $limit = 100, $end_char = NULL, $preserve_words = FALSE): string
+    {
+        $end_char = $end_char ?? '…';
 
         $limit = (int)$limit;
 
-        if (\trim($str) === '' OR \mb_strlen($str, 'utf-8') <= $limit)
+        if (\trim($str) === '' || \mb_strlen($str) <= $limit)
             return $str;
 
         if ($limit <= 0)
             return $end_char;
 
-        if ($preserve_words === FALSE)
-            return \rtrim(\mb_substr($str, 0, $limit, 'utf-8')) . $end_char;
+        if ($preserve_words === False)
+            return \rtrim(\mb_substr($str, 0, $limit)) . $end_char;
 
         // Don't preserve words. The limit is considered the top limit.
         // No strings with a length longer than $limit should be returned.
@@ -86,12 +87,12 @@ class Text
      * You can also create a custom type by providing the "pool" of characters
      * as the type.
      *
-     * @param   string $type a type of pool, or a string of characters to use as the pool
-     * @param   integer $length length of string to return
+     * @param string  $type a type of pool, or a string of characters to use as the pool
+     * @param integer $length length of string to return
      * @return  string
-     * @uses    UTF8::split
      */
-    public static function random($type = NULL, $length = 8) {
+    public static function random($type = NULL, $length = 8): string
+    {
         if ($type === NULL) {
             // Default is to generate an alphanumeric string
             $type = 'alnum';
@@ -105,7 +106,7 @@ class Text
                 $pool = '0123456789abcdef';
                 break;
             default:
-                $pool = (string) $type;
+                $pool = (string)$type;
                 break;
         }
 
@@ -122,7 +123,7 @@ class Text
         }
 
         // Make sure alnum strings contain at least one letter and one digit
-        if ($type === 'alnum' AND $length > 1) {
+        if ($type === 'alnum' and $length > 1) {
             if (ctype_alpha($str)) {
                 // Add a random digit
                 $str[\mt_rand(0, $length - 1)] = \chr(\mt_rand(48, 57));
@@ -136,57 +137,19 @@ class Text
     }
 
     /**
-     * Uppercase words that are not separated by spaces, using a custom
-     * delimiter or the default.
+     * А unicode-safe implementation of built-in PHP function `ucfirst()`
      *
-     *      $str = Text::ucfirst('content-type'); // returns "Content-Type"
-     *
-     * @param   string $string string to transform
-     * @param   string $delimiter delemiter to use
+     * @param string $string string to transform
      * @return  string
      */
-    public static function ucfirst($string, $delimiter = '-') {
-        // Put the keys back the Case-Convention expected
-        return \implode($delimiter, \array_map('ucfirst', \explode($delimiter, $string)));
+    public static function ucfirst(string $string) : string
+    {
+        $first = \mb_substr($string, 0, 1);
+        $rest = \mb_substr($string, 1);
+
+        return \mb_strtoupper($first) . $rest;
     }
 
-
-    /**
-     * Replaces the given words with a string.
-     *
-     *     // Displays "What the #####, man!"
-     *     echo Text::censor('What the frick, man!', array(
-     *         'frick' => '#####',
-     *     ));
-     *
-     * @param   string $str phrase to replace words in
-     * @param   array $badwords words to replace
-     * @param   string $replacement replacement string
-     * @param   boolean $replace_partial_words replace words across word boundries (space, period, etc)
-     * @return  string
-     * @uses    UTF8::strlen
-     */
-    public static function censor($str, $badwords, $replacement = '#', $replace_partial_words = TRUE) {
-        foreach ((array)$badwords as $key => $badword) {
-            $badwords[$key] = str_replace('\*', '\S*?', preg_quote((string)$badword));
-        }
-
-        $regex = '(' . implode('|', $badwords) . ')';
-
-        if ($replace_partial_words === FALSE) {
-            // Just using \b isn't sufficient when we need to replace a badword that already contains word boundaries itself
-            $regex = '(?<=\b|\s|^)' . $regex . '(?=\b|\s|$)';
-        }
-
-        $regex = '!' . $regex . '!ui';
-
-        if (\mb_strlen($replacement) == 1) {
-            $regex .= 'e';
-            return preg_replace($regex, 'str_repeat($replacement, UTF8::strlen(\'$1\'))', $str);
-        }
-
-        return preg_replace($regex, $replacement, $str);
-    }
 
     /**
      * Automatically applies "p" and "br" markup to text.
@@ -196,17 +159,18 @@ class Text
      *
      * [!!] This method is not foolproof since it uses regex to parse HTML.
      *
-     * @param   string $str subject
-     * @param   boolean $br convert single linebreaks to <br />
+     * @param string  $str subject
+     * @param boolean $br convert single linebreaks to <br />
      * @return  string
      */
-    public static function auto_p($str, $br = TRUE) {
+    public static function auto_p(string $str, $br = TRUE): string
+    {
         // Trim whitespace
         if (($str = trim($str)) === '')
             return '';
 
         // Standardize newlines
-        $str = str_replace(array("\r\n", "\r"), "\n", $str);
+        $str = str_replace(["\r\n", "\r"], "\n", $str);
 
         // Trim whitespace on each line
         $str = preg_replace('~^[ \t]+~m', '', $str);
@@ -247,10 +211,11 @@ class Text
      *
      *     echo Text::widont($text);
      *
-     * @param   string $str text to remove widows from
+     * @param string $str text to remove widows from
      * @return  string
      */
-    public static function widont($str) {
+    public static function widont(string $str): string
+    {
         $str = rtrim($str);
         $space = strrpos($str, ' ');
 
@@ -266,14 +231,15 @@ class Text
      *
      *     echo Text::title('Мой блог пост'); // "moi-blog-post"
      *
-     * @param $text
+     * @param        $text
      * @param string $separator Word separator (any single character)
      * @return  string
      * @uses    UTF8::ru_translit
      * @uses    UTF8::transliterate_to_ascii
      */
 
-    public static function to_slug($text, $separator = '-') {
+    public static function to_slug(string $text, string $separator = '-'): string
+    {
 
         $value = UTF8::ru_translit($text);
 
@@ -296,27 +262,29 @@ class Text
     }
 
 
-    public static function base64url_encode($data) {
+    public static function base64url_encode($data) : string
+    {
         return \rtrim(\strtr(\base64_encode($data), '+/', '-_'), '=');
     }
 
 
-    public static function base64url_decode($data) {
+    public static function base64url_decode($data) : string
+    {
         return \base64_decode(\strtr($data, '-_', '+/'));
     }
 
 
     /**
      * Declination of number
-     * @param $number
+     * @param int   $number
      * @param mixed $array
      * @return mixed
      */
-    public static function decl($number, $array) {
-
+    public static function decl($number, array $array)
+    {
         $cases = array(2, 0, 1, 1, 1, 2);
 
-        if ($number % 100 > 4 AND $number % 100 < 20) {
+        if ($number % 100 > 4 and $number % 100 < 20) {
             return $array[2];
         } else {
             return $array[$cases[\min($number % 10, 5)]];
@@ -324,8 +292,7 @@ class Text
     }
 
 
-    public static $byte_units = array
-    (
+    public static array $byte_units = [
         'B' => 0,
         'K' => 10,
         'KB' => 10,
@@ -333,7 +300,7 @@ class Text
         'MB' => 20,
         'G' => 30,
         'GB' => 30
-    );
+    ];
 
     /**
      * Converts a file size number to a byte value. File sizes are defined in
@@ -350,16 +317,17 @@ class Text
      * @return  float
      * @throws Exception
      */
-    public static function bytes($size) {
+    public static function bytes(string $size)
+    {
         // Prepare the size
-        $size = trim((string)$size);
+        $size = trim($size);
         // Construct an OR list of byte units for the regex
-        $accepted = implode('|', array_keys(Text::$byte_units));
+        $accepted = implode('|', array_keys(self::$byte_units));
         // Construct the regex pattern for verifying the size format
         $pattern = '/^([0-9]+(?:\.[0-9]+)?)(' . $accepted . ')?$/Di';
         // Verify the size format and store the matching parts
         if (!preg_match($pattern, $size, $matches))
-            throw new Exception('The byte unit size, "'.$size.'", is improperly formatted.');
+            throw new Exception('The byte unit size, "' . $size . '", is improperly formatted.');
         // Find the float value of the size
         $size = (float)$matches[1];
         // Find the actual unit, assume B if no unit specified
@@ -369,11 +337,25 @@ class Text
     }
 
 
-    public static function UUIDv4() {
+    public static function UUIDv4(): string
+    {
         $data = \random_bytes(16);
         $data[6] = \chr(\ord($data[6]) & 0x0f | 0x40);
         $data[8] = \chr(\ord($data[8]) & 0x3f | 0x80);
         return $data;
+    }
+
+
+    public static function first_letters(array $words) : string
+    {
+        $fl = '';
+        for ($i = 0; $i < 2; $i++) {
+            if (isset($words[$i])) {
+                $fl .= \mb_substr($words[$i], 0, 1);
+            }
+        }
+
+        return \mb_strtoupper($fl);
     }
 
 }

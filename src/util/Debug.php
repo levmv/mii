@@ -178,9 +178,20 @@ class Debug
      * @return  string
      */
     public static function path($file) {
+        if(!isset(\Mii::$paths['mii'])) {
+
+            if(!isset(\Mii::$paths['vendor'])) {
+                \Mii::$paths['vendor'] = path('root').'/vendor';
+            }
+
+            \Mii::$paths['mii'] = path('vendor').'/levmorozov/mii';
+            uasort(\Mii::$paths, static function($a, $b) {
+                return \strlen($b) - \strlen($a);
+            });
+        }
         foreach (\Mii::$paths as $name => $path) {
             if (strpos($file, $path) === 0) {
-                $file = "{" . $name . "}" . substr($file, strlen($path));
+                $file = '{' . $name . '}' . substr($file, strlen($path));
             }
         }
 

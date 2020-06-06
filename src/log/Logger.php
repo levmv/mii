@@ -44,9 +44,9 @@ class Logger extends Component
 
     public function log($level, $message, $category)
     {
-        $this->messages[] = [$message, $level, $category, time()];
+        $this->messages[] = [$message, $level, $category, \time()];
 
-        if ($this->flush_interval > 0 && $this->flush_interval > \count($this->messages))
+        if ($this->flush_interval > 0 && \count($this->messages) > $this->flush_interval)
             $this->flush();
     }
 

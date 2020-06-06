@@ -3,22 +3,24 @@
 <style type="text/css">
     .mii {
         padding: 5px;
+        overflow: auto;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     }
 
     .mii table.profiler {
         width: 100%;
         max-width: 1920px;
         background-color: #fff;
-        margin: 0 auto 1em;
-        font-size: 14px;
+        margin: 1px auto 0 auto;
+        font-size: 13px;
         border-collapse: collapse;
     }
 
     .mii table.profiler th,
     .mii table.profiler td {
-        padding: 0.2em 0.4em;
+        padding: 0.2em 0.4em 0.15em 0.4em;
         background: #fff;
-        border: solid 1px #999;
+        border: 1px solid #bbb;
         border-width: 1px 0;
         text-align: left;
         font-weight: normal;
@@ -33,20 +35,21 @@
     }
 
     .mii table.profiler tr.group th {
-        font-size: 1.4em;
-        background: #222;
+        font-size: 1.25em;
+        background: #333;
         color: #eee;
-        border-color: #222;
+        border-color: #333;
     }
 
     .mii table.profiler tr.group td {
-        background: #222;
+        background: #333;
         color: #777;
-        border-color: #222;
+        border-color: #333;
     }
 
     .mii table.profiler tr.group td.time {
         padding-bottom: 0;
+        padding-top: 0.3em;
     }
 
     .mii table.profiler tr.headers th {
@@ -100,11 +103,11 @@
     }
 
     .mii table.profiler tr.mark td.min {
-        background: #d2f1cb;
+        background: #daeed6;
     }
 
     .mii table.profiler tr.mark td.max {
-        background: #ead3cb;
+        background: #e8d8d2;
     }
 
     .mii table.profiler tr.mark td.average {
@@ -186,15 +189,12 @@ $application_cols = array('min', 'max', 'average', 'current');
     <?php foreach (Profiler::groups() as $group => $benchmarks): ?>
         <table class="profiler">
             <tr class="group">
-                <th class="name" rowspan="2"><?php echo ucfirst($group) ?></th>
+                <th class="name" ><?php echo ucfirst($group) ?></th>
                 <td class="time"
-                    colspan="4"><?php echo number_format($group_stats[$group]['total']['time'], 6) * 1000 ?> <abbr
-                            title="seconds">ms</abbr></td>
-            </tr>
-            <tr class="group">
-                <td class="memory"
-                    colspan="4"><?php echo number_format($group_stats[$group]['total']['memory'] / 1024, 4) ?> <abbr
-                            title="kilobyte">kB</abbr></td>
+                    colspan="4">
+                    <?= number_format($group_stats[$group]['total']['memory'] / 1024, 3) ?>&thinsp;kB |
+                    <span style="color:#bbb"><?= number_format($group_stats[$group]['total']['time'], 6) * 1000 ?></span>&thinsp;ms
+                </td>
             </tr>
             <tr class="headers">
                 <th class="name"><?php echo 'Benchmark' ?></th>
@@ -206,29 +206,36 @@ $application_cols = array('min', 'max', 'average', 'current');
                 <tr class="mark time">
                     <?php $stats = Profiler::stats($tokens) ?>
                     <th class="name" rowspan="2"
-                        scope="rowgroup"><?php echo HTML::chars($name), ' (', \count($tokens), ')' ?></th>
-                    <?php foreach ($group_cols as $key): ?>
+                        scope="rowgroup"><?php echo HTML::chars($name);
+                        $count = \count($tokens);
+                        if($count > 1) echo " <sup>($count)</sup>" ?></th>
+                    <?php foreach ($group_cols as $key):
+                        $is_total = $key === 'total';?>
                         <td class="<?php echo $key ?>">
                             <div>
-                                <div class="value"><?php echo number_format($stats[$key]['time'], 6) * 1000 ?> <abbr
-                                            title="seconds">ms</abbr></div>
-                                <?php if ($key === 'total'): ?>
+                                <div class="value"><?php echo number_format($stats[$key]['time'], 6) * 1000 ?><?php
+                                    if($is_total) echo "&thinsp;<abbr>ms</abbr>"
+                                    ?>
+                                </div>
+                                <?php if ($is_total): ?>
                                     <div class="graph"
-                                         style="left: <?php echo max(0, 100 - $stats[$key]['time'] / $group_stats[$group]['max']['time'] * 100) ?>%"></div>
+                                         style="left: <?php echo max(0, 100 - $stats[$key]['time'] / max(1, $group_stats[$group]['max']['time']) * 100) ?>%"></div>
                                 <?php endif ?>
                             </div>
                         </td>
                     <?php endforeach ?>
                 </tr>
                 <tr class="mark memory">
-                    <?php foreach ($group_cols as $key): ?>
+                    <?php foreach ($group_cols as $key):
+                        $is_total = $key === 'total'; ?>
                         <td class="<?php echo $key ?>">
                             <div>
-                                <div class="value"><?php echo number_format($stats[$key]['memory'] / 1024, 4) ?> <abbr
-                                            title="kilobyte">kB</abbr></div>
-                                <?php if ($key === 'total'): ?>
+                                <div class="value"><?php echo number_format($stats[$key]['memory'] / 1024, 4) ?><?php
+                                    if($is_total) echo "&thinsp;<abbr>kB</abbr>"
+                                    ?></div>
+                                <?php if ($is_total): ?>
                                     <div class="graph"
-                                         style="left: <?php echo max(0, 100 - $stats[$key]['memory'] / $group_stats[$group]['max']['memory'] * 100) ?>%"></div>
+                                         style="left: <?php echo max(0, 100 - $stats[$key]['memory'] / max(1,$group_stats[$group]['max']['memory']) * 100) ?>%"></div>
                                 <?php endif ?>
                             </div>
                         </td>

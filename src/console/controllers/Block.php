@@ -288,7 +288,7 @@ class Block extends Controller
             $text = file_get_contents($this->input_path . '/' . $f);
 
             if ($callback)
-                $text = \call_user_func($callback, $text);
+                $text = $callback($text);
 
             $out .= $text . "\n";
         }
@@ -321,9 +321,10 @@ class Block extends Controller
         }
     }
 
-    protected function iterate_dir($from, $callback) {
+    protected function iterate_dir($from, $callback): void
+    {
         $files = scandir($this->input_path . '/' . $from);
-        array_map(function ($item) use ($callback) {
+        array_map(static function ($item) use ($callback) {
             if ($item === '.' OR $item === '..')
                 return;
 

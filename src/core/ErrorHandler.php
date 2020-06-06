@@ -14,12 +14,12 @@ class ErrorHandler extends Component
      * the help of this reserved memory. If you set this value to be 0, no memory will be reserved.
      * Defaults to 0;
      */
-    public $memory_reserve_size = 0;
+    public int $memory_reserve_size = 0;
 
     /**
      * @var string Used to reserve memory for fatal error handler.
      */
-    private $_memory_reserve;
+    private string $_memory_reserve;
 
     public function register()
     {
@@ -59,18 +59,21 @@ class ErrorHandler extends Component
 
         $this->current_exception = $e;
 
-        if (PHP_SAPI !== 'cli') {
-            http_response_code(500);
-        }
-
         try {
+            $e = $this->prepare_exception($e);
             $this->report($e);
             $this->clear_output();
             $this->render($e);
         } catch (\Throwable $e) {
+            http_response_code(500);
             echo static::exception_to_text($e);
         }
         exit(1);
+    }
+
+    public function prepare_exception(\Throwable $e) : \Throwable
+    {
+        return $e;
     }
 
 

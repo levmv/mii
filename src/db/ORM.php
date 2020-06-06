@@ -3,9 +3,8 @@
 namespace mii\db;
 
 use mii\core\Exception;
-use mii\util\Arr;
 
-class ORM implements \JsonSerializable
+class ORM implements \JsonSerializable, \IteratorAggregate
 {
     /**
      * @var string database table name
@@ -26,6 +25,11 @@ class ORM implements \JsonSerializable
      * @var  array  Data that's changed since the object was loaded
      */
     protected array $_changed = [];
+
+    /**
+     * @var  array  Data that's changed during update/create
+     */
+    protected array $_was_changed = [];
 
     /**
      * @var boolean Is this model loaded from DB
@@ -100,26 +104,38 @@ class ORM implements \JsonSerializable
     }
 
     /**
-     * @param int $value
-     * @param bool $find_or_fail
+     * @param int  $value
+     * @param Deprecated $find_or_fail
      * @return $this|null
-     * @throws ModelNotFoundException
      */
-    public static function one(int $value, bool $find_or_fail = false)
+    public static function one(int $value, bool $find_or_fail = false) : ?self
     {
-        $result = (new static)
+        if($find_or_fail) {
+            return static::one_or_fail($value);
+        }
+        /** @noinspection PhpUnhandledExceptionInspection */
+        return (new static)
             ->select_query(false)
             ->where('id', '=', $value)
             ->one();
+    }
 
-        if ($find_or_fail && $result === null)
-            throw new ModelNotFoundException;
-
-        return $result;
+    /** @noinspection PhpDocMissingThrowsInspection */
+    /**
+     * @param int $id
+     * @return static
+     */
+    public static function one_or_fail(int $id) : self
+    {
+        /** @noinspection PhpUnhandledExceptionInspection */
+        return (new static)
+            ->select_query(false)
+            ->where('id', '=', $id)
+            ->one_or_fail();
     }
 
     /**
-     * @param bool $with_order
+     * @param bool       $with_order
      * @param Query|null $query
      * @return Query
      */
@@ -128,11 +144,12 @@ class ORM implements \JsonSerializable
         if ($query === null)
             $query = new Query;
 
-        $query->select(['`' . $this->get_table() . '`.*'], true)
-            ->from($this->get_table())
+        $query->from($this->get_table())
+            ->model($this)
+            ->select(['*'], true)
             ->as_object(static::class, [null, true]);
 
-        if ($this->order_by AND $with_order) {
+        if ($this->order_by and $with_order) {
             foreach ($this->order_by as $column => $direction) {
                 $query->order_by($column, $direction);
             }
@@ -143,7 +160,7 @@ class ORM implements \JsonSerializable
 
     public function raw_query(): Query
     {
-        return new Query;
+        return (new Query)->model($this);
     }
 
 
@@ -209,12 +226,12 @@ class ORM implements \JsonSerializable
 
     public function get(string $key)
     {
-        return $this->$key;
+        return $this->$key ?? null;
     }
 
     public function set($values, $value = NULL): ORM
     {
-        if (\is_object($values) AND $values instanceof \mii\web\Form) {
+        if (\is_object($values) and $values instanceof \mii\web\Form) {
 
             $values = $values->changed_fields();
 
@@ -239,12 +256,13 @@ class ORM implements \JsonSerializable
     }
 
 
-    public function __unset($key) {
+    public function __unset($key)
+    {
 
-        if(\array_key_exists($key, $this->attributes)) {
+        if (\array_key_exists($key, $this->attributes)) {
             unset($this->attributes[$key]);
 
-            if(isset($this->_changed[$key])) {
+            if (isset($this->_changed[$key])) {
                 unset($this->_changed[$key]);
             }
         }
@@ -268,11 +286,28 @@ class ORM implements \JsonSerializable
      */
     public function to_array(array $properties = []): array
     {
-        if (empty($properties)) {
-            return $this->attributes;
+        if (!empty($properties)) {
+            $result = [];
+            foreach ($properties as $key => $name) {
+                if (\is_int($key)) {
+                    $result[$name] = $this->$name;
+                } else {
+                    if (\is_string($name)) {
+                        $result[$key] = $this->$name;
+                    } elseif ($name instanceof \Closure) {
+                        $result[$key] = $name($this);
+                    }
+                }
+            }
+
+            return $result;
         }
 
-        return Arr::to_array($this, $properties);
+        $result = [];
+        foreach ($this as $key => $value) {
+            $result[$key] = $value;
+        }
+        return $result;
     }
 
     /**
@@ -289,18 +324,40 @@ class ORM implements \JsonSerializable
         }
 
         if (\is_array($field_name)) {
-            return (bool) \count(\array_intersect($field_name, \array_keys($this->_changed)));
+            return (bool)\count(\array_intersect($field_name, \array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);
     }
+
+
+    /**
+     * Checks if the field (or any) was changed during update/create
+     *
+     * @param string|array $field_name
+     * @return bool
+     */
+
+    public function was_changed($field_name = null): bool
+    {
+        if ($field_name === null) {
+            return \count($this->_was_changed) > 0;
+        }
+
+        if (\is_array($field_name)) {
+            return (bool)\count(\array_intersect($field_name, \array_keys($this->_was_changed)));
+        }
+
+        return isset($this->_was_changed[$field_name]);
+    }
+
 
     /**
      * Determine if this model is loaded.
      *
      * @return bool
      */
-    public function loaded() : bool
+    public function loaded(): bool
     {
         return (bool)$this->__loaded;
     }
@@ -312,8 +369,10 @@ class ORM implements \JsonSerializable
      */
     public function update()
     {
-        if (!$this->_changed)
+        if (!$this->_changed) {
+            $this->_was_changed = [];
             return 0;
+        }
 
         if ($this->on_update() === false)
             return 0;
@@ -325,12 +384,13 @@ class ORM implements \JsonSerializable
         (new Query)
             ->update($this->get_table())
             ->set($data)
-            ->where('id', '=', (int) $this->attributes['id'])
+            ->where('id', '=', (int)$this->attributes['id'])
             ->execute();
 
         $this->on_after_update();
         $this->on_after_change();
 
+        $this->_was_changed = $this->_changed;
         $this->_changed = [];
 
         return \Mii::$app->db->affected_rows();
@@ -361,34 +421,23 @@ class ORM implements \JsonSerializable
     /**
      * @deprecated
      */
-    protected function on_after_create(): void
-    {
-    }
-    /**
-     * @deprecated
-     */
     protected function on_after_update(): void
     {
     }
+
     /**
      * @deprecated
      */
     protected function on_after_change(): void
     {
     }
-    /**
-     * @deprecated
-     */
-    protected function on_after_delete(): void
-    {
-    }
+
 
     /**
      * Saves the model to your database. It will do a
      * database INSERT and assign the inserted row id to $data['id'].
      *
      * @return int Inserted row id
-     * @throws \mii\web\Exception
      */
     public function create()
     {
@@ -408,9 +457,9 @@ class ORM implements \JsonSerializable
 
         $this->attributes['id'] = \Mii::$app->db->inserted_id();
 
-        $this->on_after_create();
         $this->on_after_change();
 
+        $this->_was_changed = $this->_changed;
         $this->_changed = [];
 
         return $this->attributes['id'];
@@ -420,24 +469,21 @@ class ORM implements \JsonSerializable
     /**
      * Deletes the current object's associated database row.
      * The object will still contain valid data until it is destroyed.
-     *
      */
     public function delete(): void
     {
-        if ($this->__loaded) {
+        if ($this->__loaded && isset($this->id)) {
             $this->__loaded = false;
 
             (new Query)
                 ->delete($this->get_table())
-                ->where('id', '=', (int) $this->attributes['id'])
+                ->where('id', '=', (int)$this->id)
                 ->execute();
-
-            $this->on_after_delete();
 
             return;
         }
 
-        throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!');
+        throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . ' or model without id pk!');
     }
 
     /**
@@ -449,5 +495,10 @@ class ORM implements \JsonSerializable
     public function jsonSerialize()
     {
         return $this->to_array();
+    }
+
+    public function getIterator() : \Traversable
+    {
+        return new \ArrayIterator($this->attributes);
     }
 }

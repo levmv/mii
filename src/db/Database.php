@@ -28,61 +28,83 @@ class Database extends Component
 
     protected ?string $charset = 'utf8';
 
-    /**
-     * @var  string  the last query executed
-     */
-    public $last_query;
+    protected ?\mysqli $conn = null;
 
     /**
-     * @var \mysqli Raw server connection
-     */
-    protected $_connection;
-
-
-    /**
-     * Disconnect from the database when the object is destroyed.
+     * Connect to the database. This is called automatically when the first
+     * query is executed.
      *
-     *     // Destroy the database instance
-     *     unset(Database::instances[(string) $db], $db);
-     *
-     * [!!] Calling `unset($db)` is not enough to destroy the database, as it
-     * will still be stored in `Database::$instances`.
+     *     $db->connect();
      *
      * @return  void
+     * @throws  DatabaseException
      */
-    public function __destruct() {
+    public function connect(): void
+    {
+        try {
+            $this->conn = mysqli_connect(
+                $this->hostname,
+                $this->username,
+                $this->password,
+                $this->database,
+                $this->port
+            );
+
+        } catch (\Exception $e) {
+            // No connection exists
+            $this->conn = NULL;
+            $this->password = null;
+            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        $this->password = null;
+
+        $this->conn->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
+
+        if (!\is_null($this->charset)) {
+            // Set the character set
+            $this->conn->set_charset($this->charset);
+        }
+    }
+
+
+    public function auto_native_types(bool $enable): bool
+    {
+        return $this->conn->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, $enable);
+    }
+
+
+    public function __destruct()
+    {
         $this->disconnect();
     }
 
     /**
      * Disconnect from the database. This is called automatically by [Database::__destruct].
-     * Clears the database instance from [Database::$instances].
-     *
-     *     $db->disconnect();
      *
      * @return  boolean
      */
-    public function disconnect() {
+    public function disconnect()
+    {
         try {
             // Database is assumed disconnected
             $status = true;
 
-            if (\is_resource($this->_connection)) {
-                if ($status = $this->_connection->close()) {
-                    // Clear the connection
-                    $this->_connection = NULL;
-                }
+            if (\is_resource($this->conn) && $status = $this->conn->close()) {
+                // Clear the connection
+                $this->conn = NULL;
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Database is probably not disconnected
-            $status = !\is_resource($this->_connection);
+            $status = !\is_resource($this->conn);
         }
 
         return $status;
     }
 
 
-    public function __toString() {
+    public function __toString()
+    {
         return 'db';
     }
 
@@ -96,36 +118,31 @@ class Database extends Component
      *     $db->query(Database::SELECT, 'SELECT * FROM users LIMIT 1', 'Model_User');
      *
      * @param integer $type Database::SELECT, Database::INSERT, etc
-     * @param string $sql SQL query
-     * @param mixed $as_object result object class string, TRUE for stdClass, FALSE for assoc array
-     * @param array $params object construct parameters for result class
+     * @param string  $sql SQL query
+     * @param mixed   $as_object result object class string, TRUE for stdClass, FALSE for assoc array
+     * @param array   $params object construct parameters for result class
      * @return  Result|null   Result for SELECT queries or null
+     * @throws DatabaseException
      */
-    public function query(?int $type, string $sql, $as_object = false, array $params = NULL): ?Result {
+    public function query(?int $type, string $sql, $as_object = false, array $params = NULL): ?Result
+    {
         // Make sure the database is connected
-        ! \is_null($this->_connection) or $this->connect();
+        !\is_null($this->conn) || $this->connect();
 
-        assert(
-            config('debug') &&
-            ($benchmark = \mii\util\Profiler::start("Database", $sql)) ||
-            true
-        );
+        assert((config('debug') && ($benchmark = \mii\util\Profiler::start("Database", $sql))) || 1);
 
         // Execute the query
-        $result = $this->_connection->query($sql);
+        $result = $this->conn->query($sql);
 
-        if ($result === false || $this->_connection->errno) {
-            assert(isset($benchmark) && \mii\util\Profiler::delete($benchmark) || true);
+        if ($result === false || $this->conn->errno) {
+            assert((isset($benchmark) && \mii\util\Profiler::delete($benchmark)) || 1);
 
-            throw new DatabaseException("{$this->_connection->error} [ $sql ]", $this->_connection->errno);
+            throw new DatabaseException("{$this->conn->error} [ $sql ]", $this->conn->errno);
         }
 
-        assert(isset($benchmark) && \mii\util\Profiler::stop($benchmark) || true);
+        assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
 
-        // Set the last query
-        $this->last_query = $sql;
-
-        if ($type === Database::SELECT) {
+        if ($type === self::SELECT) {
             // Return an iterator of results
             return new Result($result, $as_object, $params);
         }
@@ -134,68 +151,38 @@ class Database extends Component
     }
 
 
-    public function inserted_id() {
-        return $this->_connection->insert_id;
-    }
-
-
-    public function affected_rows(): int {
-        return $this->_connection->affected_rows;
-    }
-
-    /**
-     * Connect to the database. This is called automatically when the first
-     * query is executed.
-     *
-     *     $db->connect();
-     *
-     * @return  void
-     * @throws  DatabaseException
-     */
-    public function connect() {
-
-        try {
-            $this->_connection = mysqli_connect(
-                $this->hostname,
-                $this->username,
-                $this->password,
-                $this->database,
-                $this->port
-            );
-
-        } catch (\Exception $e) {
-            // No connection exists
-            $this->_connection = NULL;
-            $this->password = null;
-            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
-        }
-
-        $this->password = null;
-
-        $this->_connection->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
-
-        if (! \is_null($this->charset)) {
-            // Set the character set
-            $this->_connection->set_charset($this->charset);
-        }
-
-     /*   if (!empty($this->variables)) {
-            // Set session variables
-            $variables = [];
-
-            foreach ($this->_config['connection']['variables'] as $var => $val) {
-                $variables[] = 'SESSION ' . $var . ' = ' . $this->quote($val);
-            }
-
-            $this->_connection->query('SET ' . implode(', ', $variables));
-        }*/
-
-    }
-
-
-    public function auto_native_types(bool $enable) : void
+    public function multi_query(string $sql): ?Result
     {
-        $this->_connection->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, $enable);
+
+        $this->conn or $this->connect();
+        assert((config('debug') && ($benchmark = \mii\util\Profiler::start("Database", $sql))) || 1);
+
+        // Execute the query
+        $result = $this->conn->multi_query($sql);
+        $affected_rows = 0;
+        do {
+            $affected_rows += $this->conn->affected_rows;
+        } while ($this->conn->more_results() && $this->conn->next_result());
+
+        assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
+
+        if ($result === false || $this->conn->errno) {
+            throw new DatabaseException("{$this->conn->error} [ $sql ]", $this->conn->errno);
+        }
+
+        return null;
+    }
+
+
+    public function inserted_id()
+    {
+        return $this->conn->insert_id;
+    }
+
+
+    public function affected_rows(): int
+    {
+        return $this->conn->affected_rows;
     }
 
 
@@ -213,13 +200,15 @@ class Database extends Component
      *
      * @param mixed $value any value to quote
      * @return  string
+     * @throws DatabaseException
      * @uses    Database::escape
      */
-    public function quote($value): string {
+    public function quote($value): string
+    {
         if (\is_null($value)) {
             return 'NULL';
         } elseif (\is_int($value)) {
-            return (int)$value;
+            return (string)$value;
         } elseif ($value === true) {
             return "'1'";
         } elseif ($value === false) {
@@ -233,13 +222,15 @@ class Database extends Component
             if ($value instanceof Query) {
                 // Create a sub-query
                 return '(' . $value->compile($this) . ')';
-            } elseif ($value instanceof Expression) {
+            }
+
+            if ($value instanceof Expression) {
                 // Compile the expression
                 return $value->compile($this);
-            } else {
-                // Convert the object to a string
-                return $this->quote((string)$value);
             }
+
+            // Convert the object to a string
+            return $this->quote((string)$value);
         }
 
         return $this->escape($value);
@@ -255,12 +246,13 @@ class Database extends Component
      * @return  string
      * @throws DatabaseException
      */
-    public function escape($value): string {
+    public function escape($value): string
+    {
         // Make sure the database is connected
-        ! \is_null($this->_connection) or $this->connect();
+        !\is_null($this->conn) or $this->connect();
 
-        if (($value = $this->_connection->real_escape_string((string)$value)) === false) {
-            throw new DatabaseException($this->_connection->error, $this->_connection->errno);
+        if (($value = $this->conn->real_escape_string((string)$value)) === false) {
+            throw new DatabaseException($this->conn->error, $this->conn->errno);
         }
 
         // SQL standard is to use single-quotes for all values
@@ -287,16 +279,18 @@ class Database extends Component
      *
      * @param string $mode transaction mode
      * @return  boolean
+     * @throws DatabaseException
      */
-    public function begin($mode = NULL) {
+    public function begin($mode = NULL): bool
+    {
         // Make sure the database is connected
-        $this->_connection or $this->connect();
+        $this->conn or $this->connect();
 
-        if ($mode AND !$this->_connection->query("SET TRANSACTION ISOLATION LEVEL $mode")) {
-            throw new DatabaseException($this->_connection->error, $this->_connection->errno);
+        if ($mode and !$this->conn->query("SET TRANSACTION ISOLATION LEVEL $mode")) {
+            throw new DatabaseException($this->conn->error, $this->conn->errno);
         }
 
-        return (bool)$this->_connection->query('START TRANSACTION');
+        return (bool)$this->conn->query('START TRANSACTION');
     }
 
     /**
@@ -306,12 +300,14 @@ class Database extends Component
      *     $db->commit();
      *
      * @return  boolean
+     * @throws DatabaseException
      */
-    public function commit() {
+    public function commit(): bool
+    {
         // Make sure the database is connected
-        $this->_connection or $this->connect();
+        $this->conn or $this->connect();
 
-        return (bool)$this->_connection->query('COMMIT');
+        return (bool)$this->conn->query('COMMIT');
     }
 
     /**
@@ -321,16 +317,19 @@ class Database extends Component
      *     $db->rollback();
      *
      * @return  boolean
+     * @throws DatabaseException
      */
-    public function rollback() {
+    public function rollback(): bool
+    {
         // Make sure the database is connected
-        $this->_connection or $this->connect();
+        $this->conn or $this->connect();
 
-        return (bool)$this->_connection->query('ROLLBACK');
+        return (bool)$this->conn->query('ROLLBACK');
     }
 
 
-    public function get_lock($name, $timeout = 0) : bool {
+    public function get_lock($name, $timeout = 0): bool
+    {
 
         return (bool)$this->query(
             static::SELECT,
@@ -342,7 +341,8 @@ class Database extends Component
     }
 
 
-    public function release_lock($name) : bool {
+    public function release_lock($name): bool
+    {
         return (bool)$this->query(
             static::SELECT,
             strtr('SELECT RELEASE_LOCK(:name)', [
@@ -367,20 +367,21 @@ class Database extends Component
      * All other objects will be converted using the `__toString` method.
      *
      * @param mixed $column column name or array(column, alias)
+     * @param null  $table
      * @return  string
      * @uses    Database::quote_identifier
      */
-    public function quote_column($column): string {
-
+    public function quote_column($column, $table = null): string
+    {
         if (\is_array($column)) {
             list($column, $alias) = $column;
             $alias = \str_replace('`', '``', $alias);
         }
 
-        if (\is_object($column) AND $column instanceof Query) {
+        if (\is_object($column) and $column instanceof Query) {
             // Create a sub-query
             $column = '(' . $column->compile($this) . ')';
-        } elseif (\is_object($column) AND $column instanceof Expression) {
+        } elseif (\is_object($column) and $column instanceof Expression) {
             // Compile the expression
             $column = $column->compile($this);
         } else {
@@ -390,8 +391,10 @@ class Database extends Component
             $column = \str_replace('`', '``', $column);
 
             if ($column === '*') {
-                return $column;
-            } elseif (\strpos($column, '.') !== false) {
+                return $table ? "$table.$column" : $column;
+            }
+
+            if (\strpos($column, '.') !== false) {
                 $parts = \explode('.', $column);
 
                 foreach ($parts as & $part) {
@@ -403,7 +406,9 @@ class Database extends Component
 
                 $column = \implode('.', $parts);
             } else {
-                $column = '`' . $column . '`';
+                $column = $table === null
+                    ? "`$column`"
+                    : "$table.`$column`";
             }
         }
 
@@ -429,7 +434,8 @@ class Database extends Component
      * @return  string
      * @uses    Database::quote_identifier
      */
-    public function quote_table($table): string {
+    public function quote_table($table): string
+    {
         if (\is_array($table)) {
             list($table, $alias) = $table;
             $alias = \str_replace('`', '``', $alias);
@@ -452,7 +458,7 @@ class Database extends Component
 
                 foreach ($parts as & $part) {
                     // Quote each of the parts
-                    $part = '`' . $part . '`';
+                    $part = "`$part`";
                 }
 
                 $table = \implode('.', $parts);
@@ -480,14 +486,9 @@ class Database extends Component
      * @param mixed $value any identifier
      * @return  string
      */
-    public function quote_identifier($value): string {
-
-        if (\is_array($value)) {
-            list($value, $alias) = $value;
-            $alias = \str_replace('`', '``', $alias);
-        }
-
-        if (\is_object($value) AND $value instanceof Query) {
+    public function quote_identifier($value): string
+    {
+        if (\is_object($value) and $value instanceof Query) {
             // Create a sub-query
             $value = '(' . $value->compile($this) . ')';
         } elseif ($value instanceof Expression) {
@@ -495,7 +496,7 @@ class Database extends Component
             $value = $value->compile($this);
         } else {
             // Convert to a string
-            $value = (string)$value;
+            $value = (string) $value;
 
             $value = \str_replace('`', '``', $value);
 
@@ -511,10 +512,6 @@ class Database extends Component
             } else {
                 $value = "`$value`";
             }
-        }
-
-        if (isset($alias)) {
-            $value .= " AS `$alias`";
         }
 
         return $value;

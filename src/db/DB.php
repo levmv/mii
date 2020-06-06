@@ -5,7 +5,7 @@ namespace mii\db;
 class DB
 {
 
-    static function raw(string $q, array $params = []) {
+    public static function raw(string $q, array $params = []) {
         return static::query(null, $q, $params);
     }
 
@@ -13,8 +13,9 @@ class DB
      * @param string $q
      * @param array $params
      * @return Result
+     * @throws DatabaseException
      */
-    static function select(string $q, array $params = []) {
+    public static function select(string $q, array $params = []) {
         return static::query(Database::SELECT, $q, $params);
     }
 
@@ -23,8 +24,9 @@ class DB
      * @param string $q
      * @param array $params
      * @return Result|int|string
+     * @throws DatabaseException
      */
-    static function query(?int $type, string $q, array $params = []) {
+    public static function query(?int $type, string $q, array $params = []) {
 
         $db = \Mii::$app->db;
 
@@ -48,12 +50,27 @@ class DB
         }
     }
 
+    public static function compile(string $q, array $params = []) {
+        $db = \Mii::$app->db;
+
+        if (!empty($params)) {
+            // Quote all of the values
+            $values = \array_map([$db, 'quote'], $params);
+
+            // Replace the values in the SQL
+            $q = \strtr($q, $values);
+        }
+        return $q;
+    }
+
+
     /**
      * @param string $q
      * @param array $params
      * @return int
+     * @throws DatabaseException
      */
-    static function alter(string $q, array $params = []): int {
+    public static function alter(string $q, array $params = []): int {
         return static::query(Database::UPDATE, $q, $params);
     }
 
@@ -61,8 +78,9 @@ class DB
      * @param string $q
      * @param array $params
      * @return int
+     * @throws DatabaseException
      */
-    static function update(string $q, array $params = []): int {
+    public static function update(string $q, array $params = []): int {
         return static::query(Database::UPDATE, $q, $params);
     }
 
@@ -70,8 +88,9 @@ class DB
      * @param string $q
      * @param array $params
      * @return Result
+     * @throws DatabaseException
      */
-    static function insert(string $q, array $params = []) {
+    public static function insert(string $q, array $params = []) {
         return static::query(Database::INSERT, $q, $params);
     }
 
@@ -79,8 +98,9 @@ class DB
      * @param string $q
      * @param array $params
      * @return int
+     * @throws DatabaseException
      */
-    static function delete(string $q, array $params = []): int {
+    public static function delete(string $q, array $params = []): int {
         return static::query(Database::DELETE, $q, $params);
     }
 
@@ -89,19 +109,19 @@ class DB
      * @param array $params
      * @return Expression
      */
-    static function expr($value, array $params = []): Expression {
+    public static function expr($value, array $params = []): Expression {
         return new Expression($value, $params);
     }
 
-    static function begin(): void {
+    public static function begin(): void {
         \Mii::$app->db->begin();
     }
 
-    static function commit(): void {
+    public static function commit(): void {
         \Mii::$app->db->commit();
     }
 
-    static function rollback(): void {
+    public static function rollback(): void {
         \Mii::$app->db->rollback();
     }
 

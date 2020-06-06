@@ -238,7 +238,7 @@ class Block
      * @uses    Block::capture
      */
     public function render(bool $force = false): string {
-        if (!$this->_loaded AND !$force) {
+        if (!$this->_loaded && !$force) {
             return '';
         }
 
@@ -251,14 +251,14 @@ class Block
         }
 
         assert(
-            config('debug') &&
-            ($benchmark = \mii\util\Profiler::start('Block:render', \mii\util\Debug::path($this->_file)))
-            || true
+            (config('debug') &&
+                ($benchmark = \mii\util\Profiler::start('Block:render', \mii\util\Debug::path($this->_file))))
+            || 1
         );
         // Combine local and global data and capture the output
         $c = $this->capture($this->_file);
 
-        assert(isset($benchmark) && \mii\util\Profiler::stop($benchmark) || true);
+        assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
 
         return $c;
     }

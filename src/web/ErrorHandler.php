@@ -3,8 +3,9 @@
 namespace mii\web;
 
 use mii\core\ErrorException;
-use mii\core\Exception;
+use mii\core\InvalidRouteException;
 use mii\core\UserException;
+use mii\db\ModelNotFoundException;
 use mii\util\Debug;
 
 class ErrorHandler extends \mii\core\ErrorHandler
@@ -12,11 +13,27 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
     public $route;
 
+    public function prepare_exception(\Throwable $e) : \Throwable
+    {
+        if(config('debug'))
+            return $e;
+
+        if($e instanceof ModelNotFoundException) {
+            return new NotFoundHttpException($e->getMessage(), $e);
+        }
+
+        if($e instanceof InvalidRouteException) {
+            return new NotFoundHttpException($e->getMessage(), $e);
+        }
+
+        return $e;
+    }
+
     public function render($exception) {
 
         if (\Mii::$app->has('response')) {
             $response = \Mii::$app->response;
-            $response->content("");
+            $response->clear();
         } else {
             $response = new Response();
         }
@@ -31,27 +48,17 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
             if($this->route && !\config('debug')) {
                 \Mii::$app->request->uri($this->route);
-
                 try {
                     \Mii::$app->run();
                     return;
                 } catch (\Throwable $t) {
                     $response->content(static::exception_to_text($exception));
                 }
+            } else if(config('debug')) {
+
+                $response->content($this->render_file(__DIR__ . '/Exception/error.php', ['exception' => $exception]));
             } else {
-                if(config('debug')) {
-                    $params = [
-                        'class' => $exception instanceof ErrorException ? $exception->get_name() : \get_class($exception),
-                        'code' => $exception->getCode(),
-                        'message' => $exception->getMessage(),
-                        'file' => $exception->getFile(),
-                        'line' => $exception->getLine(),
-                        'trace' => $exception->getTrace()
-                    ];
-                    $response->content($this->render_file(__DIR__ . '/Exception/error.php', $params));
-                } else {
-                    $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');
-                }
+                $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');
             }
 
         } elseif ($response->format === Response::FORMAT_JSON) {
@@ -95,7 +102,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
             $arr['file'] = Debug::path($e->getFile());
             $arr['line'] = $e->getLine();
         }
-        if (($prev = $e->getPrevious()) !== null) {
+        if (config('debug') && ($prev = $e->getPrevious()) !== null) {
             $arr['previous'] = $this->exception_to_array($prev);
         }
         return $arr;

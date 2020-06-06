@@ -172,6 +172,15 @@ class Form
         return $this->get($name);
     }
 
+    /**
+     * @param string $key the property to test
+     * @return bool
+     */
+    public function __isset($key)
+    {
+        return \array_key_exists($key, $this->_fields);
+    }
+
 
     public function get(string $name) {
         return $this->_fields[$name];
