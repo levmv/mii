@@ -18,18 +18,18 @@ class Util extends Controller
 
     public function preload(string $fcgi = null, bool $save = false)
     {
-        if(!$fcgi) {
+        if (!$fcgi) {
             $this->warning('No --fcgi option specified. Trying to detect php-fpm listen addr...');
             $fcgi = $this->detect_fcgi_listen();
 
-            if(!$fcgi) {
+            if (!$fcgi) {
                 $this->error("Detect failed. Exit");
                 return;
             }
             $this->info("Detected: $fcgi");
         }
 
-        $tmp = tempnam('/tmp', 'ops').'.php';
+        $tmp = tempnam('/tmp', 'ops') . '.php';
         file_put_contents($tmp, <<<EOS
         <?php echo json_encode(opcache_get_status(true));
         EOS
@@ -41,13 +41,13 @@ class Util extends Controller
 
         unlink($tmp);
 
-        if($code !== 0) {
+        if ($code !== 0) {
             $this->error($result);
             return;
         }
         // Strip headers
         $result = implode("\n", $result);
-        $result = substr($result, strpos($result, "\n\n")+2);
+        $result = substr($result, strpos($result, "\n\n") + 2);
 
         try {
             $result = \json_decode($result, true);
@@ -65,69 +65,64 @@ class Util extends Controller
         Total hits:       {hits}
         EOS, [
             '{opcache}' => $result['opcache_enabled'] ? "True" : "False",
-            '{usedmem}' => number_format($result['memory_usage']['used_memory']/1024/1024, 3),
-            '{freemem}' => number_format($result['memory_usage']['free_memory']/1024/1024, 3),
-            '{cached}'  => $result['opcache_statistics']['num_cached_scripts'],
-            '{max}'     => $result['opcache_statistics']['max_cached_keys'],
-            '{hits}'    => $result['opcache_statistics']['hits'],
+            '{usedmem}' => number_format($result['memory_usage']['used_memory'] / 1024 / 1024, 2),
+            '{freemem}' => number_format($result['memory_usage']['free_memory'] / 1024 / 1024, 2),
+            '{cached}' => $result['opcache_statistics']['num_cached_scripts'],
+            '{max}' => $result['opcache_statistics']['max_cached_keys'],
+            '{hits}' => $result['opcache_statistics']['hits'],
         ]);
 
         $scripts = [];
         $blocks = [];
 
 
-        foreach($result['scripts'] as $key => [
-                'full_path' => $path,
-                'hits' => $hits,
-                'memory_consumption' => $mem
-        ]) {
+        foreach ($result['scripts'] as $key => ['full_path' => $path,
+                 'hits' => $hits,
+                 'memory_consumption' => $mem]) {
 
-            if($hits === 0)
+            if ($hits === 0)
                 continue;
 
-            if($path === path('root').'/index.php')
+            if ($path === path('root') . '/index.php')
                 continue;
 
-            if(strpos($path, 'composer') !== false)
+            if (strpos($path, 'composer') !== false)
                 continue;
-            if(strpos($path, 'preload.php') !== false)
+            if (strpos($path, 'preload.php') !== false)
                 continue;
 
-        //    if(strpos($path, 'blocks') !== false) {
-          //      $blocks[$path] = [$hits, $mem];
-            //} else {
+            if (strpos($path, 'blocks') !== false) {
+                $blocks[$path] = [$hits, $mem];
+            } else {
                 $scripts[$path] = [$hits, $mem];
-            //}
+            }
         }
 
-        uasort($scripts, function($a, $b) {
-            return $b[1] <=> $a[1];
+        uasort($scripts, function ($a, $b) {
+            return $b[0] <=> $a[0];
         });
 
-        //$avg = $result['opcache_statistics']['hits'] / $result['opcache_statistics']['num_cached_scripts'];
-        //$scripts = array_filter($scripts, fn($hits) => $hits > ($avg/2));
-
         $this->info("\nTop scripts:\nhits   mem, kb  path\n--------------------------");
-        foreach($scripts as $path => [$hits, $mem]) {
+        foreach ($scripts as $path => [$hits, $mem]) {
 
             $mem = number_format($mem / 1024, 2);
 
             $this->info(
-                str_pad($hits, 7). ' '.
-                str_pad($mem, 6, ' ',STR_PAD_LEFT). '  '.
+                str_pad($hits, 7) . ' ' .
+                str_pad($mem, 6, ' ', STR_PAD_LEFT) . '  ' .
                 Debug::path($path));
         }
 
-/*        $this->info('Blocks:');
-        foreach($blocks as $path => $hits) {
-            $this->info(str_pad($hits, 5). ' '.$path);
-        }*/
+        $this->info('Blocks:');
+        foreach ($blocks as $path => $hits) {
+            $this->info(str_pad($hits, 5) . ' ' . $path);
+        }
 
-        if($save) {
+        if ($save) {
 
             $array = var_export(array_keys($scripts), true);
 
-            file_put_contents(path('root').'/preload.php', <<<"EOS"
+            file_put_contents(path('root') . '/preload.php', <<<"EOS"
             <?php
             
                 require(__DIR__ . '/vendor/autoload.php');
@@ -147,19 +142,19 @@ class Util extends Controller
         $output = [];
         exec("ps aux | grep \"php-fpm\" | awk '{print $11}'", $output, $code);
 
-        if($code !== 0 || !count($output))
+        if ($code !== 0 || !count($output))
             return null;
 
         $fpm = $output[0];
         $output = [];
         exec("$fpm -tt 2>&1 | grep 'listen = '", $output);
 
-        if(!count($output))
+        if (!count($output))
             return null;
 
         preg_match('/listen\s*=\s*(.*)/s', $output[0], $matches);
 
-        if(count($matches) !== 2)
+        if (count($matches) !== 2)
             return null;
 
         return $matches[1];
