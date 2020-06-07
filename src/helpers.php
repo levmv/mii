@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 if (!\function_exists('abort')) {
 
@@ -18,7 +18,7 @@ if (!\function_exists('abort')) {
 
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('redirect')) {
     /**
      * @param      $url
      * @param bool $use_back_url
@@ -35,7 +35,7 @@ if (!\function_exists('abort')) {
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('block')) {
     /**
      * @param $name string
      * @return \mii\web\Block
@@ -49,7 +49,7 @@ if (!\function_exists('abort')) {
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('render_block')) {
     /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param string $name
@@ -62,7 +62,7 @@ if (!\function_exists('abort')) {
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('get_cached')) {
     /**
      * Retrieve a cached value entry by id.
      *
@@ -95,7 +95,7 @@ if (!\function_exists('abort')) {
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('cache')) {
     /**
      * Set a value to cache with id and lifetime
      *
@@ -139,14 +139,14 @@ if (!\function_exists('abort')) {
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('path')) {
     function path(string $name): string
     {
         return Mii::$paths[$name];
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('e')) {
     function e(?string $text): string
     {
         return mii\util\HTML::entities($text, false);
@@ -180,7 +180,7 @@ if (!\function_exists('dd')) {
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('config')) {
     function config(string $key, $default = null)
     {
         if (isset(Mii::$app->_config[$key]))
@@ -216,7 +216,7 @@ if (!\function_exists('abort')) {
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('config_set')) {
     function config_set(string $key, $value)
     {
         \mii\util\Arr::set_path(Mii::$app->_config, $key, $value, '.');

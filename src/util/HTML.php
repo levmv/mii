@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\util;
 
@@ -11,7 +11,7 @@ class HTML
     /**
      * @var  array  preferred order of attributes
      */
-    public static $attribute_order = [
+    public static array $attribute_order = [
         'action',
         'method',
         'type',
@@ -30,7 +30,6 @@ class HTML
         'media',
         'accept',
         'tabindex',
-        'accesskey',
         'alt',
         'title',
         'class',
@@ -41,7 +40,7 @@ class HTML
         'disabled',
     ];
 
-    public static $void_elements = [
+    public static array $void_elements = [
         'area' => 1,
         'base' => 1,
         'br' => 1,
@@ -143,53 +142,6 @@ class HTML
         return '<a' . HTML::attributes($attributes) . '>' . $title . '</a>';
     }
 
-    /**
-     * Creates an HTML anchor to a file. Note that the title is not escaped,
-     * to allow HTML elements within links (images, etc).
-     *
-     *     echo HTML::file_anchor('media/doc/user_guide.pdf', 'User Guide');
-     *
-     * @param   string $file name of file to link to
-     * @param   string $title link text
-     * @param   array $attributes HTML anchor attributes
-     * @param   mixed $protocol protocol to pass to URL::base()
-     * @param   boolean $index include the index page
-     * @return  string
-     * @uses    URL::base
-     * @uses    HTML::attributes
-     */
-    public static function file_anchor($file, $title = NULL, array $attributes = NULL, $protocol = NULL) {
-        if ($title === NULL) {
-            // Use the file name as the title
-            $title = basename($file);
-        }
-
-        // Add the file link to the attributes
-        $attributes['href'] = URL::site($file, $protocol);
-
-        return '<a' . HTML::attributes($attributes) . '>' . $title . '</a>';
-    }
-
-    /**
-     * Creates an email (mailto:) anchor. Note that the title is not escaped,
-     * to allow HTML elements within links (images, etc).
-     *
-     *     echo HTML::mailto($address);
-     *
-     * @param   string $email email address to send to
-     * @param   string $title link text
-     * @param   array $attributes HTML anchor attributes
-     * @return  string
-     * @uses    HTML::attributes
-     */
-    public static function mailto($email, $title = NULL, array $attributes = NULL) {
-        if ($title === NULL) {
-            // Use the email address as the title
-            $title = $email;
-        }
-
-        return '<a href="&#109;&#097;&#105;&#108;&#116;&#111;&#058;' . $email . '"' . HTML::attributes($attributes) . '>' . $title . '</a>';
-    }
 
     /**
      * Creates a style sheet link element.

@@ -7,13 +7,11 @@ use mii\console\Controller;
 use mii\db\DB;
 
 /**
- * Class Migrate
+ * DB migration tool
  * @package mii\console\controllers
  */
 class Migrate extends Controller
 {
-    public static string $description = 'DB migrations';
-
     protected $migrate_table = 'migrations';
 
     protected $migrations_list = [];

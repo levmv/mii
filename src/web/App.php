@@ -1,10 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\web;
 
 use mii\core\InvalidRouteException;
 use mii\core\Router;
-use mii\db\ModelNotFoundException;
 
 /**
  * Class App

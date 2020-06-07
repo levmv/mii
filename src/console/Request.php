@@ -109,7 +109,7 @@ class Request extends Component
         $controller = new $controller_class;
         $controller->request = $this;
 
-        return (int)$controller->execute();
+        return (int)$controller->_execute();
     }
 
 

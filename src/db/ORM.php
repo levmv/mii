@@ -89,7 +89,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param array|null $conditions
      * @return Query
      */
-    public static function find(array $conditions = null): Query
+    public static function find(array $conditions = null): SelectQuery
     {
         if (\is_null($conditions))
             return (new static)->select_query();
@@ -139,10 +139,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param Query|null $query
      * @return Query
      */
-    public function select_query($with_order = true, Query $query = null): Query
+    public function select_query($with_order = true, Query $query = null): SelectQuery
     {
         if ($query === null)
-            $query = new Query;
+            $query = new SelectQuery;
 
         $query->from($this->get_table())
             ->model($this)

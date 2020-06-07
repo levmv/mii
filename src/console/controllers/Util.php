@@ -5,6 +5,7 @@ namespace mii\console\controllers;
 
 use mii\console\Controller;
 use mii\db\DB;
+use mii\util\Debug;
 
 
 /**
@@ -49,7 +50,7 @@ class Util extends Controller
         $result = substr($result, strpos($result, "\n\n")+2);
 
         try {
-            $result = json_decode($result, true);
+            $result = \json_decode($result, true);
         } catch (\Throwable $t) {
             $this->error($t);
             return;
@@ -72,11 +73,13 @@ class Util extends Controller
         ]);
 
         $scripts = [];
-        $sum = 0;
+        $blocks = [];
+
 
         foreach($result['scripts'] as $key => [
                 'full_path' => $path,
-                'hits' => $hits
+                'hits' => $hits,
+                'memory_consumption' => $mem
         ]) {
 
             if($hits === 0)
@@ -90,18 +93,35 @@ class Util extends Controller
             if(strpos($path, 'preload.php') !== false)
                 continue;
 
-            $scripts[$path] = $hits;
-            $sum += $hits;
+        //    if(strpos($path, 'blocks') !== false) {
+          //      $blocks[$path] = [$hits, $mem];
+            //} else {
+                $scripts[$path] = [$hits, $mem];
+            //}
         }
 
-        arsort($scripts);
+        uasort($scripts, function($a, $b) {
+            return $b[1] <=> $a[1];
+        });
 
         //$avg = $result['opcache_statistics']['hits'] / $result['opcache_statistics']['num_cached_scripts'];
         //$scripts = array_filter($scripts, fn($hits) => $hits > ($avg/2));
 
-        foreach($scripts as $path => $hits) {
-            $this->info(str_pad($hits, 5). ' '.$path);
+        $this->info("\nTop scripts:\nhits   mem, kb  path\n--------------------------");
+        foreach($scripts as $path => [$hits, $mem]) {
+
+            $mem = number_format($mem / 1024, 2);
+
+            $this->info(
+                str_pad($hits, 7). ' '.
+                str_pad($mem, 6, ' ',STR_PAD_LEFT). '  '.
+                Debug::path($path));
         }
+
+/*        $this->info('Blocks:');
+        foreach($blocks as $path => $hits) {
+            $this->info(str_pad($hits, 5). ' '.$path);
+        }*/
 
         if($save) {
 
@@ -115,8 +135,7 @@ class Util extends Controller
                 \$scripts = $array;
                 
                 foreach(\$scripts as \$filename) 
-                    opcache_compile_file(\$filename);  
-                
+                    require_once(\$filename);                                      
             EOS
             );
         }
@@ -200,7 +219,7 @@ class Util extends Controller
         }
     }
 
-    private function convert_type_names($type)
+    private function convert_type_names(string $type): string
     {
 
         if ($type === 'int' || $type === 'smallint' || $type === 'tinyint')

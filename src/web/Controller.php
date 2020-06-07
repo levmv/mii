@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\web;
 
@@ -11,12 +11,12 @@ class Controller
     /**
      * @var  Request  Request that created the controller
      */
-    public $request;
+    public Request $request;
 
     /**
      * @var  Response The response that will be returned from controller
      */
-    public $response;
+    public Response $response;
 
 
     protected function before() {
