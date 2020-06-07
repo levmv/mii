@@ -219,7 +219,7 @@ class Database extends Component
         } elseif (\is_array($value)) {
             return '(' . implode(', ', array_map([$this, __FUNCTION__], $value)) . ')';
         } elseif (\is_object($value)) {
-            if ($value instanceof Query) {
+            if ($value instanceof SelectQuery) {
                 // Create a sub-query
                 return '(' . $value->compile($this) . ')';
             }
@@ -378,7 +378,7 @@ class Database extends Component
             $alias = \str_replace('`', '``', $alias);
         }
 
-        if (\is_object($column) and $column instanceof Query) {
+        if (\is_object($column) and $column instanceof SelectQuery) {
             // Create a sub-query
             $column = '(' . $column->compile($this) . ')';
         } elseif (\is_object($column) and $column instanceof Expression) {
@@ -441,7 +441,7 @@ class Database extends Component
             $alias = \str_replace('`', '``', $alias);
         }
 
-        if ($table instanceof Query) {
+        if ($table instanceof SelectQuery) {
             // Create a sub-query
             $table = '(' . $table->compile($this) . ')';
         } elseif ($table instanceof Expression) {
@@ -488,7 +488,7 @@ class Database extends Component
      */
     public function quote_identifier($value): string
     {
-        if (\is_object($value) and $value instanceof Query) {
+        if (\is_object($value) and $value instanceof SelectQuery) {
             // Create a sub-query
             $value = '(' . $value->compile($this) . ')';
         } elseif ($value instanceof Expression) {

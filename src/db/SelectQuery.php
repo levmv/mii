@@ -171,20 +171,6 @@ class SelectQuery
     }
 
     /**
-     * Choose the columns to select from, using an array.
-     * @param array $columns list of column names or aliases
-     * @return  $this
-     * @deprecated
-     */
-    public function select_array(array $columns)
-    {
-        $this->_select = \array_merge($this->_select, $columns);
-        $this->_select_any = false;
-
-        return $this;
-    }
-
-    /**
      * @param mixed ...$columns
      * @return $this
      */
@@ -555,10 +541,10 @@ class SelectQuery
     /**
      * Use a sub-query to for the inserted values.
      *
-     * @param Query $query Database_Query of SELECT type
+     * @param SelectQuery $query Database_Query of SELECT type
      * @return  $this
      */
-    public function subselect(Query $query)
+    public function subselect(SelectQuery $query)
     {
         assert($query->_type === Database::SELECT, 'Only SELECT queries can be combined with INSERT queries');
 
@@ -842,17 +828,9 @@ class SelectQuery
      */
     public function compile(Database $db = null): string
     {
-
         $this->db = $db ?? \Mii::$app->db;
 
-        // Compile the SQL query
-        switch ($this->_type) {
-            case Database::SELECT:
-                $sql = $this->compile_select();
-                break;
-        }
-
-        return $sql;
+        return $this->compile_select();
     }
 
 
@@ -872,19 +850,7 @@ class SelectQuery
             $this->db = \Mii::$app->db;
         }
 
-        assert(in_array($this->_type, [
-            Database::SELECT,
-            Database::INSERT,
-            Database::UPDATE,
-            Database::DELETE
-        ], true), 'Wrong query type!');
-
-        // Compile the SQL query
-        switch ($this->_type) {
-            case Database::SELECT:
-                $sql = $this->compile_select();
-                break;
-        }
+        $sql = $this->compile();
 
         /** @noinspection PhpUnhandledExceptionInspection */
         // Execute the query

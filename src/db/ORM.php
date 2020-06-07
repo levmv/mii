@@ -136,10 +136,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * @param bool       $with_order
-     * @param Query|null $query
-     * @return Query
+     * @param SelectQuery|null $query
+     * @return SelectQuery
      */
-    public function select_query($with_order = true, Query $query = null): SelectQuery
+    public function select_query($with_order = true, SelectQuery $query = null): SelectQuery
     {
         if ($query === null)
             $query = new SelectQuery;

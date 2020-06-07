@@ -5,7 +5,7 @@ namespace mii\db\field;
 
 use mii\db\DB;
 use mii\db\ORM;
-use mii\db\Query;
+use mii\db\SelectQuery;
 
 class Sort
 {
@@ -26,7 +26,7 @@ class Sort
 
         if ($parent_field) {
 
-            $value = (new Query)
+            $value = (new SelectQuery)
                 ->select([
                     [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
                 ])
@@ -40,7 +40,7 @@ class Sort
 
         } else {
 
-            $value = (new Query)
+            $value = (new SelectQuery)
                 ->select([
                     [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
                 ])

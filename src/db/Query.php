@@ -101,7 +101,7 @@ class Query extends SelectQuery
      * @param Query $query Database_Query of SELECT type
      * @return  $this
      */
-    public function subselect(Query $query)
+    public function subselect(SelectQuery $query)
     {
         assert($query->_type === Database::SELECT, 'Only SELECT queries can be combined with INSERT queries');
 
@@ -256,7 +256,6 @@ class Query extends SelectQuery
      */
     public function compile(Database $db = null): string
     {
-
         $this->db = $db ?? \Mii::$app->db;
 
         // Compile the SQL query
@@ -276,59 +275,6 @@ class Query extends SelectQuery
         }
 
         return $sql;
-    }
-
-
-    /**
-     * Execute the current query on the given database.
-     *
-     * @param mixed $db Database instance or name of instance
-     * @param mixed   result object classname or null for array
-     * @param array    result object constructor arguments
-     * @return  Result   Result for SELECT queries
-     * @return  mixed    the insert id for INSERT queries
-     * @return  integer  number of affected rows for all other queries
-     */
-    public function execute(Database $db = null): ?Result
-    {
-        if ($db === null) {
-            $this->db = \Mii::$app->db;
-        }
-
-        assert(in_array($this->_type, [
-            Database::SELECT,
-            Database::INSERT,
-            Database::UPDATE,
-            Database::DELETE
-        ], true), 'Wrong query type!');
-
-        // Compile the SQL query
-        switch ($this->_type) {
-            case Database::SELECT:
-                $sql = $this->compile_select();
-                break;
-            case Database::INSERT:
-                $sql = $this->compile_insert();
-                break;
-            case Database::UPDATE:
-                $sql = $this->compile_update();
-                break;
-            case Database::DELETE:
-                $sql = $this->compile_delete();
-                break;
-        }
-
-        /** @noinspection PhpUnhandledExceptionInspection */
-        // Execute the query
-        $result = $this->db->query($this->_type, $sql, $this->_as_object, $this->_object_params);
-
-        if (!\is_null($this->_index_by))
-            $result->index_by($this->_index_by);
-
-        if ($this->_pagination)
-            $result->set_pagination($this->_pagination);
-
-        return $result;
     }
 
 

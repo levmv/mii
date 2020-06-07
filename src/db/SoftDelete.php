@@ -9,7 +9,7 @@ namespace mii\db;
  */
 trait SoftDelete
 {
-    public function select_query($with_order = true, Query $query = null): SelectQuery
+    public function select_query($with_order = true, SelectQuery $query = null): SelectQuery
     {
         return parent::select_query($with_order, $query)->where('deleted', 'is', null);
     }
