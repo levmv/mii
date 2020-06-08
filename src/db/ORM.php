@@ -9,12 +9,12 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     /**
      * @var string database table name
      */
-    protected static $table;
+    public static string $table;
 
     /**
      * @var mixed
      */
-    protected $order_by = null;
+    public static array $order_by = [];
 
     /**
      * @var array The model attributes
@@ -44,7 +44,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param mixed
      * @return void
      */
-    public function __construct(array $values = null, bool $loaded = false)
+    public function __construct(?array $values = null, bool $loaded = false)
     {
         $this->__loaded = $loaded;
 
@@ -53,17 +53,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
                 $this->$key = $value;
             }
         }
-    }
-
-    /**
-     *
-     * @return Query
-     */
-    public static function query()
-    {
-        return (new Query())
-            ->table(static::$table)
-            ->as_object(static::class, [[], true]);
     }
 
     /**
@@ -77,8 +66,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         assert(!is_array($value[0]), "This method accepts only array of int/string's");
 
-        return (new static)
-            ->select_query()
+        return static::select_query()
             ->where('id', 'IN', $value)
             ->all();
     }
@@ -88,33 +76,33 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param array|null $conditions
      * @return Query
      */
-    public static function find(array $conditions = null): SelectQuery
+    public static function find(): SelectQuery
     {
-        if (\is_null($conditions))
-            return (new static)->select_query();
+        return static::select_query(true, new SelectQuery(static::class));
+    }
 
+    /**
+     * @param array|null $conditions
+     * @return Query
+     */
+    public static function where(array $conditions): SelectQuery
+    {
         if (count($conditions) === 3 && \is_string($conditions[1])) {
             $conditions = [$conditions];
         }
 
-        return (new static)
-            ->select_query()
-            ->where($conditions);
+        return static::find()->where($conditions);
     }
 
+
     /**
-     * @param int  $value
-     * @param Deprecated $find_or_fail
+     * @param int        $value
      * @return $this|null
      */
-    public static function one(int $value, bool $find_or_fail = false) : ?self
+    public static function one(int $value): ?self
     {
-        if($find_or_fail) {
-            return static::one_or_fail($value);
-        }
         /** @noinspection PhpUnhandledExceptionInspection */
-        return (new static)
-            ->select_query(false)
+        return static::select_query(false)
             ->where('id', '=', $value)
             ->one();
     }
@@ -124,31 +112,43 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param int $id
      * @return static
      */
-    public static function one_or_fail(int $id) : self
+    public static function one_or_fail(int $id): self
     {
         /** @noinspection PhpUnhandledExceptionInspection */
-        return (new static)
-            ->select_query(false)
+        return static::select_query(false)
             ->where('id', '=', $id)
             ->one_or_fail();
     }
 
+
     /**
-     * @param bool       $with_order
+     *
+     * @return Query
+     */
+    public static function query(): Query
+    {
+        return (new Query())
+            ->table(static::$table)
+            ->as_object(static::class);
+    }
+
+    /**
+     * @param bool             $with_order
      * @param SelectQuery|null $query
      * @return SelectQuery
      */
-    public function select_query($with_order = true, SelectQuery $query = null): SelectQuery
+    public static function select_query(bool $with_order = true, SelectQuery $query = null): SelectQuery
     {
-        if ($query === null)
+        if ($query === null) {
             $query = new SelectQuery;
+        }
 
-        $query->from($this->get_table())
+        $query->from(static::$table)
             ->select(['*'], true)
-            ->as_object(static::class, [null, true]);
+            ->as_object(static::class);
 
-        if ($this->order_by and $with_order) {
-            foreach ($this->order_by as $column => $direction) {
+        if ($with_order && !empty(static::$order_by)) {
+            foreach (static::$order_by as $column => $direction) {
                 $query->order_by($column, $direction);
             }
         }
@@ -158,14 +158,12 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function raw_query(): Query
     {
-        return (new Query)
-            ->as_object(static::class, [null, true]);
+        return (new Query)->as_object(static::class);
     }
 
 
     /**
      * Gets the table name for this object
-     *
      * @return string
      */
     public function get_table(): string
@@ -225,8 +223,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             $values = [$values => $value];
         }
 
-        foreach ($values as $key => $value) {
-            $this->$key = $value;
+        foreach ($values as $key => $val) {
+            $this->$key = $val;
         }
 
         return $this;
@@ -342,6 +340,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * Determine if this model is loaded.
      *
      * @return bool
+     * @deprecated
      */
     public function loaded(): bool
     {
@@ -367,13 +366,12 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         $data = \array_intersect_key($this->attributes, $this->_changed);
 
-        $this->raw_query()
-            ->update($this->get_table())
+        static::query()
+            ->update(static::$table)
             ->set($data)
             ->where('id', '=', (int)$this->attributes['id'])
             ->execute();
 
-        $this->on_after_update();
         $this->on_after_change();
 
         $this->_was_changed = $this->_changed;
@@ -407,13 +405,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     /**
      * @deprecated
      */
-    protected function on_after_update(): void
-    {
-    }
-
-    /**
-     * @deprecated
-     */
     protected function on_after_change(): void
     {
     }
@@ -433,8 +424,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         $this->on_change();
 
-        $this->raw_query()
-            ->insert($this->get_table())
+        static::query()
+            ->insert(static::$table)
             ->columns(\array_keys($this->attributes))
             ->values($this->attributes)
             ->execute();
@@ -462,7 +453,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             $this->__loaded = false;
 
             $this->raw_query()
-                ->delete()
+                ->delete(static::$table)
                 ->where('id', '=', (int)$this->id)
                 ->execute();
 
@@ -483,7 +474,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return $this->to_array();
     }
 
-    public function getIterator() : \Traversable
+    public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->attributes);
     }

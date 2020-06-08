@@ -2,6 +2,8 @@
 
 namespace mii\db;
 
+use mii\web\Pagination;
+
 /**
  * Database result wrapper.
  */
@@ -24,7 +26,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     protected $_index_by;
 
-    protected $_pagination;
+    protected Pagination $_pagination;
 
     /**
      * Sets the total number of rows and stores the result locally.
@@ -83,7 +85,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
         if ($this->_as_object) {
             // Return an object of given class name
-            return $this->_result->fetch_object($this->_as_object, $this->_object_params);
+            return $this->_result->fetch_object($this->_as_object, !\is_null($this->_object_params) ?: [null, true]);
 
         } else {
             // Return an array of the row
@@ -408,7 +410,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         $this->_pagination = $pagination;
     }
 
-    public function pagination()
+    public function pagination() : Pagination
     {
         return $this->_pagination;
     }

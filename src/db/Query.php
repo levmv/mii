@@ -14,13 +14,6 @@ use mii\web\Pagination;
  */
 class Query extends SelectQuery
 {
-
-    // Parameters for __construct when using object results
-    /**
-     * @var array
-     */
-    protected ?array $_object_params = null;
-
     protected $_table;
 
     // (...)

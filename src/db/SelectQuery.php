@@ -20,7 +20,7 @@ class SelectQuery
     protected Database $db;
 
     // Query type
-    protected int $_type;
+    protected int $_type = Database::SELECT;
 
     // Return results as associative arrays or objects
     protected $_as_object = null;
@@ -81,9 +81,11 @@ class SelectQuery
      *
      * @param integer $type query type: Database::SELECT, Database::INSERT, etc
      */
-    public function __construct($type = Database::SELECT)
+    public function __construct($classname = null)
     {
-        $this->_type = $type;
+        if($classname) {
+            $this->as_object($classname);
+        }
     }
 
     /**
@@ -334,10 +336,10 @@ class SelectQuery
         return $this;
     }
 
-    public function paginate($count = 100)
+    public function paginate($count = 100, string $block_name = 'pagination')
     {
         $this->_pagination = new Pagination([
-            'block' => 'pagination',
+            'block' => $block_name,
             'total_items' => $this->count(),
             'items_per_page' => $count
         ]);

@@ -9,23 +9,21 @@ namespace mii\db;
  */
 trait SoftDelete
 {
-    public function select_query($with_order = true, SelectQuery $query = null): SelectQuery
+    public static function select_query($with_order = true, SelectQuery $query = null): SelectQuery
     {
         return parent::select_query($with_order, $query)->where('deleted', 'is', null);
     }
 
     public static function find_deleted()
     {
-        $model = (new static);
-
-        $query = $model->raw_query()
+        $query = static::query()
             ->select(['*'], true)
-            ->from($model->get_table())
-            ->as_object(static::class, [null, true])
+            ->from(static::$table)
+            ->as_object(static::class)
             ->where('deleted', 'is not', null);
 
-        if ($model->order_by) {
-            foreach ($model->order_by as $column => $direction) {
+        if (!empty(static::$order_by)) {
+            foreach (static::$order_by as $column => $direction) {
                 $query->order_by($column, $direction);
             }
         }
@@ -35,8 +33,8 @@ trait SoftDelete
 
     public function restore()
     {
-        return $this->raw_query()
-            ->update($this->get_table())
+        return static::query()
+            ->update(static::$table)
             ->set(['deleted' => null])
             ->where('id', '=', $this->id)
             ->execute();
