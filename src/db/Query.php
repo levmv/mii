@@ -33,7 +33,6 @@ class Query extends SelectQuery
     protected $_set = [];
 
 
-
     /**** INSERT ****/
 
 

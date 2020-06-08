@@ -119,7 +119,7 @@ if (!\function_exists('cache')) {
     }
 }
 
-if (!\function_exists('abort')) {
+if (!\function_exists('clear_cache')) {
     /**
      * Delete a cache entry based on id, or delete all cache entries.
      *

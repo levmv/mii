@@ -23,7 +23,7 @@ class SelectQuery
     protected int $_type;
 
     // Return results as associative arrays or objects
-    protected $_as_object = false;
+    protected $_as_object = null;
 
     // Parameters for __construct when using object results
     /**
@@ -106,13 +106,6 @@ class SelectQuery
     }
 
 
-    public function model($model) : self
-    {
-        $this->_model = $model;
-        return $this;
-    }
-
-
     /**
      * Returns results as objects
      *
@@ -189,8 +182,18 @@ class SelectQuery
      */
     public function from($table): self
     {
-        $this->_from[] = $table;
+        if(empty($this->_from)) {
+            $this->_from[] = $table;
+            return $this;
+        }
 
+        $table_ar = (array) $table;
+        foreach($this->_from as $index => $from) {
+            $from = (array) $from;
+            if($from[0] === $table_ar[0]) {
+                $this->_from[$index] = $table;
+            }
+        }
         return $this;
     }
 
@@ -595,7 +598,7 @@ class SelectQuery
         // Save first (by order) table for later use, flag if it aliased and quoted name (not alias)
         $table = $this->_from[0];
         $table_aliased = \is_array($table);
-        $table_q = $this->db->quote_table($table_aliased ? \current($table) : $table);
+        $table_q = $this->db->quote_table($table_aliased ? $table[1] : $table);
 
         if ($this->_select_any === true) {
             $query .= "$table_q.*";
@@ -617,7 +620,7 @@ class SelectQuery
                 : " FROM $table_q";
 
         } else if (!empty($this->_from)) {
-            assert(empty($this->_from), 'From must not be empty');
+            assert(!empty($this->_from), 'From must not be empty');
             $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quote_table'], $this->_from));
         }
 
@@ -938,7 +941,9 @@ class SelectQuery
         $result = $this->one();
 
         if ($result === null) {
-            throw (new ModelNotFoundException("Model not found"))->set_model(get_class($this->_model));
+            throw (
+                (new ModelNotFoundException("Model not found"))->set_model((string)$this->_as_object)
+            );
         }
         return $result;
     }

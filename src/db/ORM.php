@@ -61,8 +61,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public static function query()
     {
-        return (new static)
-            ->raw_query()
+        return (new Query())
             ->table(static::$table)
             ->as_object(static::class, [[], true]);
     }
@@ -145,7 +144,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             $query = new SelectQuery;
 
         $query->from($this->get_table())
-            ->model($this)
             ->select(['*'], true)
             ->as_object(static::class, [null, true]);
 
@@ -160,7 +158,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function raw_query(): Query
     {
-        return (new Query)->model($this);
+        return (new Query)
+            ->as_object(static::class, [null, true]);
     }
 
 
@@ -187,20 +186,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public static function select_list($key, $display, $first = NULL)
     {
-        $class = new static();
-
-        $query = $class->raw_query()
-            ->select([static::$table . '.' . $key, static::$table . '.' . $display])
-            ->from($class->get_table())
-            ->as_array();
-
-        if ($class->order_by) {
-            foreach ($class->order_by as $column => $direction) {
-                $query->order_by($column, $direction);
-            }
-        }
-
-        return $query->get()->to_list($key, $display, $first);
+        return static::find()->get()->to_list($key, $display, $first);
     }
 
 
@@ -381,7 +367,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         $data = \array_intersect_key($this->attributes, $this->_changed);
 
-        (new Query)
+        $this->raw_query()
             ->update($this->get_table())
             ->set($data)
             ->where('id', '=', (int)$this->attributes['id'])
@@ -447,7 +433,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         $this->on_change();
 
-        (new Query)
+        $this->raw_query()
             ->insert($this->get_table())
             ->columns(\array_keys($this->attributes))
             ->values($this->attributes)
@@ -475,8 +461,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         if ($this->__loaded && isset($this->id)) {
             $this->__loaded = false;
 
-            (new Query)
-                ->delete($this->get_table())
+            $this->raw_query()
+                ->delete()
                 ->where('id', '=', (int)$this->id)
                 ->execute();
 
