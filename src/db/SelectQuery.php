@@ -34,7 +34,7 @@ class SelectQuery
     // SELECT ...
     protected array $_select = [];
 
-    protected bool $_select_any = false;
+    protected bool $_select_any = true;
 
     protected bool $_for_update = false;
 
@@ -172,7 +172,7 @@ class SelectQuery
     public function select_also(...$columns): self
     {
         $this->_select = \array_merge($this->_select, $columns);
-        $this->_select_any = false;
+     //   $this->_select_any = false;
         return $this;
     }
 
@@ -597,10 +597,16 @@ class SelectQuery
             ? 'SELECT DISTINCT '
             : 'SELECT ';
 
-        // Save first (by order) table for later use, flag if it aliased and quoted name (not alias)
-        $table = $this->_from[0];
-        $table_aliased = \is_array($table);
-        $table_q = $this->db->quote_table($table_aliased ? $table[1] : $table);
+        if(empty($this->_from)) {
+            $table = $this->_as_object::table();
+            $table_aliased = false;
+            $table_q = $this->db->quote_table($table);
+        } else {
+            // Save first (by order) table for later use, flag if it aliased and quoted name (not alias)
+            $table = $this->_from[0];
+            $table_aliased = \is_array($table);
+            $table_q = $this->db->quote_table($table_aliased ? $table[1] : $table);
+        }
 
         if ($this->_select_any === true) {
             $query .= "$table_q.*";
@@ -615,7 +621,7 @@ class SelectQuery
         }
 
         // One table - most common case
-        if (\count($this->_from) === 1) {
+        if (\count($this->_from) <= 1) {
             // Why make extra function call if it not neccesary?
             $query .= $table_aliased
                 ? ' FROM ' . $this->db->quote_table($table)

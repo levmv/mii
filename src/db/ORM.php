@@ -7,11 +7,6 @@ use mii\core\Exception;
 class ORM implements \JsonSerializable, \IteratorAggregate
 {
     /**
-     * @var string database table name
-     */
-    public static string $table;
-
-    /**
      * @var mixed
      */
     public static array $order_by = [];
@@ -56,6 +51,29 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
     /**
+     * Gets the table name for this object
+     * @return string
+     */
+    public static function table(): string
+    {
+        $short = static::class;
+        $short = (\substr($short, \strrpos($short, '\\') + 1));
+        $short = \mb_strtolower(\trim(\preg_replace('/(?<!\p{Lu})\p{Lu}/u', '_\0', $short), '_'));
+        $short .= ($short[-1] === 's') ? 'es' : 's';
+
+        return $short;
+    }
+
+    /**
+     * @return SelectQuery
+     */
+    public static function find(): SelectQuery
+    {
+        return (new SelectQuery(static::class))
+            ->order_by(static::$order_by);
+    }
+
+    /**
      * @param array $value
      * @return array
      */
@@ -72,14 +90,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
 
-    /**
-     * @param array|null $conditions
-     * @return Query
-     */
-    public static function find(): SelectQuery
-    {
-        return static::select_query(true, new SelectQuery(static::class));
-    }
 
     /**
      * @param array|null $conditions
@@ -143,7 +153,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             $query = new SelectQuery;
         }
 
-        $query->from(static::$table)
+        $query
             ->select(['*'], true)
             ->as_object(static::class);
 
@@ -161,15 +171,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return (new Query)->as_object(static::class);
     }
 
-
-    /**
-     * Gets the table name for this object
-     * @return string
-     */
-    public function get_table(): string
-    {
-        return static::$table;
-    }
 
     /**
      * Returns an associative array, where the keys of the array is set to $key

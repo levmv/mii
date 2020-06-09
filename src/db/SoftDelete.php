@@ -11,7 +11,7 @@ trait SoftDelete
 {
     public static function select_query($with_order = true, SelectQuery $query = null): SelectQuery
     {
-        return parent::select_query($with_order, $query)->where('deleted', 'is', null);
+        return static::find()->where('deleted', 'is', null);
     }
 
     public static function find_deleted()
