@@ -325,4 +325,10 @@ class Query extends SelectQuery
 
         return $this;
     }
+
+
+    private function get_table() : string
+    {
+        return $this->_table ?? $this->as_object::table();
+    }
 }

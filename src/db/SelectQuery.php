@@ -23,7 +23,7 @@ class SelectQuery
     protected int $_type = Database::SELECT;
 
     // Return results as associative arrays or objects
-    protected $_as_object = null;
+    protected ?string $_model_class = null;
 
     // Parameters for __construct when using object results
     /**
@@ -84,7 +84,7 @@ class SelectQuery
     public function __construct($classname = null)
     {
         if($classname) {
-            $this->as_object($classname);
+            $this->as_model($classname);
         }
     }
 
@@ -101,7 +101,7 @@ class SelectQuery
 
     public function as_array(): self
     {
-        $this->_as_object = false;
+        $this->_model_class = false;
         // note, we doesnt clean here _object_params value
 
         return $this;
@@ -110,15 +110,13 @@ class SelectQuery
 
     /**
      * Returns results as objects
-     *
      * @param string $class classname
      * @param array  $params
      * @return  $this
      */
-    public function as_object($class, array $params = null): self
+    public function as_model(string $class): self
     {
-        $this->_as_object = $class;
-        $this->_object_params = $params;
+        $this->_model_class = $class;
 
         return $this;
     }
@@ -483,30 +481,6 @@ class SelectQuery
         return $this;
     }
 
-    /**
-     * Closes an open "WHERE (...)" grouping.
-     *
-     * @return  $this
-     */
-    public function and_where_close(): self
-    {
-        $this->_where[] = ['AND' => ')'];
-
-        return $this;
-    }
-
-    /**
-     * Closes an open "WHERE (...)" grouping.
-     *
-     * @return  $this
-     */
-    public function or_where_close(): self
-    {
-        $this->_where[] = ['OR' => ')'];
-
-        return $this;
-    }
-
 
     /**
      * Applies sorting with "ORDER BY ..."
@@ -598,7 +572,7 @@ class SelectQuery
             : 'SELECT ';
 
         if(empty($this->_from)) {
-            $table = $this->_as_object::table();
+            $table = $this->_model_class::table();
             $table_aliased = false;
             $table_q = $this->db->quote_table($table);
         } else {
@@ -865,7 +839,7 @@ class SelectQuery
 
         /** @noinspection PhpUnhandledExceptionInspection */
         // Execute the query
-        $result = $this->db->query($this->_type, $sql, $this->_as_object, $this->_object_params);
+        $result = $this->db->query($this->_type, $sql, $this->_model_class);
 
         if (!\is_null($this->_index_by))
             $result->index_by($this->_index_by);
@@ -903,8 +877,8 @@ class SelectQuery
                 new Expression('COUNT(*)')
             ]);
         }
-        $as_object = $this->_as_object;
-        $this->_as_object = null;
+        $model_class = $this->_model_class;
+        $this->_model_class = null;
 
         $this->_order_by = [];
 
@@ -913,7 +887,7 @@ class SelectQuery
         $this->_select = $old_select;
         $this->_select_any = $old_any;
         $this->_order_by = $old_order;
-        $this->_as_object = $as_object;
+        $this->_model_class = $model_class;
 
         return (int)$count;
     }
@@ -927,19 +901,16 @@ class SelectQuery
     }
 
     /**
-     * @param Deprecated $find_or_fail
-     * @return array|mixed|object|\stdClass|null
+     * @return mixed|null
      */
-    public function one($find_or_fail = false)
+    public function one()
     {
         $this->limit(1);
         $result = $this->execute();
 
-        if (\count($result) > 0)
+        if (\count($result) > 0) {
             return $result->current();
-
-        if ($find_or_fail)
-            throw new ModelNotFoundException();
+        }
 
         return null;
     }
@@ -949,8 +920,9 @@ class SelectQuery
         $result = $this->one();
 
         if ($result === null) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             throw (
-                (new ModelNotFoundException("Model not found"))->set_model((string)$this->_as_object)
+                (new ModelNotFoundException("Model not found"))->set_model((string)$this->_model_class)
             );
         }
         return $result;

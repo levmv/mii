@@ -69,8 +69,13 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public static function find(): SelectQuery
     {
-        return (new SelectQuery(static::class))
-            ->order_by(static::$order_by);
+        return static::prepare_query(new SelectQuery(static::class));
+    }
+
+
+    protected static function prepare_query(SelectQuery $query) : SelectQuery
+    {
+        return $query;
     }
 
     /**
@@ -125,7 +130,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     public static function one_or_fail(int $id): self
     {
         /** @noinspection PhpUnhandledExceptionInspection */
-        return static::select_query(false)
+        return static::find()
+            ->order_by(null)
             ->where('id', '=', $id)
             ->one_or_fail();
     }
@@ -139,7 +145,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     {
         return (new Query())
             ->table(static::$table)
-            ->as_object(static::class);
+            ->as_model(static::class);
     }
 
     /**
@@ -155,7 +161,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         $query
             ->select(['*'], true)
-            ->as_object(static::class);
+            ->as_model(static::class);
 
         if ($with_order && !empty(static::$order_by)) {
             foreach (static::$order_by as $column => $direction) {
@@ -168,7 +174,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function raw_query(): Query
     {
-        return (new Query)->as_object(static::class);
+        return (new Query)->as_model(static::class);
     }
 
 
