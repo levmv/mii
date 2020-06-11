@@ -9,12 +9,6 @@ namespace mii\db;
  */
 trait SoftDelete
 {
-    public static function select_query($with_order = true, SelectQuery $query = null): SelectQuery
-    {
-        return static::find()->where('deleted', 'is', null);
-    }
-
-
     /**
      * @return SelectQuery
      */
@@ -25,33 +19,22 @@ trait SoftDelete
             ->order_by(static::$order_by);
     }
 
-
     protected static function prepare_query(SelectQuery $query) : SelectQuery
     {
         return $query->where('deleted', 'is', null);
     }
 
-    public static function find_deleted()
+    public static function find_deleted() : SelectQuery
     {
-        $query = static::query()
-            ->select(['*'], true)
-            ->from(static::$table)
-            ->as_object(static::class)
-            ->where('deleted', 'is not', null);
-
-        if (!empty(static::$order_by)) {
-            foreach (static::$order_by as $column => $direction) {
-                $query->order_by($column, $direction);
-            }
-        }
-
-        return $query;
+        return (new SelectQuery(static::class))
+            ->where('deleted', 'is not', null)
+            ->order_by(static::$order_by);
     }
 
     public function restore()
     {
         return static::query()
-            ->update(static::$table)
+            ->update()
             ->set(['deleted' => null])
             ->where('id', '=', $this->id)
             ->execute();
@@ -61,14 +44,13 @@ trait SoftDelete
     public function delete(): void
     {
         if (!$this->loaded()) {
-
             throw new \Exception('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
         }
 
         $this->__loaded = false;
 
-        $this->raw_query()
-            ->update($this->get_table())
+        static::query()
+            ->update()
             ->set(['deleted' => time()])
             ->where('id', '=', $this->id)
             ->execute();

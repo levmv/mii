@@ -19,23 +19,18 @@ class Request extends Component
     /**
      * @var  string  method: GET, POST, PUT, DELETE, HEAD, etc
      */
-    protected $_method = 'GET';
+    protected string $_method = 'GET';
 
-    /**
-     * The name of the HTTP header for sending CSRF token.
-     */
-    const CSRF_HEADER = 'X-CSRF-Token';
+    public const SAME_SITE_LAX = 'Lax';
 
-    const SAME_SITE_LAX = 'Lax';
-
-    const SAME_SITE_STRICT = 'Strict';
+    public const SAME_SITE_STRICT = 'Strict';
 
     /**
      * @var  string  the URI of the request
      */
-    protected $_uri;
+    protected string $_uri;
 
-    protected $_hostname;
+    protected string $_hostname;
 
     public $cookie_validation = false;
 
@@ -53,30 +48,30 @@ class Request extends Component
     /**
      * @var  integer  Number of seconds before the cookie expires
      */
-    protected $cookie_expiration = 0;
+    protected int $cookie_expiration = 0;
 
     /**
      * @var  string  Restrict the path that the cookie is available to
      */
-    public $cookie_path = '/';
+    public string $cookie_path = '/';
 
     /**
      * @var  string  Restrict the domain that the cookie is available to
      */
-    public $cookie_domain = '';
+    public string $cookie_domain = '';
 
     /**
      * @var  boolean  Only transmit cookies over secure connections
      */
-    public $cookie_secure = false;
+    public bool $cookie_secure = false;
 
     /**
      * @var  boolean  Only transmit cookies over HTTP, disabling Javascript access
      */
-    public $cookie_httponly = true;
+    public bool $cookie_httponly = true;
 
 
-    public $cookie_samesite = self::SAME_SITE_LAX;
+    public string $cookie_samesite = self::SAME_SITE_LAX;
 
     /**
      * @var  array   parameters from the route
@@ -86,12 +81,12 @@ class Request extends Component
     /**
      * @var  string  controller to be executed
      */
-    public $controller;
+    public string $controller;
 
     /**
      * @var  string  action to be executed in the controller
      */
-    public $action;
+    public string $action;
 
 
     public function init(array $config = []): void
@@ -197,8 +192,8 @@ class Request extends Component
      */
     public function is_secure()
     {
-        return isset($_SERVER['HTTPS']) && (\strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1)
-            || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && \strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0;
+        return (isset($_SERVER['HTTPS']) && (\strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1))
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && \strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0);
     }
 
 
@@ -221,29 +216,6 @@ class Request extends Component
     public function param($key, $default = null)
     {
         return $this->params[$key] ?? $default;
-    }
-
-
-    public function validate_csrf_token()
-    {
-
-        if (\in_array($this->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
-            return true;
-        }
-
-        if (isset($_POST[$this->csrf_token_name])) {
-
-            $token = $_POST[$this->csrf_token_name];
-
-        } elseif (isset($_SERVER['HTTP_X_CSRF_TOKEN'])) { // must be like self::CSRF_HEADER
-
-            $token = $_SERVER['HTTP_X_CSRF_TOKEN'];
-
-        } else {
-            return false;
-        }
-
-        return $this->csrf_token() === $token;
     }
 
 
@@ -297,13 +269,13 @@ class Request extends Component
      * Returns whether this is an AJAX (XMLHttpRequest) request.
      * @return boolean whether this is an AJAX (XMLHttpRequest) request.
      */
-    public function is_ajax()
+    public function is_ajax(): bool
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
 
-    public function is_post()
+    public function is_post() : bool
     {
         return $this->method() === 'POST';
     }
@@ -315,7 +287,7 @@ class Request extends Component
      * Returns the raw HTTP request body.
      * @return string the request body
      */
-    public function raw_body()
+    public function raw_body(): string
     {
         if ($this->_raw_body === null) {
             $this->_raw_body = \file_get_contents('php://input');
@@ -324,20 +296,7 @@ class Request extends Component
         return $this->_raw_body;
     }
 
-    private $_json_params;
-
-
-    public function json_params()
-    {
-        if ($this->_json_params === null) {
-            $this->_json_params = \file_get_contents('php://input');
-        }
-
-        return $this->_json_params;
-    }
-
-
-    private $_json_items;
+    private ?array $_json_items = null;
 
     public function json($key, $default = null)
     {

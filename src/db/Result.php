@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\db;
 
@@ -22,7 +22,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     // Parameters for __construct when using object results
     protected ?array $_object_params = null;
 
-    protected $_internal_row = 0;
+    protected int $_internal_row = 0;
 
     protected $_index_by;
 
@@ -64,7 +64,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     public function seek($offset)
     {
-        if ($this->offsetExists($offset) and $this->_result->data_seek($offset)) {
+        if ($this->offsetExists($offset) && $this->_result->data_seek($offset)) {
             // Set the current row to the offset
             $this->_current_row = $this->_internal_row = $offset;
 
@@ -77,8 +77,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     public function current()
     {
-        if ($this->_current_row !== $this->_internal_row and !$this->seek($this->_current_row))
+        if ($this->_current_row !== $this->_internal_row && !$this->seek($this->_current_row)) {
             return null;
+        }
 
         // Increment internal row for optimization assuming rows are fetched in order
         $this->_internal_row++;
@@ -86,11 +87,10 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         if ($this->_as_object) {
             // Return an object of given class name
             return $this->_result->fetch_object($this->_as_object, !\is_null($this->_object_params) ?: [null, true]);
-
-        } else {
-            // Return an array of the row
-            return $this->_result->fetch_assoc();
         }
+
+        // Return an array of the row
+        return $this->_result->fetch_assoc();
     }
 
     public function all(): array
@@ -107,9 +107,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             : $this->_result->fetch_all(\MYSQLI_ASSOC);
     }
 
-    public function each(\Closure $callback) : self
+    public function each(\Closure $callback): self
     {
-        foreach($this as $row) {
+        foreach ($this as $row) {
             $callback($row);
         }
 
@@ -233,17 +233,19 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         $row = $this->current();
 
         if ($this->_as_object) {
-            if (isset($row->$name))
+            if (isset($row->$name)) {
                 return $row->$name;
+            }
         } else {
-            if (isset($row[$name]))
+            if (isset($row[$name])) {
                 return $row[$name];
+            }
         }
 
         return $default;
     }
 
-    public function column_values($name)
+    public function column_values($name) : array
     {
         $result = [];
 
@@ -410,7 +412,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         $this->_pagination = $pagination;
     }
 
-    public function pagination() : Pagination
+    public function pagination(): Pagination
     {
         return $this->_pagination;
     }

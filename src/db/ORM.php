@@ -75,7 +75,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     protected static function prepare_query(SelectQuery $query) : SelectQuery
     {
-        return $query;
+        return $query->order_by(static::$order_by);
     }
 
     /**
@@ -89,11 +89,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         assert(!is_array($value[0]), "This method accepts only array of int/string's");
 
-        return static::select_query()
+        return static::find()
             ->where('id', 'IN', $value)
             ->all();
     }
-
 
 
     /**
@@ -117,7 +116,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     public static function one(int $value): ?self
     {
         /** @noinspection PhpUnhandledExceptionInspection */
-        return static::select_query(false)
+        return static::find()
+            ->order_by(null)
             ->where('id', '=', $value)
             ->one();
     }
@@ -347,7 +347,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * Determine if this model is loaded.
      *
      * @return bool
-     * @deprecated
      */
     public function loaded(): bool
     {
@@ -359,7 +358,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      *
      * @return int Affected rows
      */
-    public function update()
+    public function update(): int
     {
         if (!$this->_changed) {
             $this->_was_changed = [];
@@ -374,9 +373,9 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         $data = \array_intersect_key($this->attributes, $this->_changed);
 
         static::query()
-            ->update(static::$table)
+            ->update()
             ->set($data)
-            ->where('id', '=', (int)$this->attributes['id'])
+            ->where('id', '=', $this->attributes['id'])
             ->execute();
 
         $this->on_after_change();
@@ -423,7 +422,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      *
      * @return int Inserted row id
      */
-    public function create()
+    public function create(): int
     {
         if ($this->on_create() === false) {
             return 0;
@@ -432,7 +431,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         $this->on_change();
 
         static::query()
-            ->insert(static::$table)
+            ->insert()
             ->columns(\array_keys($this->attributes))
             ->values($this->attributes)
             ->execute();

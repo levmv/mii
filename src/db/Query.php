@@ -202,7 +202,7 @@ class Query extends SelectQuery
 
         if (!empty($this->_order_by)) {
             // Add sorting
-            $query .= ' ' . $this->_compile_order_by();
+            $query .= $this->_compile_order_by();
         }
 
         if ($this->_limit !== null) {
@@ -226,7 +226,7 @@ class Query extends SelectQuery
 
         if (!empty($this->_order_by)) {
             // Add sorting
-            $query .= ' ' . $this->_compile_order_by();
+            $query .= $this->_compile_order_by();
         }
 
         if ($this->_limit !== null) {

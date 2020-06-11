@@ -194,8 +194,8 @@ class Database extends Component
      *     $db->quote('fred'); // 'fred'
      *
      * Objects passed to this function will be converted to strings.
-     * [Database_Expression] objects will be compiled.
-     * [Database_Query] objects will be compiled and converted to a sub-query.
+     * [Expression] objects will be compiled.
+     * [SelectQuery] objects will be compiled and converted to a sub-query.
      * All other objects will be converted using the `__toString` method.
      *
      * @param mixed $value any value to quote

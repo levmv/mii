@@ -14,10 +14,10 @@ class Expression
 {
 
     // Unquoted parameters
-    protected $_parameters;
+    protected $params;
 
     // Raw expression string
-    protected $_value;
+    protected $value;
 
     /**
      * Sets the expression string.
@@ -28,10 +28,10 @@ class Expression
      * @param   array $parameters unquoted parameter values
      * @return  void
      */
-    public function __construct($value, $parameters = array()) {
+    public function __construct($value, $parameters = []) {
         // Set the expression string
-        $this->_value = $value;
-        $this->_parameters = $parameters;
+        $this->value = $value;
+        $this->params = $parameters;
     }
 
     /**
@@ -42,7 +42,7 @@ class Expression
      * @return  $this
      */
     public function bind($param, & $var) {
-        $this->_parameters[$param] =& $var;
+        $this->params[$param] =& $var;
 
         return $this;
     }
@@ -55,7 +55,7 @@ class Expression
      * @return  $this
      */
     public function param($param, $value) {
-        $this->_parameters[$param] = $value;
+        $this->params[$param] = $value;
 
         return $this;
     }
@@ -67,7 +67,7 @@ class Expression
      * @return  $this
      */
     public function parameters(array $params) {
-        $this->_parameters = $params + $this->_parameters;
+        $this->params = $params + $this->params;
 
         return $this;
     }
@@ -80,7 +80,7 @@ class Expression
      * @return  string
      */
     public function value(): string {
-        return (string)$this->_value;
+        return (string)$this->value;
     }
 
     /**
@@ -110,9 +110,9 @@ class Expression
 
         $value = $this->value();
 
-        if (!empty($this->_parameters)) {
+        if (!empty($this->params)) {
             // Quote all of the parameter values
-            $params = array_map([$db, 'quote'], $this->_parameters);
+            $params = array_map([$db, 'quote'], $this->params);
 
             // Replace the values in the expression
             $value = strtr($value, $params);

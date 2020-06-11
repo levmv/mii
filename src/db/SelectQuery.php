@@ -635,7 +635,7 @@ class SelectQuery
 
         if (!empty($this->_order_by)) {
             // Add sorting
-            $query .= ' ' . $this->_compile_order_by();
+            $query .= $this->_compile_order_by();
         }
 
         if ($this->_limit !== null) {
@@ -800,7 +800,7 @@ class SelectQuery
             $sort[] = "$column $direction";
         }
 
-        return 'ORDER BY ' . \implode(', ', $sort);
+        return ' ORDER BY ' . \implode(', ', $sort);
     }
 
 
