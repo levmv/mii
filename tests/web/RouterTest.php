@@ -1,9 +1,9 @@
 <?php
 
-namespace mii\tests\web;
+namespace miit\web;
 
 use mii\core\Router;
-use mii\tests\TestCase;
+use miit\TestCase;
 
 
 class RouterTest extends TestCase {
@@ -48,7 +48,7 @@ class RouterTest extends TestCase {
             );
             foreach($group['tests'] as $test) {
 
-                $url = url($test[0], $test[1]);
+                $url = \Mii::$app->router->url($test[0], $test[1]);
                 $this->assertEquals($url, $test[2]);
 
             }

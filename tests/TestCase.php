@@ -1,6 +1,6 @@
 <?php
 
-namespace mii\tests;
+namespace miit;
 
 
 /**
@@ -39,7 +39,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * Clean up after test.
      * By default the application created with [[mockApplication]] will be destroyed.
      */
-    protected function tearDown() {
+    protected function tearDown() : void {
         parent::tearDown();
         $this->destroyApplication();
     }
@@ -74,5 +74,28 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function mockWebApplication($config = [], $appClass = '\mii\web\App') {
         new $appClass($config);
+    }
+
+
+    /**
+     * Invokes a inaccessible method.
+     * @param $object
+     * @param $method
+     * @param array $args
+     * @param bool $revoke whether to make method inaccessible after execution
+     * @return mixed
+     * @since 2.0.11
+     */
+    protected function invokeMethod($object, $method, $args = [], $revoke = true)
+    {
+        $reflection = new \ReflectionObject($object);
+        $method = $reflection->getMethod($method);
+        $method->setAccessible(true);
+        $result = $method->invokeArgs($object, $args);
+        if ($revoke) {
+            $method->setAccessible(false);
+        }
+
+        return $result;
     }
 }

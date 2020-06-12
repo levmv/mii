@@ -7,6 +7,4 @@ $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-require_once(__DIR__ . '/../src/Mii.php');
-
 require_once(__DIR__ . '/TestCase.php');

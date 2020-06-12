@@ -1,37 +1,13 @@
 <?php
 
-namespace mii\tests\db;
+namespace miit\db;
 
-use mii\core\ACL;
-use mii\db\Query;
-use mii\tests\TestCase;
+use miit\TestCase;
 
 
-class LockTest extends TestCase
+class LockTest extends DatabaseTestCase
 {
 
-
-    protected function setUp()
-    {
-        parent::setUp();
-
-        $this->mockWebApplication(
-            [
-                'components' => [
-                    'db' => [
-                        'connection' => [
-
-                            'hostname'   => 'localhost',
-                            'username'   => 'root',
-                            'password'   => 'localroot',
-                            'database'   => 'miitest',
-                        ],
-                        'charset'      => 'utf8'
-                    ],
-                ]
-            ]
-        );
-    }
 
 
     public function testLock() {

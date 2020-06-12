@@ -1,19 +1,19 @@
 <?php
 
-namespace mii\tests\db;
+namespace miit\db;
 
 use mii\core\ACL;
 use mii\db\Query;
-use mii\tests\TestCase;
 use mii\util\URL;
 use mii\web\Request;
+use miit\TestCase;
 
 
 class UrlTest extends TestCase
 {
 
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
 

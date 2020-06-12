@@ -1,14 +1,13 @@
 <?php
 
-namespace mii\tests\web;
+namespace miit\core;
 
 use mii\core\ACL;
-use mii\tests\TestCase;
+use miit\TestCase;
 
 
 class AclTest extends TestCase
 {
-
 
     public function testDefault() {
         $acl = new ACL();
@@ -31,6 +30,5 @@ class AclTest extends TestCase
 
         $this->assertTrue($acl->check(['admin', 'foo'], 'bar'));
     }
-
 
 }

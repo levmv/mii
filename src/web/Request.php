@@ -30,7 +30,7 @@ class Request extends Component
      */
     protected string $_uri;
 
-    protected string $_hostname;
+    protected ?string $_hostname = null;
 
     public $cookie_validation = false;
 

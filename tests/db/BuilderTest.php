@@ -1,53 +1,29 @@
 <?php
 
-namespace mii\tests\db;
+namespace miit\db;
 
-use mii\core\ACL;
 use mii\db\Query;
-use mii\tests\TestCase;
+use mii\db\SelectQuery;
+use miit\TestCase;
 
-
-class BuilderTest extends TestCase
+class BuilderTest extends DatabaseTestCase
 {
-
-
-    protected function setUp()
-    {
-        parent::setUp();
-
-        $this->mockWebApplication(
-            [
-                'components' => [
-                    'db' => [
-                        'connection' => [
-
-                            'hostname'   => 'localhost',
-                            'username'   => 'root',
-                            'password'   => 'localroot',
-                            'database'   => 'miitest',
-                        ],
-                        'charset'      => 'utf8'
-                    ],
-                ]
-            ]
-        );
-    }
-
 
     public function testSimpleSelect() {
         $this->assertEquals(
-
-            (new Query())
+            "SELECT `table`.`name` FROM `table` WHERE `field` = 1",
+            (new SelectQuery())
             ->select(['name'])
             ->from('table')
             ->where('field', '=', 1)
-            ->compile(),
-
-            "SELECT `name` FROM `table` WHERE `field` = 1");
+            ->compile()
+           );
     }
 
-    public function testEscape() {
+
+  /*  public function testEscape() {
         $this->assertEquals(
+            "SELECT `name\"'` FROM `table\"\\"``` WHERE `field``'` = '\\",`'",
 
             (new Query())
                 ->select(['name"\''])
@@ -57,6 +33,42 @@ class BuilderTest extends TestCase
 
             'SELECT `name"\'` FROM `table"\"``` WHERE `field``\'` = \'\",`\''
         );
+    }*/
+
+
+    /**
+     * @dataProvider conditionProvider
+     * @param array $condition
+     * @param string $expected
+     * @param array $expectedParams
+     * @throws \Exception
+     */
+    public function testBuildCondition($condition, $expected, $expectedParams)
+    {
+        $query = (new SelectQuery())->from('table')->where(...$condition);
+
+        $this->assertEquals(
+            'SELECT `table`.* FROM `table` ' . (empty($expected) ? '' : 'WHERE ' . $expected),
+            $query->compile()
+        );
+    }
+
+
+    public function conditionProvider()
+    {
+        $conditions = [
+            [['col', '=', 1], '`col` = 1', []],
+
+            [[[
+                    ['col1', '=', 1],
+                    ['col2', '=', 2]], null, null
+                ]
+                , '`col1` = 1 AND `col2` = 2', []]
+
+
+        ];
+
+        return $conditions;
     }
 
 
