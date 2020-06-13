@@ -224,6 +224,10 @@ class Query extends SelectQuery
     {
         $this->db = $db ?? \Mii::$app->db;
 
+        if(!$this->_table) {
+            $this->_table = $this->_model_class::table();
+        }
+
         // Compile the SQL query
         switch ($this->_type) {
             case Database::SELECT:

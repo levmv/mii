@@ -75,7 +75,13 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     protected static function prepare_query(SelectQuery $query) : SelectQuery
     {
-        return $query->order_by(static::$order_by);
+        if(!empty(static::$order_by)) {
+            foreach(static::$order_by as $col => $dir) {
+                $query->order_by($col, $dir);
+            }
+        }
+
+        return $query;
     }
 
     /**
@@ -143,9 +149,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public static function query(): Query
     {
-        return (new Query())
-            ->table(static::$table)
-            ->as_model(static::class);
+        return new Query(static::class);
     }
 
     /**

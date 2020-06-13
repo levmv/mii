@@ -48,14 +48,14 @@ trait JsonAttributes
     }
 
 
-    public function create()
+    public function create() : int
     {
         if ($this->_serialize_cache_dirty)
             $this->_invalidate_serialize_cache();
         return parent::create();
     }
 
-    public function update()
+    public function update() : int
     {
         if ($this->_serialize_cache_dirty) {
             $this->_invalidate_serialize_cache();

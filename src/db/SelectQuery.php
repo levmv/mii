@@ -22,6 +22,8 @@ class SelectQuery
     protected int $_type = Database::SELECT;
 
     // Return results as associative arrays or objects
+    protected bool $_as_array = true;
+
     protected ?string $_model_class = null;
 
     // Parameters for __construct when using object results
@@ -98,8 +100,7 @@ class SelectQuery
 
     public function as_array(): self
     {
-        $this->_model_class = false;
-        // note, we doesnt clean here _object_params value
+        $this->_as_array = true;
 
         return $this;
     }
@@ -114,6 +115,7 @@ class SelectQuery
     public function as_model(string $class): self
     {
         $this->_model_class = $class;
+        $this->_as_array = false;
 
         return $this;
     }
@@ -543,6 +545,7 @@ class SelectQuery
             : 'SELECT ';
 
         if (empty($this->_from)) {
+            assert(!empty($this->_model_class), "You must specify 'from' table or set model class");
             $table = $this->_model_class::table();
             $table_aliased = false;
             $table_q = $this->db->quote_table($table);
@@ -862,7 +865,7 @@ class SelectQuery
 
         /** @noinspection PhpUnhandledExceptionInspection */
         // Execute the query
-        $result = $this->db->query($this->_type, $sql, $this->_model_class);
+        $result = $this->db->query($this->_type, $sql, $this->_as_array ? false : $this->_model_class);
 
         if (!\is_null($this->_index_by))
             $result->index_by($this->_index_by);
@@ -900,8 +903,8 @@ class SelectQuery
                 new Expression('COUNT(*)')
             ]);
         }
-        $model_class = $this->_model_class;
-        $this->_model_class = null;
+        $as_array = $this->_as_array;
+        $this->_as_array = true;
 
         $this->_order_by = [];
 
@@ -910,7 +913,7 @@ class SelectQuery
         $this->_select = $old_select;
         $this->_select_any = $old_any;
         $this->_order_by = $old_order;
-        $this->_model_class = $model_class;
+        $this->_as_array = $as_array;
 
         return (int)$count;
     }
