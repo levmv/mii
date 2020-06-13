@@ -103,32 +103,6 @@ class Query extends SelectQuery
     }
 
 
-    public function reset()
-    {
-        $this->db = null;
-        $this->_select =
-        $this->_from =
-        $this->_joins =
-        $this->_where =
-        $this->_group_by =
-        $this->_having =
-        $this->_order_by = [];
-
-        $this->_for_update = false;
-        $this->_distinct = false;
-
-        $this->_limit =
-        $this->_offset =
-        $this->_last_join = null;
-
-        $this->_table = null;
-        $this->_columns =
-        $this->_values = [];
-
-
-        return $this;
-    }
-
     /**
      * Compile the SQL query and return it.
      *

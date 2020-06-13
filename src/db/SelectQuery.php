@@ -3,7 +3,6 @@
 namespace mii\db;
 
 use mii\valid\Rules;
-use mii\web\Exception;
 use mii\web\Pagination;
 
 /**
@@ -54,27 +53,25 @@ class SelectQuery
     protected $_having = [];
 
     // OFFSET ...
-    protected $_offset;
+    protected ?int $_offset = null;
 
     // The last JOIN statement created
     protected $_last_join;
 
     // WHERE ...
-    protected $_where = [];
+    protected array $_where = [];
 
     // ORDER BY ...
     protected $_order_by = [];
 
     // LIMIT ...
-    protected $_limit;
+    protected ?int $_limit = null;
 
     protected $_index_by;
 
     protected $_last_condition_where;
 
     protected $_pagination;
-
-    protected $_model = null;
 
     /**
      * Creates a new SQL query of the specified type.
@@ -83,7 +80,7 @@ class SelectQuery
      */
     public function __construct($classname = null)
     {
-        if($classname) {
+        if ($classname) {
             $this->as_model($classname);
         }
     }
@@ -134,11 +131,13 @@ class SelectQuery
      * @param bool|null $any String like `table`.*
      * @return  Query
      */
-    public function select(array $columns, bool $any = false): self
+    public function select(array $columns = null): self
     {
         $this->_type = Database::SELECT;
-        $this->_select = $columns;
-        $this->_select_any = $any;
+        if ($columns !== null) {
+            $this->_select = $columns;
+            $this->_select_any = false;
+        }
 
         return $this;
     }
@@ -170,7 +169,6 @@ class SelectQuery
     public function select_also(...$columns): self
     {
         $this->_select = \array_merge($this->_select, $columns);
-     //   $this->_select_any = false;
         return $this;
     }
 
@@ -182,15 +180,15 @@ class SelectQuery
      */
     public function from($table): self
     {
-        if(empty($this->_from)) {
+        if (empty($this->_from)) {
             $this->_from[] = $table;
             return $this;
         }
 
-        $table_ar = (array) $table;
-        foreach($this->_from as $index => $from) {
-            $from = (array) $from;
-            if($from[0] === $table_ar[0]) {
+        $table_ar = (array)$table;
+        foreach ($this->_from as $index => $from) {
+            $from = (array)$from;
+            if ($from[0] === $table_ar[0]) {
                 $this->_from[$index] = $table;
             }
         }
@@ -509,7 +507,7 @@ class SelectQuery
      * @param integer $number maximum results to return or null to reset
      * @return  $this
      */
-    public function limit($number): self
+    public function limit(int $number): self
     {
         $this->_limit = $number;
 
@@ -533,33 +531,6 @@ class SelectQuery
     }
 
 
-    public function reset()
-    {
-        $this->db = null;
-        $this->_select =
-        $this->_from =
-        $this->_joins =
-        $this->_where =
-        $this->_group_by =
-        $this->_having =
-        $this->_order_by = [];
-
-        $this->_for_update = false;
-        $this->_distinct = false;
-
-        $this->_limit =
-        $this->_offset =
-        $this->_last_join = null;
-
-        $this->_table = null;
-        $this->_columns =
-        $this->_values = [];
-
-
-        return $this;
-    }
-
-
     /**
      * Compile the SQL query and return it.
      *
@@ -571,7 +542,7 @@ class SelectQuery
             ? 'SELECT DISTINCT '
             : 'SELECT ';
 
-        if(empty($this->_from)) {
+        if (empty($this->_from)) {
             $table = $this->_model_class::table();
             $table_aliased = false;
             $table_q = $this->db->quote_table($table);
@@ -613,7 +584,10 @@ class SelectQuery
 
         if (!empty($this->_where)) {
             // Add selection conditions
-            $query .= ' WHERE ' . $this->_compile_conditions($this->_where);
+            if(\count($this->_where) === 1)
+                $query .= ' WHERE '. $this->_compile_short_conditions($this->_where);
+            else
+                $query .= ' WHERE ' . $this->_compile_conditions($this->_where);
         }
 
         if (!empty($this->_group_by)) {
@@ -714,10 +688,12 @@ class SelectQuery
     {
         $last_condition = null;
 
+
         $sql = '';
         foreach ($conditions as $group) {
             // Process groups of conditions
             foreach ($group as $logic => $condition) {
+
                 if ($condition === '(') {
                     if (!empty($sql) and $last_condition !== '(') {
                         // Include logic operator
@@ -734,7 +710,7 @@ class SelectQuery
                     }
 
                     // Split the condition
-                    list($column, $op, $value) = $condition;
+                    [$column, $op, $value] = $condition;
 
                     if ($value === null) {
                         if ($op === '=') {
@@ -746,7 +722,13 @@ class SelectQuery
                         }
                     }
 
-                    if ($op === 'BETWEEN' and \is_array($value)) {
+                    if ($op === 'IN' and \is_array($value)) {
+                        $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
+
+                    } elseif ($op === 'NOT IN' and \is_array($value)) {
+                        $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
+
+                    } elseif ($op === 'BETWEEN' and \is_array($value)) {
                         // BETWEEN always has exactly two arguments
                         [$min, $max] = $value;
 
@@ -759,19 +741,11 @@ class SelectQuery
                         }
 
                         $value = "$min AND $max";
-                    } elseif ($op === 'IN' and \is_array($value)) {
-                        $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
-
-                    } elseif ($op === 'NOT IN' and \is_array($value)) {
-                        $value = '(' . implode(',', array_map([$this->db, 'quote'], $value)) . ')';
-
                     } else {
                         $value = \is_int($value) ? $value : $this->db->quote($value);
                     }
 
-                    if ($column) {
-                        $column = $this->db->quote_column($column);
-                    }
+                    $column = $this->db->quote_column($column);
 
                     // Append the statement to the query
                     $sql .= "$column $op $value";
@@ -782,6 +756,55 @@ class SelectQuery
         }
 
         return $sql;
+    }
+
+    protected function _compile_short_conditions(array $conditions): string
+    {
+
+        [$column, $op, $value] = \current($conditions[0]);
+
+        $column = $this->db->quote_column($column);
+
+        if ($value === null) {
+            if ($op === '=') {
+                // Convert "val = null" to "val IS null"
+                $op = 'IS';
+            } elseif ($op === '!=') {
+                // Convert "val != null" to "val IS NOT null"
+                $op = 'IS NOT';
+            }
+        }
+
+        if($op === '=') {
+            $value = \is_int($value) ? $value : $this->db->quote($value);
+            return "$column $op $value";
+        }
+
+        if ($op === 'IN' and \is_array($value)) {
+            $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
+
+        } elseif ($op === 'NOT IN' and \is_array($value)) {
+            $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
+
+        } elseif ($op === 'BETWEEN' and \is_array($value)) {
+            // BETWEEN always has exactly two arguments
+            [$min, $max] = $value;
+
+            if (!\is_int($min)) {
+                $min = $this->db->quote($min);
+            }
+
+            if (!\is_int($max)) {
+                $max = $this->db->quote($max);
+            }
+
+            $value = "$min AND $max";
+        } else {
+            $value = \is_int($value) ? $value : $this->db->quote($value);
+        }
+
+
+        return "$column $op $value";
     }
 
 
@@ -895,7 +918,7 @@ class SelectQuery
     /**
      * @return Result
      */
-    public function get() : Result
+    public function get(): Result
     {
         return $this->execute();
     }
@@ -922,7 +945,7 @@ class SelectQuery
         if ($result === null) {
             /** @noinspection PhpUnhandledExceptionInspection */
             throw (
-                (new ModelNotFoundException("Model not found"))->set_model((string)$this->_model_class)
+            (new ModelNotFoundException("Model not found"))->set_model((string)$this->_model_class)
             );
         }
         return $result;
