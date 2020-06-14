@@ -30,7 +30,7 @@ class Sort
                 ->select([
                     [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
                 ])
-                ->from($this->_model->get_table())
+                ->from($this->_model::table())
                 ->where($parent_field, '=', $this->_model->get($parent_field))
                 ->one();
 
@@ -44,7 +44,7 @@ class Sort
                 ->select([
                     [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
                 ])
-                ->from($this->_model->get_table())
+                ->from($this->_model::table())
                 ->one();
 
             if ($value) {

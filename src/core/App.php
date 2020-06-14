@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\core;
 
@@ -37,7 +37,7 @@ abstract class App
         }
 
         if ($this->locale !== null)
-            \setlocale(LC_COLLATE | LC_CTYPE | LC_TIME, $this->locale);
+            \setlocale(LC_TIME, $this->locale);
 
         if ($this->timezone !== null)
             \date_default_timezone_set($this->timezone);

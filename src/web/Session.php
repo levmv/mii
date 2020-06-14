@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\web;
 
@@ -83,7 +83,7 @@ class Session extends Component
             return;
 
         if ($this->lifetime > 0) {
-            \ini_set('session.gc_maxlifetime', $this->lifetime);
+            \ini_set('session.gc_maxlifetime', (string) $this->lifetime);
         }
 
         // Sync up the session cookie with Cookie parameters

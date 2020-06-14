@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\web;
 
@@ -74,7 +74,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
     public function render_file($__file, $__params) {
         $__params['handler'] = $this;
         ob_start();
-        ob_implicit_flush(false);
+        ob_implicit_flush(0);
         extract($__params, EXTR_OVERWRITE);
         require($__file);
         return ob_get_clean();

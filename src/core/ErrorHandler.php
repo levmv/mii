@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\core;
 
@@ -23,7 +23,7 @@ class ErrorHandler extends Component
 
     public function register()
     {
-        ini_set('display_errors', false);
+        ini_set('display_errors', '0');
         set_exception_handler([$this, 'handle_exception']);
         set_error_handler([$this, 'handle_error']);
 

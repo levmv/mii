@@ -226,16 +226,16 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function set($values, $value = NULL): ORM
     {
-        if (\is_object($values) and $values instanceof \mii\web\Form) {
+        if (\is_object($values) && $values instanceof \mii\web\Form) {
 
             $values = $values->changed_fields();
 
         } elseif (!\is_array($values)) {
-            $values = [$values => $value];
-        }
-
-        foreach ($values as $key => $val) {
-            $this->$key = $val;
+            $this->$values = $value;
+        } else {
+            foreach ($values as $key => $val) {
+                $this->$key = $val;
+            }
         }
 
         return $this;
@@ -357,39 +357,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return (bool)$this->__loaded;
     }
 
-    /**
-     * Perform update request. Uses value of 'id' attribute as primary key
-     *
-     * @return int Affected rows
-     */
-    public function update(): int
-    {
-        if (!$this->_changed) {
-            $this->_was_changed = [];
-            return 0;
-        }
-
-        if ($this->on_update() === false)
-            return 0;
-
-        $this->on_change();
-
-        $data = \array_intersect_key($this->attributes, $this->_changed);
-
-        static::query()
-            ->update()
-            ->set($data)
-            ->where('id', '=', $this->attributes['id'])
-            ->execute();
-
-        $this->on_after_change();
-
-        $this->_was_changed = $this->_changed;
-        $this->_changed = [];
-
-        return \Mii::$app->db->affected_rows();
-    }
-
 
     public function refresh()
     {
@@ -412,9 +379,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     {
     }
 
-    /**
-     * @deprecated
-     */
+
     protected function on_after_change(): void
     {
     }
@@ -444,12 +409,46 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         $this->attributes['id'] = \Mii::$app->db->inserted_id();
 
+        $this->_was_changed = $this->_changed;
+        $this->_changed = [];
+
         $this->on_after_change();
+
+        return $this->attributes['id'];
+    }
+
+
+    /**
+     * Perform update request. Uses value of 'id' attribute as primary key
+     *
+     * @return int Affected rows
+     */
+    public function update(): int
+    {
+        if (!$this->_changed) {
+            $this->_was_changed = [];
+            return 0;
+        }
+
+        if ($this->on_update() === false)
+            return 0;
+
+        $this->on_change();
+
+        $data = \array_intersect_key($this->attributes, $this->_changed);
+
+        static::query()
+            ->update()
+            ->set($data)
+            ->where('id', '=', $this->attributes['id'])
+            ->execute();
 
         $this->_was_changed = $this->_changed;
         $this->_changed = [];
 
-        return $this->attributes['id'];
+        $this->on_after_change();
+
+        return \Mii::$app->db->affected_rows();
     }
 
 
@@ -462,8 +461,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         if ($this->__loaded && isset($this->id)) {
             $this->__loaded = false;
 
-            $this->raw_query()
-                ->delete(static::$table)
+            static::query()
+                ->delete()
                 ->where('id', '=', (int)$this->id)
                 ->execute();
 

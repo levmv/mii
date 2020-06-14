@@ -20,10 +20,10 @@ class Query extends SelectQuery
     protected array $_columns = [];
 
     // VALUES (...)
-    protected $_values = [];
+    protected array $_values = [];
 
     // SET ...
-    protected $_set = [];
+    protected array $_set = [];
 
 
     /**** INSERT ****/
@@ -111,7 +111,7 @@ class Query extends SelectQuery
     public function compile_insert(): string
     {
         // Start an insertion query
-        $query = 'INSERT INTO ' . $this->db->quote_table($this->_table);
+        $query = 'INSERT INTO ' . $this->get_table();
 
         // Add the column names
         $query .= ' (' . implode(', ', array_map([$this->db, 'quote_column'], $this->_columns)) . ') ';
@@ -144,7 +144,7 @@ class Query extends SelectQuery
     public function compile_update(): string
     {
         // Start an update query
-        $query = 'UPDATE ' . $this->db->quote_table($this->_table);
+        $query = 'UPDATE ' . $this->get_table();
 
         if (!empty($this->_joins)) {
             // Add tables to join
@@ -191,7 +191,7 @@ class Query extends SelectQuery
     {
 
         // Start a deletion query
-        $query = 'DELETE FROM ' . $this->db->quote_table($this->_table);
+        $query = 'DELETE FROM ' . $this->get_table();
 
         if (!empty($this->_where)) {
             // Add deletion conditions
@@ -223,10 +223,6 @@ class Query extends SelectQuery
     public function compile(Database $db = null): string
     {
         $this->db = $db ?? \Mii::$app->db;
-
-        if(!$this->_table) {
-            $this->_table = $this->_model_class::table();
-        }
 
         // Compile the SQL query
         switch ($this->_type) {
@@ -307,6 +303,6 @@ class Query extends SelectQuery
 
     private function get_table() : string
     {
-        return $this->_table ?? $this->as_object::table();
+        return $this->db->quote_table($this->_table ?? $this->_model_class::table());
     }
 }
