@@ -24,7 +24,7 @@ trait JsonAttributes
             return;
         }
 
-        if (static::$json_attributes && \in_array($key, static::$json_attributes)) {
+        if (static::$json_attributes && \in_array($key, static::$json_attributes, true)) {
             $this->_serialize_cache[$key] = $value;
             $this->_serialize_cache_dirty = true;
             return;

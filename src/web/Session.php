@@ -94,7 +94,7 @@ class Session extends Component
             \Mii::$app->request->cookie_httponly);
 
         // Do not allow PHP to send Cache-Control headers
-        \session_cache_limiter(false);
+        \session_cache_limiter("");
 
         // Set the session cookie name
         \session_name($this->name);
