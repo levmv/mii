@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\db;
 
@@ -9,7 +9,6 @@ namespace mii\db;
  * @copyright  (c) 2015 Lev Morozov
  * @copyright  (c) 2009 Kohana Team
  */
-
 class Expression
 {
 
@@ -24,11 +23,12 @@ class Expression
      *
      *     $expression = new Expression('COUNT(users.id)');
      *
-     * @param   string $value raw SQL expression string
-     * @param   array $parameters unquoted parameter values
+     * @param string $value raw SQL expression string
+     * @param array  $parameters unquoted parameter values
      * @return  void
      */
-    public function __construct($value, $parameters = []) {
+    public function __construct($value, $parameters = [])
+    {
         // Set the expression string
         $this->value = $value;
         $this->params = $parameters;
@@ -37,11 +37,12 @@ class Expression
     /**
      * Bind a variable to a parameter.
      *
-     * @param   string $param parameter key to replace
-     * @param   mixed $var variable to use
+     * @param string $param parameter key to replace
+     * @param mixed  $var variable to use
      * @return  $this
      */
-    public function bind($param, & $var) {
+    public function bind($param, &$var)
+    {
         $this->params[$param] =& $var;
 
         return $this;
@@ -50,11 +51,12 @@ class Expression
     /**
      * Set the value of a parameter.
      *
-     * @param   string $param parameter key to replace
-     * @param   mixed $value value to use
+     * @param string $param parameter key to replace
+     * @param mixed  $value value to use
      * @return  $this
      */
-    public function param($param, $value) {
+    public function param($param, $value)
+    {
         $this->params[$param] = $value;
 
         return $this;
@@ -63,10 +65,11 @@ class Expression
     /**
      * Add multiple parameter values.
      *
-     * @param   array $params list of parameter values
+     * @param array $params list of parameter values
      * @return  $this
      */
-    public function parameters(array $params) {
+    public function parameters(array $params)
+    {
         $this->params = $params + $this->params;
 
         return $this;
@@ -79,7 +82,8 @@ class Expression
      *
      * @return  string
      */
-    public function value(): string {
+    public function value(): string
+    {
         return (string)$this->value;
     }
 
@@ -91,7 +95,8 @@ class Expression
      * @return  string
      * @uses    Database_Expression::value
      */
-    public function __toString() {
+    public function __toString()
+    {
         return $this->value();
     }
 
@@ -99,10 +104,11 @@ class Expression
      * Compile the SQL expression and return it. Replaces any parameters with
      * their given values.
      *
-     * @param   mixed    Database instance or name of instance
+     * @param mixed    Database instance or name of instance
      * @return  string
      */
-    public function compile(Database $db = NULL): string {
+    public function compile(Database $db = NULL): string
+    {
         if ($db === null) {
             // Get the database instance
             $db = \Mii::$app->db;

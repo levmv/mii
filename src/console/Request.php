@@ -50,7 +50,7 @@ class Request extends Component
         foreach ($argv as $param) {
             if (preg_match('/^--(\w+)(=(.*))?$/', $param, $matches)) {
                 $name = $matches[1];
-                $value = isset($matches[3]) ? $matches[3] : true;
+                $value = $matches[3] ?? true;
 
                 if (isset($params[$name])) {
                     $params[$name] = (array)$params[$name];
@@ -74,7 +74,7 @@ class Request extends Component
     {
 
         if (empty($this->controller)) {
-            $this->gen_help();
+            $this->genHelp();
             return 0;
         }
 
@@ -119,7 +119,7 @@ class Request extends Component
     }
 
 
-    public function gen_help()
+    public function genHelp()
     {
 
         $namespaces = array_unique(array_merge(config('console.namespaces', [
@@ -132,7 +132,6 @@ class Request extends Component
             'app\\console' => '@app/console',
             'mii\\console\\controllers' => __DIR__//.'\\controllers'
         ], config('console.ns_paths', static::get_paths_from_composer($namespaces)));
-;
 
         $list = [];
         foreach ($namespaces as $namespace) {
@@ -143,7 +142,7 @@ class Request extends Component
                 continue;
             }
 
-            $this->find_controllers($namespace, \Mii::resolve($paths[$namespace]), $list);
+            $this->findControllers($namespace, \Mii::resolve($paths[$namespace]), $list);
         }
 
         Console::stdout("\n");
@@ -158,7 +157,7 @@ class Request extends Component
             $doc = $reflection->getStaticPropertyValue('description', '');
 
             if (!$doc) {
-                [$doc,] = static::get_phpdoc_summary($reflection);
+                [$doc,] = static::getPhpdocSummary($reflection);
             }
 
             $max = max($max, mb_strlen($command));
@@ -169,7 +168,7 @@ class Request extends Component
                 'actions' => []
             ];
 
-            $result['actions'] = static::get_controller_actions($reflection);
+            $result['actions'] = static::getControllerActions($reflection);
             foreach ($result['actions'] as ['name' => $name]) {
                 $max = max($max, mb_strlen($name));
             }
@@ -177,18 +176,15 @@ class Request extends Component
             $out[] = $result;
         }
 
-        foreach ($out as [
-                 'command' => $command,
+        foreach ($out as ['command' => $command,
                  'desc' => $doc,
                  'actions' => $actions]) {
 
             Console::stdout(static::padded($command, $max), Console::FG_YELLOW);
             Console::stdout("$doc\n");
 
-            foreach ($actions as [
-                'name' => $action,
-                'summary' => $desc
-            ]) {
+            foreach ($actions as ['name' => $action,
+                     'summary' => $desc]) {
                 Console::stdout(static::padded("  " . $action, $max), Console::FG_GREEN);
                 Console::stdout("$desc\n", Console::FG_GREY);
             }
@@ -248,7 +244,7 @@ class Request extends Component
         }
     }
 
-    protected function find_controllers($namespace, $path, &$files)
+    protected function findControllers($namespace, $path, &$files)
     {
 
         $dir = dir($path);
@@ -275,7 +271,7 @@ class Request extends Component
     }
 
 
-    public static function get_controller_actions($obj): array
+    public static function getControllerActions($obj): array
     {
         $methods = $obj->getMethods(\ReflectionMethod::IS_PUBLIC);
         $results = [];
@@ -295,10 +291,10 @@ class Request extends Component
                 $optional = $param->isDefaultValueAvailable();
                 $type = $param->getType();
 
-                $args[] = $optional ? "[".$name."]" : "<$name>";
+                $args[] = $optional ? "[" . $name . "]" : "<$name>";
             }
 
-            [$summary,$desc] = static::get_phpdoc_summary($obj->getMethod($method->name));
+            [$summary, $desc] = static::getPhpdocSummary($obj->getMethod($method->name));
 
             $results[] = [
                 'name' => $method->name,
@@ -315,14 +311,14 @@ class Request extends Component
      * @param \ReflectionMethod|\ReflectionClass $ref
      * @return array
      */
-    public static function get_phpdoc_summary(\Reflector $ref): array
+    public static function getPhpdocSummary(\Reflector $ref): array
     {
         $comment = $ref->getDocComment();
 
         if (!$comment)
-            return ['',''];
+            return ['', ''];
 
-        $comment = preg_replace('#[ \t]*(?:\/\*\*|\*\/|\*)?[ \t]?(.*)?#u', '$1', $comment);
+        $comment = preg_replace('#[ \t]*(?:/\*\*|\*/|\*)?[ \t]?(.*)?#u', '$1', $comment);
         $comment = trim($comment);
 
         if (substr($comment, -2) === '*/') {
@@ -336,11 +332,11 @@ class Request extends Component
         $summary = $lines[0];
         $full = '';
 
-        for($i=1;$i<count($lines);$i++) {
-            if(mb_strpos(trim($lines[$i]), '@') === 0) {
+        for ($i = 1; $i < count($lines); $i++) {
+            if (mb_strpos(trim($lines[$i]), '@') === 0) {
                 break;
             }
-            $full .= $lines[$i]."\n";
+            $full .= $lines[$i] . "\n";
         }
 
         return [$summary, $full];

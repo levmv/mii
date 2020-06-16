@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * @copyright Copyright (c) 2008 Yii Software LLC
@@ -9,48 +9,49 @@ namespace mii\util;
 
 class Console
 {
-    const FG_BLACK = 30;
-    const FG_RED = 31;
-    const FG_GREEN = 32;
-    const FG_YELLOW = 33;
-    const FG_BLUE = 34;
-    const FG_PURPLE = 35;
-    const FG_CYAN = 36;
-    const FG_GREY = 37;
+    public const FG_BLACK = 30;
+    public const FG_RED = 31;
+    public const FG_GREEN = 32;
+    public const FG_YELLOW = 33;
+    public const FG_BLUE = 34;
+    public const FG_PURPLE = 35;
+    public const FG_CYAN = 36;
+    public const FG_GREY = 37;
 
-    const BG_BLACK = 40;
-    const BG_RED = 41;
-    const BG_GREEN = 42;
-    const BG_YELLOW = 43;
-    const BG_BLUE = 44;
-    const BG_PURPLE = 45;
-    const BG_CYAN = 46;
-    const BG_GREY = 47;
+    public const BG_BLACK = 40;
+    public const BG_RED = 41;
+    public const BG_GREEN = 42;
+    public const BG_YELLOW = 43;
+    public const BG_BLUE = 44;
+    public const BG_PURPLE = 45;
+    public const BG_CYAN = 46;
+    public const BG_GREY = 47;
 
-    const RESET = 0;
-    const NORMAL = 0;
-    const BOLD = 1;
-    const ITALIC = 3;
-    const UNDERLINE = 4;
-    const BLINK = 5;
-    const NEGATIVE = 7;
-    const CONCEALED = 8;
-    const CROSSED_OUT = 9;
-    const FRAMED = 51;
-    const ENCIRCLED = 52;
-    const OVERLINED = 53;
+    public const RESET = 0;
+    public const NORMAL = 0;
+    public const BOLD = 1;
+    public const ITALIC = 3;
+    public const UNDERLINE = 4;
+    public const BLINK = 5;
+    public const NEGATIVE = 7;
+    public const CONCEALED = 8;
+    public const CROSSED_OUT = 9;
+    public const FRAMED = 51;
+    public const ENCIRCLED = 52;
+    public const OVERLINED = 53;
 
 
     /**
      * Will return a string formatted with the given ANSI style
      *
      * @param string $string the string to be formatted
-     * @param array $format An array containing formatting values.
+     * @param array  $format An array containing formatting values.
      * You can pass any of the FG_*, BG_* and TEXT_* constants
      * and also [[xtermFgColor]] and [[xtermBgColor]] to specify a format.
      * @return string
      */
-    public static function ansi_format(string $string, array $format = []) :string {
+    public static function ansiFormat(string $string, array $format = []): string
+    {
         $code = implode(';', $format);
 
         return "\033[0m" . ($code !== '' ? "\033[" . $code . "m" : '') . $string . "\033[0m";
@@ -62,7 +63,8 @@ class Console
      * @param string $string String to strip
      * @return string
      */
-    public static function strip_ansi_format(string $string) : string {
+    public static function stripAnsiFormat(string $string): string
+    {
         return preg_replace('/\033\[[\d;?]*\w/', '', $string);
     }
 
@@ -76,7 +78,8 @@ class Console
      * @access public
      * @return string
      */
-    public static function escape(string $string) : string {
+    public static function escape(string $string): string
+    {
         return str_replace('%', '%%', $string);
     }
 
@@ -89,7 +92,8 @@ class Console
      * @param mixed $stream
      * @return boolean true if the stream supports ANSI colors, otherwise false.
      */
-    public static function stream_supports_ansi_colors($stream) {
+    public static function streamSupportsAnsiColors($stream)
+    {
         return DIRECTORY_SEPARATOR === '\\'
             ? getenv('ANSICON') !== false || getenv('ConEmuANSI') === 'ON'
             : \function_exists('posix_isatty') && @posix_isatty($stream);
@@ -114,8 +118,9 @@ class Console
      * @param array  $args
      * @return int|boolean Number of bytes printed or false on error
      */
-    public static function stdout($string, ...$args) {
-        return static::write_to_stream(\STDOUT, $string, ...$args);
+    public static function stdout($string, ...$args)
+    {
+        return static::writeToStream(\STDOUT, $string, ...$args);
     }
 
     /**
@@ -124,14 +129,15 @@ class Console
      * @param string $string the string to print
      * @return int|boolean Number of bytes printed or false on error
      */
-    public static function stderr($string, ...$args) {
-        return static::write_to_stream(\STDERR, $string, ...$args);
+    public static function stderr($string, ...$args)
+    {
+        return static::writeToStream(\STDERR, $string, ...$args);
     }
 
-    public static function write_to_stream($stream, $string, ...$args)
+    public static function writeToStream($stream, $string, ...$args)
     {
-        if(!empty($args) && static::stream_supports_ansi_colors($stream)) {
-            $string = static::ansi_format($string, $args);
+        if (!empty($args) && static::streamSupportsAnsiColors($stream)) {
+            $string = static::ansiFormat($string, $args);
         }
         return fwrite($stream, $string);
     }
@@ -144,7 +150,8 @@ class Console
      * @param string $prompt the prompt to display before waiting for input (optional)
      * @return string the user's input
      */
-    public static function input($prompt = null) {
+    public static function input($prompt = null)
+    {
         if (isset($prompt)) {
             static::stdout($prompt);
         }
@@ -158,7 +165,8 @@ class Console
      * @param string $string the text to print
      * @return integer|boolean number of bytes printed or false on error.
      */
-    public static function output($string = null) {
+    public static function output($string = null)
+    {
         return static::stdout($string . PHP_EOL);
     }
 
@@ -168,14 +176,15 @@ class Console
      * @param string $string the text to print
      * @return integer|boolean number of bytes printed or false on error.
      */
-    public static function error($string = null) {
+    public static function error($string = null)
+    {
         return static::stderr($string . PHP_EOL);
     }
 
     /**
      * Asks user to confirm by typing y or n.
      *
-     * @param string $message to print out before waiting for user input
+     * @param string  $message to print out before waiting for user input
      * @param boolean $default this value is returned if no selection is made.
      * @return boolean whether user confirmed
      */
@@ -204,11 +213,12 @@ class Console
      * a list of options to choose from and their explanations.
      *
      * @param string $prompt the prompt message
-     * @param array $options Key-value array of options to choose from
+     * @param array  $options Key-value array of options to choose from
      *
      * @return string An option character the user chose
      */
-    public static function select($prompt, $options = []) {
+    public static function select($prompt, $options = [])
+    {
         top:
         static::stdout("$prompt [" . implode(',', array_keys($options)) . ",?]: ");
         $input = static::stdin();

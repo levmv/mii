@@ -1,9 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\storage;
 
 
-interface StorageInterface {
+interface StorageInterface
+{
 
     public function exist(string $path);
 
@@ -11,7 +12,7 @@ interface StorageInterface {
 
     public function put(string $path, $content);
 
-    public function put_file(string $path, string $from);
+    public function putFile(string $path, string $from);
 
     public function delete(string $path);
 

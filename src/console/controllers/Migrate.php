@@ -20,7 +20,8 @@ class Migrate extends Controller
 
     protected $migrations_paths = [];
 
-    protected function before() {
+    protected function before()
+    {
 
         $config = config('migrate', []);
 
@@ -32,7 +33,7 @@ class Migrate extends Controller
 
 
         try {
-            $this->applied_migrations = DB::select('SELECT `name`, `date` FROM `' . $this->migrate_table . '`')->index_by('name')->all();
+            $this->applied_migrations = DB::select('SELECT `name`, `date` FROM `' . $this->migrate_table . '`')->indexBy('name')->all();
 
         } catch (\Exception $e) {
             $this->info('Trying to create table :table', [':table' => $this->migrate_table]);
@@ -86,11 +87,12 @@ class Migrate extends Controller
     /**
      * Create new migration file
      */
-    public function create(string $name = null) {
+    public function create(string $name = null)
+    {
 
         $custom_name = false;
 
-        if(count($this->request->params) && $name === null)
+        if (count($this->request->params) && $name === null)
             $name = $this->request->params[0];
 
         if ($name) {
@@ -100,8 +102,9 @@ class Migrate extends Controller
         DB::begin();
         try {
             $name = 'm' . gmdate('ymd_His');
-            if ($custom_name)
-                $name = $name . '_' . $custom_name;
+            if ($custom_name) {
+                $name .= '_' . $custom_name;
+            }
 
             $file = '<?php
 // ' . strftime('%F %T') . '
@@ -145,7 +148,8 @@ class ' . $name . ' {
     /**
      * Apply new migrations
      */
-    public function up($limit = null) {
+    public function up($limit = null)
+    {
 
         $applied = 0;
 
@@ -166,7 +170,7 @@ class ' . $name . ' {
 
             $this->info('Loading migration #:name', [':name' => $name]);
 
-            $obj = $this->load_migration($migration);
+            $obj = $this->loadMigration($migration);
             if ($obj->up() === false) {
                 $this->error('Migration #:name failed. Stop.', [':name' => $name]);
                 return;
@@ -196,7 +200,8 @@ class ' . $name . ' {
     }
 
 
-    protected function load_migration($migration) {
+    protected function loadMigration($migration)
+    {
         require_once($migration['file']);
         return new $migration['name'];
     }

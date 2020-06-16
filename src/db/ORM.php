@@ -69,15 +69,15 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public static function find(): SelectQuery
     {
-        return static::prepare_query(new SelectQuery(static::class));
+        return static::prepareQuery(new SelectQuery(static::class));
     }
 
 
-    protected static function prepare_query(SelectQuery $query) : SelectQuery
+    protected static function prepareQuery(SelectQuery $query): SelectQuery
     {
-        if(!empty(static::$order_by)) {
-            foreach(static::$order_by as $col => $dir) {
-                $query->order_by($col, $dir);
+        if (!empty(static::$order_by)) {
+            foreach (static::$order_by as $col => $dir) {
+                $query->orderBy($col, $dir);
             }
         }
 
@@ -116,14 +116,13 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
 
     /**
-     * @param int        $value
+     * @param int $value
      * @return $this|null
      */
     public static function one(int $value): ?self
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
         return static::find()
-            ->order_by(null)
+            ->orderBy(null)
             ->where('id', '=', $value)
             ->one();
     }
@@ -133,13 +132,13 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param int $id
      * @return static
      */
-    public static function one_or_fail(int $id): self
+    public static function oneOrFail(int $id): self
     {
         /** @noinspection PhpUnhandledExceptionInspection */
         return static::find()
-            ->order_by(null)
+            ->orderBy(null)
             ->where('id', '=', $id)
-            ->one_or_fail();
+            ->oneOrFail();
     }
 
 
@@ -150,35 +149,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     public static function query(): Query
     {
         return new Query(static::class);
-    }
-
-    /**
-     * @param bool             $with_order
-     * @param SelectQuery|null $query
-     * @return SelectQuery
-     */
-    public static function select_query(bool $with_order = true, SelectQuery $query = null): SelectQuery
-    {
-        if ($query === null) {
-            $query = new SelectQuery;
-        }
-
-        $query
-            ->select(['*'], true)
-            ->as_model(static::class);
-
-        if ($with_order && !empty(static::$order_by)) {
-            foreach (static::$order_by as $column => $direction) {
-                $query->order_by($column, $direction);
-            }
-        }
-
-        return $query;
-    }
-
-    public function raw_query(): Query
-    {
-        return (new Query)->as_model(static::class);
     }
 
 
@@ -193,9 +163,9 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @return array
      * @deprecated
      */
-    public static function select_list($key, $display, $first = NULL)
+    public static function selectList($key, $display, $first = NULL): array
     {
-        return static::find()->get()->to_list($key, $display, $first);
+        return static::find()->get()->toList($key, $display, $first);
     }
 
 
@@ -228,7 +198,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     {
         if (\is_object($values) && $values instanceof \mii\web\Form) {
 
-            $values = $values->changed_fields();
+            $values = $values->changedFields();
 
         } elseif (!\is_array($values)) {
             $this->$values = $value;
@@ -279,19 +249,17 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param array $properties
      * @return array
      */
-    public function to_array(array $properties = []): array
+    public function toArray(array $properties = []): array
     {
         if (!empty($properties)) {
             $result = [];
             foreach ($properties as $key => $name) {
                 if (\is_int($key)) {
                     $result[$name] = $this->$name;
-                } else {
-                    if (\is_string($name)) {
-                        $result[$key] = $this->$name;
-                    } elseif ($name instanceof \Closure) {
-                        $result[$key] = $name($this);
-                    }
+                } else if (\is_string($name)) {
+                    $result[$key] = $this->$name;
+                } elseif ($name instanceof \Closure) {
+                    $result[$key] = $name($this);
                 }
             }
 
@@ -333,7 +301,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @return bool
      */
 
-    public function was_changed($field_name = null): bool
+    public function wasChanged($field_name = null): bool
     {
         if ($field_name === null) {
             return \count($this->_was_changed) > 0;
@@ -365,22 +333,22 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
 
-    protected function on_create()
+    protected function onCreate()
     {
         return true;
     }
 
-    protected function on_update()
+    protected function onUpdate()
     {
         return true;
     }
 
-    protected function on_change()
+    protected function onChange()
     {
     }
 
 
-    protected function on_after_change(): void
+    protected function onAfterChange(): void
     {
     }
 
@@ -393,11 +361,11 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public function create(): int
     {
-        if ($this->on_create() === false) {
+        if ($this->onCreate() === false) {
             return 0;
         }
 
-        $this->on_change();
+        $this->onChange();
 
         static::query()
             ->insert()
@@ -407,12 +375,12 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
         $this->__loaded = true;
 
-        $this->attributes['id'] = \Mii::$app->db->inserted_id();
+        $this->attributes['id'] = \Mii::$app->db->insertedId();
 
         $this->_was_changed = $this->_changed;
         $this->_changed = [];
 
-        $this->on_after_change();
+        $this->onAfterChange();
 
         return $this->attributes['id'];
     }
@@ -430,10 +398,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return 0;
         }
 
-        if ($this->on_update() === false)
+        if ($this->onUpdate() === false)
             return 0;
 
-        $this->on_change();
+        $this->onChange();
 
         $data = \array_intersect_key($this->attributes, $this->_changed);
 
@@ -446,9 +414,9 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         $this->_was_changed = $this->_changed;
         $this->_changed = [];
 
-        $this->on_after_change();
+        $this->onAfterChange();
 
-        return \Mii::$app->db->affected_rows();
+        return \Mii::$app->db->affectedRows();
     }
 
 
@@ -480,7 +448,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public function jsonSerialize()
     {
-        return $this->to_array();
+        return $this->toArray();
     }
 
     public function getIterator(): \Traversable

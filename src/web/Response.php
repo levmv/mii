@@ -7,10 +7,10 @@ use mii\core\Component;
 
 class Response extends Component
 {
-    const FORMAT_RAW = 0;
-    const FORMAT_HTML = 1;
-    const FORMAT_JSON = 2;
-    const FORMAT_XML = 3;
+    public const FORMAT_RAW = 0;
+    public const FORMAT_HTML = 1;
+    public const FORMAT_JSON = 2;
+    public const FORMAT_XML = 3;
 
     public int $format = self::FORMAT_HTML;
 
@@ -29,8 +29,7 @@ class Response extends Component
     protected array $_headers = [];
 
 
-
-    public function clear() : void
+    public function clear(): void
     {
         $this->_content = '';
         $this->_headers = [];
@@ -45,7 +44,7 @@ class Response extends Component
      * @param string $value the value of the header
      * @return static object itself
      */
-    public function set_header($name, $value = '')
+    public function setHeader($name, $value = '')
     {
         $name = \strtolower($name);
         $this->_headers[$name] = (array)$value;
@@ -60,7 +59,7 @@ class Response extends Component
      * @param string $value the value of the header
      * @return static the collection object itself
      */
-    public function add_header($name, $value)
+    public function addHeader($name, $value)
     {
         $name = \strtolower($name);
         $this->_headers[$name][] = $value;
@@ -68,7 +67,7 @@ class Response extends Component
     }
 
 
-    public function remove_header($name)
+    public function removeHeader($name)
     {
         $name = \strtolower($name);
         if (isset($this->_headers[$name]))
@@ -77,12 +76,12 @@ class Response extends Component
     }
 
 
-    public function send_headers()
+    public function sendHeaders()
     {
         assert(headers_sent() === false, "Headers were already sent");
 
         if (!isset($this->_headers['content-type'])) {
-            $this->set_header('content-type', 'text/html; charset=UTF-8');
+            $this->setHeader('content-type', 'text/html; charset=UTF-8');
         }
 
         // Create the response header
@@ -130,10 +129,10 @@ class Response extends Component
     {
         // todo: process url
 
-        if (\Mii::$app->request->is_ajax()) {
-            $this->set_header('X-Redirect', $url);
+        if (\Mii::$app->request->isAjax()) {
+            $this->setHeader('X-Redirect', $url);
         } else {
-            $this->set_header('Location', $url);
+            $this->setHeader('Location', $url);
         }
 
         $this->status($code);
@@ -157,25 +156,25 @@ class Response extends Component
     {
         switch ($this->format) {
             case self::FORMAT_HTML:
-                $this->set_header('content-type', 'text/html; charset=UTF-8');
+                $this->setHeader('content-type', 'text/html; charset=UTF-8');
                 break;
             case self::FORMAT_JSON:
-                $this->set_header('content-type', 'application/json; charset=UTF-8');
+                $this->setHeader('content-type', 'application/json; charset=UTF-8');
                 $this->_content = \json_encode($this->_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 break;
             case self::FORMAT_XML:
-                $this->set_header('content-type', 'application/xml; charset=UTF-8');
+                $this->setHeader('content-type', 'application/xml; charset=UTF-8');
                 break;
         }
 
-        $this->send_headers();
-        $this->send_content();
+        $this->sendHeaders();
+        $this->sendContent();
 
         // todo: fastcgi_finish_request();
     }
 
 
-    protected function send_content()
+    protected function sendContent()
     {
         echo $this->_content;
     }

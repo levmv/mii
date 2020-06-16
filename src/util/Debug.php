@@ -16,33 +16,37 @@ class Debug
      *
      * Borrows heavily on concepts from the Debug class of [Nette](http://nettephp.com/).
      *
-     * @param   mixed $value variable to dump
-     * @param   integer $length maximum length of strings
-     * @param   integer $level_recursion recursion limit
+     * @param mixed   $value variable to dump
+     * @param integer $length maximum length of strings
+     * @param integer $level_recursion recursion limit
      * @return  string
      */
-    public static function dump($value, $length = 128, $level_recursion = 10) {
-        return Debug::_dump($value, $length, $level_recursion);
+    public static function dump($value, $length = 128, $level_recursion = 10): string
+    {
+        return self::_dump($value, $length, $level_recursion);
     }
 
     /**
      * Helper for Debug::dump(), handles recursion in arrays and objects.
      *
-     * @param   mixed $var variable to dump
-     * @param   integer $length maximum length of strings
-     * @param   integer $limit recursion limit
-     * @param   integer $level current recursion level (internal usage only!)
+     * @param mixed   $var variable to dump
+     * @param integer $length maximum length of strings
+     * @param integer $limit recursion limit
+     * @param integer $level current recursion level (internal usage only!)
      * @return  string
      */
-    protected static function _dump(& $var, $length = 128, $limit = 10, $level = 0) {
+    protected static function _dump(&$var, $length = 128, $limit = 10, $level = 0): string
+    {
         if ($var === NULL) {
             return '<small>NULL</small>';
         } elseif (\is_bool($var)) {
             return '<small>bool</small> ' . ($var ? 'TRUE' : 'FALSE');
+        } elseif (\is_int($var)) {
+            return "<small>int</small> $var";
         } elseif (is_float($var)) {
-            return '<small>float</small> ' . $var;
+            return "<small>float</small> $var";
         } elseif (\is_resource($var)) {
-            if (($type = get_resource_type($var)) === 'stream' AND $meta = stream_get_meta_data($var)) {
+            if (($type = get_resource_type($var)) === 'stream' && $meta = stream_get_meta_data($var)) {
                 $meta = stream_get_meta_data($var);
 
                 if (isset($meta['uri'])) {
@@ -52,19 +56,19 @@ class Debug
                         $file = Debug::path($file);
                     }
 
-                    return '<small>resource</small><span>(' . $type . ')</span> ' . htmlspecialchars($file, ENT_NOQUOTES, 'utf-8');
+                    return "<small>resource</small><span>($type)</span> " . htmlspecialchars($file, ENT_NOQUOTES, 'utf-8');
                 }
             } else {
-                return '<small>resource</small><span>(' . $type . ')</span>';
+                return "<small>resource</small><span>($type)</span>";
             }
         } elseif (\is_string($var)) {
             // Clean invalid multibyte characters. iconv is only invoked
             // if there are non ASCII characters in the string, so this
             // isn't too much of a hit.
             // Remove control characters
-            $var = UTF8::strip_ascii_ctrl($var);
+            $var = UTF8::stripAsciiCtrl($var);
 
-            if (!UTF8::is_ascii($var)) {
+            if (!UTF8::isAscii($var)) {
                 // Disable notices
                 $error_reporting = error_reporting(~E_NOTICE);
                 // iconv is expensive, so it is only used when needed
@@ -73,7 +77,7 @@ class Debug
                 error_reporting($error_reporting);
             }
 
-            if (mb_strlen($var) > $length) {
+            if (\mb_strlen($var) > $length) {
                 // Encode the truncated string
                 $str = htmlspecialchars(mb_substr($var, 0, $length), ENT_NOQUOTES, 'utf-8') . '&nbsp;&hellip;';
             } else {
@@ -104,7 +108,9 @@ class Debug
 
                 $var[$marker] = TRUE;
                 foreach ($var as $key => & $val) {
-                    if ($key === $marker) continue;
+                    if ($key === $marker) {
+                        continue;
+                    }
                     if (!\is_int($key)) {
                         $key = '"' . htmlspecialchars($key, ENT_NOQUOTES, 'utf-8') . '"';
                     }
@@ -164,9 +170,9 @@ class Debug
             }
 
             return '<small>object</small> <span>' . \get_class($var) . '(' . count($array) . ')</span> ' . implode("\n", $output);
-        } else {
-            return '<small>' . gettype($var) . '</small> ' . htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
         }
+
+        return '<small>' . gettype($var) . '</small> ' . htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
     }
 
     /**
@@ -174,18 +180,19 @@ class Debug
      * replacing them with the aliases. Useful for debugging
      * when you want to display a shorter path.
      *
-     * @param   string $file path to debug
+     * @param string $file path to debug
      * @return  string
      */
-    public static function path($file) {
-        if(!isset(\Mii::$paths['mii'])) {
+    public static function path($file)
+    {
+        if (!isset(\Mii::$paths['mii'])) {
 
-            if(!isset(\Mii::$paths['vendor'])) {
-                \Mii::$paths['vendor'] = path('root').'/vendor';
+            if (!isset(\Mii::$paths['vendor'])) {
+                \Mii::$paths['vendor'] = path('root') . '/vendor';
             }
 
-            \Mii::$paths['mii'] = path('vendor').'/levmorozov/mii';
-            uasort(\Mii::$paths, static function($a, $b) {
+            \Mii::$paths['mii'] = path('vendor') . '/levmorozov/mii';
+            uasort(\Mii::$paths, static function ($a, $b) {
                 return \strlen($b) - \strlen($a);
             });
         }
@@ -205,14 +212,15 @@ class Debug
      *     // Highlights the current line of the current file
      *     echo Debug::source(__FILE__, __LINE__);
      *
-     * @param   string $file file to open
-     * @param   integer $line_number line number to highlight
-     * @param   integer $padding number of padding lines
+     * @param string  $file file to open
+     * @param integer $line_number line number to highlight
+     * @param integer $padding number of padding lines
      * @return  string   source of file
      * @return  FALSE    file is unreadable
      */
-    public static function source($file, $line_number, $padding = 5) {
-        if (!$file OR !is_readable($file)) {
+    public static function source($file, $line_number, $padding = 5)
+    {
+        if (!$file || !is_readable($file)) {
             // Continuing will cause errors
             return FALSE;
         }
@@ -230,8 +238,9 @@ class Debug
         $source = '';
         while (($row = fgets($file)) !== FALSE) {
             // Increment the line number
-            if (++$line > $range['end'])
+            if (++$line > $range['end']) {
                 break;
+            }
 
             if ($line >= $range['start']) {
                 // Make the row safe for output
@@ -269,7 +278,8 @@ class Debug
      * @return  array
      * @throws \ReflectionException
      */
-    public static function trace(array $trace = NULL) {
+    public static function trace(array $trace = NULL)
+    {
         if ($trace === NULL) {
             // Start a new trace
             $trace = debug_backtrace();
@@ -285,7 +295,7 @@ class Debug
                 continue;
             }
 
-            if (isset($step['file']) AND isset($step['line'])) {
+            if (isset($step['file']) and isset($step['line'])) {
                 // Include the source of this step
                 $source = Debug::source($step['file'], $step['line']);
             }
@@ -310,7 +320,7 @@ class Debug
                     $args = array($step['args'][0]);
                 }
             } elseif (isset($step['args'])) {
-                if (!\function_exists($step['function']) OR strpos($step['function'], '{closure}') !== FALSE) {
+                if (!\function_exists($step['function']) or strpos($step['function'], '{closure}') !== FALSE) {
                     // Introspection on closures or language constructs in a stack trace is impossible
                     $params = NULL;
                 } else {
@@ -348,10 +358,10 @@ class Debug
 
             $output[] = array(
                 'function' => $function,
-                'args' => isset($args) ? $args : NULL,
-                'file' => isset($file) ? $file : NULL,
-                'line' => isset($line) ? $line : NULL,
-                'source' => isset($source) ? $source : NULL,
+                'args' => $args ?? NULL,
+                'file' => $file ?? NULL,
+                'line' => $line ?? NULL,
+                'source' => $source ?? NULL,
             );
 
             unset($function, $args, $file, $line, $source);
@@ -361,7 +371,8 @@ class Debug
     }
 
 
-    public static function short_text_trace(array $trace = null) {
+    public static function shortTextTrace(array $trace = null)
+    {
         $trace = static::trace($trace);
 
         $count = 0;
@@ -371,11 +382,11 @@ class Debug
             $line = $step['line'];
 
             $args = [];
-            if(\is_array($step['args'])) {
-                foreach($step['args'] as $arg) {
+            if (\is_array($step['args'])) {
+                foreach ($step['args'] as $arg) {
 
                     if (\is_string($arg)) {
-                        $args[] = "'" . Text::limit_chars($arg, 45) . "'";
+                        $args[] = "'" . Text::limitChars($arg, 45) . "'";
                     } elseif (\is_array($arg)) {
                         $args[] = "Array";
                     } elseif (\is_null($arg)) {
@@ -394,7 +405,7 @@ class Debug
 
             $count++;
 
-            return  "#$count $file [$line]: " . $step['function'] . "(" . implode(', ', $args) . ")";
+            return "#$count $file [$line]: " . $step['function'] . "(" . implode(', ', $args) . ")";
         }, $trace));
     }
 

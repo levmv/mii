@@ -50,26 +50,29 @@ class PageController extends Controller
 
     public bool $render_layout = true;
 
-    protected function access_rules() {
+    protected function access_rules()
+    {
     }
 
-    protected function before() {
+    protected function before()
+    {
 
-        if (!Mii::$app->request->is_ajax() && $this->render_layout) {
-            $this->setup_layout();
+        if (!Mii::$app->request->isAjax() && $this->render_layout) {
+            $this->setupLayout();
         }
 
         return true;
     }
 
 
-    protected function after($content = null): Response {
-        if ($this->render_layout AND $this->response->format === Response::FORMAT_HTML) {
+    protected function after($content = null): Response
+    {
+        if ($this->render_layout && $this->response->format === Response::FORMAT_HTML) {
 
-            $this->setup_index();
+            $this->setupIndex();
 
             if (!$this->layout) {
-                $this->setup_layout();
+                $this->setupLayout();
             }
             $this->index_block->set('layout',
                 $this->layout
@@ -81,7 +84,7 @@ class PageController extends Controller
 
         } else {
 
-            if (\is_array($content) AND $this->request->is_ajax()) {
+            if (\is_array($content) && $this->request->isAjax()) {
                 $this->response->format = Response::FORMAT_JSON;
             }
             $this->response->content($content);
@@ -90,8 +93,9 @@ class PageController extends Controller
         return $this->response;
     }
 
-    protected function setup_index($block_name = false): void {
-        $name = ($block_name) ? $block_name : $this->index_block_name;
+    protected function setupIndex($block_name = false): void
+    {
+        $name = ($block_name) ?: $this->index_block_name;
 
         $this->index_block = \block($name)
             ->bind('title', $this->title)
@@ -101,7 +105,8 @@ class PageController extends Controller
     }
 
 
-    protected function setup_layout($block_name = null, $depends = null): void {
+    protected function setupLayout($block_name = null, $depends = null): void
+    {
         if ($block_name === null)
             $block_name = $this->layout_block_name;
 
@@ -112,22 +117,25 @@ class PageController extends Controller
             ->depends($depends);
     }
 
-    protected function on_access_denied() {
+    protected function onAccessDenied()
+    {
         throw new ForbiddenHttpException('User has no rights to access ' . $this->request->uri());
     }
 
-    public function execute(string $action, $params) {
+    public function execute(string $action, $params): void
+    {
 
         $this->access_rules();
 
         if ($this->acl !== null) {
-            $roles = Mii::$app->auth->get_user() ? Mii::$app->auth->get_user()->get_roles() : '*';
+            $roles = Mii::$app->auth->getUser() ? Mii::$app->auth->get_user()->getRoles() : '*';
 
             if (empty($roles))
                 $roles = '*';
 
             if (!$this->acl->check($roles, $action)) {
-                return $this->on_access_denied();
+                $this->onAccessDenied();
+                return;
             }
         }
 

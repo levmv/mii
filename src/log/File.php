@@ -19,11 +19,11 @@ class File extends Target
     {
         $this->file = Mii::resolve($this->file);
         $log_dir = \dirname($this->file);
-        if(!\is_dir($log_dir)) {
+        if (!\is_dir($log_dir)) {
             FS::mkdir(\dirname($this->file));
         }
 
-        $text = implode("\n", array_map([$this, 'format_message'], $messages)) . "\n";
+        $text = implode("\n", array_map([$this, 'formatMessage'], $messages)) . "\n";
 
         if (($fp = fopen($this->file, 'a')) === false) {
             error_log("Unable to append to log file: {$this->file}");

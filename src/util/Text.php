@@ -18,7 +18,7 @@ class Text
      * @param string  $end_char end character or entity
      * @return  string
      */
-    public static function limit_words($str, $limit = 100, $end_char = NULL): string
+    public static function limitWords($str, $limit = 100, $end_char = NULL): string
     {
         $limit = (int)$limit;
         $end_char = $end_char ?? '…';
@@ -47,7 +47,7 @@ class Text
      * @param boolean $preserve_words enable or disable the preservation of words while limiting
      * @return  string
      */
-    public static function limit_chars($str, $limit = 100, $end_char = NULL, $preserve_words = FALSE): string
+    public static function limitChars($str, $limit = 100, $end_char = NULL, $preserve_words = FALSE): string
     {
         $end_char = $end_char ?? '…';
 
@@ -123,7 +123,7 @@ class Text
         }
 
         // Make sure alnum strings contain at least one letter and one digit
-        if ($type === 'alnum' and $length > 1) {
+        if ($type === 'alnum' && $length > 1) {
             if (ctype_alpha($str)) {
                 // Add a random digit
                 $str[\mt_rand(0, $length - 1)] = \chr(\mt_rand(48, 57));
@@ -142,7 +142,7 @@ class Text
      * @param string $string string to transform
      * @return  string
      */
-    public static function ucfirst(string $string) : string
+    public static function ucfirst(string $string): string
     {
         $first = \mb_substr($string, 0, 1);
         $rest = \mb_substr($string, 1);
@@ -163,7 +163,7 @@ class Text
      * @param boolean $br convert single linebreaks to <br />
      * @return  string
      */
-    public static function auto_p(string $str, $br = TRUE): string
+    public static function autoP(string $str, $br = TRUE): string
     {
         // Trim whitespace
         if (($str = trim($str)) === '')
@@ -234,22 +234,22 @@ class Text
      * @param        $text
      * @param string $separator Word separator (any single character)
      * @return  string
-     * @uses    UTF8::ru_translit
-     * @uses    UTF8::transliterate_to_ascii
+     * @uses    UTF8::ruTranslit
+     * @uses    UTF8::transliterateToAscii
      */
 
-    public static function to_slug(string $text, string $separator = '-'): string
+    public static function toSlug(string $text, string $separator = '-'): string
     {
 
-        $value = UTF8::ru_translit($text);
+        $value = UTF8::ruTranslit($text);
 
         // Transliterate value to ASCII
-        $value = UTF8::transliterate_to_ascii($value);
+        $value = UTF8::transliterateToAscii($value);
 
-        $value = UTF8::strip_non_ascii($value);
+        $value = UTF8::stripNonAscii($value);
 
         // Set preserved characters
-        $preserved_characters = preg_quote($separator);
+        $preserved_characters = preg_quote($separator, '!');
 
         // Remove all characters that are not in preserved characters, a-z, 0-9, point or whitespace
         $value = preg_replace('![^' . $preserved_characters . 'a-z0-9.\s]+!', '', strtolower($value));
@@ -262,13 +262,13 @@ class Text
     }
 
 
-    public static function base64url_encode($data) : string
+    public static function b64Encode($data): string
     {
         return \rtrim(\strtr(\base64_encode($data), '+/', '-_'), '=');
     }
 
 
-    public static function base64url_decode($data) : string
+    public static function b64Decode($data): string
     {
         return \base64_decode(\strtr($data, '-_', '+/'));
     }
@@ -284,11 +284,11 @@ class Text
     {
         $cases = array(2, 0, 1, 1, 1, 2);
 
-        if ($number % 100 > 4 and $number % 100 < 20) {
+        if ($number % 100 > 4 && $number % 100 < 20) {
             return $array[2];
-        } else {
-            return $array[$cases[\min($number % 10, 5)]];
         }
+
+        return $array[$cases[\min($number % 10, 5)]];
     }
 
 
@@ -333,7 +333,7 @@ class Text
         // Find the actual unit, assume B if no unit specified
         $unit = $matches[2] ?? 'B';
         // Convert the size into bytes
-        return $size * pow(2, Text::$byte_units[$unit]);
+        return $size * (2 ** self::$byte_units[$unit]);
     }
 
 
@@ -346,7 +346,7 @@ class Text
     }
 
 
-    public static function first_letters(array $words) : string
+    public static function firstLetters(array $words): string
     {
         $fl = '';
         for ($i = 0; $i < 2; $i++) {

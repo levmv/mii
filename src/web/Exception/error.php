@@ -116,15 +116,7 @@ $error_id = uniqid('error');
     function koggle(elem) {
         elem = document.getElementById(elem);
 
-        if (elem.style && elem.style['display'])
-        // Only works with the "style" attr
-            var disp = elem.style['display'];
-        else if (elem.currentStyle)
-        // For MSIE, naturally
-            var disp = elem.currentStyle['display'];
-        else if (window.getComputedStyle)
-        // For most other browsers
-            var disp = document.defaultView.getComputedStyle(elem, null).getPropertyValue('display');
+        let disp = document.defaultView.getComputedStyle(elem, null).getPropertyValue('display');
 
         // Toggle the state of the "display" style
         elem.style.display = disp === 'block' ? 'none' : 'block';
@@ -133,28 +125,28 @@ $error_id = uniqid('error');
 </script>
 <div id="mii_error">
     <?php
-        $ex = 0;
-        do {
+    $ex = 0;
+    do {
         $ex++;
-        $class = $exception instanceof \mii\core\ErrorException ? $exception->get_name() : \get_class($exception);
+        $class = $exception instanceof \mii\core\ErrorException ? $exception->getName() : \get_class($exception);
         $code = $exception->getCode();
         $message = $exception->getMessage();
         $file = $exception->getFile();
         $line = $exception->getLine();
         $trace = $exception->getTrace();
-    ?>
+        ?>
 
-    <h1><span class="type"><?php echo $class ?> [ <?php echo $code ?> ]:</span> <span
-                class="message"><?php echo \mii\util\HTML::chars($message) ?></span></h1>
-    <div id="<?php echo $error_id ?>" class="content">
-        <p><span class="file"><?php echo \mii\util\Debug::path($file) ?> [ <?php echo $line ?> ]</span></p>
-        <?php echo \mii\util\Debug::source($file, $line) ?>
-        <ol class="trace">
-            <?php foreach (\mii\util\Debug::trace($trace) as $i => $step): ?>
-                <li>
-                    <p>
+        <h1><span class="type"><?php echo $class ?> [ <?php echo $code ?> ]:</span> <span
+                    class="message"><?php echo \mii\util\HTML::chars($message) ?></span></h1>
+        <div id="<?php echo $error_id ?>" class="content">
+            <p><span class="file"><?php echo \mii\util\Debug::path($file) ?> [ <?php echo $line ?> ]</span></p>
+            <?php echo \mii\util\Debug::source($file, $line) ?>
+            <ol class="trace">
+                <?php foreach (\mii\util\Debug::trace($trace) as $i => $step): ?>
+                    <li>
+                        <p>
 					<span class="file">
-						<?php if ($step['file']): $source_id = $error_id . 'source' . $ex . '_' .$i; ?>
+						<?php if ($step['file']): $source_id = $error_id . 'source' . $ex . '_' . $i; ?>
                             <a href="#<?php echo $source_id ?>"
                                onclick="return koggle('<?php echo $source_id ?>')"><?php echo \mii\util\Debug::path($step['file']) ?>
                                 [ <?php echo $step['line'] ?> ]</a>
@@ -162,36 +154,37 @@ $error_id = uniqid('error');
                             {<?php echo 'PHP internal call' ?>}
                         <?php endif ?>
 					</span>
-                        &raquo;
-                        <?php echo $step['function'] ?>(<?php if ($step['args']): $args_id = $error_id . 'args' . $i; ?>
-                            <a href="#<?php echo $args_id ?>"
-                               onclick="return koggle('<?php echo $args_id ?>')"><?php echo 'arguments' ?></a><?php endif ?>
-                        )
-                    </p>
-                    <?php if (isset($args_id)): ?>
-                        <div id="<?php echo $args_id ?>" class="collapsed">
-                            <table cellspacing="0">
-                                <?php foreach ($step['args'] as $name => $arg): ?>
-                                    <tr>
-                                        <td><code><?php echo $name ?></code></td>
-                                        <td>
-                                            <pre><?php echo \mii\util\Debug::dump($arg) ?></pre>
-                                        </td>
-                                    </tr>
-                                <?php endforeach ?>
-                            </table>
-                        </div>
-                    <?php endif ?>
-                    <?php if (isset($source_id)): ?>
-                        <pre id="<?php echo $source_id ?>"
-                             class="source collapsed"><code><?php echo $step['source'] ?></code></pre>
-                    <?php endif ?>
-                </li>
-                <?php unset($args_id, $source_id); ?>
-            <?php endforeach ?>
-        </ol>
-    </div>
-    <?php } while(null !== ($exception = $exception->getPrevious()));?>
+                            &raquo;
+                            <?php echo $step['function'] ?>
+                            (<?php if ($step['args']): $args_id = $error_id . 'args' . $i; ?>
+                                <a href="#<?php echo $args_id ?>"
+                                   onclick="return koggle('<?php echo $args_id ?>')"><?php echo 'arguments' ?></a><?php endif ?>
+                            )
+                        </p>
+                        <?php if (isset($args_id)): ?>
+                            <div id="<?php echo $args_id ?>" class="collapsed">
+                                <table>
+                                    <?php foreach ($step['args'] as $name => $arg): ?>
+                                        <tr>
+                                            <td><code><?php echo $name ?></code></td>
+                                            <td>
+                                                <pre><?php echo \mii\util\Debug::dump($arg) ?></pre>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                </table>
+                            </div>
+                        <?php endif ?>
+                        <?php if (isset($source_id)): ?>
+                            <pre id="<?php echo $source_id ?>"
+                                 class="source collapsed"><code><?php echo $step['source'] ?></code></pre>
+                        <?php endif ?>
+                    </li>
+                    <?php unset($args_id, $source_id); ?>
+                <?php endforeach ?>
+            </ol>
+        </div>
+    <?php } while (null !== ($exception = $exception->getPrevious())); ?>
 
     <h2><a href="#<?php echo $env_id = $error_id . 'environment' ?>"
            onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Environment' ?></a></h2>
@@ -201,7 +194,7 @@ $error_id = uniqid('error');
                onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Included files' ?></a>
             (<?php echo count($included) ?>)</h3>
         <div id="<?php echo $env_id ?>" class="collapsed">
-            <table cellspacing="0">
+            <table>
                 <?php foreach ($included as $file): ?>
                     <tr>
                         <td><code><?php echo \mii\util\Debug::path($file) ?></code></td>
@@ -214,7 +207,7 @@ $error_id = uniqid('error');
                onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Loaded extensions' ?></a>
             (<?php echo count($included) ?>)</h3>
         <div id="<?php echo $env_id ?>" class="collapsed">
-            <table cellspacing="0">
+            <table>
                 <?php foreach ($included as $file): ?>
                     <tr>
                         <td><code><?php echo \mii\util\Debug::path($file) ?></code></td>
@@ -223,11 +216,11 @@ $error_id = uniqid('error');
             </table>
         </div>
         <?php foreach (array('_SESSION', '_GET', '_POST', '_FILES', '_COOKIE', '_SERVER') as $var): ?>
-            <?php if (empty($GLOBALS[$var]) OR !\is_array($GLOBALS[$var])) continue ?>
+            <?php if (empty($GLOBALS[$var]) or !\is_array($GLOBALS[$var])) continue ?>
             <h3><a href="#<?php echo $env_id = $error_id . 'environment' . strtolower($var) ?>"
                    onclick="return koggle('<?php echo $env_id ?>')">$<?php echo $var ?></a></h3>
             <div id="<?php echo $env_id ?>" class="collapsed">
-                <table cellspacing="0">
+                <table>
                     <?php foreach ($GLOBALS[$var] as $key => $value): ?>
                         <tr>
                             <td><code><?php echo \mii\util\HTML::chars($key) ?></code></td>

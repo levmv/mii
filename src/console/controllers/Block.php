@@ -27,7 +27,8 @@ class Block extends Controller
 
     private $changed_files = 0;
 
-    protected function before() {
+    protected function before()
+    {
 
         $list = config('console.block.rules', []);
 
@@ -36,8 +37,9 @@ class Block extends Controller
         } else {
 
             foreach ($list as $namespace => $blocks) {
-                if (!isset($this->blocks[$namespace]))
+                if (!isset($this->blocks[$namespace])) {
                     $this->blocks[$namespace] = [];
+                }
 
                 foreach ($blocks as $index => $value) {
                     // Block can be defined either by simply name or by name => func_name
@@ -63,7 +65,8 @@ class Block extends Controller
     }
 
 
-    public function index($argv) {
+    public function index($argv)
+    {
 
         $this->force = $this->request->param('force', false);
 
@@ -81,7 +84,7 @@ class Block extends Controller
                     try {
                         $this->{$func}($block);
                         $this->info($block);
-                    } catch (Exception $e) {
+                    } catch (\Throwable $e) {
                         $this->error($e->getMessage());
                     }
                 }
@@ -103,12 +106,14 @@ class Block extends Controller
     }
 
 
-    protected function do_jquery($block) {
+    protected function do_jquery($block)
+    {
         $this->to_block('jquery/dist/jquery.min.js', $block, 'js');
     }
 
 
-    protected function do_jcrop($block) {
+    protected function do_jcrop($block)
+    {
         $this->to_block('Jcrop/js/Jcrop.min.js', $block, 'js');
         $this->to_block('Jcrop/css/Jcrop.min.css', $block, 'css', function ($text) use ($block) {
             return str_replace('url(', 'url(/assets/' . $block . '/', $text);
@@ -116,11 +121,13 @@ class Block extends Controller
         $this->to_assets('Jcrop/css/Jcrop.gif', $block);
     }
 
-    protected function do_dot($block) {
+    protected function do_dot($block)
+    {
         $this->to_block('doT/doT.min.js', $block, 'js');
     }
 
-    protected function do_tinymce($block) {
+    protected function do_tinymce($block)
+    {
         $this->to_block(
             [
                 'tinymce/tinymce.min.js',
@@ -173,7 +180,8 @@ class Block extends Controller
     }
 
 
-    protected function do_fotorama($block) {
+    protected function do_fotorama($block)
+    {
 
         $this->to_block('fotorama/fotorama.js', $block, 'js');
 
@@ -186,13 +194,15 @@ class Block extends Controller
     }
 
 
-    protected function do_magnific($block) {
+    protected function do_magnific($block)
+    {
         $this->to_block('magnific-popup/dist/jquery.magnific-popup.min.js', $block, 'js');
         $this->to_block('magnific-popup/dist/magnific-popup.css', $block, 'css');
     }
 
 
-    protected function do_fancybox($block) {
+    protected function do_fancybox($block)
+    {
 
         $this->to_block('fancyBox/source/jquery.fancybox.pack.js', $block, 'js');
 
@@ -212,14 +222,16 @@ class Block extends Controller
     }
 
 
-    protected function do_plupload($block) {
+    protected function do_plupload($block)
+    {
         $this->to_block('plupload/js/plupload.full.min.js', $block, 'js');
         $this->to_assets('plupload/js/Moxie.swf', $block);
         $this->to_assets('plupload/js/Moxie.xap', $block);
 
     }
 
-    protected function do_jquery_ui($block) {
+    protected function do_jquery_ui($block)
+    {
         $this->to_block([
             'jquery-ui/ui/data.js',
             'jquery-ui/ui/scroll-parent.js',
@@ -243,7 +255,8 @@ class Block extends Controller
         });
     }
 
-    protected function do_fontawesome($block) {
+    protected function do_fontawesome($block)
+    {
         $this->to_block('font-awesome/css/font-awesome.min.css', $block, 'css',
             function ($text) use ($block) {
                 return str_replace('../fonts', '/assets/' . $block, $text);
@@ -254,15 +267,17 @@ class Block extends Controller
     }
 
     /**
-     * @param $from
-     * @param $block_name
-     * @param $ext
+     * @param      $from
+     * @param      $block_name
+     * @param      $ext
      * @param null $callback
      * @throws Exception
      */
-    protected function to_block($from, $block_name, $ext, $callback = null) {
-        if (!\is_array($from))
+    protected function to_block($from, $block_name, $ext, $callback = null)
+    {
+        if (!\is_array($from)) {
             $from = array($from);
+        }
 
         $dir = $this->output_path . '/' . implode('/', explode('_', $block_name));
 
@@ -278,22 +293,25 @@ class Block extends Controller
 
         foreach ($from as $f) {
 
-            if (!file_exists($this->input_path . '/' . $f))
+            if (!file_exists($this->input_path . '/' . $f)) {
                 throw new Exception("Source for $block_name not found. Skip.");
+            }
 
-            if (!$exist OR filemtime($this->input_path . '/' . $f) > filemtime($to))
+            if (!$exist || filemtime($this->input_path . '/' . $f) > filemtime($to)) {
                 $same = false;
+            }
         }
 
-        if ($same AND !$this->force) {
+        if ($same && !$this->force) {
             return;
         }
 
         foreach ($from as $f) {
             $text = file_get_contents($this->input_path . '/' . $f);
 
-            if ($callback)
+            if ($callback) {
                 $text = $callback($text);
+            }
 
             $out .= $text . "\n";
         }
@@ -303,7 +321,8 @@ class Block extends Controller
         $this->changed_files++;
     }
 
-    protected function to_assets($from, $block_name, $callback = null) {
+    protected function to_assets($from, $block_name, $callback = null)
+    {
         if (!\is_array($from))
             $from = array($from);
 
@@ -319,20 +338,21 @@ class Block extends Controller
 
             if ($callback) {
                 $file = file_get_contents($this->input_path . '/' . $f);
-                file_put_contents($dir . '/' . $filename, \call_user_func($callback, $file));
+                file_put_contents($dir . '/' . $filename, $callback($file));
             } else {
                 copy($this->input_path . '/' . $f, $dir . '/' . $filename);
             }
         }
     }
 
-    protected function iterate_dir($from, $callback) {
+    protected function iterate_dir($from, $callback)
+    {
         $files = scandir($this->input_path . '/' . $from);
         array_map(function ($item) use ($callback) {
-            if ($item === '.' OR $item === '..')
+            if ($item === '.' || $item === '..')
                 return;
 
-            \call_user_func($callback, $item);
+            $callback($item);
         }, $files);
     }
 }

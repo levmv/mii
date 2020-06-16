@@ -3,14 +3,15 @@
 namespace mii\db;
 
 
-class ModelNotFoundException extends DatabaseException {
+class ModelNotFoundException extends DatabaseException
+{
 
     public string $model = '';
 
     public string $id = '';
 
 
-    public function set_model(string $model, string $id = '') : self
+    public function setModel(string $model, string $id = ''): self
     {
         $this->model = $model;
         $this->id = $id;

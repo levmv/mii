@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection ALL */
+declare(strict_types=1);
 
 namespace mii\db;
 
@@ -20,7 +21,7 @@ class Query extends SelectQuery
     protected array $_columns = [];
 
     // VALUES (...)
-    protected array $_values = [];
+    protected $_values = [];
 
     // SET ...
     protected array $_set = [];
@@ -93,7 +94,7 @@ class Query extends SelectQuery
      * @param Query $query Database_Query of SELECT type
      * @return  $this
      */
-    public function subselect(SelectQuery $query)
+    public function subselect(SelectQuery $query) : self
     {
         assert($query->_type === Database::SELECT, 'Only SELECT queries can be combined with INSERT queries');
 
@@ -108,13 +109,13 @@ class Query extends SelectQuery
      *
      * @return  string
      */
-    public function compile_insert(): string
+    public function compileInsert(): string
     {
         // Start an insertion query
-        $query = 'INSERT INTO ' . $this->get_table();
+        $query = 'INSERT INTO ' . $this->getTable();
 
         // Add the column names
-        $query .= ' (' . implode(', ', array_map([$this->db, 'quote_column'], $this->_columns)) . ') ';
+        $query .= ' (' . implode(', ', array_map([$this->db, 'quoteColumn'], $this->_columns)) . ') ';
 
         if (\is_array($this->_values)) {
 
@@ -141,25 +142,23 @@ class Query extends SelectQuery
     /**
      * Compile the SQL query and return it.
      */
-    public function compile_update(): string
+    public function compileUpdate(): string
     {
         // Start an update query
-        $query = 'UPDATE ' . $this->get_table();
+        $query = 'UPDATE ' . $this->getTable();
 
         if (!empty($this->_joins)) {
             // Add tables to join
-            $query .= ' ' . $this->_compile_join();
+            $query .= ' ' . $this->_compileJoin();
         }
 
         // Add the columns to update
 
         $set = [];
-        foreach ($this->_set as $group) {
-            // Split the set
-            list ($column, $value) = $group;
+        foreach ($this->_set as [$column, $value]) {
 
             // Quote the column name
-            $column = $this->db->quote_column($column);
+            $column = $this->db->quoteColumn($column);
 
             $value = $this->db->quote($value);
 
@@ -171,12 +170,12 @@ class Query extends SelectQuery
 
         if (!empty($this->_where)) {
             // Add selection conditions
-            $query .= ' WHERE ' . $this->_compile_conditions($this->_where);
+            $query .= ' WHERE ' . $this->_compileConditions($this->_where);
         }
 
         if (!empty($this->_order_by)) {
             // Add sorting
-            $query .= $this->_compile_order_by();
+            $query .= $this->_compileOrderBy();
         }
 
         if ($this->_limit !== null) {
@@ -187,20 +186,20 @@ class Query extends SelectQuery
         return $query;
     }
 
-    public function compile_delete()
+    public function compileDelete()
     {
 
         // Start a deletion query
-        $query = 'DELETE FROM ' . $this->get_table();
+        $query = 'DELETE FROM ' . $this->getTable();
 
         if (!empty($this->_where)) {
             // Add deletion conditions
-            $query .= ' WHERE ' . $this->_compile_conditions($this->_where);
+            $query .= ' WHERE ' . $this->_compileConditions($this->_where);
         }
 
         if (!empty($this->_order_by)) {
             // Add sorting
-            $query .= $this->_compile_order_by();
+            $query .= $this->_compileOrderBy();
         }
 
         if ($this->_limit !== null) {
@@ -210,7 +209,6 @@ class Query extends SelectQuery
 
         return $query;
     }
-
 
 
     /**
@@ -227,16 +225,16 @@ class Query extends SelectQuery
         // Compile the SQL query
         switch ($this->_type) {
             case Database::SELECT:
-                $sql = $this->compile_select();
+                $sql = $this->compileSelect();
                 break;
             case Database::INSERT:
-                $sql = $this->compile_insert();
+                $sql = $this->compileInsert();
                 break;
             case Database::UPDATE:
-                $sql = $this->compile_update();
+                $sql = $this->compileUpdate();
                 break;
             case Database::DELETE:
-                $sql = $this->compile_delete();
+                $sql = $this->compileDelete();
                 break;
         }
 
@@ -301,8 +299,8 @@ class Query extends SelectQuery
     }
 
 
-    private function get_table() : string
+    private function getTable(): string
     {
-        return $this->db->quote_table($this->_table ?? $this->_model_class::table());
+        return $this->db->quoteTable($this->_table ?? $this->_model_class::table());
     }
 }

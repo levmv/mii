@@ -35,12 +35,14 @@ class UploadedFile
     public $error;
 
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->name;
     }
 
 
-    public function __construct($config) {
+    public function __construct($config)
+    {
         foreach ($config as $key => $value)
             $this->{$key} = $value;
     }
@@ -50,37 +52,44 @@ class UploadedFile
      * Note that this method uses php's move_uploaded_file() method. If the target file `$file`
      * already exists, it will be overwritten.
      * @param string $file the file path used to save the uploaded file
-     * @param bool $delete_tmp whether to delete the temporary file after saving.
+     * @param bool   $delete_tmp whether to delete the temporary file after saving.
      * If true, you will not be able to save the uploaded file again in the current request.
      * @return bool true whether the file is saved successfully
      */
-    public function save_as($file, $delete_tmp = true): bool {
+    public function saveAs($file, $delete_tmp = true): bool
+    {
         $file = \Mii::resolve($file);
 
-        if ($this->error == UPLOAD_ERR_OK) {
+        if ($this->error === \UPLOAD_ERR_OK) {
             if ($delete_tmp) {
                 return move_uploaded_file($this->tmp_name, $file);
-            } elseif (is_uploaded_file($this->tmp_name)) {
+            }
+
+            if (is_uploaded_file($this->tmp_name)) {
                 return copy($this->tmp_name, $file);
             }
         }
         return false;
     }
 
-    public function basename(): string {
+    public function basename(): string
+    {
         return basename($this->name);
     }
 
-    public function has_error(): bool {
+    public function hasError(): bool
+    {
         return $this->error !== UPLOAD_ERR_OK;
     }
 
-    public function is_uploaded_file(): bool {
+    public function isUploadedFile(): bool
+    {
         return is_uploaded_file($this->tmp_name);
     }
 
 
-    public function extension(): string {
+    public function extension(): string
+    {
         return strtolower(pathinfo($this->name, PATHINFO_EXTENSION));
     }
 

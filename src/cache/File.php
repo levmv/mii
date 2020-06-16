@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\cache;
 
@@ -13,12 +13,13 @@ class File extends Cache
     public $chmode = 0775;
 
 
-    public function init(array $config = []): void {
+    public function init(array $config = []): void
+    {
 
         parent::init($config);
 
         $this->path = \Mii::resolve($this->path);
-        if(!is_dir($this->path)) {
+        if (!is_dir($this->path)) {
             FS::mkdir($this->path, 0777);
         }
     }
@@ -26,13 +27,14 @@ class File extends Cache
     /**
      * Retrieve a cached value entry by id.
      *
-     * @param   string $id id of cache to entry
-     * @param   string $default default value to return if cache miss
+     * @param string $id id of cache to entry
+     * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    public function get($id, $default = NULL) {
+    public function get($id, $default = NULL)
+    {
 
-        $filename = $this->cache_file($id);
+        $filename = $this->cacheFile($id);
 
         if (@\file_exists($filename) && @\filemtime($filename) > time()) {
             $fp = @\fopen($filename, 'r');
@@ -52,17 +54,18 @@ class File extends Cache
     /**
      * Set a value to cache with id and lifetime
      *
-     * @param   string $id id of cache entry
-     * @param   string $data data to set to cache
-     * @param   integer $lifetime lifetime in seconds
+     * @param string  $id id of cache entry
+     * @param string  $data data to set to cache
+     * @param integer $lifetime lifetime in seconds
      * @return  boolean
      */
-    public function set($id, $data, $lifetime = NULL) {
+    public function set($id, $data, $lifetime = NULL)
+    {
         if ($lifetime === NULL) {
             $lifetime = $this->default_expire;
         }
 
-        $filename = $this->cache_file($id);
+        $filename = $this->cacheFile($id);
 
         if ($this->directory_level > 0) {
             FS::mkdir(\dirname($filename), $this->chmode);
@@ -72,7 +75,7 @@ class File extends Cache
                 \chmod($filename, $this->chmode);
             }
             if ($lifetime <= 0) {
-                $lifetime = 60*60*24*7;
+                $lifetime = 60 * 60 * 24 * 7;
             }
             return touch($filename, $lifetime + time());
         }
@@ -86,28 +89,31 @@ class File extends Cache
     /**
      * Delete a cache entry based on id
      *
-     * @param   string $id id to remove from cache
+     * @param string $id id to remove from cache
      * @return  boolean
      */
-    public function delete($id) {
-        return unlink($this->cache_file($id));
+    public function delete($id)
+    {
+        return unlink($this->cacheFile($id));
     }
 
     /**
      * Delete all cache entries.
      *
      */
-    public function delete_all(): bool {
-        return $this->recursive_remove($this->path);
+    public function deleteAll(): bool
+    {
+        return $this->recursiveRemove($this->path);
     }
 
 
-    private function recursive_remove($path) {
+    protected function recursiveRemove($path): bool
+    {
         $result = true;
         try {
             foreach ((new \DirectoryIterator($path)) as $fi) {
                 if ($fi->isDir() && !$fi->isDot()) {
-                    $result = $this->recursive_remove($fi->getPathname());
+                    $result = $this->recursiveRemove($fi->getPathname());
                     rmdir($fi->getPathname());
                 }
 
@@ -129,12 +135,13 @@ class File extends Cache
      * Useful for shared counters and other persistent integer based
      * tracking.
      *
-     * @param   string $id of cache entry to increment
-     * @param   int $step value to increment by
+     * @param string $id of cache entry to increment
+     * @param int    $step value to increment by
      * @return  integer
      * @return  boolean
      */
-    public function increment($id, $step = 1) {
+    public function increment($id, $step = 1)
+    {
 
     }
 
@@ -143,12 +150,13 @@ class File extends Cache
      * Useful for shared counters and other persistent integer based
      * tracking.
      *
-     * @param   string $id of cache entry to decrement
-     * @param   int $step value to decrement by
+     * @param string $id of cache entry to decrement
+     * @param int    $step value to decrement by
      * @return  integer
      * @return  boolean
      */
-    public function decrement($id, $step = 1) {
+    public function decrement($id, $step = 1)
+    {
 
     }
 
@@ -158,14 +166,14 @@ class File extends Cache
      * @param string $key cache key
      * @return string the cache file path
      */
-    protected function cache_file($key)
+    protected function cacheFile(string $key): string
     {
-        $key = sha1($key);
+        $key = \sha1($key);
 
         if ($this->directory_level > 0) {
             $base = $this->path;
             for ($i = 0; $i < $this->directory_level; ++$i) {
-                if (($prefix = substr($key, $i + $i, 2)) !== false) {
+                if (($prefix = \substr($key, $i + $i, 2)) !== false) {
                     $base .= DIRECTORY_SEPARATOR . $prefix;
                 }
             }

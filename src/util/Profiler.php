@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\util;
 
@@ -63,8 +63,9 @@ class Profiler
      *     Profiler::stop($token);
      *
      * @param string $token
+     * @return bool
      */
-    public static function stop($token)
+    public static function stop($token): bool
     {
         // Stop the benchmark
         self::$_marks[$token]['stop_time'] = \hrtime(true) / 1e9;
@@ -80,6 +81,7 @@ class Profiler
      *     Profiler::delete($token);
      *
      * @param string $token
+     * @return bool
      */
     public static function delete($token): bool
     {
@@ -132,7 +134,7 @@ class Profiler
 
         foreach ($tokens as $token) {
             // Get the total time and memory for this benchmark
-            list($time, $memory) = self::total($token);
+            [$time, $memory] = self::total($token);
 
             if ($max['time'] === NULL or $time > $max['time']) {
                 // Set the maximum time
@@ -185,7 +187,7 @@ class Profiler
      * @param mixed $groups single group name string, or array with group names; all groups by default
      * @return  array   min, max, average, total
      */
-    public static function group_stats($groups = NULL): array
+    public static function groupStats($groups = NULL): array
     {
         // Which groups do we need to calculate stats for?
         $groups = ($groups === NULL)
@@ -359,7 +361,7 @@ class Profiler
             'memory' => $stats['total']['memory'] / $stats['count']);
 
         // Cache the new stats
-        if(Mii::$app->has('cache'))
+        if (Mii::$app->has('cache'))
             Mii::$app->cache->set('profiler_app_stats', $stats, 3600 * 12);
 
         // Set the current application execution time and memory
@@ -374,7 +376,7 @@ class Profiler
 
     public static function show()
     {
-        include realpath(__DIR__ . '/../util/Profiler/view.php');
+        include dirname(__DIR__) . '/util/Profiler/view.php';
     }
 
 }

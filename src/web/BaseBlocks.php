@@ -42,11 +42,11 @@ abstract class BaseBlocks extends Component
             ];
         }
 
-        $this->load_set(\key($this->sets));
+        $this->loadSet(\key($this->sets));
     }
 
 
-    public function load_set(string $setname): void
+    public function loadSet(string $setname): void
     {
         assert(isset($this->sets[$setname]), "Unknown blocks set name: $setname");
 
@@ -58,11 +58,13 @@ abstract class BaseBlocks extends Component
             'base_path' => null
         ], $this->sets[$setname]);
 
-        foreach ($set as $key => $value)
+        foreach ($set as $key => $value) {
             $this->$key = $value;
+        }
 
-        for ($i = 0, $imx = \count($this->libraries); $i < $imx; $i++)
+        for ($i = 0, $imx = \count($this->libraries); $i < $imx; $i++) {
             $this->libraries[$i] = Mii::resolve($this->libraries[$i]);
+        }
     }
 
     /**
@@ -81,7 +83,7 @@ abstract class BaseBlocks extends Component
     }
 
 
-    public function get_block_php_file(string $name): ?string
+    public function getBlockPhpFile(string $name): ?string
     {
         $path = \implode('/', \explode('_', $name));
         $block_path = "/$path/$name.php";
@@ -97,8 +99,9 @@ abstract class BaseBlocks extends Component
 
     public function css(): string
     {
-        if (!$this->_rendered)
+        if (!$this->_rendered) {
             $this->render();
+        }
 
         return implode("\n", $this->_css);
     }
@@ -106,14 +109,16 @@ abstract class BaseBlocks extends Component
 
     public function js(int $position = null): string
     {
-        if (!$this->_rendered)
+        if (!$this->_rendered) {
             $this->render();
+        }
 
         if ($position === null) {
             $out = [];
             foreach ($this->_js as $js) {
-                if (!empty($js))
+                if (!empty($js)) {
                     $out[] = \implode("\n", $js);
+                }
             }
             return \implode("\n", $out);
         }

@@ -76,7 +76,8 @@ class Pagination
      *
      * @return  void
      */
-    public function __construct(array $config = []) {
+    public function __construct(array $config = [])
+    {
         foreach ($config as $key => $val)
             $this->$key = $val;
 
@@ -91,10 +92,11 @@ class Pagination
      * Loads configuration settings into the object and (re)calculates pagination if needed.
      * Allows you to update config settings after a Pagination object has been constructed.
      *
-     * @param   array $config configuration
+     * @param array $config configuration
      * @return  object  Pagination
      */
-    public function calculate(array $config = []) {
+    public function calculate(array $config = [])
+    {
         foreach ($config as $key => $val)
             $this->$key = $val;
 
@@ -137,15 +139,16 @@ class Pagination
     /**
      * Generates the full URL for a certain page.
      *
-     * @param   integer  page number
+     * @param integer  page number
      * @return  string   page URL
      */
-    public function url($page = 1) {
+    public function url($page = 1)
+    {
         // Clean the page number
         $page = max(1, (int)$page);
 
         // No page number in URLs to first page
-        if ($page === 1 AND !$this->first_page_in_url) {
+        if ($page === 1 && !$this->first_page_in_url) {
             $page = NULL;
         }
 
@@ -168,22 +171,24 @@ class Pagination
     /**
      * Checks whether the given page number exists.
      *
-     * @param   integer $page page number
+     * @param integer $page page number
      * @return  boolean
      */
-    public function valid_page(int $page): bool {
-        return $page > 0 AND $page <= $this->total_pages;
+    public function valid_page(int $page): bool
+    {
+        return $page > 0 and $page <= $this->total_pages;
     }
 
     /**
      * Renders the pagination links.
      *
-     * @param   mixed   string of the block name to use, or a block object
+     * @param mixed   string of the block name to use, or a block object
      * @return  string  pagination output (HTML)
      */
-    public function render($block = null) {
+    public function render($block = null)
+    {
         // Automatically hide pagination whenever it is superfluous
-        if ($this->auto_hide === true AND $this->total_pages <= 1)
+        if ($this->auto_hide === true && $this->total_pages <= 1)
             return '';
 
         if ($block === null) {
@@ -200,35 +205,40 @@ class Pagination
         return $block->set(get_object_vars($this))->set('page', $this)->render();
     }
 
-    public function get_offset() {
+    public function getOffset()
+    {
         return $this->offset;
     }
 
-    public function get_limit() {
+    public function getLimit()
+    {
         return $this->items_per_page;
     }
 
-    public function next_page() {
+    public function nextPage()
+    {
         return $this->next_page;
     }
 
-    public function prev_page() {
+    public function prevPage()
+    {
         return $this->previous_page;
     }
 
-    public function links(): array {
+    public function links(): array
+    {
         $links = [];
-        if ($this->next_page()) {
+        if ($this->nextPage()) {
             $links[] = [
                 'rel' => 'next',
-                'href' => $this->url($this->next_page())
+                'href' => $this->url($this->nextPage())
             ];
         }
 
-        if ($this->prev_page()) {
+        if ($this->prevPage()) {
             $links[] = [
                 'rel' => 'prev',
-                'href' => $this->url($this->prev_page())
+                'href' => $this->url($this->prevPage())
             ];
         }
         return [];
@@ -238,10 +248,11 @@ class Pagination
     /**
      * URL::query() replacement for Pagination use only
      *
-     * @param    array    Parameters to override
+     * @param array    Parameters to override
      * @return    string
      */
-    public function query(array $params = NULL) {
+    public function query(array $params = NULL)
+    {
         if ($params === NULL) {
             // Use only the current parameters
             $params = $this->request->get();
@@ -267,7 +278,8 @@ class Pagination
      *
      * @return  string  pagination output (HTML)
      */
-    public function __toString() {
+    public function __toString()
+    {
         return $this->render();
     }
 

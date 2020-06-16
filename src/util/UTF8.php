@@ -13,7 +13,8 @@ class UTF8
      * @param string $replace
      * @return string
      */
-    public static function strip_4b(string $str, string $replace = '') : string {
+    public static function strip4b(string $str, string $replace = ''): string
+    {
         return preg_replace('/[\xF0-\xF7].../s', $replace, $str);
     }
 
@@ -23,10 +24,11 @@ class UTF8
      *
      *     $ascii = UTF8::is_ascii($str);
      *
-     * @param   mixed $str string or array of strings to check
+     * @param mixed $str string or array of strings to check
      * @return  boolean
      */
-    public static function is_ascii(string $str) : bool {
+    public static function isAscii(string $str): bool
+    {
         return !preg_match('/[^\x00-\x7F]/S', $str);
     }
 
@@ -35,10 +37,11 @@ class UTF8
      *
      *     $str = UTF8::strip_ascii_ctrl($str);
      *
-     * @param   string $str string to clean
+     * @param string $str string to clean
      * @return  string
      */
-    public static function strip_ascii_ctrl(string $str) {
+    public static function stripAsciiCtrl(string $str)
+    {
         return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $str);
     }
 
@@ -47,10 +50,11 @@ class UTF8
      *
      *     $str = UTF8::strip_non_ascii($str);
      *
-     * @param   string $str string to clean
+     * @param string $str string to clean
      * @return  string
      */
-    public static function strip_non_ascii(string $str) {
+    public static function stripNonAscii(string $str)
+    {
         return preg_replace('/[^\x00-\x7F]+/S', '', $str);
     }
 
@@ -59,12 +63,13 @@ class UTF8
      *
      *     $ascii = UTF8::transliterate_to_ascii($utf8);
      *
-     * @author  Andreas Gohr <andi@splitbrain.org>
-     * @param   string $str string to transliterate
-     * @param   integer $case -1 lowercase only, +1 uppercase only, 0 both cases
+     * @param string  $str string to transliterate
+     * @param integer $case -1 lowercase only, +1 uppercase only, 0 both cases
      * @return  string
+     * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function transliterate_to_ascii($str, $case = 0) {
+    public static function transliterateToAscii($str, $case = 0)
+    {
         static $utf8_lower_accents = NULL;
         static $utf8_upper_accents = NULL;
 
@@ -135,12 +140,13 @@ class UTF8
      *
      *     $str = UTF8::ucfirst($str);
      *
-     * @author  Harry Fuecks <hfuecks@gmail.com>
-     * @param   string $str mixed case string
+     * @param string $str mixed case string
      * @return  string
+     * @author  Harry Fuecks <hfuecks@gmail.com>
      */
-    public static function ucfirst($str) {
-        if (UTF8::is_ascii($str))
+    public static function ucfirst($str)
+    {
+        if (self::isAscii($str))
             return ucfirst($str);
 
         preg_match('/^(.?)(.*)$/us', $str, $matches);
@@ -154,16 +160,17 @@ class UTF8
      *
      *     $str = UTF8::trim($str);
      *
-     * @author  Andreas Gohr <andi@splitbrain.org>
-     * @param   string $str input string
-     * @param   string $charlist string of characters to remove
+     * @param string $str input string
+     * @param string $charlist string of characters to remove
      * @return  string
+     * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function trim($str, $charlist = NULL) {
+    public static function trim($str, $charlist = NULL)
+    {
         if ($charlist === NULL)
             return trim($str);
 
-        return UTF8::ltrim(UTF8::rtrim($str, $charlist), $charlist);
+        return self::ltrim(self::rtrim($str, $charlist), $charlist);
     }
 
     /**
@@ -172,16 +179,17 @@ class UTF8
      *
      *     $str = UTF8::ltrim($str);
      *
-     * @author  Andreas Gohr <andi@splitbrain.org>
-     * @param   string $str input string
-     * @param   string $charlist string of characters to remove
+     * @param string $str input string
+     * @param string $charlist string of characters to remove
      * @return  string
+     * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function ltrim($str, $charlist = NULL) {
+    public static function ltrim($str, $charlist = NULL)
+    {
         if ($charlist === NULL)
             return ltrim($str);
 
-        if (UTF8::is_ascii($charlist))
+        if (self::isAscii($charlist))
             return ltrim($str, $charlist);
 
         $charlist = preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
@@ -195,16 +203,17 @@ class UTF8
      *
      *     $str = UTF8::rtrim($str);
      *
-     * @author  Andreas Gohr <andi@splitbrain.org>
-     * @param   string $str input string
-     * @param   string $charlist string of characters to remove
+     * @param string $str input string
+     * @param string $charlist string of characters to remove
      * @return  string
+     * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function rtrim($str, $charlist = NULL) {
+    public static function rtrim($str, $charlist = NULL)
+    {
         if ($charlist === NULL)
             return rtrim($str);
 
-        if (UTF8::is_ascii($charlist))
+        if (self::isAscii($charlist))
             return rtrim($str, $charlist);
 
         $charlist = preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
@@ -213,7 +222,8 @@ class UTF8
     }
 
 
-    public static function ru_translit($str) {
+    public static function ruTranslit($str)
+    {
         static $trans_table = null;
 
         if ($trans_table === null) {

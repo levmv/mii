@@ -19,32 +19,36 @@ class Controller
     public Response $response;
 
 
-    protected function before() {
+    protected function before()
+    {
 
     }
 
-    protected function after($content = null) {
+    protected function after($content = null)
+    {
         $this->response->content($content);
     }
 
-    public function execute(string $action, $params) {
-
+    public function execute(string $action, $params): void
+    {
         if (!\method_exists($this, $action)) {
-            throw new InvalidRouteException('Method "'.get_class($this)."::$action\" does not exists");
+            throw new InvalidRouteException('Method "' . get_class($this) . "::$action\" does not exists");
         }
 
         $method = new \ReflectionMethod($this, $action);
 
-        if (!$method->isPublic())
+        if (!$method->isPublic()) {
             throw new BadRequestHttpException("Cannot access not public method");
+        }
 
         $this->before();
 
-        $this->after($this->execute_action($method, $action, $params));
+        $this->after($this->executeAction($method, $action, $params));
     }
 
 
-    protected function execute_action($method, $action, $params) {
+    protected function executeAction($method, $action, $params)
+    {
         $args = [];
         $missing = [];
         foreach ($method->getParameters() as $param) {
@@ -53,10 +57,10 @@ class Controller
                 $is_valid = true;
 
                 if ($param->isArray()) {
-                    $params[$name] = (array) $params[$name];
+                    $params[$name] = (array)$params[$name];
                 } elseif (\is_array($params[$name])) {
                     $is_valid = false;
-                } elseif(
+                } elseif (
                     ($type = $param->getType()) !== null &&
                     $type->isBuiltin() &&
                     ($params[$name] !== null || !$type->allowsNull())
@@ -77,7 +81,7 @@ class Controller
                         $is_valid = false;
                     }
                 }
-                if(!$is_valid) {
+                if (!$is_valid) {
                     throw new BadRequestHttpException("Invalid data received for parameter \"$name\".");
                 }
                 $args[] = $params[$name];

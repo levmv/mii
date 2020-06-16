@@ -9,11 +9,12 @@ class ErrorHandler extends \mii\core\ErrorHandler
 {
     public int $memory_reserve_size = 262144;
 
-    public function render($exception) {
+    public function render($exception)
+    {
 
         if (config('debug')) {
             if ($exception instanceof ErrorException) {
-                $message = $this->formatMessage($exception->get_name());
+                $message = $this->formatMessage($exception->getName());
             } else {
                 $message = $this->formatMessage('Exception');
             }
@@ -37,15 +38,16 @@ class ErrorHandler extends \mii\core\ErrorHandler
     /**
      * Colorizes a message for console output.
      * @param string $message the message to colorize.
-     * @param array $format the message format.
+     * @param array  $format the message format.
      * @return string the colorized message.
      * @see Console::ansiFormat() for details on how to specify the message format.
      */
-    protected function formatMessage($message, $format = [Console::FG_RED, Console::BOLD]) {
+    protected function formatMessage($message, $format = [Console::FG_RED, Console::BOLD])
+    {
         $stream = (PHP_SAPI === 'cli') ? \STDERR : \STDOUT;
 
-        if (Console::stream_supports_ansi_colors($stream)) {
-            $message = Console::ansi_format($message, $format);
+        if (Console::streamSupportsAnsiColors($stream)) {
+            $message = Console::ansiFormat($message, $format);
         }
 
         return $message;

@@ -83,7 +83,7 @@ class SelectQuery
     public function __construct($classname = null)
     {
         if ($classname) {
-            $this->as_model($classname);
+            $this->asModel($classname);
         }
     }
 
@@ -98,7 +98,7 @@ class SelectQuery
     }
 
 
-    public function as_array(): self
+    public function asArray(): self
     {
         $this->_as_array = true;
 
@@ -112,7 +112,7 @@ class SelectQuery
      * @param array  $params
      * @return  $this
      */
-    public function as_model(string $class): self
+    public function asModel(string $class): self
     {
         $this->_model_class = $class;
         $this->_as_array = false;
@@ -144,7 +144,7 @@ class SelectQuery
         return $this;
     }
 
-    public function for_update(bool $enable = true): self
+    public function forUpdate(bool $enable = true): self
     {
         $this->_for_update = $enable;
 
@@ -168,7 +168,7 @@ class SelectQuery
      * @param mixed ...$columns
      * @return $this
      */
-    public function select_also(...$columns): self
+    public function selectAlso(...$columns): self
     {
         $this->_select = \array_merge($this->_select, $columns);
         return $this;
@@ -252,7 +252,7 @@ class SelectQuery
      * @param mixed $columns column name or object
      * @return  $this
      */
-    public function group_by(...$columns): self
+    public function groupBy(...$columns): self
     {
         $this->_group_by = array_merge($this->_group_by, $columns);
 
@@ -269,7 +269,7 @@ class SelectQuery
      */
     public function having($column = null, $op = null, $value = null): self
     {
-        return $this->and_having($column, $op, $value);
+        return $this->andHaving($column, $op, $value);
     }
 
     /**
@@ -280,7 +280,7 @@ class SelectQuery
      * @param mixed  $value column value
      * @return  $this
      */
-    public function and_having($column, $op, $value = null): self
+    public function andHaving($column, $op, $value = null): self
     {
         if ($column === null) {
             $this->_having[] = ['AND' => '('];
@@ -304,7 +304,7 @@ class SelectQuery
      * @param mixed  $value column value
      * @return  $this
      */
-    public function or_having($column = null, $op = null, $value = null): self
+    public function orHaving($column = null, $op = null, $value = null): self
     {
         if ($column === null) {
             $this->_having[] = ['OR' => '('];
@@ -343,8 +343,8 @@ class SelectQuery
         ]);
 
         $this
-            ->offset($this->_pagination->get_offset())
-            ->limit($this->_pagination->get_limit());
+            ->offset($this->_pagination->getOffset())
+            ->limit($this->_pagination->getLimit());
 
         return $this;
     }
@@ -362,7 +362,7 @@ class SelectQuery
      */
     public function where($column = null, $op = null, $value = null): self
     {
-        return $this->and_where($column, $op, $value);
+        return $this->andWhere($column, $op, $value);
     }
 
     /**
@@ -375,7 +375,7 @@ class SelectQuery
      */
     public function filter($column, $op, $value): self
     {
-        return $this->and_filter($column, $op, $value);
+        return $this->andFilter($column, $op, $value);
     }
 
     /**
@@ -386,7 +386,7 @@ class SelectQuery
      * @param mixed  $value column value
      * @return  $this
      */
-    public function and_where($column, $op = null, $value = null): self
+    public function andWhere($column, $op = null, $value = null): self
     {
 
         if ($column === null) {
@@ -412,12 +412,13 @@ class SelectQuery
      * @param mixed  $value column value
      * @return  $this
      */
-    public function and_filter($column, $op, $value): self
+    public function andFilter($column, $op, $value): self
     {
-        if ($value === null || $value === "" || !Rules::not_empty((\is_string($value) ? trim($value) : $value)))
+        if ($value === null || $value === "" || !Rules::notEmpty((\is_string($value) ? trim($value) : $value))) {
             return $this;
+        }
 
-        return $this->and_where($column, $op, $value);
+        return $this->andWhere($column, $op, $value);
     }
 
 
@@ -429,7 +430,7 @@ class SelectQuery
      * @param mixed  $value column value
      * @return  $this
      */
-    public function or_where($column = null, $op = null, $value = null): self
+    public function orWhere($column = null, $op = null, $value = null): self
     {
         if ($column === null) {
 
@@ -455,7 +456,7 @@ class SelectQuery
             if ($check_for_empty !== false) {
                 $group = \end($this->_where);
 
-                if ($group and \reset($group) === '(') {
+                if ($group && \reset($group) === '(') {
                     \array_pop($this->_where);
                     return $this;
                 }
@@ -468,7 +469,7 @@ class SelectQuery
             if ($check_for_empty !== false) {
                 $group = \end($this->_having);
 
-                if ($group and \reset($group) === '(') {
+                if ($group && \reset($group) === '(') {
                     \array_pop($this->_having);
                     return $this;
                 }
@@ -489,7 +490,7 @@ class SelectQuery
      * @param string $direction direction of sorting
      * @return  $this
      */
-    public function order_by($column, $direction = null): self
+    public function orderBy($column, $direction = null): self
     {
         if (\is_array($column) && $direction === null) {
             $this->_order_by = $column;
@@ -518,27 +519,11 @@ class SelectQuery
 
 
     /**
-     * Use a sub-query to for the inserted values.
-     *
-     * @param SelectQuery $query Database_Query of SELECT type
-     * @return  $this
-     */
-    public function subselect(SelectQuery $query)
-    {
-        assert($query->_type === Database::SELECT, 'Only SELECT queries can be combined with INSERT queries');
-
-        $this->_values = $query;
-
-        return $this;
-    }
-
-
-    /**
      * Compile the SQL query and return it.
      *
      * @return  string
      */
-    public function compile_select(): string
+    public function compileSelect(): string
     {
         $query = ($this->_distinct === true)
             ? 'SELECT DISTINCT '
@@ -548,12 +533,12 @@ class SelectQuery
             assert(!empty($this->_model_class), "You must specify 'from' table or set model class");
             $table = $this->_model_class::table();
             $table_aliased = false;
-            $table_q = $this->db->quote_table($table);
+            $table_q = $this->db->quoteTable($table);
         } else {
             // Save first (by order) table for later use, flag if it aliased and quoted name (not alias)
             $table = $this->_from[0];
             $table_aliased = \is_array($table);
-            $table_q = $this->db->quote_table($table_aliased ? $table[1] : $table);
+            $table_q = $this->db->quoteTable($table_aliased ? $table[1] : $table);
         }
 
         if ($this->_select_any === true) {
@@ -562,7 +547,7 @@ class SelectQuery
             $columns = [];
 
             foreach ($this->_select as $column) {
-                $columns[] = $this->db->quote_column($column, $table_q);
+                $columns[] = $this->db->quoteColumn($column, $table_q);
             }
             assert(count($columns) === count(array_unique($columns)), 'Columns in select query must be unique');
             $query .= \implode(', ', $columns);
@@ -572,25 +557,26 @@ class SelectQuery
         if (\count($this->_from) <= 1) {
             // Why make extra function call if it not neccesary?
             $query .= $table_aliased
-                ? ' FROM ' . $this->db->quote_table($table)
+                ? ' FROM ' . $this->db->quoteTable($table)
                 : " FROM $table_q";
 
         } else if (!empty($this->_from)) {
             assert(!empty($this->_from), 'From must not be empty');
-            $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quote_table'], $this->_from));
+            $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quoteTable'], $this->_from));
         }
 
         if (!empty($this->_joins)) {
             // Add tables to join
-            $query .= ' ' . $this->_compile_join();
+            $query .= ' ' . $this->_compileJoin();
         }
 
         if (!empty($this->_where)) {
             // Add selection conditions
-            if(\count($this->_where) === 1)
-                $query .= ' WHERE '. $this->_compile_short_conditions($this->_where);
-            else
-                $query .= ' WHERE ' . $this->_compile_conditions($this->_where);
+            if (\count($this->_where) === 1) {
+                $query .= ' WHERE ' . $this->_compileShortConditions($this->_where);
+            } else {
+                $query .= ' WHERE ' . $this->_compileConditions($this->_where);
+            }
         }
 
         if (!empty($this->_group_by)) {
@@ -599,7 +585,7 @@ class SelectQuery
             $group = [];
 
             foreach ($this->_group_by as $column) {
-                $group[] = $this->db->quote_identifier($column);
+                $group[] = $this->db->quoteIdentifier($column);
             }
 
             $query .= ' GROUP BY ' . \implode(', ', $group);
@@ -607,12 +593,12 @@ class SelectQuery
 
         if (!empty($this->_having)) {
             // Add filtering conditions
-            $query .= ' HAVING ' . $this->_compile_conditions($this->_having);
+            $query .= ' HAVING ' . $this->_compileConditions($this->_having);
         }
 
         if (!empty($this->_order_by)) {
             // Add sorting
-            $query .= $this->_compile_order_by();
+            $query .= $this->_compileOrderBy();
         }
 
         if ($this->_limit !== null) {
@@ -638,7 +624,7 @@ class SelectQuery
      *
      * @return  string
      */
-    protected function _compile_join(): string
+    protected function _compileJoin(): string
     {
         $statements = [];
 
@@ -651,11 +637,11 @@ class SelectQuery
             }
 
             // Quote the table name that is being joined
-            $sql .= ' ' . $this->db->quote_table($join['table']);
+            $sql .= ' ' . $this->db->quoteTable($join['table']);
 
             if (!empty($join['using'])) {
                 // Quote and concat the columns
-                $sql .= ' USING (' . \implode(', ', \array_map(array($this->db, 'quote_column'), $join['using'])) . ')';
+                $sql .= ' USING (' . \implode(', ', \array_map(array($this->db, 'quoteColumn'), $join['using'])) . ')';
             } else {
                 $conditions = array();
                 foreach ($join['on'] as [$c1, $op, $c2]) {
@@ -666,7 +652,7 @@ class SelectQuery
                     }
 
                     // Quote each of the columns used for the condition
-                    $conditions[] = $this->db->quote_column($c1) . $op . ' ' . $this->db->quote_column($c2);
+                    $conditions[] = $this->db->quoteColumn($c1) . $op . ' ' . $this->db->quoteColumn($c2);
                 }
 
                 // Concat the conditions "... AND ..."
@@ -687,7 +673,7 @@ class SelectQuery
      * @param array $conditions condition statements
      * @return  string
      */
-    protected function _compile_conditions(array $conditions): string
+    protected function _compileConditions(array $conditions): string
     {
         $last_condition = null;
 
@@ -698,7 +684,7 @@ class SelectQuery
             foreach ($group as $logic => $condition) {
 
                 if ($condition === '(') {
-                    if (!empty($sql) and $last_condition !== '(') {
+                    if (!empty($sql) && $last_condition !== '(') {
                         // Include logic operator
                         $sql .= " $logic ";
                     }
@@ -707,7 +693,7 @@ class SelectQuery
                 } elseif ($condition === ')') {
                     $sql .= ')';
                 } else {
-                    if (!empty($sql) and $last_condition !== '(') {
+                    if (!empty($sql) && $last_condition !== '(') {
                         // Add the logic operator
                         $sql .= " $logic ";
                     }
@@ -725,13 +711,13 @@ class SelectQuery
                         }
                     }
 
-                    if ($op === 'IN' and \is_array($value)) {
+                    if ($op === 'IN' && \is_array($value)) {
                         $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
 
-                    } elseif ($op === 'NOT IN' and \is_array($value)) {
+                    } elseif ($op === 'NOT IN' && \is_array($value)) {
                         $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
 
-                    } elseif ($op === 'BETWEEN' and \is_array($value)) {
+                    } elseif ($op === 'BETWEEN' && \is_array($value)) {
                         // BETWEEN always has exactly two arguments
                         [$min, $max] = $value;
 
@@ -748,7 +734,7 @@ class SelectQuery
                         $value = \is_int($value) ? $value : $this->db->quote($value);
                     }
 
-                    $column = $this->db->quote_column($column);
+                    $column = $this->db->quoteColumn($column);
 
                     // Append the statement to the query
                     $sql .= "$column $op $value";
@@ -761,12 +747,12 @@ class SelectQuery
         return $sql;
     }
 
-    protected function _compile_short_conditions(array $conditions): string
+    protected function _compileShortConditions(array $conditions): string
     {
 
         [$column, $op, $value] = \current($conditions[0]);
 
-        $column = $this->db->quote_column($column);
+        $column = $this->db->quoteColumn($column);
 
         if ($value === null) {
             if ($op === '=') {
@@ -778,36 +764,17 @@ class SelectQuery
             }
         }
 
-        if($op === '=') {
+        if ($op === '=') {
             $value = \is_int($value) ? $value : $this->db->quote($value);
             return "$column $op $value";
         }
 
-        if ($op === 'IN' and \is_array($value)) {
+        if ($op === 'IN' && \is_array($value)) {
             $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
-
-        } elseif ($op === 'NOT IN' and \is_array($value)) {
-            $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
-
-        } elseif ($op === 'BETWEEN' and \is_array($value)) {
-            // BETWEEN always has exactly two arguments
-            [$min, $max] = $value;
-
-            if (!\is_int($min)) {
-                $min = $this->db->quote($min);
-            }
-
-            if (!\is_int($max)) {
-                $max = $this->db->quote($max);
-            }
-
-            $value = "$min AND $max";
-        } else {
-            $value = \is_int($value) ? $value : $this->db->quote($value);
+            return "$column $op $value";
         }
 
-
-        return "$column $op $value";
+        return $this->_compileConditions($conditions);
     }
 
 
@@ -816,12 +783,12 @@ class SelectQuery
      *
      * @return  string
      */
-    protected function _compile_order_by(): string
+    protected function _compileOrderBy(): string
     {
         $sort = [];
         foreach ($this->_order_by as [$column, $direction]) {
 
-            $column = $this->db->quote_identifier($column);
+            $column = $this->db->quoteIdentifier($column);
 
             $sort[] = "$column $direction";
         }
@@ -841,7 +808,7 @@ class SelectQuery
     {
         $this->db = $db ?? \Mii::$app->db;
 
-        return $this->compile_select();
+        return $this->compileSelect();
     }
 
 
@@ -867,16 +834,18 @@ class SelectQuery
         // Execute the query
         $result = $this->db->query($this->_type, $sql, $this->_as_array ? false : $this->_model_class);
 
-        if (!\is_null($this->_index_by))
-            $result->index_by($this->_index_by);
+        if (!\is_null($this->_index_by)) {
+            $result->indexBy($this->_index_by);
+        }
 
-        if ($this->_pagination)
-            $result->set_pagination($this->_pagination);
+        if ($this->_pagination) {
+            $result->setPagination($this->_pagination);
+        }
 
         return $result;
     }
 
-    public function index_by($column)
+    public function indexBy($column): self
     {
         $this->_index_by = $column;
 
@@ -894,7 +863,7 @@ class SelectQuery
         $old_order = $this->_order_by;
 
         if ($this->_distinct) {
-            $dt_column = $db->quote_column($this->_select[0]);
+            $dt_column = $db->quoteColumn($this->_select[0]);
             $this->select([
                 new Expression("COUNT(DISTINCT $dt_column)")
             ]);
@@ -941,14 +910,14 @@ class SelectQuery
         return null;
     }
 
-    public function one_or_fail()
+    public function oneOrFail()
     {
         $result = $this->one();
 
         if ($result === null) {
             /** @noinspection PhpUnhandledExceptionInspection */
             throw (
-            (new ModelNotFoundException("Model not found"))->set_model((string)$this->_model_class)
+            (new ModelNotFoundException("Model not found"))->setModel((string)$this->_model_class)
             );
         }
         return $result;

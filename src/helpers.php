@@ -79,11 +79,11 @@ if (!\function_exists('get_cached')) {
     function get_cached($id, $default = null, $lifetime = null)
     {
 
-        if (\is_object($default) && $default instanceof \Closure) {
+        if ($default instanceof \Closure) {
 
             $cached = Mii::$app->cache->get($id);
             if ($cached === null) {
-                $cached = \call_user_func($default);
+                $cached = $default();
 
                 Mii::$app->cache->set($id, $cached, $lifetime);
             }
@@ -133,7 +133,7 @@ if (!\function_exists('clear_cache')) {
     function clear_cache($id = null)
     {
         if ($id === null)
-            return Mii::$app->cache->delete_all();
+            return Mii::$app->cache->deleteAll();
 
         return Mii::$app->cache->delete($id);
     }
@@ -165,14 +165,14 @@ if (!\function_exists('dd')) {
             echo "pre small { font-size: 1em; color: #000080;font-weight:bold}";
             echo "</style><pre>\n";
 
-            array_map(function ($a) {
+            array_map(static function ($a) {
                 echo \mii\util\Debug::dump($a, 400);
             }, $params);
 
             echo "</pre>\n";
         } else {
 
-            array_map(function ($a) {
+            array_map(static function ($a) {
                 var_dump($a);
             }, $params);
         }
@@ -198,11 +198,9 @@ if (!\function_exists('config')) {
                     return $array[$key];
                 }
 
-                if (!is_array($array[$key])) {
-                    if (!\is_iterable($array[$key])) {
-                        // Unable to dig deeper
-                        break;
-                    }
+                if (!is_array($array[$key]) && !\is_iterable($array[$key])) {
+                    // Unable to dig deeper
+                    break;
                 }
                 // Dig down into the next part of the path
                 $array = $array[$key];
@@ -219,6 +217,6 @@ if (!\function_exists('config')) {
 if (!\function_exists('config_set')) {
     function config_set(string $key, $value)
     {
-        \mii\util\Arr::set_path(Mii::$app->_config, $key, $value, '.');
+        \mii\util\Arr::setPath(Mii::$app->_config, $key, $value, '.');
     }
 }

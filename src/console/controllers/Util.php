@@ -20,7 +20,7 @@ class Util extends Controller
     {
         if (!$fcgi) {
             $this->warning('No --fcgi option specified. Trying to detect php-fpm listen addr...');
-            $fcgi = $this->detect_fcgi_listen();
+            $fcgi = $this->detectFcgiListen();
 
             if (!$fcgi) {
                 $this->error("Detect failed. Exit");
@@ -98,7 +98,7 @@ class Util extends Controller
             }
         }
 
-        uasort($scripts, function ($a, $b) {
+        uasort($scripts, static function ($a, $b) {
             return $b[0] <=> $a[0];
         });
 
@@ -137,7 +137,7 @@ class Util extends Controller
     }
 
 
-    private function detect_fcgi_listen()
+    private function detectFcgiListen()
     {
         $output = [];
         exec("ps aux | grep \"php-fpm\" | awk '{print $11}'", $output, $code);
@@ -167,7 +167,7 @@ class Util extends Controller
      */
     public function table(string $name)
     {
-        $table_info = DB::select("SHOW FULL COLUMNS FROM " . $name)->to_array();
+        $table_info = DB::select("SHOW FULL COLUMNS FROM " . $name)->toArray();
 
         $columns = [];
         foreach ($table_info as $info) {
@@ -179,9 +179,9 @@ class Util extends Controller
             $column['allow_null'] = $info['null'] === 'YES';
             $column['type'] = $info['type'];
 
-            if (preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $info['type'], $matches)) {
+            if (preg_match('/^(\w+)(?:\(([^)]+)\))?/', $info['type'], $matches)) {
 
-                $column['type'] = $this->convert_type_names(strtolower($matches[1]));
+                $column['type'] = $this->convertTypeNames(strtolower($matches[1]));
 
                 $type = strtolower($matches[1]);
 
@@ -214,7 +214,7 @@ class Util extends Controller
         }
     }
 
-    private function convert_type_names(string $type): string
+    private function convertTypeNames(string $type): string
     {
 
         if ($type === 'int' || $type === 'smallint' || $type === 'tinyint')

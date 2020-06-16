@@ -13,7 +13,8 @@ namespace mii\console;
 class App extends \mii\core\App
 {
 
-    public function run() {
+    public function run()
+    {
 
         try {
             return $this->request->execute();
@@ -22,7 +23,8 @@ class App extends \mii\core\App
         }
     }
 
-    public function default_components() : array {
+    protected function defaultComponents(): array
+    {
         return [
             'log' => 'mii\log\Logger',
             'blocks' => 'mii\web\Blocks',

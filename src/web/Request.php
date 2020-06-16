@@ -111,7 +111,7 @@ class Request extends Component
         }
 
         if ($this->_method === 'PUT') {
-            \parse_str($this->raw_body(), $_POST);
+            \parse_str($this->rawBody(), $_POST);
         }
     }
 
@@ -131,11 +131,11 @@ class Request extends Component
         return $this->_uri = $uri;
     }
 
-    public function get_hostname(): string
+    public function getHostname(): string
     {
 
         if (!$this->_hostname) {
-            $http = $this->is_secure() ? 'https' : 'http';
+            $http = $this->isSecure() ? 'https' : 'http';
             $domain = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'];
             $this->_hostname = $http . '://' . $domain;
         }
@@ -143,18 +143,18 @@ class Request extends Component
         return $this->_hostname;
     }
 
-    public function get_user_agent(): string
+    public function getUserAgent(): string
     {
         return $_SERVER['HTTP_USER_AGENT'] ?? '';
     }
 
 
-    public function get_content_type(): string
+    public function getContentType(): string
     {
         return $_SERVER['CONTENT_TYPE'] ?? '';
     }
 
-    public function get_ip(): string
+    public function getIp(): string
     {
         if (!empty($_SERVER['HTTP_CLIENT_IP']))
             return $_SERVER['HTTP_CLIENT_IP'];
@@ -190,7 +190,7 @@ class Request extends Component
      * Return if the request is sent via secure channel (https).
      * @return boolean if the request is sent via secure channel (https)
      */
-    public function is_secure()
+    public function isSecure()
     {
         return (isset($_SERVER['HTTPS']) && (\strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1))
             || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && \strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0);
@@ -219,17 +219,17 @@ class Request extends Component
     }
 
 
-    public function csrf_token($new = false)
+    public function csrfToken($new = false)
     {
 
         if ($this->_csrf_token === null || $new) {
-            if ($new || ($this->_csrf_token = $this->load_csrf_token()) === null) {
+            if ($new || ($this->_csrf_token = $this->loadCsrfToken()) === null) {
                 // Generate a new unique token
                 $this->_csrf_token = \bin2hex(\random_bytes(20));
 
                 // Store the new token
                 if ($this->enable_csrf_cookie) {
-                    $this->set_cookie($this->csrf_token_name, $this->_csrf_token);
+                    $this->setCookie($this->csrf_token_name, $this->_csrf_token);
                 } else {
                     \Mii::$app->session->set($this->csrf_token_name, $this->_csrf_token);
                 }
@@ -239,20 +239,20 @@ class Request extends Component
         return $this->_csrf_token;
     }
 
-    public function load_csrf_token()
+    public function loadCsrfToken()
     {
         if ($this->enable_csrf_cookie) {
-            return $this->get_cookie($this->csrf_token_name);
-        } else {
-            return \Mii::$app->session->get($this->csrf_token_name);
+            return $this->getCookie($this->csrf_token_name);
         }
+
+        return \Mii::$app->session->get($this->csrf_token_name);
     }
 
 
     /**
      * Gets HTTP POST parameters of the request.
      *
-     * @param mixed $key Parameter name
+     * @param mixed  $key Parameter name
      * @param string $default Default value if parameter does not exist
      * @return  mixed
      */
@@ -269,13 +269,13 @@ class Request extends Component
      * Returns whether this is an AJAX (XMLHttpRequest) request.
      * @return boolean whether this is an AJAX (XMLHttpRequest) request.
      */
-    public function is_ajax(): bool
+    public function isAjax(): bool
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
     }
 
 
-    public function is_post() : bool
+    public function isPost(): bool
     {
         return $this->method() === 'POST';
     }
@@ -287,7 +287,7 @@ class Request extends Component
      * Returns the raw HTTP request body.
      * @return string the request body
      */
-    public function raw_body(): string
+    public function rawBody(): string
     {
         if ($this->_raw_body === null) {
             $this->_raw_body = \file_get_contents('php://input');
@@ -301,7 +301,7 @@ class Request extends Component
     public function json($key, $default = null)
     {
 
-        if (!$this->_json_items && \strtolower($this->get_content_type()) === 'application/json') {
+        if (!$this->_json_items && \strtolower($this->getContentType()) === 'application/json') {
             $this->_json_items = \json_decode(\file_get_contents('php://input'), true);
         } else {
             $this->_json_items = [];
@@ -323,10 +323,10 @@ class Request extends Component
      * will be deleted.
      *
      * @param string $key cookie name
-     * @param mixed $default default value to return
+     * @param mixed  $default default value to return
      * @return  string
      */
-    public function get_cookie(string $key, $default = null)
+    public function getCookie(string $key, $default = null)
     {
         if (!isset($_COOKIE[$key])) {
             // The cookie does not exist
@@ -352,7 +352,7 @@ class Request extends Component
             }
 
             // The cookie signature is invalid, delete it
-            $this->delete_cookie($key);
+            $this->deleteCookie($key);
         }
 
         return $default;
@@ -363,12 +363,12 @@ class Request extends Component
      * Sets a signed cookie. Note that all cookie values must be strings and no
      * automatic serialization will be performed!
      *
-     * @param string $name name of cookie
-     * @param string $value value of cookie
+     * @param string  $name name of cookie
+     * @param string  $value value of cookie
      * @param integer $expiration lifetime in seconds
      * @return  boolean
      */
-    public function set_cookie(string $name, string $value, int $expiration = null)
+    public function setCookie(string $name, string $value, int $expiration = null)
     {
         if ($expiration === null) {
             // Use the default expiration
@@ -405,7 +405,7 @@ class Request extends Component
      * @param string $name cookie name
      * @return  boolean
      */
-    public function delete_cookie($name)
+    public function deleteCookie($name)
     {
         // Remove the cookie
         unset($_COOKIE[$name]);
@@ -431,6 +431,6 @@ class Request extends Component
             );
         }
 
-        return \substr(\mii\util\Text::base64url_encode(\md5($name . $value . $this->cookie_salt, true)), 0, 20);
+        return \substr(\mii\util\Text::b64Encode(\md5($name . $value . $this->cookie_salt, true)), 0, 20);
     }
 }

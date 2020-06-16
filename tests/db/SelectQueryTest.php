@@ -18,10 +18,10 @@ class SelectQueryTest extends DatabaseTestCase
             "HAVING `count` > 0 ORDER BY `id` desc, `col1` asc, `col2` asc LIMIT 5 OFFSET 10 FOR UPDATE",
 
             (new SelectQuery())
-                ->for_update()
+                ->forUpdate()
                 ->distinct(true)
                 ->select(['col1', ['col2', 'al1'], new Expression('COUNT(id)')])
-                ->select_also('col3', 'col4')
+                ->selectAlso('col3', 'col4')
                 ->join('jt', 'LEFT')
                 ->on('jt.id', '=', 't2.id')
                 ->from('table')
@@ -29,14 +29,14 @@ class SelectQueryTest extends DatabaseTestCase
                 ->where('col1', '=', 1)
                 ->where()
                 ->where('col2', '<', 'sadf')
-                ->or_where('col2', '=', null)
+                ->orWhere('col2', '=', null)
                 ->end()
                 ->having('count', '>', 0)
-                ->order_by([
+                ->orderBy([
                     ['id', 'desc'],
                     ['col1', 'asc']
                 ])
-                ->order_by('col2', 'asc')
+                ->orderBy('col2', 'asc')
                 ->limit(5)
                 ->offset(10)
                 ->compile()
@@ -86,9 +86,9 @@ class SelectQueryTest extends DatabaseTestCase
             ["`a` = 1 OR `b` = 1 AND `c` = 1 OR (`x` = 3 AND (`d` = 1 AND `e` = 1))",
                 $q()
                     ->where('a', '=', 1)
-                    ->or_where('b', '=', 1)
+                    ->orWhere('b', '=', 1)
                     ->where('c', '=', 1)
-                    ->or_where()
+                    ->orWhere()
                     ->where('x', '=', 3)
                     ->where()
                     ->where('d', '=', 1)
@@ -124,12 +124,12 @@ class SelectQueryTest extends DatabaseTestCase
                 ->where('col1', '=', 1)
                 ->where()
                 ->where('col2', '=', 2)
-                ->or_where('col3', '=', 4)
+                ->orWhere('col3', '=', 4)
                 ->end()
                 ->end()
-                ->or_where()
+                ->orWhere()
                 ->where('col2', '=', 5)
-                ->or_where('col3', '=', "six")
+                ->orWhere('col3', '=', "six")
                 ->end()
                 ->where()
                 ->where('col3', '=', 7)
@@ -137,9 +137,9 @@ class SelectQueryTest extends DatabaseTestCase
                 ->having('col1', '<', 5)
                 ->having()
                 ->having('col2', '=', 'col3')
-                ->or_having('col3', '=', 5)
+                ->orHaving('col3', '=', 5)
                 ->end()
-                ->order_by('col3', 'desc')
+                ->orderBy('col3', 'desc')
                 ->compile(),
 
             "SELECT `t`.`col1`, `t`.`col2`, `t`.`col3` FROM `table` AS `t` WHERE (`col1` = 1 AND (`col2` = 2 OR `col3` = 4)) OR (`col2` = 5 OR `col3` = 'six') AND (`col3` = 7) HAVING `col1` < 5 AND (`col2` = 'col3' OR `col3` = 5) ORDER BY `col3` desc");

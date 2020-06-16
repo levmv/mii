@@ -2,27 +2,28 @@
 
 namespace mii\log;
 
-class Log {
+class Log
+{
 
-    public static function error(...$args) : void
+    public static function error(...$args): void
     {
         static::log(Logger::ERROR, $args);
     }
 
-    public static function warning(...$args) : void
+    public static function warning(...$args): void
     {
         static::log(Logger::WARNING, $args);
     }
 
-    public static function info(...$args) : void
+    public static function info(...$args): void
     {
         static::log(Logger::INFO, $args);
     }
 
 
-    private static function log(int $level, array $args) : void
+    private static function log(int $level, array $args): void
     {
-        if(count($args) === 1 && $args[0] instanceof \Throwable) {
+        if (count($args) === 1 && $args[0] instanceof \Throwable) {
             \Mii::log($level, $args[0], 'app');
             return;
         }
@@ -42,7 +43,7 @@ class Log {
             if (\is_object($arg)) {
                 $classname = \get_class($arg);
 
-                if($arg instanceof \Throwable) {
+                if ($arg instanceof \Throwable) {
                     $exceptions[] = $arg;
                 }
 
@@ -57,7 +58,7 @@ class Log {
 
         \Mii::log($level, \implode(' ', $message), 'app');
 
-        foreach($exceptions as $e) {
+        foreach ($exceptions as $e) {
             \Mii::log($level, $e, 'app');
         }
     }

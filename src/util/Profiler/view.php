@@ -152,7 +152,7 @@
 </style>
 
 <?php
-$group_stats = Profiler::group_stats();
+$group_stats = Profiler::groupStats();
 $group_cols = array('min', 'max', 'average', 'total');
 $application_cols = array('min', 'max', 'average', 'current');
 ?>
@@ -189,7 +189,7 @@ $application_cols = array('min', 'max', 'average', 'current');
     <?php foreach (Profiler::groups() as $group => $benchmarks): ?>
         <table class="profiler">
             <tr class="group">
-                <th class="name" ><?php echo ucfirst($group) ?></th>
+                <th class="name"><?php echo ucfirst($group) ?></th>
                 <td class="time"
                     colspan="4">
                     <?= number_format($group_stats[$group]['total']['memory'] / 1024, 3) ?>&thinsp;kB |
@@ -208,13 +208,13 @@ $application_cols = array('min', 'max', 'average', 'current');
                     <th class="name" rowspan="2"
                         scope="rowgroup"><?php echo HTML::chars($name);
                         $count = \count($tokens);
-                        if($count > 1) echo " <sup>($count)</sup>" ?></th>
+                        if ($count > 1) echo " <sup>($count)</sup>" ?></th>
                     <?php foreach ($group_cols as $key):
-                        $is_total = $key === 'total';?>
+                        $is_total = $key === 'total'; ?>
                         <td class="<?php echo $key ?>">
                             <div>
                                 <div class="value"><?php echo number_format($stats[$key]['time'], 6) * 1000 ?><?php
-                                    if($is_total) echo "&thinsp;<abbr>ms</abbr>"
+                                    if ($is_total) echo "&thinsp;<abbr>ms</abbr>"
                                     ?>
                                 </div>
                                 <?php if ($is_total): ?>
@@ -231,11 +231,11 @@ $application_cols = array('min', 'max', 'average', 'current');
                         <td class="<?php echo $key ?>">
                             <div>
                                 <div class="value"><?php echo number_format($stats[$key]['memory'] / 1024, 4) ?><?php
-                                    if($is_total) echo "&thinsp;<abbr>kB</abbr>"
+                                    if ($is_total) echo "&thinsp;<abbr>kB</abbr>"
                                     ?></div>
                                 <?php if ($is_total): ?>
                                     <div class="graph"
-                                         style="left: <?php echo max(0, 100 - $stats[$key]['memory'] / max(1,$group_stats[$group]['max']['memory']) * 100) ?>%"></div>
+                                         style="left: <?php echo max(0, 100 - $stats[$key]['memory'] / max(1, $group_stats[$group]['max']['memory']) * 100) ?>%"></div>
                                 <?php endif ?>
                             </div>
                         </td>

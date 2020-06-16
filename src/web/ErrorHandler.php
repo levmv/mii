@@ -13,23 +13,24 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
     public $route;
 
-    public function prepare_exception(\Throwable $e) : \Throwable
+    public function prepareException(\Throwable $e): \Throwable
     {
-        if(config('debug'))
+        if (config('debug'))
             return $e;
 
-        if($e instanceof ModelNotFoundException) {
+        if ($e instanceof ModelNotFoundException) {
             return new NotFoundHttpException($e->getMessage(), $e);
         }
 
-        if($e instanceof InvalidRouteException) {
+        if ($e instanceof InvalidRouteException) {
             return new NotFoundHttpException($e->getMessage(), $e);
         }
 
         return $e;
     }
 
-    public function render($exception) {
+    public function render($exception)
+    {
 
         if (\Mii::$app->has('response')) {
             $response = \Mii::$app->response;
@@ -44,34 +45,35 @@ class ErrorHandler extends \mii\core\ErrorHandler
             $response->status(500);
         }
 
-        if($response->format === Response::FORMAT_HTML) {
+        if ($response->format === Response::FORMAT_HTML) {
 
-            if($this->route && !\config('debug')) {
+            if ($this->route && !\config('debug')) {
                 \Mii::$app->request->uri($this->route);
                 try {
                     \Mii::$app->run();
                     return;
                 } catch (\Throwable $t) {
-                    $response->content(static::exception_to_text($exception));
+                    $response->content(static::exceptionToText($exception));
                 }
-            } else if(config('debug')) {
+            } else if (config('debug')) {
 
-                $response->content($this->render_file(__DIR__ . '/Exception/error.php', ['exception' => $exception]));
+                $response->content($this->renderFile(__DIR__ . '/Exception/error.php', ['exception' => $exception]));
             } else {
-                $response->content('<pre>' . e(static::exception_to_text($exception)) . '</pre>');
+                $response->content('<pre>' . e(static::exceptionToText($exception)) . '</pre>');
             }
 
         } elseif ($response->format === Response::FORMAT_JSON) {
-            $response->content($this->exception_to_array($exception));
+            $response->content($this->exceptionToArray($exception));
         } else {
-            $response->content(static::exception_to_text($exception));
+            $response->content(static::exceptionToText($exception));
         }
 
         $response->send();
     }
 
 
-    public function render_file($__file, $__params) {
+    public function renderFile($__file, $__params)
+    {
         $__params['handler'] = $this;
         ob_start();
         ob_implicit_flush(0);
@@ -80,7 +82,8 @@ class ErrorHandler extends \mii\core\ErrorHandler
         return ob_get_clean();
     }
 
-    protected function exception_to_array($e) {
+    protected function exceptionToArray($e)
+    {
 
         $arr = [
             'name' => 'Exception',
@@ -103,7 +106,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
             $arr['line'] = $e->getLine();
         }
         if (config('debug') && ($prev = $e->getPrevious()) !== null) {
-            $arr['previous'] = $this->exception_to_array($prev);
+            $arr['previous'] = $this->exceptionToArray($prev);
         }
         return $arr;
     }

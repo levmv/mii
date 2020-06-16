@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection MagicMethodsValidityInspection */
+declare(strict_types=1);
 
 namespace mii\db;
 
@@ -8,7 +9,7 @@ namespace mii\db;
  *  protected array $json_attributes = [];
  *
  *
-     * @property array $json_attributes Auto-serialize and unserialize columns on get/set
+ * @property array $json_attributes Auto-serialize and unserialize columns on get/set
  */
 trait JsonAttributes
 {
@@ -48,32 +49,32 @@ trait JsonAttributes
     }
 
 
-    public function create() : int
+    public function create(): int
     {
         if ($this->_serialize_cache_dirty)
-            $this->_invalidate_serialize_cache();
+            $this->_invalidateSerializeCache();
         return parent::create();
     }
 
-    public function update() : int
+    public function update(): int
     {
         if ($this->_serialize_cache_dirty) {
-            $this->_invalidate_serialize_cache();
+            $this->_invalidateSerializeCache();
         }
         return parent::update();
     }
 
     public function changed($field_name = null): bool
     {
-        if($this->_serialize_cache_dirty) {
-            $this->_invalidate_serialize_cache();
+        if ($this->_serialize_cache_dirty) {
+            $this->_invalidateSerializeCache();
         }
 
         return parent::changed($field_name);
     }
 
 
-    protected function _invalidate_serialize_cache(): void
+    protected function _invalidateSerializeCache(): void
     {
         $this->_serialize_cache_dirty = false;
 
@@ -81,7 +82,7 @@ trait JsonAttributes
 
             $value = \is_null($value)
                 ? null
-                : $this->_serialize_value($value);
+                : $this->_serializeValue($value);
 
             if (!array_key_exists($key, $this->attributes) || $value !== $this->attributes[$key]) {
                 $this->attributes[$key] = $value;
@@ -90,7 +91,7 @@ trait JsonAttributes
         }
     }
 
-    protected function _serialize_value($value)
+    protected function _serializeValue($value)
     {
         return \json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
@@ -113,20 +114,20 @@ trait JsonAttributes
     public function jsonSerialize()
     {
         if ($this->_serialize_cache_dirty) {
-            $this->_invalidate_serialize_cache();
+            $this->_invalidateSerializeCache();
         }
 
         return parent::jsonSerialize();
     }
 
-    public function getIterator() : \Traversable
+    public function getIterator(): \Traversable
     {
         if ($this->_serialize_cache_dirty) {
-            $this->_invalidate_serialize_cache();
+            $this->_invalidateSerializeCache();
         }
 
         return (function () {
-            foreach($this->attributes as $column => $value) {
+            foreach ($this->attributes as $column => $value) {
                 yield $column => $this->$column;
             }
         })();

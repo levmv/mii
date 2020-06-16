@@ -9,14 +9,16 @@ class UploadHandler extends Component
 
     private $_files;
 
-    public function init(array $config = []): void {
+    public function init(array $config = []): void
+    {
         parent::init($config);
 
         $this->files();
     }
 
-    public function get_file(string $name): ?UploadedFile {
-        return isset($this->_files[$name]) ? $this->_files[$name] : null;
+    public function getFile(string $name): ?UploadedFile
+    {
+        return $this->_files[$name] ?? null;
     }
 
 
@@ -24,7 +26,8 @@ class UploadHandler extends Component
      * @param string $name
      * @return array UploadedFile
      */
-    public function get_files(string $name): array {
+    public function getFiles(string $name): array
+    {
         if (isset($this->_files[$name])) {
             return [$this->_files[$name]];
         }
@@ -38,13 +41,14 @@ class UploadHandler extends Component
     }
 
 
-    public function files(): array {
+    public function files(): array
+    {
 
         if ($this->_files === null) {
             $this->_files = [];
             if (isset($_FILES) && \is_array($_FILES)) {
                 foreach ($_FILES as $class => $info) {
-                    $this->load_files_recursive($class, $info['name'], $info['tmp_name'], $info['type'], $info['size'], $info['error']);
+                    $this->loadFilesRecursive($class, $info['name'], $info['tmp_name'], $info['type'], $info['size'], $info['error']);
                 }
             }
         }
@@ -55,16 +59,17 @@ class UploadHandler extends Component
     /**
      * Creates UploadedFile instances from $_FILE recursively.
      * @param string $key key for identifying uploaded file: class name and sub-array indexes
-     * @param mixed $names file names provided by PHP
-     * @param mixed $tmp_names temporary file names provided by PHP
-     * @param mixed $types file types provided by PHP
-     * @param mixed $sizes file sizes provided by PHP
-     * @param mixed $errors uploading issues provided by PHP
+     * @param mixed  $names file names provided by PHP
+     * @param mixed  $tmp_names temporary file names provided by PHP
+     * @param mixed  $types file types provided by PHP
+     * @param mixed  $sizes file sizes provided by PHP
+     * @param mixed  $errors uploading issues provided by PHP
      */
-    private function load_files_recursive($key, $names, $tmp_names, $types, $sizes, $errors) {
+    private function loadFilesRecursive($key, $names, $tmp_names, $types, $sizes, $errors): void
+    {
         if (\is_array($names)) {
             foreach ($names as $i => $name) {
-                static::load_files_recursive($key . '[' . $i . ']', $name, $tmp_names[$i], $types[$i], $sizes[$i], $errors[$i]);
+                static::loadFilesRecursive($key . '[' . $i . ']', $name, $tmp_names[$i], $types[$i], $sizes[$i], $errors[$i]);
             }
         } elseif ((int)$errors !== UPLOAD_ERR_NO_FILE) {
             $this->_files[$key] = new UploadedFile([

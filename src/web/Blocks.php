@@ -27,21 +27,24 @@ class Blocks extends BaseBlocks
         }
         $this->base_path = Mii::resolve($this->base_path);
 
-        if (!is_dir($this->base_path))
+        if (!is_dir($this->base_path)) {
             FS::mkdir($this->base_path, 0777);
+        }
 
         foreach ($this->_blocks as $block_name => $block) {
-            if ($block->__has_parent)
+            if ($block->__has_parent) {
                 continue;
+            }
 
-            $this->process_block_assets($block_name, $block_name, $block->_depends);
+            $this->processBlockAssets($block_name, $block_name, $block->_depends);
         }
 
         foreach ($this->_files as $type => $blocks) {
             foreach ($blocks as $block_name => $block) {
 
-                if (isset($block['files']))
-                    $this->_build_block($block_name, $type, $block['files']);
+                if (isset($block['files'])) {
+                    $this->_buildBlock($block_name, $type, $block['files']);
+                }
 
                 if (isset($block['remote'])) {
 
@@ -83,18 +86,19 @@ class Blocks extends BaseBlocks
      * @param string $parent_block
      * @param array  $depends
      */
-    public function process_block_assets($block_name, $parent_block, $depends): void
+    public function processBlockAssets($block_name, $parent_block, $depends): void
     {
 
-        if (isset($this->_used_blocks[$block_name]))
+        if (isset($this->_used_blocks[$block_name])) {
             return;
+        }
 
-        $block_path = $this->get_block_path($block_name);
+        $block_path = $this->getBlockPath($block_name);
 
         foreach ($this->libraries as $base_path) {
 
             if (is_dir($base_path . $block_path . 'assets')) {
-                $this->_build_assets_dir($block_name, $base_path . $block_path . 'assets');
+                $this->_buildAssetsDir($block_name, $base_path . $block_path . 'assets');
                 break;
             }
         }
@@ -104,7 +108,7 @@ class Blocks extends BaseBlocks
                 if (isset($this->_used_blocks[$depend])) {
                     continue;
                 }
-                $this->process_block_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
+                $this->processBlockAssets($depend, $parent_block, $this->_blocks[$depend]->_depends);
                 $this->_used_blocks[$depend] = true;
             }
         }
@@ -122,19 +126,20 @@ class Blocks extends BaseBlocks
 
         if ($this->_blocks[$block_name]->__remote_js !== null) {
             foreach ($this->_blocks[$block_name]->__remote_js as $link => $settings) {
-                if (!empty($settings) and isset($settings['position'])) {
+                if (!empty($settings) && isset($settings['position'])) {
                     $position = $settings['position'];
                     unset($settings['position']);
                 } else {
-                    $position = Blocks::END;
+                    $position = self::END;
                 }
                 $this->_files['js'][$parent_block]['remote'][$position][] = HTML::script($link, $settings);
             }
         }
 
         if ($this->_blocks[$block_name]->__remote_css !== null) {
-            if (!isset($this->_files['css'][$parent_block]['remote']))
+            if (!isset($this->_files['css'][$parent_block]['remote'])) {
                 $this->_files['css'][$parent_block]['remote'] = [];
+            }
 
             foreach ($this->_blocks[$block_name]->__remote_css as $link) {
                 $this->_files['css'][$parent_block]['remote'][] = $link;
@@ -144,22 +149,24 @@ class Blocks extends BaseBlocks
         if (!empty($this->_blocks[$block_name]->__inline_js)) {
 
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
-                $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
-                if (!isset($this->_files['js'][$parent_block]['inline'][$position]))
+                $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : self::END;
+                if (!isset($this->_files['js'][$parent_block]['inline'][$position])) {
                     $this->_files['js'][$parent_block]['inline'][$position] = [];
+                }
                 $this->_files['js'][$parent_block]['inline'][$position][] = $inline[0];
             }
         }
 
         if (!empty($this->_blocks[$block_name]->__inline_css)) {
-            if (!isset($this->_files['css'][$parent_block]['inline']))
+            if (!isset($this->_files['css'][$parent_block]['inline'])) {
                 $this->_files['css'][$parent_block]['inline'] = $this->_blocks[$block_name]->__inline_css;
-            else
+            } else {
                 $this->_files['css'][$parent_block]['inline'] = array_merge($this->_files['.css'][$parent_block]['inline'], $this->_blocks[$block_name]->__inline_css);
+            }
         }
     }
 
-    private function _build_block(string $block_name, string $type, array $files): void
+    private function _buildBlock(string $block_name, string $type, array $files): void
     {
 
         $result_file_name = $block_name . '.' . substr(md5(implode('', array_values($files))), 0, 10);
@@ -192,14 +199,12 @@ class Blocks extends BaseBlocks
             $this->_css[] = '<link type="text/css" href="' . $web_output . '?' . filemtime($output) . '" rel="stylesheet">';
 
         } else {
-            $this->_js[Blocks::END][] = '<script src="' . $web_output . '?' . filemtime($output) . '"></script>';
+            $this->_js[self::END][] = '<script src="' . $web_output . '?' . filemtime($output) . '"></script>';
         }
-
-        return;
     }
 
 
-    private function _build_assets_dir(string $blockname, string $path): void
+    private function _buildAssetsDir(string $blockname, string $path): void
     {
 
         $output = $this->base_path . '/' . $blockname;
@@ -209,7 +214,7 @@ class Blocks extends BaseBlocks
         }
     }
 
-    private function get_block_path(string $name): ?string
+    private function getBlockPath(string $name): ?string
     {
         return '/' . \implode('/', \explode('_', $name)) . '/';
     }

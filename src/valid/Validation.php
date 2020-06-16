@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\valid;
 
@@ -31,10 +31,11 @@ class Validation
      * Sets the unique "any field" key and creates an ArrayObject from the
      * passed array.
      *
-     * @param   array $array array to validate
+     * @param array $array array to validate
      * @return  void
      */
-    public function __construct(array $array = []) {
+    public function __construct(array $array = [])
+    {
         $this->_data = $array;
     }
 
@@ -44,13 +45,15 @@ class Validation
      *
      * @return mixed
      */
-    public function data($data = null) {
+    public function data($data = null)
+    {
         if ($data === null)
             return $this->_data;
         $this->_data = $data;
     }
 
-    public function field($name) {
+    public function field($name)
+    {
         if (isset($this->_data[$name]))
             return $this->_data[$name];
 
@@ -60,11 +63,12 @@ class Validation
     /**
      * Sets or overwrites the label name for a field.
      *
-     * @param   string $field field name
-     * @param   string $label label
+     * @param string $field field name
+     * @param string $label label
      * @return  $this
      */
-    public function label($field, $label) {
+    public function label($field, $label)
+    {
         // Set the label for this field
         $this->_labels[$field] = $label;
 
@@ -74,10 +78,11 @@ class Validation
     /**
      * Sets labels using an array.
      *
-     * @param   array $labels list of field => label names
+     * @param array $labels list of field => label names
      * @return  $this
      */
-    public function labels(array $labels) {
+    public function labels(array $labels)
+    {
         $this->_labels = $labels + $this->_labels;
 
         return $this;
@@ -109,13 +114,14 @@ class Validation
      *
      * [!!] Errors must be added manually when using closures!
      *
-     * @param   string $field field name
-     * @param   callback $rule valid PHP callback or closure
-     * @param   array $params extra parameters for the rule
+     * @param string   $field field name
+     * @param callback $rule valid PHP callback or closure
+     * @param array    $params extra parameters for the rule
      * @return  $this
      */
-    public function rule($field, $rule, array $params = []) {
-        if ($field !== true AND !isset($this->_labels[$field])) {
+    public function rule($field, $rule, array $params = [])
+    {
+        if ($field !== true && !isset($this->_labels[$field])) {
             // Set the field label to the field name
             $this->_labels[$field] = $field;
         }
@@ -129,14 +135,15 @@ class Validation
     /**
      * Add rules using an array.
      *
-     * @param   array $rules list of rules
+     * @param array $rules list of rules
      * @return  $this
      */
-    public function rules(array $rules) {
+    public function rules(array $rules)
+    {
         foreach ($rules as $row) {
             $field = $row[0];
             $rule = $row[1];
-            $params = isset($row[2]) ? $row[2] : [];
+            $params = $row[2] ?? [];
 
             if (\is_array($field)) {
                 foreach ($field as $field_name) {
@@ -163,7 +170,8 @@ class Validation
      *
      * @return  boolean
      */
-    public function check() {
+    public function check()
+    {
         $benchmark = false;
         if (config('debug')) {
             // Start a new benchmark
@@ -182,7 +190,7 @@ class Validation
 
         foreach ($expected as $field) {
             // Use the submitted value or NULL if no data exists
-            $data[$field] = isset($this->_data[$field]) ? $this->_data[$field] : null;
+            $data[$field] = $this->_data[$field] ?? null;
 
         }
         // Overload the current array with the new one
@@ -195,9 +203,7 @@ class Validation
             $value = $this->_data[$field];
 
 
-            foreach ($set as $array) {
-                // Rules are defined as array($rule, $params)
-                list($rule, $params) = $array;
+            foreach ($set as [$rule, $params]) {
 
                 array_unshift($params, $value);
 
@@ -206,7 +212,7 @@ class Validation
                 if (\is_array($rule)) {
 
                     // Allows rule('field', array(':model', 'some_rule'));
-                    if (\is_string($rule[0]) AND \array_key_exists($rule[0], $this->_bound)) {
+                    if (\is_string($rule[0]) && \array_key_exists($rule[0], $this->_bound)) {
                         // Replace with bound value
                         $rule[0] = $this->_bound[$rule[0]];
                     }
@@ -249,10 +255,10 @@ class Validation
                 }
 
                 // Ignore return values from rules when the field is empty
-                if (!\in_array($rule, $this->_empty_rules) AND !Rules::not_empty($value))
+                if (!\in_array($rule, $this->_empty_rules) && !Rules::notEmpty($value))
                     continue;
 
-                if ($passed === FALSE AND $error_name !== FALSE) {
+                if ($passed === FALSE && $error_name !== FALSE) {
                     // Add the rule to the errors
                     $this->error($field, $error_name, $params);
 
@@ -278,23 +284,26 @@ class Validation
     /**
      * Add an error to a field.
      *
-     * @param   string $field field name
-     * @param   string $error error message
-     * @param   array $params
+     * @param string $field field name
+     * @param string $error error message
+     * @param array  $params
      * @return  $this
      */
-    public function error($field, $error, array $params = NULL) {
+    public function error($field, $error, array $params = NULL)
+    {
         $this->_errors[$field] = $error;
 
         return $this;
     }
 
-    public function add_error_message($field, $error, $message) {
+    public function add_error_message($field, $error, $message)
+    {
         $this->_error_messages[$field][$error] = $message;
     }
 
 
-    public function has_errors() {
+    public function hasErrors()
+    {
         return \count($this->_errors);
     }
 
@@ -313,11 +322,12 @@ class Validation
      *     $errors = $Validation->errors('forms/login');
      *
      * @param string $file file to load error messages from
-     * @param mixed $translate translate the message
+     * @param mixed  $translate translate the message
      * @return  array
      * @throws \Exception
      */
-    public function errors($file = null, $translate = false) {
+    public function errors($file = null, $translate = false)
+    {
         if ($file === NULL) {
             // Return the error list
             return $this->_errors;
@@ -380,16 +390,16 @@ class Validation
             }
 
 
-            if ($message = Arr::path($this->_error_messages, "{$field}.{$error}") AND \is_string($message)) {
+            if ($message = Arr::path($this->_error_messages, "{$field}.{$error}") && \is_string($message)) {
 
-            } elseif ($message = Mii::message($file, "{$field}.{$error}") AND \is_string($message)) {
+            } elseif ($message = Mii::message($file, "{$field}.{$error}") && \is_string($message)) {
 
                 // Found a message for this field and error
-            } elseif ($message = Mii::message($file, "{$field}.default") AND \is_string($message)) {
+            } elseif ($message = Mii::message($file, "{$field}.default") && \is_string($message)) {
                 // Found a default message for this field
-            } elseif ($message = Mii::message($file, $error) AND \is_string($message)) {
+            } elseif ($message = Mii::message($file, $error) && \is_string($message)) {
                 // Found a default message for this error
-            } elseif ($message = Mii::message('validation', $error) AND \is_string($message)) {
+            } elseif ($message = Mii::message('validation', $error) && \is_string($message)) {
                 // Found a default message for this error
             } else {
                 // No message exists, display the path expected
@@ -416,7 +426,8 @@ class Validation
      *
      * @return  array
      */
-    public function errors_values() {
+    public function errorsValues()
+    {
         return $this->_errors;
     }
 

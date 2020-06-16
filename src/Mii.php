@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpIllegalPsrClassPathInspection */
+declare(strict_types=1);
 
 use mii\log\Logger;
 
@@ -94,9 +95,9 @@ class Mii
         if ($path === null) {
             // Return all of the messages
             return $messages[$file];
-        } else {
-            // Get a message using the path
-            return \mii\util\Arr::path($messages[$file], $path, $default);
         }
+
+        // Get a message using the path
+        return \mii\util\Arr::path($messages[$file], $path, $default);
     }
 }

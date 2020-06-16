@@ -3,7 +3,6 @@
 namespace mii\web;
 
 use Mii;
-use mii\core\ErrorHandler;
 
 
 class Block
@@ -39,11 +38,12 @@ class Block
      * always only be created using [Blocks::factory] or [block].
      *
      *
-     * @param   string $name block name
-     * @param   string $file path to block php file
+     * @param string $name block name
+     * @param string $file path to block php file
      * @return  void
      */
-    public function __construct(string $name, ?string $file = null) {
+    public function __construct(string $name, ?string $file = null)
+    {
         $this->__name = $name;
         $this->_file = $file;
     }
@@ -57,10 +57,11 @@ class Block
      *
      * [!!] If the variable has not yet been set, an exception will be thrown.
      *
-     * @param   string $key variable name
+     * @param string $key variable name
      * @return  mixed
      */
-    public function & __get($key) {
+    public function __get($key)
+    {
         return $this->get($key);
     }
 
@@ -69,11 +70,12 @@ class Block
      *
      *     $view->foo = 'something';
      *
-     * @param   string $key variable name
-     * @param   mixed $value value
+     * @param string $key variable name
+     * @param mixed  $value value
      * @return  void
      */
-    public function __set($key, $value) {
+    public function __set($key, $value)
+    {
         $this->set($key, $value);
     }
 
@@ -84,10 +86,11 @@ class Block
      *
      * [!!] `NULL` variables are not considered to be set by [isset](http://php.net/isset).
      *
-     * @param   string $key variable name
+     * @param string $key variable name
      * @return  boolean
      */
-    public function __isset(string $key): bool {
+    public function __isset(string $key): bool
+    {
         return (isset($this->_data[$key]));
     }
 
@@ -96,10 +99,11 @@ class Block
      *
      *     unset($view->foo);
      *
-     * @param   string $key variable name
+     * @param string $key variable name
      * @return  void
      */
-    public function __unset(string $key) {
+    public function __unset(string $key)
+    {
         unset($this->_data[$key]);
     }
 
@@ -108,11 +112,13 @@ class Block
      *
      * @return  string
      */
-    public function __toString(): string {
+    public function __toString(): string
+    {
         return $this->render();
     }
 
-    public function depends(array $depends): Block {
+    public function depends(array $depends): Block
+    {
         $this->_depends = array_unique(array_merge($this->_depends, $depends));
 
         foreach ($this->_depends as $depend) {
@@ -122,46 +128,53 @@ class Block
         return $this;
     }
 
-    public function name(): string {
+    public function name(): string
+    {
         return $this->__name;
     }
 
 
-    public function path(): string {
+    public function path(): string
+    {
         return '/' . implode('/', explode('_', $this->__name));
     }
 
 
-    public function css(string $link) {
+    public function css(string $link): self
+    {
         $this->__remote_css[] = $link;
         return $this;
     }
 
-    public function js(string $link, array $options = []) {
+    public function js(string $link, array $options = []): self
+    {
         $this->__remote_js[$link] = $options;
         return $this;
     }
 
-    public function inline_css(string $code, array $options = []) {
+    public function inlineCss(string $code, array $options = []): self
+    {
         $this->__inline_css[] = [$code, $options];
         return $this;
     }
 
-    public function inline_js(string $code, array $options = []) {
+    public function inlineJs(string $code, array $options = []): self
+    {
         $this->__inline_js[] = [$code, $options];
         return $this;
     }
 
-    public function get(string $key, $default = NULL) {
-
+    public function get(string $key, $default = NULL)
+    {
         if (\array_key_exists($key, $this->_data)) {
             return $this->_data[$key];
-        } else {
-            if ($default !== NULL)
-                return $default;
-
-            throw new Exception("Block variable is not set: $key");
         }
+
+        if ($default !== NULL) {
+            return $default;
+        }
+
+        throw new Exception("Block variable is not set: $key");
     }
 
     /**
@@ -176,11 +189,12 @@ class Block
      *     // Create the values $food and $beverage in the view
      *     $view->set(array('food' => 'bread', 'beverage' => 'water'));
      *
-     * @param   mixed $key variable name or an array of variables
-     * @param   mixed $value value
+     * @param mixed $key variable name or an array of variables
+     * @param mixed $value value
      * @return  $this
      */
-    public function set($key, $value = NULL) {
+    public function set($key, $value = NULL)
+    {
         if (\is_array($key)) {
             foreach ($key as $name => $value) {
                 $this->_data[$name] = $value;
@@ -203,23 +217,26 @@ class Block
      *     // This reference can be accessed as $ref within the view
      *     $view->bind('ref', $bar);
      *
-     * @param   string $key variable name
-     * @param   mixed $value referenced variable
+     * @param string $key variable name
+     * @param mixed  $value referenced variable
      * @return  $this
      */
-    public function bind(string $key, & $value) {
+    public function bind(string $key, &$value)
+    {
         $this->_data[$key] =& $value;
 
         return $this;
     }
 
-    public function bind_global(string $key, & $value) {
-        Block::$_global_data[$key] = &$value;
+    public function bindGlobal(string $key, &$value)
+    {
+        self::$_global_data[$key] = &$value;
 
         return $this;
     }
 
-    public function loaded(): bool {
+    public function loaded(): bool
+    {
         return (bool)$this->_loaded;
     }
 
@@ -233,21 +250,23 @@ class Block
      * [!!] Global variables with the same key name as local variables will be
      * overwritten by the local variable.
      *
-     * @param   bool $force is force render needed
+     * @param bool $force is force render needed
      * @return  string
      * @uses    Block::capture
      */
-    public function render(bool $force = false): string {
+    public function render(bool $force = false): string
+    {
         if (!$this->_loaded && !$force) {
             return '';
         }
 
         if (empty($this->_file)) {
 
-            $this->_file = Mii::$app->blocks->get_block_php_file($this->__name);
+            $this->_file = Mii::$app->blocks->getBlockPhpFile($this->__name);
 
-            if($this->_file === null)
-                throw new Exception('Block '.$this->__name.' does not have a php file');
+            if ($this->_file === null) {
+                throw new Exception('Block ' . $this->__name . ' does not have a php file');
+            }
         }
 
         assert(
@@ -268,20 +287,21 @@ class Block
      * Captures the output that is generated when a view is included.
      * The view data will be extracted to make local variables.
      *
-     * @param   string $block_filename filename
-     * @throws \Exception
+     * @param string $block_filename filename
      * @return  string
+     * @throws \Exception
      */
-    protected function capture(string $block_filename): string {
+    protected function capture(string $block_filename): string
+    {
 
-        if(!empty($this->_data)) {
+        if (!empty($this->_data)) {
             // Import the view variables to local namespace
             \extract($this->_data, EXTR_OVERWRITE);
         }
 
-        if (!empty(Block::$_global_data)) {
+        if (!empty(self::$_global_data)) {
             // Import the global view variables to local namespace
-            \extract(Block::$_global_data, EXTR_SKIP | EXTR_REFS);
+            \extract(self::$_global_data, EXTR_SKIP | EXTR_REFS);
         }
 
         // Capture the view output

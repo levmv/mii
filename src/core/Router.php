@@ -32,7 +32,7 @@ class Router extends Component
         'path' => '[a-zA-Z0-9-_./]+'
     ];
 
-    protected $cache = 'opcache';
+    protected $cache = null;
 
     protected $cache_id = 'mii_core_router_routes';
 
@@ -56,12 +56,12 @@ class Router extends Component
 
         if ($this->cache) {
 
-            list($this->_routes_list, $this->_named_routes) = \Mii::$app->get($this->cache)->get($this->cache_id, [[], []]);
+            [$this->_routes_list, $this->_named_routes] = \Mii::$app->get($this->cache)->get($this->cache_id, [[], []]);
             if (empty($this->_routes_list))
-                $this->init_routes();
+                $this->initRoutes();
 
         } else {
-            $this->init_routes();
+            $this->initRoutes();
         }
     }
 
@@ -70,7 +70,7 @@ class Router extends Component
      * Process route list.
      * As result: $this->_routes_list and $this->_named_routes
      */
-    public function init_routes(): void
+    public function initRoutes(): void
     {
         $route_index = 0;
 
@@ -87,7 +87,7 @@ class Router extends Component
             $params = null;
             $name = false;
 
-            $is_static = ((\strpos($pattern, '{') === false AND \strpos($pattern, '(') === false));
+            $is_static = ((\strpos($pattern, '{') === false and \strpos($pattern, '(') === false));
 
             if (\is_array($value)) {
                 $result[static::R_PATH] = $value['path'];
@@ -109,7 +109,7 @@ class Router extends Component
             }
 
             if (!$is_static) {
-                $result[static::R_COMPILED] = $this->compile_route($pattern, $params);
+                $result[static::R_COMPILED] = $this->compileRoute($pattern, $params);
             }
 
             $this->_routes_list[] = $result;
@@ -126,7 +126,7 @@ class Router extends Component
         }
     }
 
-    protected function compile_route(string $pattern, array $parameters = null): string
+    protected function compileRoute(string $pattern, array $parameters = null): string
     {
         $parameters ??= $this->default_parameters;
 
@@ -163,7 +163,7 @@ class Router extends Component
         }
 
         foreach ($this->_routes_list as $index => $route) {
-            $result = $this->match_route($uri, $route);
+            $result = $this->matchRoute($uri, $route);
 
             if ($result !== false) {
                 $this->_current_route = $index;
@@ -174,7 +174,7 @@ class Router extends Component
         return false;
     }
 
-    protected function match_route(string $uri, array $route)
+    protected function matchRoute(string $uri, array $route)
     {
 
         if (empty($route[static::R_COMPILED])) {
@@ -270,10 +270,10 @@ class Router extends Component
 
 
             while (preg_match('#' . static::REGEX_KEY . '#', $replace, $match)) {
-                list($key, $param) = $match;
+                [$key, $param] = $match;
 
 
-                if ($params !== null AND isset($params[$param]) AND $params[$param] !== ($defaults[$param] ?? null)) {
+                if ($params !== null && isset($params[$param]) && $params[$param] !== ($defaults[$param] ?? null)) {
                     // Future optional params should be required
                     $provided_optional = TRUE;
 
@@ -301,7 +301,7 @@ class Router extends Component
 
 
         while (preg_match('#' . static::REGEX_KEY . '#', $uri, $match)) {
-            list($key, $param) = $match;
+            [$key, $param] = $match;
 
             if (!isset($params[$param])) {
                 // Look for a default

@@ -31,7 +31,7 @@ class Session extends Component
      * @return bool
      */
 
-    public function check_cookie(): bool
+    public function checkCookie(): bool
     {
         return isset($_COOKIE[$this->name]);
     }
@@ -65,7 +65,7 @@ class Session extends Component
     }
 
 
-    public function has($key)
+    public function has($key): bool
     {
         $this->open();
 
@@ -73,17 +73,19 @@ class Session extends Component
     }
 
 
-    public function open($id = null)
+    public function open($id = null): void
     {
 
-        if ($this->is_active())
+        if ($this->isActive()) {
             return;
+        }
 
-        if (\headers_sent())
+        if (\headers_sent()) {
             return;
+        }
 
         if ($this->lifetime > 0) {
-            \ini_set('session.gc_maxlifetime', (string) $this->lifetime);
+            \ini_set('session.gc_maxlifetime', (string)$this->lifetime);
         }
 
         // Sync up the session cookie with Cookie parameters
@@ -113,12 +115,10 @@ class Session extends Component
         // Write the session at shutdown
         \register_shutdown_function([$this, 'close']);
 
-        $this->update_flash_counters();
-
-        return;
+        $this->updateFlashCounters();
     }
 
-    public function is_active(): bool
+    public function isActive(): bool
     {
         return \session_status() === PHP_SESSION_ACTIVE;
     }
@@ -188,7 +188,7 @@ class Session extends Component
      */
     public function regenerate($delete_old = false): string
     {
-        if ($this->is_active()) {
+        if ($this->isActive()) {
             // Regenerate the session id
             @session_regenerate_id($delete_old);
         } else {
@@ -210,7 +210,7 @@ class Session extends Component
      */
     public function close(): void
     {
-        if ($this->is_active()) {
+        if ($this->isActive()) {
 
             // Set the last active timestamp
             $this->_data['last_active'] = time();
@@ -226,14 +226,14 @@ class Session extends Component
      */
     public function destroy(): void
     {
-        if ($this->is_active()) {
+        if ($this->isActive()) {
 
             session_unset();
             session_destroy();
             $this->_data = [];
 
             // Make sure the session cannot be restarted
-            \Mii::$app->request->delete_cookie($this->name);
+            \Mii::$app->request->deleteCookie($this->name);
         }
     }
 
@@ -254,7 +254,7 @@ class Session extends Component
     }
 
 
-    private function update_flash_counters(): void
+    private function updateFlashCounters(): void
     {
         $counters = $this->get($this->_flash, []);
         if (\is_array($counters)) {

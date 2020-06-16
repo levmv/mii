@@ -9,12 +9,12 @@ namespace mii\db;
  */
 trait SoftDelete
 {
-    protected static function prepare_query(SelectQuery $query) : SelectQuery
+    protected static function prepareQuery(SelectQuery $query): SelectQuery
     {
-        return parent::prepare_query($query->where('deleted', 'is', null));
+        return parent::prepareQuery($query->where('deleted', 'is', null));
     }
 
-    public static function find_deleted() : SelectQuery
+    public static function findDeleted(): SelectQuery
     {
         // TODO:: order_by
         return (new SelectQuery(static::class))
@@ -46,7 +46,7 @@ trait SoftDelete
             ->execute();
     }
 
-    public function real_delete() : void
+    public function realDelete(): void
     {
         parent::delete();
     }

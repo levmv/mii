@@ -49,7 +49,7 @@ class ResultTest extends DatabaseTestCase
 
     public function testArrayAccess2()
     {
-        $result = Item::find()->as_array()->limit(3)->get();
+        $result = Item::find()->asArray()->limit(3)->get();
 
         foreach($result as $item) {
             $this->assertIsArray($item);
@@ -71,7 +71,7 @@ class ResultTest extends DatabaseTestCase
         $result = Item::find()
             ->where('id', 'in', [10,15,20])
             ->get()
-            ->index_by('id')
+            ->indexBy('id')
             ->all();
 
         $this->assertIsArray($result);
@@ -83,9 +83,9 @@ class ResultTest extends DatabaseTestCase
 
         $result = Item::find()
             ->where('id', 'in', [10,20])
-            ->as_array()
+            ->asArray()
             ->get()
-            ->index_by('id')
+            ->indexBy('id')
             ->all();
 
         $this->assertIsArray($result);
@@ -101,7 +101,7 @@ class ResultTest extends DatabaseTestCase
 
         $result = Item::find()->where('id', 'in', [11,12,13])->get();
 
-        $this->assertSame([11,12,13], $result->column_values('id'));
+        $this->assertSame([11,12,13], $result->columnValues('id'));
     }
 
     public function testScalar()

@@ -70,11 +70,12 @@ class HTML
      *
      *     echo HTML::chars($username);
      *
-     * @param   string $value string to convert
-     * @param   boolean $double_encode encode existing entities
+     * @param string  $value string to convert
+     * @param boolean $double_encode encode existing entities
      * @return  string
      */
-    public static function chars($value, $double_encode = TRUE) {
+    public static function chars($value, $double_encode = TRUE)
+    {
         return \htmlspecialchars((string)$value, ENT_QUOTES, 'utf-8', $double_encode);
     }
 
@@ -85,15 +86,17 @@ class HTML
      *
      *     echo HTML::entities($username);
      *
-     * @param   string $value string to convert
-     * @param   boolean $double_encode encode existing entities
+     * @param string  $value string to convert
+     * @param boolean $double_encode encode existing entities
      * @return  string
      */
-    public static function entities($value, $double_encode = TRUE) {
+    public static function entities($value, $double_encode = TRUE)
+    {
         return htmlentities((string)$value, ENT_QUOTES, 'utf-8', $double_encode);
     }
 
-    public static function tag($name, $content = '', array $attributes = null) {
+    public static function tag($name, $content = '', array $attributes = null)
+    {
         $html = "<$name" . static::attributes($attributes) . '>';
         return isset(static::$void_elements[strtolower($name)]) ? $html : "$html$content</$name>";
     }
@@ -105,17 +108,18 @@ class HTML
      *
      *     echo HTML::anchor('/user/profile', 'My Profile');
      *
-     * @param   string $uri URL or URI string
-     * @param   string $title link text
-     * @param   array $attributes HTML anchor attributes
-     * @param   mixed $protocol protocol to pass to URL::base()
-     * @param   boolean $index include the index page
+     * @param string  $uri URL or URI string
+     * @param string  $title link text
+     * @param array   $attributes HTML anchor attributes
+     * @param mixed   $protocol protocol to pass to URL::base()
+     * @param boolean $index include the index page
      * @return  string
      * @uses    URL::base
      * @uses    URL::site
      * @uses    HTML::attributes
      */
-    public static function anchor($uri, $title = NULL, array $attributes = NULL, $protocol = NULL) {
+    public static function anchor($uri, $title = NULL, array $attributes = NULL, $protocol = NULL)
+    {
         if ($title === NULL) {
             // Use the URI as the title
             $title = $uri;
@@ -126,7 +130,7 @@ class HTML
             $uri = URL::base($protocol);
         } else {
             if (strpos($uri, '://') !== FALSE) {
-                if (HTML::$windowed_urls === TRUE AND empty($attributes['target'])) {
+                if (self::$windowed_urls === TRUE && empty($attributes['target'])) {
                     // Make the link open in a new window
                     $attributes['target'] = '_blank';
                 }
@@ -139,7 +143,7 @@ class HTML
         // Add the sanitized link to the attributes
         $attributes['href'] = $uri;
 
-        return '<a' . HTML::attributes($attributes) . '>' . $title . '</a>';
+        return '<a' . self::attributes($attributes) . '>' . $title . '</a>';
     }
 
 
@@ -148,15 +152,16 @@ class HTML
      *
      *     echo HTML::style('media/css/screen.css');
      *
-     * @param   string $file file name
-     * @param   array $attributes default attributes
-     * @param   mixed $protocol protocol to pass to URL::base()
-     * @param   boolean $index include the index page
+     * @param string  $file file name
+     * @param array   $attributes default attributes
+     * @param mixed   $protocol protocol to pass to URL::base()
+     * @param boolean $index include the index page
      * @return  string
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function style($file, array $attributes = NULL, $protocol = NULL) {
+    public static function style($file, array $attributes = NULL, $protocol = NULL)
+    {
         if (strpos($file, '://') === FALSE) {
             // Add the base URL
             $file = URL::site($file, $protocol);
@@ -171,7 +176,7 @@ class HTML
         // Set the stylesheet type
         $attributes['type'] = 'text/css';
 
-        return '<link' . HTML::attributes($attributes) . ' />';
+        return '<link' . self::attributes($attributes) . ' />';
     }
 
     /**
@@ -179,15 +184,16 @@ class HTML
      *
      *     echo HTML::script('media/js/jquery.min.js');
      *
-     * @param   string $file file name
-     * @param   array $attributes default attributes
-     * @param   mixed $protocol protocol to pass to URL::base()
-     * @param   boolean $index include the index page
+     * @param string  $file file name
+     * @param array   $attributes default attributes
+     * @param mixed   $protocol protocol to pass to URL::base()
+     * @param boolean $index include the index page
      * @return  string
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function script($file, array $attributes = NULL, $protocol = NULL) {
+    public static function script($file, array $attributes = NULL, $protocol = NULL)
+    {
         if (\strpos($file, '://') === FALSE && \strpos($file, '//') !== 0) {
             // Add the base URL
             $file = URL::site($file, $protocol);
@@ -196,7 +202,7 @@ class HTML
         // Set the script link
         $attributes['src'] = $file;
 
-        return '<script' . HTML::attributes($attributes) . '></script>';
+        return '<script' . self::attributes($attributes) . '></script>';
     }
 
     /**
@@ -204,14 +210,15 @@ class HTML
      *
      *     echo HTML::image('media/img/logo.png', array('alt' => 'My Company'));
      *
-     * @param   string $file file name
-     * @param   array $attributes default attributes
-     * @param   mixed $protocol protocol to pass to URL::base()
+     * @param string $file file name
+     * @param array  $attributes default attributes
+     * @param mixed  $protocol protocol to pass to URL::base()
      * @return  string
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function image($file, array $attributes = NULL, $protocol = NULL) {
+    public static function image($file, array $attributes = NULL, $protocol = NULL)
+    {
         if (strpos($file, '://') === FALSE) {
             // Add the base URL
             $file = URL::site($file, $protocol);
@@ -220,7 +227,7 @@ class HTML
         // Add the image link
         $attributes['src'] = $file;
 
-        return '<img' . HTML::attributes($attributes) . ' />';
+        return '<img' . self::attributes($attributes) . ' />';
     }
 
     /**
@@ -229,15 +236,16 @@ class HTML
      *
      *     echo '<div'.HTML::attributes($attrs).'>'.$content.'</div>';
      *
-     * @param   array $attributes attribute list
+     * @param array $attributes attribute list
      * @return  string
      */
-    public static function attributes(array $attributes = NULL) {
+    public static function attributes(array $attributes = NULL)
+    {
         if (empty($attributes))
             return '';
 
         $sorted = array();
-        foreach (HTML::$attribute_order as $key) {
+        foreach (self::$attribute_order as $key) {
             if (isset($attributes[$key])) {
                 // Add the attribute to the sorted list
                 $sorted[$key] = $attributes[$key];
@@ -263,9 +271,9 @@ class HTML
             // Add the attribute key
             $compiled .= ' ' . $key;
 
-            if ($value OR $value === '0') {
+            if ($value || $value === '0') {
                 // Add the attribute value
-                $compiled .= '="' . HTML::chars($value) . '"';
+                $compiled .= '="' . self::chars($value) . '"';
             }
         }
 
@@ -284,14 +292,15 @@ class HTML
      *     // When "file" inputs are present, you must include the "enctype"
      *     echo Form::open(NULL, array('enctype' => 'multipart/form-data'));
      *
-     * @param   mixed $action form action, defaults to the current request URI, or [Request] class to use
-     * @param   array $attributes html attributes
+     * @param mixed $action form action, defaults to the current request URI, or [Request] class to use
+     * @param array $attributes html attributes
      * @return  string
      * @uses    Request::instance
      * @uses    URL::site
      * @uses    HTML::attributes
      */
-    public static function open($action = NULL, array $attributes = NULL) {
+    public static function open($action = NULL, array $attributes = NULL)
+    {
         if ($action instanceof Request) {
             // Use the current URI
             $action = $action->uri();
@@ -316,7 +325,7 @@ class HTML
             $attributes['method'] = 'post';
         }
 
-        return '<form' . HTML::attributes($attributes) . '>';
+        return '<form' . self::attributes($attributes) . '>';
     }
 
     /**
@@ -326,7 +335,8 @@ class HTML
      *
      * @return  string
      */
-    public static function close() {
+    public static function close()
+    {
         return '</form>';
     }
 
@@ -336,13 +346,14 @@ class HTML
      *
      *     echo Form::input('username', $username);
      *
-     * @param   string $name input name
-     * @param   string $value input value
-     * @param   array $attributes html attributes
+     * @param string $name input name
+     * @param string $value input value
+     * @param array  $attributes html attributes
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function input($name, $value = NULL, array $attributes = NULL) {
+    public static function input($name, $value = NULL, array $attributes = NULL)
+    {
         // Set the input name
         $attributes['name'] = $name;
 
@@ -354,7 +365,7 @@ class HTML
             $attributes['type'] = 'text';
         }
 
-        return '<input' . HTML::attributes($attributes) . '>';
+        return '<input' . self::attributes($attributes) . '>';
     }
 
     /**
@@ -362,16 +373,17 @@ class HTML
      *
      *     echo Form::hidden('csrf', $token);
      *
-     * @param   string $name input name
-     * @param   string $value input value
-     * @param   array $attributes html attributes
+     * @param string $name input name
+     * @param string $value input value
+     * @param array  $attributes html attributes
      * @return  string
      * @uses    Form::input
      */
-    public static function hidden($name, $value = NULL, array $attributes = NULL) {
+    public static function hidden($name, $value = NULL, array $attributes = NULL)
+    {
         $attributes['type'] = 'hidden';
 
-        return HTML::input($name, $value, $attributes);
+        return self::input($name, $value, $attributes);
     }
 
     /**
@@ -379,16 +391,17 @@ class HTML
      *
      *     echo Form::password('password');
      *
-     * @param   string $name input name
-     * @param   string $value input value
-     * @param   array $attributes html attributes
+     * @param string $name input name
+     * @param string $value input value
+     * @param array  $attributes html attributes
      * @return  string
      * @uses    Form::input
      */
-    public static function password($name, $value = NULL, array $attributes = NULL) {
+    public static function password($name, $value = NULL, array $attributes = NULL)
+    {
         $attributes['type'] = 'password';
 
-        return HTML::input($name, $value, $attributes);
+        return self::input($name, $value, $attributes);
     }
 
     /**
@@ -396,15 +409,16 @@ class HTML
      *
      *     echo Form::file('image');
      *
-     * @param   string $name input name
-     * @param   array $attributes html attributes
+     * @param string $name input name
+     * @param array  $attributes html attributes
      * @return  string
      * @uses    Form::input
      */
-    public static function file($name, array $attributes = NULL) {
+    public static function file($name, array $attributes = NULL)
+    {
         $attributes['type'] = 'file';
 
-        return HTML::input($name, NULL, $attributes);
+        return self::input($name, NULL, $attributes);
     }
 
     /**
@@ -412,14 +426,15 @@ class HTML
      *
      *     echo Form::checkbox('remember_me', 1, (bool) $remember);
      *
-     * @param   string $name input name
-     * @param   string $value input value
-     * @param   boolean $checked checked status
-     * @param   array $attributes html attributes
+     * @param string  $name input name
+     * @param string  $value input value
+     * @param boolean $checked checked status
+     * @param array   $attributes html attributes
      * @return  string
      * @uses    Form::input
      */
-    public static function checkbox($name, $value = NULL, $checked = FALSE, array $attributes = NULL) {
+    public static function checkbox($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
+    {
         $attributes['type'] = 'checkbox';
 
         if ($checked === TRUE) {
@@ -427,7 +442,7 @@ class HTML
             $attributes[] = 'checked';
         }
 
-        return HTML::input($name, $value, $attributes);
+        return self::input($name, $value, $attributes);
     }
 
     /**
@@ -436,14 +451,15 @@ class HTML
      *     echo Form::radio('like_cats', 1, $cats);
      *     echo Form::radio('like_cats', 0, ! $cats);
      *
-     * @param   string $name input name
-     * @param   string $value input value
-     * @param   boolean $checked checked status
-     * @param   array $attributes html attributes
+     * @param string  $name input name
+     * @param string  $value input value
+     * @param boolean $checked checked status
+     * @param array   $attributes html attributes
      * @return  string
      * @uses    Form::input
      */
-    public static function radio($name, $value = NULL, $checked = FALSE, array $attributes = NULL) {
+    public static function radio($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
+    {
         $attributes['type'] = 'radio';
 
         if ($checked === TRUE) {
@@ -451,7 +467,7 @@ class HTML
             $attributes[] = 'checked';
         }
 
-        return HTML::input($name, $value, $attributes);
+        return self::input($name, $value, $attributes);
     }
 
     /**
@@ -459,22 +475,23 @@ class HTML
      *
      *     echo Form::textarea('about', $about);
      *
-     * @param   string $name textarea name
-     * @param   string $body textarea body
-     * @param   array $attributes html attributes
-     * @param   boolean $double_encode encode existing HTML characters
+     * @param string  $name textarea name
+     * @param string  $body textarea body
+     * @param array   $attributes html attributes
+     * @param boolean $double_encode encode existing HTML characters
      * @return  string
      * @uses    HTML::attributes
      * @uses    HTML::chars
      */
-    public static function textarea($name, $body = '', array $attributes = NULL, $double_encode = TRUE) {
+    public static function textarea($name, $body = '', array $attributes = NULL, $double_encode = TRUE)
+    {
         // Set the input name
         $attributes['name'] = $name;
 
         // Add default rows and cols attributes (required)
         $attributes += array('rows' => 10, 'cols' => 50);
 
-        return '<textarea' . HTML::attributes($attributes) . '>' . HTML::chars($body, $double_encode) . '</textarea>';
+        return '<textarea' . self::attributes($attributes) . '>' . self::chars($body, $double_encode) . '</textarea>';
     }
 
     /**
@@ -484,14 +501,15 @@ class HTML
      *
      * [!!] Support for multiple selected options was added in v3.0.7.
      *
-     * @param   string $name input name
-     * @param   array $options available options
-     * @param   mixed $selected selected option string, or an array of selected options
-     * @param   array $attributes html attributes
+     * @param string $name input name
+     * @param array  $options available options
+     * @param mixed  $selected selected option string, or an array of selected options
+     * @param array  $attributes html attributes
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function select($name, array $options = NULL, $selected = NULL, array $attributes = NULL) {
+    public static function select($name, array $options = NULL, $selected = NULL, array $attributes = NULL)
+    {
         // Set the input name
         $attributes['name'] = $name;
 
@@ -518,10 +536,10 @@ class HTML
             foreach ($options as $value => $name) {
                 if (\is_array($name)) {
                     // Create a new optgroup
-                    $group = array('label' => $value);
+                    $group = ['label' => $value];
 
                     // Create a new list of options
-                    $_options = array();
+                    $_options = [];
 
                     foreach ($name as $_value => $_name) {
                         $_value = HTML::chars($_value);
@@ -534,16 +552,16 @@ class HTML
                         }
 
                         // Change the option to the HTML string
-                        $_options[] = '<option value=' . $_value . '>' . HTML::chars($_name, FALSE) . '</option>';
+                        $_options[] = '<option value=' . $_value . '>' . self::chars($_name, FALSE) . '</option>';
                     }
 
                     // Compile the options into a string
                     $_options = "\n" . implode("\n", $_options) . "\n";
 
-                    $r_options[] = '<optgroup' . HTML::attributes($group) . '>' . $_options . '</optgroup>';
+                    $r_options[] = '<optgroup' . self::attributes($group) . '>' . $_options . '</optgroup>';
                 } else {
                     // Force value to be string
-                    $value = HTML::chars($value);
+                    $value = self::chars($value);
 
                     if (\in_array($value, $selected)) {
                         // This option is selected
@@ -553,7 +571,7 @@ class HTML
                     }
 
                     // Change the option to the HTML string
-                    $r_options[] = '<option value=' . $value . '>' . HTML::chars($name, FALSE) . '</option>';
+                    $r_options[] = '<option value=' . $value . '>' . self::chars($name, FALSE) . '</option>';
                 }
             }
 
@@ -562,7 +580,7 @@ class HTML
         }
 
 
-        return '<select' . HTML::attributes($attributes) . '>' . $options . '</select>';
+        return '<select' . self::attributes($attributes) . '>' . $options . '</select>';
     }
 
     /**
@@ -570,16 +588,17 @@ class HTML
      *
      *     echo Form::submit(NULL, 'Login');
      *
-     * @param   string $name input name
-     * @param   string $value input value
-     * @param   array $attributes html attributes
+     * @param string $name input name
+     * @param string $value input value
+     * @param array  $attributes html attributes
      * @return  string
      * @uses    Form::input
      */
-    public static function submit($name, $value, array $attributes = NULL) {
+    public static function submit($name, $value, array $attributes = NULL)
+    {
         $attributes['type'] = 'submit';
 
-        return HTML::input($name, $value, $attributes);
+        return self::input($name, $value, $attributes);
     }
 
 
@@ -589,17 +608,18 @@ class HTML
      *
      *     echo Form::button('save', 'Save Profile', array('type' => 'submit'));
      *
-     * @param   string $name input name
-     * @param   string $body input value
-     * @param   array $attributes html attributes
+     * @param string $name input name
+     * @param string $body input value
+     * @param array  $attributes html attributes
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function button($name, $body, array $attributes = NULL) {
+    public static function button($name, $body, array $attributes = NULL)
+    {
         // Set the input name
         $attributes['name'] = $name;
 
-        return '<button' . HTML::attributes($attributes) . '>' . $body . '</button>';
+        return '<button' . self::attributes($attributes) . '>' . $body . '</button>';
     }
 
     /**
@@ -607,13 +627,14 @@ class HTML
      *
      *     echo Form::label('username', 'Username');
      *
-     * @param   string $input target input
-     * @param   string $text label text
-     * @param   array $attributes html attributes
+     * @param string $input target input
+     * @param string $text label text
+     * @param array  $attributes html attributes
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function label($input, $text = NULL, array $attributes = NULL) {
+    public static function label($input, $text = NULL, array $attributes = NULL)
+    {
         if ($text === NULL) {
             // Use the input name as the text
             $text = ucwords(preg_replace('/[\W_]+/', ' ', $input));
@@ -622,24 +643,25 @@ class HTML
         // Set the label target
         $attributes['for'] = $input;
 
-        return '<label' . HTML::attributes($attributes) . '>' . $text . '</label>';
+        return '<label' . self::attributes($attributes) . '>' . $text . '</label>';
     }
 
 
-    public static function csrf_meta() {
+    public static function csrfMeta()
+    {
         $token = \Mii::$app->get('request')->csrf_token();
         $name = \Mii::$app->get('request')->csrf_token_name;
         return "<meta name='csrf-token-name' content='$name'>\n<meta name='csrf-token' content='$token'>";
     }
 
-    public static function text_avatar($name, array $attributes = []) : string
+    public static function text_avatar($name, array $attributes = []): string
     {
         $fl = '';
 
-        if(is_array($name)) {
-            $fl = \mb_strtoupper(\mb_substr($name[0], 0, 1)).
+        if (is_array($name)) {
+            $fl = \mb_strtoupper(\mb_substr($name[0], 0, 1)) .
                 \mb_strtoupper(\mb_substr($name[1], 0, 1));
-            $name = $name[0].' '.$name[1];
+            $name = $name[0] . ' ' . $name[1];
         } else {
             $words = \preg_split('/\W+/u', $name, -1, PREG_SPLIT_NO_EMPTY);
 
@@ -649,10 +671,10 @@ class HTML
             }
         }
 
-        $color =  'hsl(' . (\crc32($name) % 360) . ', 34%, 77%)';
+        $color = 'hsl(' . (\crc32($name) % 360) . ', 34%, 77%)';
 
         $params = [
-            'style' => 'background-color:'.$color
+            'style' => 'background-color:' . $color
         ];
 
         return static::tag('span', $fl, \array_replace($params, $attributes));

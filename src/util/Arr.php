@@ -14,10 +14,11 @@ class Arr
      *     // Returns false
      *     Arr::isAssoc('foo', 'bar');
      *
-     * @param   array $array array to check
+     * @param array $array array to check
      * @return  boolean
      */
-    public static function is_assoc(array $array) {
+    public static function isAssoc(array $array)
+    {
         // Keys of the array
         $keys = array_keys($array);
 
@@ -32,13 +33,14 @@ class Arr
      *     // Get the value of $array['foo']['bar']
      *     $value = Arr::path($array, 'foo.bar');
      *
-     * @param   array $array array to search
-     * @param   mixed $path key path string (delimiter separated) or array of keys
-     * @param   mixed $default default value if the path is not set
-     * @param   string $delimiter key path delimiter
+     * @param mixed  $array array to search
+     * @param mixed  $path key path string (delimiter separated) or array of keys
+     * @param mixed  $default default value if the path is not set
+     * @param string $delimiter key path delimiter
      * @return  mixed
      */
-    public static function path($array, $path, $default = null, $delimiter = '.') {
+    public static function path($array, $path, $default = null, $delimiter = '.')
+    {
         if (!\is_array($array) && !\is_object($array) && !($array instanceof \Traversable)) {
             // This is not an array!
             return $default;
@@ -63,10 +65,10 @@ class Arr
         do {
             $key = \array_shift($keys);
 
-           /* if (\ctype_digit($key)) {
-                // Make the key an integer
-                $key = (int)$key;
-            }*/
+            /* if (\ctype_digit($key)) {
+                 // Make the key an integer
+                 $key = (int)$key;
+             }*/
 
             if (isset($array[$key])) {
                 if (!$keys) {
@@ -74,11 +76,9 @@ class Arr
                     return $array[$key];
                 }
 
-                if (!is_array($array[$key])) {
-                    if(!\is_iterable($array[$key])) {
-                        // Unable to dig deeper
-                        break;
-                    }
+                if (!is_array($array[$key]) && !\is_iterable($array[$key])) {
+                    // Unable to dig deeper
+                    break;
                 }
                 // Dig down into the next part of the path
                 $array = $array[$key];
@@ -95,13 +95,14 @@ class Arr
     /**
      * Set a value on an array by path.
      *
-     * @see Arr::path()
-     * @param array $array Array to update
+     * @param array  $array Array to update
      * @param string $path Path
-     * @param mixed $value Value to set
+     * @param mixed  $value Value to set
      * @param string $delimiter Path delimiter
+     * @see Arr::path()
      */
-    public static function set_path(&$array, $path, $value, $delimiter = '.'): void {
+    public static function setPath(&$array, $path, $value, $delimiter = '.'): void
+    {
 
         // The path has already been separated into keys
         $keys = $path;
@@ -142,15 +143,16 @@ class Arr
      *     $data = array('level1' => array('level2a' => 'value 1', 'level2b' => 'value 2'));
      *     Arr::extract($data, array('level1.level2a', 'password'));
      *
-     * @param   array $array array to extract paths from
-     * @param   array $paths list of path
-     * @param   mixed $default default value
+     * @param array $array array to extract paths from
+     * @param array $paths list of path
+     * @param mixed $default default value
      * @return  array
      */
-    public static function extract($array, array $paths, $default = null) {
+    public static function extract($array, array $paths, $default = null)
+    {
         $found = [];
         foreach ($paths as $path) {
-            static::set_path($found, $path, static::path($array, $path, $default));
+            static::setPath($found, $path, static::path($array, $path, $default));
         }
 
         return $found;
@@ -175,12 +177,13 @@ class Arr
      * [!!] Unlike `array_map`, this method requires a callback and will only map
      * a single array.
      *
-     * @param   mixed $callbacks array of callbacks to apply to every element in the array
-     * @param   array $array array to map
-     * @param   array $keys array of keys to apply to
+     * @param mixed $callbacks array of callbacks to apply to every element in the array
+     * @param array $array array to map
+     * @param array $keys array of keys to apply to
      * @return  array
      */
-    public static function map($callbacks, $array, $keys = null) {
+    public static function map($callbacks, $array, $keys = null)
+    {
         foreach ($array as $key => $val) {
             if (\is_array($val)) {
                 $array[$key] = static::map($callbacks, $array[$key]);
@@ -214,12 +217,13 @@ class Arr
      *     // The output of $john will now be:
      *     array('name' => 'mary', 'children' => array('fred', 'paul', 'sally', 'jane'))
      *
-     * @param   array $array1 initial array
-     * @param   array $array2,... array to merge
+     * @param array $array1 initial array
+     * @param array $array2,... array to merge
      * @return  array
      */
-    public static function merge($array1, $array2) {
-        if (static::is_assoc($array2)) {
+    public static function merge($array1, $array2)
+    {
+        if (static::isAssoc($array2)) {
             foreach ($array2 as $key => $value) {
                 if (\is_array($value)
                     && isset($array1[$key])
@@ -240,7 +244,7 @@ class Arr
 
         if (\func_num_args() > 2) {
             foreach (\array_slice(\func_get_args(), 2) as $array2) {
-                if (static::is_assoc($array2)) {
+                if (static::isAssoc($array2)) {
                     foreach ($array2 as $key => $value) {
                         if (\is_array($value)
                             && isset($array1[$key])
@@ -277,11 +281,12 @@ class Arr
      *     // The output of $array will now be:
      *     array('name' => 'jack', 'mood' => 'happy', 'food' => 'tacos')
      *
-     * @param   array $array1 master array
-     * @param   array $array2 input arrays that will overwrite existing values
+     * @param array $array1 master array
+     * @param array $array2 input arrays that will overwrite existing values
      * @return  array
      */
-    public static function overwrite($array1, $array2) {
+    public static function overwrite($array1, $array2)
+    {
         foreach (\array_intersect_key($array2, $array1) as $key => $value) {
             $array1[$key] = $value;
         }
@@ -311,34 +316,34 @@ class Arr
      *
      * [!!] The keys of array values will be discarded.
      *
-     * @param   array $array array to flatten
+     * @param array $array array to flatten
      * @return  array
      */
-    public static function flatten($array) {
-        $is_assoc = static::is_assoc($array);
+    public static function flatten($array)
+    {
+        $is_assoc = static::isAssoc($array);
 
         $flat = array();
         foreach ($array as $key => $value) {
             if (\is_array($value)) {
                 $flat = \array_merge($flat, static::flatten($value));
+            } else if ($is_assoc) {
+                $flat[$key] = $value;
             } else {
-                if ($is_assoc) {
-                    $flat[$key] = $value;
-                } else {
-                    $flat[] = $value;
-                }
+                $flat[] = $value;
             }
         }
         return $flat;
     }
 
 
-    public static function to_array($object, array $properties = [], bool $recursive = true) {
+    public static function toArray($object, array $properties = [], bool $recursive = true)
+    {
         if (\is_array($object)) {
             if ($recursive) {
                 foreach ($object as $key => $value) {
                     if (\is_array($value) || \is_object($value)) {
-                        $object[$key] = static::to_array($value, $properties, true);
+                        $object[$key] = static::toArray($value, $properties, true);
                     }
                 }
             }
@@ -351,16 +356,14 @@ class Arr
                 foreach ($properties as $key => $name) {
                     if (\is_int($key)) {
                         $result[$name] = $object->$name;
-                    } else {
-                        if (\is_string($name)) {
-                            $result[$key] = $object->$name;
-                        } elseif ($name instanceof \Closure) {
-                            $result[$key] = $name($object);
-                        }
+                    } else if (\is_string($name)) {
+                        $result[$key] = $object->$name;
+                    } elseif ($name instanceof \Closure) {
+                        $result[$key] = $name($object);
                     }
                 }
 
-                return $recursive ? static::to_array($result, $properties) : $result;
+                return $recursive ? static::toArray($result, $properties) : $result;
             }
 
             $result = [];
@@ -368,7 +371,7 @@ class Arr
                 $result[$key] = $value;
             }
 
-            return $recursive ? static::to_array($result) : $result;
+            return $recursive ? static::toArray($result) : $result;
         }
 
         return $object;

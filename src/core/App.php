@@ -8,7 +8,8 @@ use Mii;
  * Class App
  * @property \mii\cache\Cache $cache The cache application component.
  * @property \mii\db\Database $db The database connection.
- * @property ErrorHandler $error;
+ * @property ErrorHandler     $error;
+ * @noinspection PhpFullyQualifiedNameUsageInspection
  */
 abstract class App
 {
@@ -32,17 +33,20 @@ abstract class App
         $this->_config = $config;
 
         if (isset($this->_config['app'])) {
-            foreach ($this->_config['app'] as $key => $value)
+            foreach ($this->_config['app'] as $key => $value) {
                 $this->$key = $value;
+            }
         }
 
-        if ($this->locale !== null)
+        if ($this->locale !== null) {
             \setlocale(LC_TIME, $this->locale);
+        }
 
-        if ($this->timezone !== null)
+        if ($this->timezone !== null) {
             \date_default_timezone_set($this->timezone);
+        }
 
-        $default_components = $this->default_components();
+        $default_components = $this->defaultComponents();
 
         if (!isset($this->_config['components'])) {
             $this->_config['components'] = [];
@@ -59,16 +63,16 @@ abstract class App
         $this->error->register();
     }
 
-    abstract function run();
+    abstract public function run();
 
-    abstract function default_components(): array;
+    abstract protected function defaultComponents(): array;
 
     private array $_instances = [];
 
     public function __get($id)
     {
         if (!isset($this->_instances[$id])) {
-            $this->_instances[$id] = $this->load_component($id);
+            $this->_instances[$id] = $this->loadComponent($id);
         }
 
         return $this->_instances[$id];
@@ -79,7 +83,7 @@ abstract class App
     {
 
         if (!isset($this->_instances[$id])) {
-            $this->_instances[$id] = $this->load_component($id);
+            $this->_instances[$id] = $this->loadComponent($id);
         }
 
         return $this->_instances[$id];
@@ -96,7 +100,7 @@ abstract class App
         return $this->has($name);
     }
 
-    protected function load_component($id)
+    protected function loadComponent($id)
     {
 
         $params = [];
@@ -118,7 +122,7 @@ abstract class App
         } elseif (\is_string($this->_config['components'][$id])) {
             $class = $this->_config['components'][$id];
             $this->_config['components'][$id] = null;
-        } elseif (\is_object($this->_config['components'][$id]) AND $this->_config['components'][$id] instanceof \Closure) {
+        } elseif (\is_object($this->_config['components'][$id]) && $this->_config['components'][$id] instanceof \Closure) {
 
             return \call_user_func($this->_config['components'][$id], []);
 
@@ -132,8 +136,8 @@ abstract class App
             return new $class($params);
         }
 
-        if (\is_object($class) AND $class instanceof \Closure) {
-            return \call_user_func($class, $params);
+        if (\is_object($class) && $class instanceof \Closure) {
+            return $class($params);
         }
 
         throw new \Exception("Cant load component \"$id\" because of wrong type: " . \gettype($class));

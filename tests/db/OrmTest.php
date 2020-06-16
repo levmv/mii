@@ -34,23 +34,23 @@ class OrmTest extends DatabaseTestCase
 
         $item->name = 'bar';
         $this->assertTrue($item->changed('name'));
-        $this->assertTrue($item->was_changed('name'));
+        $this->assertTrue($item->wasChanged('name'));
         $this->assertSame(1, $item->update());
         $this->assertFalse($item->changed('name'));
-        $this->assertTrue($item->was_changed('name'));
+        $this->assertTrue($item->wasChanged('name'));
 
         $item = Item::one(2);
         $this->assertFalse($item->changed('name'));
         $item->name = 'bar';
         $item->update();
         $this->assertFalse($item->changed('name'));
-        $this->assertTrue($item->was_changed('name'));
+        $this->assertTrue($item->wasChanged('name'));
 
         $item = Item::one(1);
         $item->name = 'bar';
         $this->assertFalse($item->changed('name'));
         $this->assertSame(0, $item->update());
-        $this->assertFalse($item->was_changed('name'));
+        $this->assertFalse($item->wasChanged('name'));
     }
 
     public function testFind()
@@ -97,7 +97,7 @@ class OrmTest extends DatabaseTestCase
         $a->create();
 
         $this->assertSame($arr, $a->data);
-        $this->assertTrue($a->was_changed('data'));
+        $this->assertTrue($a->wasChanged('data'));
 
         $a = Article::one(1);
         $a->data = $arr;
@@ -131,7 +131,7 @@ class OrmTest extends DatabaseTestCase
         $this->assertSame([
             'id' => 3,
             'name' => 'foo'
-        ], $item->to_array());
+        ], $item->toArray());
 
         $item = new Article([
             'id' => 3,
@@ -141,7 +141,7 @@ class OrmTest extends DatabaseTestCase
         $this->assertSame([
             'id' => 3,
             'data' => [1]
-        ], $item->to_array());
+        ], $item->toArray());
 
     }
 

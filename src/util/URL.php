@@ -34,21 +34,21 @@ class URL
         // Checks if it is part of active path
         $link_pieces = \explode('/', $link);
 
-        for ($i = 0; $i < \count($link_pieces); $i++) {
-            if ((isset(self::$uri_pieces[$i]) AND self::$uri_pieces[$i] !== $link_pieces[$i])
-                OR empty(self::$uri_pieces[$i])) {
+        for ($i = 0, $iMax = \count($link_pieces); $i < $iMax; $i++) {
+            if ((isset(self::$uri_pieces[$i]) && self::$uri_pieces[$i] !== $link_pieces[$i])
+                || empty(self::$uri_pieces[$i])) {
                 return 0;
             }
         }
         return self::ACTIVE;
     }
 
-    public static function is_current(string $link) : bool
+    public static function isCurrent(string $link): bool
     {
         return self::status($link) === self::CURRENT;
     }
 
-    public static function is_active(string $link) : bool
+    public static function isActive(string $link): bool
     {
         return self::status($link) === self::ACTIVE;
     }
@@ -80,13 +80,14 @@ class URL
         }
 
         if ($protocol === TRUE) {
-            return \Mii::$app->request->get_hostname() . $base;
+            return \Mii::$app->request->getHostname() . $base;
         }
 
-        if ($protocol !== '//')
-            $protocol = $protocol . '://';
+        if ($protocol !== '//') {
+            $protocol .= '://';
+        }
 
-        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+        $domain = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'];
 
         return $protocol . $domain . $base;
     }
@@ -97,7 +98,7 @@ class URL
      *     echo URL::site('foo/bar');
      *
      * @param string $uri Site URI to convert
-     * @param mixed $protocol Protocol string or true
+     * @param mixed  $protocol Protocol string or true
      * @return  string
      */
     public static function site(string $uri = '', $protocol = null): string
@@ -111,7 +112,7 @@ class URL
         }
 
         // Concat the URL
-        return URL::base($protocol) . $path;
+        return self::base($protocol) . $path;
     }
 
     /**
@@ -138,7 +139,7 @@ class URL
      *
      * [!!] Parameters with a NULL value are left out.
      *
-     * @param array $params Array of GET parameters
+     * @param array   $params Array of GET parameters
      * @param boolean $use_get Include current request GET parameters
      * @return  string
      */
@@ -167,19 +168,19 @@ class URL
     }
 
 
-    static public function current(array $params = null): string
+    public static function current(array $params = null): string
     {
         return static::site(\Mii::$app->request->uri()) . static::query($params, true);
     }
 
 
-    static public function back_url(string $default = null): string
+    public static function back_url(string $default = null): string
     {
         if (isset($_GET['back_url']))
             return \urldecode($_GET['back_url']);
 
         if ($default === null) {
-            return URL::current();
+            return self::current();
         }
 
         return $default;

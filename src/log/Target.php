@@ -71,7 +71,7 @@ abstract class Target extends Component
 
     abstract public function process(array $messages);
 
-    public function format_message(array $message): string
+    public function formatMessage(array $message): string
     {
         [$msg, $level, $category, $timestamp] = $message;
 
@@ -88,16 +88,16 @@ abstract class Target extends Component
                     if (\Mii::$app instanceof App) {
                         $extended = sprintf("\n%s%s %s",
                             \Mii::$app->request->method(),
-                            \Mii::$app->request->is_ajax() ? '[Ajax]' : '',
+                            \Mii::$app->request->isAjax() ? '[Ajax]' : '',
                             $_SERVER['REQUEST_URI']
                         );
                     }
 
-                    $extended .= "\n" . \mii\util\Debug::short_text_trace($msg->getTrace());
+                    $extended .= "\n" . \mii\util\Debug::shortTextTrace($msg->getTrace());
                 }
 
                 if ($msg instanceof \mii\web\NotFoundHttpException) {
-                    $msg = static::short404_exeption_text($msg);
+                    $msg = static::shortExceptionText($msg);
                 } else {
                     $msg = Exception::text($msg);
                 }
@@ -112,7 +112,7 @@ abstract class Target extends Component
         if (\Mii::$app instanceof App) {
 
             $request = \Mii::$app->request;
-            $ip = ($request instanceof Request) ? $request->get_ip() : '-';
+            $ip = ($request instanceof Request) ? $request->getIp() : '-';
 
             $user_id = '-';
 
@@ -133,7 +133,7 @@ abstract class Target extends Component
         return "{$this->last_date}$prefix $level $msg$extended";
     }
 
-    public static function short404_exeption_text(\Throwable $e): string
+    public static function shortExceptionText(\Throwable $e): string
     {
         $name = get_class($e);
         $msg = $e->getMessage();

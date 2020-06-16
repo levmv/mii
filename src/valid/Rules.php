@@ -9,7 +9,8 @@ class Rules
 {
 
 
-    public static function valid_captcha($value) {
+    public static function validCaptcha($value)
+    {
         return \Mii::$app->captcha->valid($value);
     }
 
@@ -22,7 +23,8 @@ class Rules
      * @param $id
      * @return bool
      */
-    public static function unique($value, $key, $model, $id = null) {
+    public static function unique($value, $key, $model, $id = null)
+    {
         if ($id) {
             $res = (new $model)->select_query()->where($key, '=', $value)->one();
             return (null === $res) or ($res->id == $id);
@@ -36,8 +38,9 @@ class Rules
      * @param $value
      * @return  boolean
      */
-    public static function not_empty($value) {
-        if (\is_object($value) AND $value instanceof \ArrayObject) {
+    public static function notEmpty($value)
+    {
+        if (\is_object($value) && $value instanceof \ArrayObject) {
             // Get the array from the ArrayObject
             $value = $value->getArrayCopy();
         }
@@ -49,43 +52,47 @@ class Rules
     /**
      * Checks a field against a regular expression.
      *
-     * @param   string $value value
-     * @param   string $expression regular expression to match (including delimiters)
+     * @param string $value value
+     * @param string $expression regular expression to match (including delimiters)
      * @return  boolean
      */
-    public static function regex($value, $expression) {
+    public static function regex($value, $expression)
+    {
         return (bool)preg_match($expression, (string)$value);
     }
 
     /**
      * Checks that a field is long enough.
      *
-     * @param   string $value value
-     * @param   integer $length minimum length required
+     * @param string  $value value
+     * @param integer $length minimum length required
      * @return  boolean
      */
-    public static function min($value, $length) {
+    public static function min($value, $length)
+    {
 
-        return static::_check_size($value, $length, 1);
+        return static::_checkSize($value, $length, 1);
     }
 
     /**
      * Checks that a field is short enough.
      *
-     * @param   string $value value
-     * @param   integer $length maximum length required
+     * @param string  $value value
+     * @param integer $length maximum length required
      * @return  boolean
      */
-    public static function max($value, $length) {
-        return static::_check_size($value, $length, -1);
+    public static function max($value, $length)
+    {
+        return static::_checkSize($value, $length, -1);
     }
 
 
-    public static function _check_size($value, $length, $dir) {
-        if(\is_object($value) && $value instanceof UploadedFile)
-            return static::file_size($value, $length, $dir);
+    public static function _checkSize($value, $length, $dir)
+    {
+        if (\is_object($value) && $value instanceof UploadedFile)
+            return static::fileSize($value, $length, $dir);
 
-        if(\is_string($value)) {
+        if (\is_string($value)) {
             return (mb_strlen($value) <=> $length) === $dir;
         }
 
@@ -96,11 +103,12 @@ class Rules
     /**
      * Checks that a field is exactly the right length.
      *
-     * @param   string $value value
-     * @param   integer|array $length exact length required, or array of valid lengths
+     * @param string        $value value
+     * @param integer|array $length exact length required, or array of valid lengths
      * @return  boolean
      */
-    public static function exact_length($value, $length) {
+    public static function exactLength($value, $length)
+    {
         if (\is_array($length)) {
             foreach ($length as $strlen) {
                 if (mb_strlen($value) === $strlen)
@@ -109,17 +117,18 @@ class Rules
             return FALSE;
         }
 
-        return static::_check_size($value, $length, 0);
+        return static::_checkSize($value, $length, 0);
     }
 
     /**
      * Checks that a field is exactly the value required.
      *
-     * @param   string $value value
-     * @param   string $required required value
+     * @param string $value value
+     * @param string $required required value
      * @return  boolean
      */
-    public static function equals($value, $required) {
+    public static function equals($value, $required)
+    {
         return ($value === $required);
     }
 
@@ -129,11 +138,12 @@ class Rules
      * @link  http://www.iamcal.com/publish/articles/php/parsing_email/
      * @link  http://www.w3.org/Protocols/rfc822/
      *
-     * @param   string $email email address
-     * @param   boolean $strict strict RFC compatibility
+     * @param string  $email email address
+     * @param boolean $strict strict RFC compatibility
      * @return  boolean
      */
-    public static function email($email, $strict = FALSE) {
+    public static function email($email, $strict = FALSE)
+    {
         if (mb_strlen($email) > 254) {
             return FALSE;
         }
@@ -165,11 +175,12 @@ class Rules
      *
      * @link  http://php.net/checkdnsrr  not added to Windows until PHP 5.3.0
      *
-     * @param   string $email email address
+     * @param string $email email address
      * @return  boolean
      */
-    public static function email_domain($email) {
-        if (!Rules::not_empty($email))
+    public static function emailDomain($email)
+    {
+        if (!Rules::notEmpty($email))
             return FALSE; // Empty fields cause issues with checkdnsrr()
 
         // Check if the email domain has a valid MX record
@@ -179,10 +190,11 @@ class Rules
     /**
      * Validate a URL.
      *
-     * @param   string $url URL
+     * @param string $url URL
      * @return  boolean
      */
-    public static function url($url) {
+    public static function url($url)
+    {
         // Based on http://www.apps.ietf.org/rfc/rfc1738.html#sec-5
         if (!preg_match(
             '~^
@@ -237,17 +249,18 @@ class Rules
     /**
      * Validate an IP.
      *
-     * @param   string $ip IP address
-     * @param   boolean $allow_private allow private IP networks
+     * @param string  $ip IP address
+     * @param boolean $allow_private allow private IP networks
      * @return  boolean
      */
-    public static function ip($ip, $allow_private = TRUE) {
+    public static function ip($ip, $allow_private = TRUE)
+    {
         // Do not allow reserved addresses
         $flags = FILTER_FLAG_NO_RES_RANGE;
 
         if ($allow_private === FALSE) {
             // Do not allow private or reserved addresses
-            $flags = $flags | FILTER_FLAG_NO_PRIV_RANGE;
+            $flags |= FILTER_FLAG_NO_PRIV_RANGE;
         }
 
         return (bool)filter_var($ip, FILTER_VALIDATE_IP, $flags);
@@ -256,11 +269,12 @@ class Rules
     /**
      * Checks if a phone number is valid.
      *
-     * @param   string $number phone number to check
-     * @param   array $lengths
+     * @param string $number phone number to check
+     * @param array  $lengths
      * @return  boolean
      */
-    public static function phone($number, $lengths = NULL) {
+    public static function phone($number, $lengths = NULL)
+    {
         if (!\is_array($lengths)) {
             $lengths = array(7, 10, 11);
         }
@@ -275,53 +289,57 @@ class Rules
     /**
      * Tests if a string is a valid date string.
      *
-     * @param   string $str date to check
+     * @param string $str date to check
      * @return  boolean
      */
-    public static function date($str) {
+    public static function date($str)
+    {
         return (strtotime($str) !== FALSE);
     }
 
     /**
      * Checks whether a string consists of alphabetical characters only.
      *
-     * @param   string $str input string
-     * @param   boolean $utf8 trigger UTF-8 compatibility
+     * @param string  $str input string
+     * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alpha($str, $utf8 = FALSE) {
+    public static function alpha($str, $utf8 = FALSE)
+    {
         $str = (string)$str;
 
         if ($utf8 === TRUE) {
             return (bool)preg_match('/^\pL++$/uD', $str);
-        } else {
-            return ctype_alpha($str);
         }
+
+        return ctype_alpha($str);
     }
 
     /**
      * Checks whether a string consists of alphabetical characters and numbers only.
      *
-     * @param   string $str input string
-     * @param   boolean $utf8 trigger UTF-8 compatibility
+     * @param string  $str input string
+     * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alpha_numeric($str, $utf8 = FALSE) {
+    public static function alphaNumeric($str, $utf8 = FALSE)
+    {
         if ($utf8 === TRUE) {
             return (bool)preg_match('/^[\pL\pN]++$/uD', $str);
-        } else {
-            return ctype_alnum($str);
         }
+
+        return ctype_alnum($str);
     }
 
     /**
      * Checks whether a string consists of alphabetical characters, numbers, underscores and dashes only.
      *
-     * @param   string $str input string
-     * @param   boolean $utf8 trigger UTF-8 compatibility
+     * @param string  $str input string
+     * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alpha_dash($str, $utf8 = FALSE) {
+    public static function alphaDash($str, $utf8 = FALSE)
+    {
         if ($utf8 === TRUE) {
             $regex = '/^[-\pL\pN_]++$/uD';
         } else {
@@ -334,16 +352,17 @@ class Rules
     /**
      * Checks whether a string consists of digits only (no dots or dashes).
      *
-     * @param   string $str input string
-     * @param   boolean $utf8 trigger UTF-8 compatibility
+     * @param string  $str input string
+     * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function digit($str, $utf8 = FALSE) {
+    public static function digit($str, $utf8 = FALSE)
+    {
         if ($utf8 === TRUE) {
             return (bool)preg_match('/^\pN++$/uD', $str);
-        } else {
-            return (\is_int($str) AND $str >= 0) OR ctype_digit($str);
         }
+
+        return (\is_int($str) and $str >= 0) or ctype_digit($str);
     }
 
     /**
@@ -352,10 +371,11 @@ class Rules
      * Uses {@link http://www.php.net/manual/en/function.localeconv.php locale conversion}
      * to allow decimal point to be locale specific.
      *
-     * @param   string $str input string
+     * @param string $str input string
      * @return  boolean
      */
-    public static function numeric($str) {
+    public static function numeric($str)
+    {
         // Get the decimal point for the current locale
         list($decimal) = array_values(localeconv());
 
@@ -366,14 +386,15 @@ class Rules
     /**
      * Tests if a number is within a range.
      *
-     * @param   string $number number to check
-     * @param   integer $min minimum value
-     * @param   integer $max maximum value
-     * @param   integer $step increment size
+     * @param string  $number number to check
+     * @param integer $min minimum value
+     * @param integer $max maximum value
+     * @param integer $step increment size
      * @return  boolean
      */
-    public static function range($number, $min, $max, $step = NULL) {
-        if ($number <= $min OR $number >= $max) {
+    public static function range($number, $min, $max, $step = NULL)
+    {
+        if ($number <= $min || $number >= $max) {
             // Number is outside of range
             return FALSE;
         }
@@ -391,12 +412,13 @@ class Rules
      * Checks if a string is a proper decimal format. Optionally, a specific
      * number of digits can be checked too.
      *
-     * @param   string $str number to check
-     * @param   integer $places number of decimal places
-     * @param   integer $digits number of digits
+     * @param string  $str number to check
+     * @param integer $places number of decimal places
+     * @param integer $digits number of digits
      * @return  boolean
      */
-    public static function decimal($str, $places = 2, $digits = NULL) {
+    public static function decimal($str, $places = 2, $digits = NULL)
+    {
         if ($digits > 0) {
             // Specific number of digits
             $digits = '{' . ((int)$digits) . '}';
@@ -416,32 +438,34 @@ class Rules
      * is quite flexible as it does not require an initial "#" and also allows for
      * the short notation using only three instead of six hexadecimal characters.
      *
-     * @param   string $str input string
+     * @param string $str input string
      * @return  boolean
      */
-    public static function color($str) {
+    public static function color($str)
+    {
         return (bool)preg_match('/^#?+[0-9a-f]{3}(?:[0-9a-f]{3})?$/iD', $str);
     }
 
     /**
      * Checks if a field matches the value of another field.
      *
-     * @param   array $array array of values
-     * @param   string $field field name
-     * @param   string $match field name to match
+     * @param array  $array array of values
+     * @param string $field field name
+     * @param string $match field name to match
      * @return  boolean
      */
-    public static function matches($array, $field, $match) {
+    public static function matches($array, $field, $match)
+    {
         return ($array[$field] === $array[$match]);
     }
 
 
-
-    public static function uploaded( $file): bool {
+    public static function uploaded($file): bool
+    {
         return \is_object($file) &&
             $file instanceof UploadedFile &&
-            !$file->has_error() &&
-            $file->is_uploaded_file();
+            !$file->hasError() &&
+            $file->isUploadedFile();
     }
 
 
@@ -450,16 +474,17 @@ class Rules
      *
      *     $array->rule('file', 'file_type', [':value', ['jpg', 'png', 'gif']]);
      *
-     * @param   array $file $_FILES item
-     * @param   array $allowed allowed file extensions
+     * @param array $file $_FILES item
+     * @param array $allowed allowed file extensions
      * @return  bool
      */
-    public static function file_type($file, array $allowed): bool {
+    public static function fileType($file, array $allowed): bool
+    {
 
-        if(! $file instanceof UploadedFile)
+        if (!$file instanceof UploadedFile)
             return true;
 
-        if ($file->has_error())
+        if ($file->hasError())
             return true;
 
         $ext = strtolower(pathinfo($file->name, PATHINFO_EXTENSION));
@@ -477,12 +502,13 @@ class Rules
      *     $array->rule('file', 'file_size', array(':value', '2.5KiB'))
      *
      * @param UploadedFile $file $_FILES item
-     * @param string $size maximum file size allowed
-     * @param int $dir
+     * @param string       $size maximum file size allowed
+     * @param int          $dir
      * @return  bool
      * @throws \mii\core\Exception
      */
-    public static function file_size(UploadedFile $file, $size, $dir = -1) {
+    public static function fileSize(UploadedFile $file, $size, $dir = -1)
+    {
         if ($file->error === UPLOAD_ERR_INI_SIZE) {
             // Upload is larger than PHP allowed size (upload_max_filesize)
             return FALSE;
@@ -500,7 +526,8 @@ class Rules
         return ($file->size <=> $size) === $dir;
     }
 
-    public static function recaptcha() {
+    public static function recaptcha()
+    {
         $recaptcha = new \ReCaptcha\ReCaptcha(config('google.recaptcha.secret'));
         $response = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
         return $response->isSuccess();

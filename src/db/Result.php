@@ -103,7 +103,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         }
 
         return $this->_as_object
-            ? $this->to_array()
+            ? $this->toArray()
             : $this->_result->fetch_all(\MYSQLI_ASSOC);
     }
 
@@ -149,7 +149,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function to_list($key, $display, $first = null): array
+    public function toList($key, $display, $first = null): array
     {
         $rows = [];
 
@@ -180,7 +180,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param array $properties
      * @return array
      */
-    public function to_array(array $properties = []): array
+    public function toArray(array $properties = []): array
     {
         if (empty($properties)) {
             $results = [];
@@ -198,12 +198,10 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             foreach ($properties as $key => $name) {
                 if (\is_int($key)) {
                     $result[$name] = $object->$name;
-                } else {
-                    if (\is_string($name)) {
-                        $result[$key] = $object->$name;
-                    } elseif ($name instanceof \Closure) {
-                        $result[$key] = $name($object);
-                    }
+                } else if (\is_string($name)) {
+                    $result[$key] = $object->$name;
+                } elseif ($name instanceof \Closure) {
+                    $result[$key] = $name($object);
                 }
             }
             $results[] = $result;
@@ -212,7 +210,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         return $results;
     }
 
-    public function index_by(string $column)
+    public function indexBy(string $column)
     {
         $this->_index_by = $column;
         return $this;
@@ -236,16 +234,14 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             if (isset($row->$name)) {
                 return $row->$name;
             }
-        } else {
-            if (isset($row[$name])) {
-                return $row[$name];
-            }
+        } else if (isset($row[$name])) {
+            return $row[$name];
         }
 
         return $default;
     }
 
-    public function column_values($name) : array
+    public function columnValues($name): array
     {
         $result = [];
 
@@ -407,7 +403,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function set_pagination($pagination)
+    public function setPagination($pagination)
     {
         $this->_pagination = $pagination;
     }

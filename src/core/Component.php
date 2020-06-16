@@ -14,8 +14,9 @@ class Component
 
     public function init(array $config = []): void
     {
-        foreach ($config as $key => $value)
+        foreach ($config as $key => $value) {
             $this->$key = $value;
+        }
     }
 
 }

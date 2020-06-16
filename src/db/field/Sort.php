@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\db\field;
 
@@ -16,13 +16,15 @@ class Sort
     protected $_model;
     protected $_field;
 
-    public function __construct(?ORM $model = NULL, ?string $field_name = NULL) {
+    public function __construct(?ORM $model = NULL, ?string $field_name = NULL)
+    {
         $this->_model = $model;
         $this->_field = $field_name;
     }
 
 
-    public function value(?string $parent_field = null) {
+    public function value(?string $parent_field = null)
+    {
 
         if ($parent_field) {
 

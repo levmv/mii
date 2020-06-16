@@ -56,7 +56,7 @@ class Logger extends Component
             return;
 
         if (!empty($this->targets) && empty($this->targets_objs))
-            $this->init_targets();
+            $this->initTargets();
 
         foreach ($this->targets_objs as $target) {
             $target->collect($this->messages);
@@ -66,7 +66,7 @@ class Logger extends Component
     }
 
 
-    protected function init_targets()
+    protected function initTargets()
     {
         foreach ($this->targets as $name => $logger) {
 

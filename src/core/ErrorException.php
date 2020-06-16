@@ -49,7 +49,7 @@ class ErrorException extends \ErrorException
     /**
      * @return string the user-friendly name of this exception
      */
-    public function get_name()
+    public function getName()
     {
         static $names = [
             E_COMPILE_ERROR => 'PHP Compile Error',
@@ -69,6 +69,6 @@ class ErrorException extends \ErrorException
             E_WARNING => 'PHP Warning',
         ];
 
-        return isset($names[$this->getCode()]) ? $names[$this->getCode()] : 'Error';
+        return $names[$this->getCode()] ?? 'Error';
     }
 }

@@ -17,9 +17,10 @@ class StaticBlocks extends BaseBlocks
         $this->assets = require($this->assets_map_path . "/{$this->current_set}.assets");
 
         foreach ($this->_blocks as $block_name => $block) {
-            if ($block->__has_parent)
+            if ($block->__has_parent) {
                 continue;
-            $this->process_assets($block_name, $block_name, $block->_depends);
+            }
+            $this->processAssets($block_name, $block_name, $block->_depends);
         }
 
         $this->_rendered = true;
@@ -32,7 +33,7 @@ class StaticBlocks extends BaseBlocks
      * @param string $parent_block
      * @param array  $depends
      */
-    public function process_assets($block_name, $parent_block, $depends): void
+    public function processAssets($block_name, $parent_block, $depends): void
     {
         if (isset($this->_used_blocks[$block_name])) {
             return;
@@ -40,7 +41,7 @@ class StaticBlocks extends BaseBlocks
 
         if (!empty($depends)) {
             foreach ($depends as $depend) {
-                $this->process_assets($depend, $parent_block, $this->_blocks[$depend]->_depends);
+                $this->processAssets($depend, $parent_block, $this->_blocks[$depend]->_depends);
                 $this->_used_blocks[$depend] = true;
             }
         }
@@ -63,7 +64,7 @@ class StaticBlocks extends BaseBlocks
 
         if ($this->_blocks[$block_name]->__remote_js !== null) {
             foreach ($this->_blocks[$block_name]->__remote_js as $link => $settings) {
-                if (!empty($settings) and isset($settings['position'])) {
+                if (!empty($settings) && isset($settings['position'])) {
                     $position = $settings['position'];
                     unset($settings['position']);
                 } else {

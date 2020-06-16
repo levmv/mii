@@ -17,24 +17,28 @@ class Date
     static private ?int $tomorrow = null;
     static private ?int $year = null;
 
-    static function nice(int $timestamp): string
+    public static function nice(int $timestamp, bool $with_time = true): string
     {
         static::$today ??= \mktime(0, 0, 0);
         static::$year ??= \mktime(0, 0, 0, 0, 0);
 
         if ($timestamp > static::$today) {
-            $pattern = 'сегодня в %k:%M';
+            $pattern = 'сегодня';
         } elseif ($timestamp > static::$year) {
-            $pattern = '%e %B в %k:%M';
+            $pattern = '%e %B';
         } else {
-            $pattern = '%e %B %Y в %k:%M';
+            $pattern = '%e %B %Y';
+        }
+
+        if ($with_time) {
+            $pattern .= ' в %k:%M';
         }
 
         return \strftime($pattern, $timestamp);
     }
 
 
-    public static function fuzzy(int $timestamp, int $local_timestamp = NULL)
+    public static function fuzzy(int $timestamp, int $local_timestamp = NULL): string
     {
         $local_timestamp = $local_timestamp ?? time();
 
@@ -43,7 +47,7 @@ class Date
 
         if ($timestamp > $local_timestamp) {
             // this is future
-            return static::fuzzy_future($timestamp, $offset);
+            return static::fuzzyFuture($timestamp, $offset);
         }
 
         if ($offset < 61) {
@@ -59,27 +63,18 @@ class Date
             $span = self::nice($timestamp);
         }
 
-        if ($timestamp <= $local_timestamp) {
-            // This is in the past
-            return $span;
-        } else {
-            // This in the future
-            return 'в ' . $span;
-        }
+        return $span;
     }
 
-    private static function fuzzy_future(int $timestamp, int $offset): string
+    private static function fuzzyFuture(int $timestamp, int $offset): string
     {
-        if ($offset < 61) {
-            $span = 'через мгновение';
+        if ($offset < 60) {
+            return 'через мгновение';
         } elseif ($offset < 60 * 55) {
             $minutes = round($offset / 60);
-            $span = "через $minutes " . Text::decl($minutes, ['минуту', 'минуты', 'минут']) ;
+            return "через $minutes " . Text::decl($minutes, ['минуту', 'минуты', 'минут']);
         } elseif ($offset < 60 * 65) {
-            $span = "через час";
-        } else {
-
-
+            return "через час";
         }
 
         static::$today ??= \mktime(0, 0, 0);
@@ -88,6 +83,8 @@ class Date
             $tomorrow = mktime(24, 0, 1);
             return ($timestamp < $tomorrow ? 'сегодня в ' : 'завтра в ') . date('H:i', $timestamp);
         }
+
+        return \strftime('%e %B в %k:%M', $timestamp);
     }
 
 
@@ -99,7 +96,7 @@ class Date
         return static::fuzzy($timestamp, $local_timestamp);
     }
 
-    public static function day_of_week($date = null, $ucfirst = true)
+    public static function dayOfWeek($date = null, $ucfirst = true) : string
     {
         $days = [
             'воскресенье', 'понедельник',

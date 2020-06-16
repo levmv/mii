@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\db;
 
@@ -68,7 +68,7 @@ class Database extends Component
     }
 
 
-    public function auto_native_types(bool $enable): bool
+    public function autoNativeTypes(bool $enable): bool
     {
         return $this->conn->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, $enable);
     }
@@ -151,7 +151,7 @@ class Database extends Component
     }
 
 
-    public function multi_query(string $sql): ?Result
+    public function multiQuery(string $sql): ?Result
     {
 
         $this->conn or $this->connect();
@@ -174,13 +174,13 @@ class Database extends Component
     }
 
 
-    public function inserted_id()
+    public function insertedId()
     {
         return $this->conn->insert_id;
     }
 
 
-    public function affected_rows(): int
+    public function affectedRows(): int
     {
         return $this->conn->affected_rows;
     }
@@ -286,7 +286,7 @@ class Database extends Component
         // Make sure the database is connected
         $this->conn or $this->connect();
 
-        if ($mode and !$this->conn->query("SET TRANSACTION ISOLATION LEVEL $mode")) {
+        if ($mode && !$this->conn->query("SET TRANSACTION ISOLATION LEVEL $mode")) {
             throw new DatabaseException($this->conn->error, $this->conn->errno);
         }
 
@@ -328,7 +328,7 @@ class Database extends Component
     }
 
 
-    public function get_lock($name, $timeout = 0): bool
+    public function getLock($name, $timeout = 0): bool
     {
 
         return (bool)$this->query(
@@ -341,7 +341,7 @@ class Database extends Component
     }
 
 
-    public function release_lock($name): bool
+    public function releaseLock($name): bool
     {
         return (bool)$this->query(
             static::SELECT,
@@ -369,19 +369,19 @@ class Database extends Component
      * @param mixed $column column name or array(column, alias)
      * @param null  $table
      * @return  string
-     * @uses    Database::quote_identifier
+     * @uses    Database::quoteIdentifier
      */
-    public function quote_column($column, $table = null): string
+    public function quoteColumn($column, $table = null): string
     {
         if (\is_array($column)) {
-            list($column, $alias) = $column;
+            [$column, $alias] = $column;
             $alias = \str_replace('`', '``', $alias);
         }
 
-        if (\is_object($column) and $column instanceof SelectQuery) {
+        if (\is_object($column) && $column instanceof SelectQuery) {
             // Create a sub-query
             $column = '(' . $column->compile($this) . ')';
-        } elseif (\is_object($column) and $column instanceof Expression) {
+        } elseif (\is_object($column) && $column instanceof Expression) {
             // Compile the expression
             $column = $column->compile($this);
         } else {
@@ -432,12 +432,12 @@ class Database extends Component
      *
      * @param mixed $table table name or array(table, alias)
      * @return  string
-     * @uses    Database::quote_identifier
+     * @uses    Database::quoteIdentifier
      */
-    public function quote_table($table): string
+    public function quoteTable($table): string
     {
         if (\is_array($table)) {
-            list($table, $alias) = $table;
+            [$table, $alias] = $table;
             $alias = \str_replace('`', '``', $alias);
         }
 
@@ -486,9 +486,9 @@ class Database extends Component
      * @param mixed $value any identifier
      * @return  string
      */
-    public function quote_identifier($value): string
+    public function quoteIdentifier($value): string
     {
-        if (\is_object($value) and $value instanceof SelectQuery) {
+        if (\is_object($value) && $value instanceof SelectQuery) {
             // Create a sub-query
             $value = '(' . $value->compile($this) . ')';
         } elseif ($value instanceof Expression) {
@@ -496,7 +496,7 @@ class Database extends Component
             $value = $value->compile($this);
         } else {
             // Convert to a string
-            $value = (string) $value;
+            $value = (string)$value;
 
             $value = \str_replace('`', '``', $value);
 

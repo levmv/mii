@@ -78,33 +78,19 @@ class Assets extends Controller
         $this->assets = require(Mii::resolve($this->config_file));
     }
 
-    public function usage($argv)
-    {
-        $this->stdout(
-            "\nUsage: ./mii assets (build|test|gen-config) [options]\n\n" .
-            "Options:\n" .
-            " --config=<path>\tPath to configuration file. By default it's «@app/config/assets.php»\n" .
-            " --set=<setname>\tName of set to process\n" .
-            " --force\tDont check if files changed\n" .
-            " --stdout\tTo print assets paths to stdout\n" .
-            "\n\n",
-            Console::FG_YELLOW
-        );
-        return;
-    }
-
     /**
      * Test assets config and show missed blocks list
      */
-    public function test() {
+    public function test()
+    {
 
-        if(\count($this->sets)) {
+        if (\count($this->sets)) {
 
-            foreach($this->sets as $name => $set) {
-                $this->test_set($name);
+            foreach ($this->sets as $name => $set) {
+                $this->testSet($name);
             }
         } else {
-            $this->test_set('default');
+            $this->testSet('default');
         }
 
     }
@@ -112,15 +98,16 @@ class Assets extends Controller
     /**
      * Build assets
      */
-    public function build() {
+    public function build()
+    {
 
-        if(\count($this->sets)) {
+        if (\count($this->sets)) {
 
             foreach ($this->filtered_sets as $name) {
-                $this->build_set($name);
+                $this->buildSet($name);
             }
         } else {
-            $this->build_set('default');
+            $this->buildSet('default');
         }
 
         foreach ($this->results as $set_name => $list) {
@@ -152,13 +139,13 @@ class Assets extends Controller
     }
 
 
-    protected function test_set($set_name)
+    protected function testSet($set_name)
     {
         $this->info("==========================");
         $this->info("Testing of set «:name»", [":name" => $set_name]);
         $this->info("==========================");
 
-        $this->init_set($set_name);
+        $this->initSet($set_name);
 
         $blocks = [];
 
@@ -170,7 +157,7 @@ class Assets extends Controller
             }
 
             $directory = new \RecursiveDirectoryIterator($library);
-            $filter = new \RecursiveCallbackFilterIterator($directory, function ($current, $key, $iterator) {
+            $filter = new \RecursiveCallbackFilterIterator($directory, static function ($current, $key, $iterator) {
                 // Skip hidden files and directories.
                 if ($current->getFilename()[0] === '.') {
                     return FALSE;
@@ -207,8 +194,9 @@ class Assets extends Controller
         foreach ($this->assets[$this->assets_group] as $name => $file) {
             foreach (['css', 'js'] as $type) {
                 if (isset($file[$type])) {
-                    if (!\is_array($file[$type]))
+                    if (!\is_array($file[$type])) {
                         $file[$type] = (array)$file[$type];
+                    }
 
                     foreach ($file[$type] as $block) {
 
@@ -254,7 +242,7 @@ class Assets extends Controller
     }
 
 
-    protected function init_set($set_name)
+    protected function initSet($set_name)
     {
 
         $this->base_path = null;
@@ -276,11 +264,13 @@ class Assets extends Controller
 
         $set = array_replace_recursive($default_set, $set);
 
-        foreach ($set as $key => $value)
+        foreach ($set as $key => $value) {
             $this->$key = $value;
+        }
 
-        for ($i = 0; $i < \count($this->libraries); $i++)
+        for ($i = 0; $i < \count($this->libraries); $i++) {
             $this->libraries[$i] = Mii::resolve($this->libraries[$i]);
+        }
 
         $this->base_url = Mii::resolve($this->base_url);
 
@@ -304,20 +294,22 @@ class Assets extends Controller
     }
 
 
-    protected function build_set($set_name)
+    protected function buildSet($set_name)
     {
-        $this->init_set($set_name);
+        $this->initSet($set_name);
 
         $this->results[$set_name] = [];
         foreach ($this->assets[$this->assets_group] as $filename => $data) {
             foreach (['css', 'js'] as $type) {
-                if (!isset($data[$type]))
+                if (!isset($data[$type])) {
                     continue;
+                }
 
-                if (!\is_array($data[$type]))
+                if (!\is_array($data[$type])) {
                     $data[$type] = (array)$data[$type];
+                }
 
-                $result_file_name = $this->build_file($filename, $data[$type], $type);
+                $result_file_name = $this->buildFile($filename, $data[$type], $type);
 
                 foreach ($data[$type] as $block_name) {
                     $this->results[$set_name][$type][$block_name] = $result_file_name;
@@ -327,7 +319,7 @@ class Assets extends Controller
     }
 
 
-    protected function build_file($filename, $blocks, $type): string
+    protected function buildFile($filename, $blocks, $type): string
     {
 
         $out_path = $this->base_path . '/';
@@ -372,7 +364,7 @@ class Assets extends Controller
 
         if (!empty($files)) {
             if (!file_exists($out_path . $outname . '.' . $type) || $this->force_mode) {
-                $this->processed[$type][] = $this->merge_files_to_one($files, $out_path, $outname . '.' . $type);
+                $this->processed[$type][] = $this->mergeFilesToOne($files, $out_path, $outname . '.' . $type);
             }
         }
 
@@ -382,14 +374,14 @@ class Assets extends Controller
 
     protected function hash(string $str): string
     {
-        return Text::base64url_encode(
+        return Text::b64Encode(
             substr(md5($str, true), 0, 6) .
             substr(sha1($str, true), 0, 1)
         );
     }
 
 
-    protected function merge_files_to_one($files, $path, $filename)
+    protected function mergeFilesToOne($files, $path, $filename)
     {
 
         $tmp = '';

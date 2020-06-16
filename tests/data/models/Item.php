@@ -7,7 +7,7 @@ use mii\db\ORM;
 class Item extends ORM {
 
 
-    public function on_create()
+    public function onCreate()
     {
         $this->created = time();
     }

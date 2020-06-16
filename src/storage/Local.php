@@ -6,40 +6,42 @@ use mii\core\Component;
 use mii\util\FS;
 use mii\web\UploadedFile;
 
-class Local extends Component implements StorageInterface {
+class Local extends Component implements StorageInterface
+{
 
     protected string $path = '';
     protected string $url = '';
 
     protected int $levels = 0;
 
-    protected function resolve(string $path) : string {
+    protected function resolve(string $path): string
+    {
 
         $path = ltrim($path, DIRECTORY_SEPARATOR);
 
-        if($this->levels) {
+        if ($this->levels) {
             $level = '';
 
-            for($i=0;$i<$this->levels;$i++) {
-                $level .= substr($path, $i, 1).DIRECTORY_SEPARATOR;
+            for ($i = 0; $i < $this->levels; $i++) {
+                $level .= substr($path, $i, 1) . DIRECTORY_SEPARATOR;
             }
 
             $path = substr($path, $i);
 
-            if(!is_dir($this->path.$level))
-                FS::mkdir($this->path.$level);
+            if (!is_dir($this->path . $level))
+                FS::mkdir($this->path . $level);
 
-            $path = $level.$path;
+            $path = $level . $path;
         }
 
-        return $this->path.$path;
+        return $this->path . $path;
     }
 
     public function init(array $config = []): void
     {
         parent::init($config);
-        if($this->path) {
-            $this->path = \Mii::resolve($this->path).DIRECTORY_SEPARATOR;
+        if ($this->path) {
+            $this->path = \Mii::resolve($this->path) . DIRECTORY_SEPARATOR;
         }
     }
 
@@ -55,13 +57,13 @@ class Local extends Component implements StorageInterface {
 
     public function put(string $path, $content)
     {
-        if($content instanceof UploadedFile) {
-            return $content->save_as($this->resolve($path));
+        if ($content instanceof UploadedFile) {
+            return $content->saveAs($this->resolve($path));
         }
         return file_put_contents($this->resolve($path), $content);
     }
 
-    public function put_file(string $path, string $from)
+    public function putFile(string $path, string $from)
     {
         $this->copy($from, $path);
     }
@@ -93,7 +95,7 @@ class Local extends Component implements StorageInterface {
 
     public function url(string $path)
     {
-        return $this->url.'/'.$path;
+        return $this->url . '/' . $path;
     }
 
     public function files(string $path)

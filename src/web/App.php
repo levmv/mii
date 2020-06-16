@@ -18,6 +18,7 @@ use mii\core\Router;
  */
 class App extends \mii\core\App
 {
+    /** @noinspection PhpRedundantCatchClauseInspection */
     public function run()
     {
         try {
@@ -60,7 +61,7 @@ class App extends \mii\core\App
     }
 
 
-    public function default_components(): array
+    protected function defaultComponents(): array
     {
         return [
             'log' => 'mii\log\Logger',

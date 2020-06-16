@@ -7,7 +7,7 @@ use mii\core\Exception;
 class FS
 {
 
-    static public function mkdir($path, $mode = 0775, $recursive = true)
+    public static function mkdir($path, $mode = 0775, $recursive = true)
     {
         $path = \Mii::resolve($path);
 
