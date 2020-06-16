@@ -2,7 +2,6 @@
 
 namespace mii\web;
 
-
 use mii\core\Component;
 
 class Session extends Component
@@ -75,7 +74,6 @@ class Session extends Component
 
     public function open($id = null): void
     {
-
         if ($this->isActive()) {
             return;
         }
@@ -89,11 +87,13 @@ class Session extends Component
         }
 
         // Sync up the session cookie with Cookie parameters
-        \session_set_cookie_params($this->lifetime,
+        \session_set_cookie_params(
+            $this->lifetime,
             \Mii::$app->request->cookie_path,
             \Mii::$app->request->cookie_domain,
             \Mii::$app->request->cookie_secure,
-            \Mii::$app->request->cookie_httponly);
+            \Mii::$app->request->cookie_httponly
+        );
 
         // Do not allow PHP to send Cache-Control headers
         \session_cache_limiter("");
@@ -227,7 +227,6 @@ class Session extends Component
     public function destroy(): void
     {
         if ($this->isActive()) {
-
             session_unset();
             session_destroy();
             $this->_data = [];

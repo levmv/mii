@@ -2,7 +2,6 @@
 
 namespace mii\util;
 
-
 use mii\core\Exception;
 
 class Text
@@ -18,16 +17,18 @@ class Text
      * @param string  $end_char end character or entity
      * @return  string
      */
-    public static function limitWords($str, $limit = 100, $end_char = NULL): string
+    public static function limitWords($str, $limit = 100, $end_char = null): string
     {
         $limit = (int)$limit;
         $end_char = $end_char ?? '…';
 
-        if (trim($str) === '')
+        if (trim($str) === '') {
             return $str;
+        }
 
-        if ($limit <= 0)
+        if ($limit <= 0) {
             return $end_char;
+        }
 
         preg_match('/^\s*+(?:\S++\s*+){1,' . $limit . '}/u', $str, $matches);
 
@@ -47,25 +48,29 @@ class Text
      * @param boolean $preserve_words enable or disable the preservation of words while limiting
      * @return  string
      */
-    public static function limitChars($str, $limit = 100, $end_char = NULL, $preserve_words = FALSE): string
+    public static function limitChars($str, $limit = 100, $end_char = null, $preserve_words = false): string
     {
         $end_char = $end_char ?? '…';
 
         $limit = (int)$limit;
 
-        if (\trim($str) === '' || \mb_strlen($str) <= $limit)
+        if (\trim($str) === '' || \mb_strlen($str) <= $limit) {
             return $str;
+        }
 
-        if ($limit <= 0)
+        if ($limit <= 0) {
             return $end_char;
+        }
 
-        if ($preserve_words === False)
+        if ($preserve_words === false) {
             return \rtrim(\mb_substr($str, 0, $limit)) . $end_char;
+        }
 
         // Don't preserve words. The limit is considered the top limit.
         // No strings with a length longer than $limit should be returned.
-        if (!\preg_match('/^.{0,' . $limit . '}\s/us', $str, $matches))
+        if (!\preg_match('/^.{0,' . $limit . '}\s/us', $str, $matches)) {
             return $end_char;
+        }
 
         return \rtrim($matches[0]) . ((\strlen($matches[0]) === \strlen($str)) ? '' : $end_char);
     }
@@ -91,9 +96,9 @@ class Text
      * @param integer $length length of string to return
      * @return  string
      */
-    public static function random($type = NULL, $length = 8): string
+    public static function random($type = null, $length = 8): string
     {
-        if ($type === NULL) {
+        if ($type === null) {
             // Default is to generate an alphanumeric string
             $type = 'alnum';
         }
@@ -163,11 +168,12 @@ class Text
      * @param boolean $br convert single linebreaks to <br />
      * @return  string
      */
-    public static function autoP(string $str, $br = TRUE): string
+    public static function autoP(string $str, $br = true): string
     {
         // Trim whitespace
-        if (($str = trim($str)) === '')
+        if (($str = trim($str)) === '') {
             return '';
+        }
 
         // Standardize newlines
         $str = str_replace(["\r\n", "\r"], "\n", $str);
@@ -177,7 +183,7 @@ class Text
         $str = preg_replace('~[ \t]+$~m', '', $str);
 
         // The following regexes only need to be executed if the string contains html
-        if ($html_found = (strpos($str, '<') !== FALSE)) {
+        if ($html_found = (strpos($str, '<') !== false)) {
             // Elements that should not be surrounded by p tags
             $no_p = '(?:p|div|h[1-6r]|ul|ol|li|blockquote|d[dlt]|pre|t[dhr]|t(?:able|body|foot|head)|c(?:aption|olgroup)|form|s(?:elect|tyle)|a(?:ddress|rea)|ma(?:p|th))';
 
@@ -191,14 +197,14 @@ class Text
         $str = preg_replace('~\n{2,}~', "</p>\n\n<p>", $str);
 
         // The following regexes only need to be executed if the string contains html
-        if ($html_found !== FALSE) {
+        if ($html_found !== false) {
             // Remove p tags around $no_p elements
             $str = preg_replace('~<p>(?=</?' . $no_p . '[^>]*+>)~i', '', $str);
             $str = preg_replace('~(</?' . $no_p . '[^>]*+>)</p>~i', '$1', $str);
         }
 
         // Convert single linebreaks to <br />
-        if ($br === TRUE) {
+        if ($br === true) {
             $str = preg_replace('~(?<!\n)\n(?!\n)~', "<br />\n", $str);
         }
 
@@ -219,7 +225,7 @@ class Text
         $str = rtrim($str);
         $space = strrpos($str, ' ');
 
-        if ($space !== FALSE) {
+        if ($space !== false) {
             $str = substr($str, 0, $space) . '&nbsp;' . substr($str, $space + 1);
         }
 
@@ -240,7 +246,6 @@ class Text
 
     public static function toSlug(string $text, string $separator = '-'): string
     {
-
         $value = UTF8::ruTranslit($text);
 
         // Transliterate value to ASCII
@@ -326,8 +331,9 @@ class Text
         // Construct the regex pattern for verifying the size format
         $pattern = '/^([0-9]+(?:\.[0-9]+)?)(' . $accepted . ')?$/Di';
         // Verify the size format and store the matching parts
-        if (!preg_match($pattern, $size, $matches))
+        if (!preg_match($pattern, $size, $matches)) {
             throw new Exception('The byte unit size, "' . $size . '", is improperly formatted.');
+        }
         // Find the float value of the size
         $size = (float)$matches[1];
         // Find the actual unit, assume B if no unit specified
@@ -357,5 +363,4 @@ class Text
 
         return \mb_strtoupper($fl);
     }
-
 }

@@ -56,7 +56,6 @@ class PageController extends Controller
 
     protected function before()
     {
-
         if (!Mii::$app->request->isAjax() && $this->render_layout) {
             $this->setupLayout();
         }
@@ -68,22 +67,20 @@ class PageController extends Controller
     protected function after($content = null): Response
     {
         if ($this->render_layout && $this->response->format === Response::FORMAT_HTML) {
-
             $this->setupIndex();
 
             if (!$this->layout) {
                 $this->setupLayout();
             }
-            $this->index_block->set('layout',
+            $this->index_block->set(
+                'layout',
                 $this->layout
                     ->set('content', $content)
                     ->render(true)
             );
 
             $this->response->content($this->index_block->render(true));
-
         } else {
-
             if (\is_array($content) && $this->request->isAjax()) {
                 $this->response->format = Response::FORMAT_JSON;
             }
@@ -107,11 +104,13 @@ class PageController extends Controller
 
     protected function setupLayout($block_name = null, $depends = null): void
     {
-        if ($block_name === null)
+        if ($block_name === null) {
             $block_name = $this->layout_block_name;
+        }
 
-        if ($depends === null)
+        if ($depends === null) {
             $depends = $this->layout_depends;
+        }
 
         $this->layout = \block($block_name)
             ->depends($depends);
@@ -124,14 +123,14 @@ class PageController extends Controller
 
     public function execute(string $action, $params): void
     {
-
         $this->access_rules();
 
         if ($this->acl !== null) {
             $roles = Mii::$app->auth->getUser() ? Mii::$app->auth->get_user()->getRoles() : '*';
 
-            if (empty($roles))
+            if (empty($roles)) {
                 $roles = '*';
+            }
 
             if (!$this->acl->check($roles, $action)) {
                 $this->onAccessDenied();
@@ -141,5 +140,4 @@ class PageController extends Controller
 
         parent::execute($action, $params);
     }
-
 }

@@ -81,7 +81,6 @@ abstract class App
 
     public function get(string $id)
     {
-
         if (!isset($this->_instances[$id])) {
             $this->_instances[$id] = $this->loadComponent($id);
         }
@@ -102,7 +101,6 @@ abstract class App
 
     protected function loadComponent($id)
     {
-
         $params = [];
 
         if (!isset($this->_config['components'][$id])) {
@@ -118,14 +116,11 @@ abstract class App
             } else {
                 throw new \Exception("The configuration for the \"$id\" component must contain a \"class\" element.");
             }
-
         } elseif (\is_string($this->_config['components'][$id])) {
             $class = $this->_config['components'][$id];
             $this->_config['components'][$id] = null;
         } elseif (\is_object($this->_config['components'][$id]) && $this->_config['components'][$id] instanceof \Closure) {
-
             return \call_user_func($this->_config['components'][$id], []);
-
         } else {
             throw new \Exception("Unexpected configuration type for the $id component: " . \gettype($this->_config['components'][$id]));
         }
@@ -142,5 +137,4 @@ abstract class App
 
         throw new \Exception("Cant load component \"$id\" because of wrong type: " . \gettype($class));
     }
-
 }

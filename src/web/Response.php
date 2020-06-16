@@ -2,7 +2,6 @@
 
 namespace mii\web;
 
-
 use mii\core\Component;
 
 class Response extends Component
@@ -70,8 +69,9 @@ class Response extends Component
     public function removeHeader($name)
     {
         $name = \strtolower($name);
-        if (isset($this->_headers[$name]))
+        if (isset($this->_headers[$name])) {
             unset($this->_headers[$name]);
+        }
         return $this;
     }
 
@@ -116,9 +116,9 @@ class Response extends Component
      * @param integer $status Status to set to this response
      * @return  mixed
      */
-    public function status(int $status = NULL)
+    public function status(int $status = null)
     {
-        if ($status === NULL) {
+        if ($status === null) {
             return $this->status;
         }
         $this->status = $status;
@@ -143,8 +143,9 @@ class Response extends Component
 
     public function content($content = null)
     {
-        if ($content === null)
+        if ($content === null) {
             return $this->_content;
+        }
 
         $this->_content = $content;
 

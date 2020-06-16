@@ -4,7 +4,6 @@ namespace mii\util;
 
 class URL
 {
-
     public const CURRENT = 1;
     public const ACTIVE = 2;
 
@@ -24,12 +23,14 @@ class URL
         $link = \trim($link, '/');
         $link_size = \strlen($link);
 
-        if ($link_size > self::$uri_size)
+        if ($link_size > self::$uri_size) {
             return 0;
+        }
 
         // Exact match
-        if (self::$uri === $link)
+        if (self::$uri === $link) {
             return self::CURRENT;
+        }
 
         // Checks if it is part of active path
         $link_pieces = \explode('/', $link);
@@ -79,7 +80,7 @@ class URL
             return $base;
         }
 
-        if ($protocol === TRUE) {
+        if ($protocol === true) {
             return \Mii::$app->request->getHostname() . $base;
         }
 
@@ -146,7 +147,7 @@ class URL
     public static function query(array $params = null, $use_get = null)
     {
         if ($use_get) {
-            if ($params === NULL) {
+            if ($params === null) {
                 // Use only the current parameters
                 $params = $_GET;
             } else {
@@ -176,8 +177,9 @@ class URL
 
     public static function back_url(string $default = null): string
     {
-        if (isset($_GET['back_url']))
+        if (isset($_GET['back_url'])) {
             return \urldecode($_GET['back_url']);
+        }
 
         if ($default === null) {
             return self::current();
@@ -185,6 +187,4 @@ class URL
 
         return $default;
     }
-
-
 }

@@ -50,5 +50,4 @@ trait SoftDelete
     {
         parent::delete();
     }
-
 }

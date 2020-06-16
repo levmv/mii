@@ -6,7 +6,6 @@ use mii\core\Component;
 
 class UploadHandler extends Component
 {
-
     private $_files;
 
     public function init(array $config = []): void
@@ -43,7 +42,6 @@ class UploadHandler extends Component
 
     public function files(): array
     {
-
         if ($this->_files === null) {
             $this->_files = [];
             if (isset($_FILES) && \is_array($_FILES)) {

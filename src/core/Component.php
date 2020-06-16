@@ -2,10 +2,8 @@
 
 namespace mii\core;
 
-
 class Component
 {
-
     public function __construct(array $config = [])
     {
         $this->init($config);
@@ -18,5 +16,4 @@ class Component
             $this->$key = $value;
         }
     }
-
 }

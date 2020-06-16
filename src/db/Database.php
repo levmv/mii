@@ -4,7 +4,6 @@ namespace mii\db;
 
 use mii\core\Component;
 
-
 /**
  * Database connection/query wrapper/helper.
  *
@@ -49,10 +48,9 @@ class Database extends Component
                 $this->database,
                 $this->port
             );
-
         } catch (\Exception $e) {
             // No connection exists
-            $this->conn = NULL;
+            $this->conn = null;
             $this->password = null;
             throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
         }
@@ -92,7 +90,7 @@ class Database extends Component
 
             if (\is_resource($this->conn) && $status = $this->conn->close()) {
                 // Clear the connection
-                $this->conn = NULL;
+                $this->conn = null;
             }
         } catch (\Throwable $e) {
             // Database is probably not disconnected
@@ -124,7 +122,7 @@ class Database extends Component
      * @return  Result|null   Result for SELECT queries or null
      * @throws DatabaseException
      */
-    public function query(?int $type, string $sql, $as_object = false, array $params = NULL): ?Result
+    public function query(?int $type, string $sql, $as_object = false, array $params = null): ?Result
     {
         // Make sure the database is connected
         !\is_null($this->conn) || $this->connect();
@@ -153,7 +151,6 @@ class Database extends Component
 
     public function multiQuery(string $sql): ?Result
     {
-
         $this->conn or $this->connect();
         assert((config('debug') && ($benchmark = \mii\util\Profiler::start("Database", $sql))) || 1);
 
@@ -281,7 +278,7 @@ class Database extends Component
      * @return  boolean
      * @throws DatabaseException
      */
-    public function begin($mode = NULL): bool
+    public function begin($mode = null): bool
     {
         // Make sure the database is connected
         $this->conn or $this->connect();
@@ -330,7 +327,6 @@ class Database extends Component
 
     public function getLock($name, $timeout = 0): bool
     {
-
         return (bool)$this->query(
             static::SELECT,
             strtr('SELECT GET_LOCK(:name, :timeout)', [
@@ -516,5 +512,4 @@ class Database extends Component
 
         return $value;
     }
-
 }

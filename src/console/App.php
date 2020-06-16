@@ -12,10 +12,8 @@ namespace mii\console;
  */
 class App extends \mii\core\App
 {
-
     public function run()
     {
-
         try {
             return $this->request->execute();
         } catch (\Throwable $e) {
@@ -35,6 +33,4 @@ class App extends \mii\core\App
             'error' => 'mii\console\ErrorHandler'
         ];
     }
-
-
 }

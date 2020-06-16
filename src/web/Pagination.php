@@ -16,8 +16,6 @@ use mii\util\URL;
  */
 class Pagination
 {
-
-
     protected $current_page_source = 'query_string';
 
     protected $current_page_source_key = 'page';
@@ -78,11 +76,13 @@ class Pagination
      */
     public function __construct(array $config = [])
     {
-        foreach ($config as $key => $val)
+        foreach ($config as $key => $val) {
             $this->$key = $val;
+        }
 
-        if (!$this->request)
+        if (!$this->request) {
             $this->request = \Mii::$app->request;
+        }
 
         // Pagination setup
         $this->calculate();
@@ -97,8 +97,9 @@ class Pagination
      */
     public function calculate(array $config = [])
     {
-        foreach ($config as $key => $val)
+        foreach ($config as $key => $val) {
             $this->$key = $val;
+        }
 
         if ($this->current_page === null) {
             $query_key = $this->current_page_source_key;
@@ -125,10 +126,10 @@ class Pagination
         $this->current_page = (int)min(max(1, $this->current_page), max(1, $this->total_pages));
         $this->current_first_item = (int)min((($this->current_page - 1) * $this->items_per_page) + 1, $this->total_items);
         $this->current_last_item = (int)min($this->current_first_item + $this->items_per_page - 1, $this->total_items);
-        $this->previous_page = ($this->current_page > 1) ? $this->current_page - 1 : FALSE;
-        $this->next_page = ($this->current_page < $this->total_pages) ? $this->current_page + 1 : FALSE;
-        $this->first_page = ($this->current_page === 1) ? FALSE : 1;
-        $this->last_page = ($this->current_page >= $this->total_pages) ? FALSE : $this->total_pages;
+        $this->previous_page = ($this->current_page > 1) ? $this->current_page - 1 : false;
+        $this->next_page = ($this->current_page < $this->total_pages) ? $this->current_page + 1 : false;
+        $this->first_page = ($this->current_page === 1) ? false : 1;
+        $this->last_page = ($this->current_page >= $this->total_pages) ? false : $this->total_pages;
         $this->offset = (int)(($this->current_page - 1) * $this->items_per_page);
 
 
@@ -149,7 +150,7 @@ class Pagination
 
         // No page number in URLs to first page
         if ($page === 1 && !$this->first_page_in_url) {
-            $page = NULL;
+            $page = null;
         }
 
         switch ($this->current_page_source) {
@@ -161,8 +162,10 @@ class Pagination
 
             case 'route':
 
-                return URL::site($this->route->url(array_merge($this->route_params,
-                        array($this->current_page_source_key => $page))) . $this->query());
+                return URL::site($this->route->url(array_merge(
+                    $this->route_params,
+                    array($this->current_page_source_key => $page)
+                )) . $this->query());
         }
 
         return '#';
@@ -188,8 +191,9 @@ class Pagination
     public function render($block = null)
     {
         // Automatically hide pagination whenever it is superfluous
-        if ($this->auto_hide === true && $this->total_pages <= 1)
+        if ($this->auto_hide === true && $this->total_pages <= 1) {
             return '';
+        }
 
         if ($block === null) {
             // Use the view from config
@@ -251,9 +255,9 @@ class Pagination
      * @param array    Parameters to override
      * @return    string
      */
-    public function query(array $params = NULL)
+    public function query(array $params = null)
     {
-        if ($params === NULL) {
+        if ($params === null) {
             // Use only the current parameters
             $params = $this->request->get();
         } else {
@@ -282,7 +286,4 @@ class Pagination
     {
         return $this->render();
     }
-
 }
-
-

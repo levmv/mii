@@ -41,38 +41,31 @@ class Blocks extends BaseBlocks
 
         foreach ($this->_files as $type => $blocks) {
             foreach ($blocks as $block_name => $block) {
-
                 if (isset($block['files'])) {
                     $this->_buildBlock($block_name, $type, $block['files']);
                 }
 
                 if (isset($block['remote'])) {
-
                     if ($type === 'js') {
                         foreach ($block['remote'] as $position => $remote) {
                             $this->_js[$position][] = implode("\n", $remote);
                         }
                     } else {
-
                         foreach ($block['remote'] as $css_remote) {
                             $this->_css[] = '<link type="text/css" href="' . $css_remote . '" rel="stylesheet" />';
                         }
                     }
-
                 }
                 if (isset($block['inline'])) {
-
                     if ($type === 'js') {
                         foreach ($block['inline'] as $position => $inline) {
                             $this->_js[$position][] = '<script>' . implode("\n", $inline) . '</script>';
                         }
-
                     } else {
                         $content = implode("\n", $block['inline']);
                         $this->_css[] = '<style>' . $content . '</style>';
                     }
                 }
-
             }
         }
 
@@ -88,7 +81,6 @@ class Blocks extends BaseBlocks
      */
     public function processBlockAssets($block_name, $parent_block, $depends): void
     {
-
         if (isset($this->_used_blocks[$block_name])) {
             return;
         }
@@ -96,7 +88,6 @@ class Blocks extends BaseBlocks
         $block_path = $this->getBlockPath($block_name);
 
         foreach ($this->libraries as $base_path) {
-
             if (is_dir($base_path . $block_path . 'assets')) {
                 $this->_buildAssetsDir($block_name, $base_path . $block_path . 'assets');
                 break;
@@ -116,7 +107,6 @@ class Blocks extends BaseBlocks
 
         foreach ($types as $type) {
             foreach ($this->libraries as $base_path) {
-
                 if (is_file($base_path . $block_path . $block_name . '.' . $type)) {
                     $this->_files[$type][$parent_block]['files'][$block_name . '.' . $type] = $base_path . $block_path . $block_name . '.' . $type;
                     break;
@@ -147,7 +137,6 @@ class Blocks extends BaseBlocks
         }
 
         if (!empty($this->_blocks[$block_name]->__inline_js)) {
-
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
                 $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : self::END;
                 if (!isset($this->_files['js'][$parent_block]['inline'][$position])) {
@@ -168,7 +157,6 @@ class Blocks extends BaseBlocks
 
     private function _buildBlock(string $block_name, string $type, array $files): void
     {
-
         $result_file_name = $block_name . '.' . substr(md5(implode('', array_values($files))), 0, 10);
 
         $web_output = $this->base_url . '/' . $result_file_name . '.' . $type;
@@ -197,7 +185,6 @@ class Blocks extends BaseBlocks
 
         if ($type === 'css') {
             $this->_css[] = '<link type="text/css" href="' . $web_output . '?' . filemtime($output) . '" rel="stylesheet">';
-
         } else {
             $this->_js[self::END][] = '<script src="' . $web_output . '?' . filemtime($output) . '"></script>';
         }
@@ -206,7 +193,6 @@ class Blocks extends BaseBlocks
 
     private function _buildAssetsDir(string $blockname, string $path): void
     {
-
         $output = $this->base_path . '/' . $blockname;
 
         if (!is_link($output)) {
@@ -218,6 +204,4 @@ class Blocks extends BaseBlocks
     {
         return '/' . \implode('/', \explode('_', $name)) . '/';
     }
-
 }
-

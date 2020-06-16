@@ -13,9 +13,9 @@ class Date
     public const MINUTE = 60;
 
 
-    static private ?int $today = null;
-    static private ?int $tomorrow = null;
-    static private ?int $year = null;
+    private static ?int $today = null;
+    private static ?int $tomorrow = null;
+    private static ?int $year = null;
 
     public static function nice(int $timestamp, bool $with_time = true): string
     {
@@ -38,7 +38,7 @@ class Date
     }
 
 
-    public static function fuzzy(int $timestamp, int $local_timestamp = NULL): string
+    public static function fuzzy(int $timestamp, int $local_timestamp = null): string
     {
         $local_timestamp = $local_timestamp ?? time();
 
@@ -91,7 +91,7 @@ class Date
     /**
      * @deprecated
      */
-    public static function formated($timestamp, $local_timestamp = NULL)
+    public static function formated($timestamp, $local_timestamp = null)
     {
         return static::fuzzy($timestamp, $local_timestamp);
     }

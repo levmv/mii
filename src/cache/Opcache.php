@@ -15,7 +15,6 @@ class Opcache extends File
 
     public function init(array $config = []): void
     {
-
         parent::init($config);
 
         $this->path = \Mii::resolve($this->path);
@@ -29,9 +28,8 @@ class Opcache extends File
      * @return  mixed
      * @noinspection IssetArgumentExistenceInspection
      */
-    public function get($id, $default = NULL)
+    public function get($id, $default = null)
     {
-
         $filename = $this->cacheFile($id);
 
         @include $filename;
@@ -52,9 +50,9 @@ class Opcache extends File
      * @return  boolean
      * @throws \mii\core\Exception
      */
-    public function set($id, $data, $lifetime = NULL)
+    public function set($id, $data, $lifetime = null)
     {
-        if ($lifetime === NULL) {
+        if ($lifetime === null) {
             $lifetime = $this->default_expire;
         }
 
@@ -69,7 +67,6 @@ class Opcache extends File
         $tmp = tempnam("/tmp", "ocache");
         if (file_put_contents($tmp, '<?php $ttl = ' . (time() + $lifetime) . '; $val = ' . $val . ';', LOCK_EX)
             && rename($tmp, $filename)) {
-
             opcache_invalidate($filename, true);
             return true;
         }
@@ -78,7 +75,6 @@ class Opcache extends File
 
         \Mii::warning("Unable to write cache file '{$filename}': {$error['message']}", 'mii');
         return false;
-
     }
 
     /**

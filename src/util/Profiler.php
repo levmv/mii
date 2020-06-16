@@ -40,8 +40,7 @@ class Profiler
         // Create a unique token based on the counter
         $token = 'kp/' . base_convert($counter++, 10, 32);
 
-        Profiler::$_marks[$token] = array
-        (
+        Profiler::$_marks[$token] = array(
             'group' => strtolower($group),
             'name' => (string)$name,
 
@@ -136,12 +135,12 @@ class Profiler
             // Get the total time and memory for this benchmark
             [$time, $memory] = self::total($token);
 
-            if ($max['time'] === NULL or $time > $max['time']) {
+            if ($max['time'] === null or $time > $max['time']) {
                 // Set the maximum time
                 $max['time'] = $time;
             }
 
-            if ($min['time'] === NULL or $time < $min['time']) {
+            if ($min['time'] === null or $time < $min['time']) {
                 // Set the minimum time
                 $min['time'] = $time;
             }
@@ -149,12 +148,12 @@ class Profiler
             // Increase the total time
             $total['time'] += $time;
 
-            if ($max['memory'] === NULL or $memory > $max['memory']) {
+            if ($max['memory'] === null or $memory > $max['memory']) {
                 // Set the maximum memory
                 $max['memory'] = $memory;
             }
 
-            if ($min['memory'] === NULL or $memory < $min['memory']) {
+            if ($min['memory'] === null or $memory < $min['memory']) {
                 // Set the minimum memory
                 $min['memory'] = $memory;
             }
@@ -187,10 +186,10 @@ class Profiler
      * @param mixed $groups single group name string, or array with group names; all groups by default
      * @return  array   min, max, average, total
      */
-    public static function groupStats($groups = NULL): array
+    public static function groupStats($groups = null): array
     {
         // Which groups do we need to calculate stats for?
-        $groups = ($groups === NULL)
+        $groups = ($groups === null)
             ? self::groups()
             : array_intersect_key(self::groups(), array_flip((array)$groups));
 
@@ -212,8 +211,8 @@ class Profiler
         foreach ($stats as $group => $names) {
             // Min and max are unknown by default
             $groups[$group]['min'] = $groups[$group]['max'] = array(
-                'time' => NULL,
-                'memory' => NULL);
+                'time' => null,
+                'memory' => null);
 
             // Total values are always integers
             $groups[$group]['total'] = array(
@@ -317,11 +316,12 @@ class Profiler
                 'count' => 0
             ];
         }
-        if (!defined('MII_START_TIME'))
+        if (!defined('MII_START_TIME')) {
             throw new Exception("Probably you disabled asserts. Please set \"zend.assertions = 1\" in php.ini");
+        }
 
         // Get the application run time
-        $time = \hrtime(TRUE) / 1e9 - MII_START_TIME;
+        $time = \hrtime(true) / 1e9 - MII_START_TIME;
 
         // Get the total memory usage
         $memory = \memory_get_usage() - MII_START_MEMORY;
@@ -361,8 +361,9 @@ class Profiler
             'memory' => $stats['total']['memory'] / $stats['count']);
 
         // Cache the new stats
-        if (Mii::$app->has('cache'))
+        if (Mii::$app->has('cache')) {
             Mii::$app->cache->set('profiler_app_stats', $stats, 3600 * 12);
+        }
 
         // Set the current application execution time and memory
         // Do NOT cache these, they are specific to the current request only
@@ -378,5 +379,4 @@ class Profiler
     {
         include dirname(__DIR__) . '/util/Profiler/view.php';
     }
-
 }

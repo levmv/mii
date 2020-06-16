@@ -28,7 +28,6 @@ class Controller
 
     protected function after()
     {
-
     }
 
     public function index($argv)
@@ -127,7 +126,6 @@ class Controller
      */
     public function _execute()
     {
-
         $this->before();
 
         if ($this->auto_params) {
@@ -186,5 +184,4 @@ class Controller
         Console::stderr($msg . "\n", Console::FG_RED);
         \Mii::error(strtr($msg, $options), 'console');
     }
-
 }

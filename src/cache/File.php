@@ -15,7 +15,6 @@ class File extends Cache
 
     public function init(array $config = []): void
     {
-
         parent::init($config);
 
         $this->path = \Mii::resolve($this->path);
@@ -31,9 +30,8 @@ class File extends Cache
      * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    public function get($id, $default = NULL)
+    public function get($id, $default = null)
     {
-
         $filename = $this->cacheFile($id);
 
         if (@\file_exists($filename) && @\filemtime($filename) > time()) {
@@ -59,9 +57,9 @@ class File extends Cache
      * @param integer $lifetime lifetime in seconds
      * @return  boolean
      */
-    public function set($id, $data, $lifetime = NULL)
+    public function set($id, $data, $lifetime = null)
     {
-        if ($lifetime === NULL) {
+        if ($lifetime === null) {
             $lifetime = $this->default_expire;
         }
 
@@ -83,7 +81,6 @@ class File extends Cache
 
         \Mii::warning("Unable to write cache file '{$filename}': {$error['message']}", 'mii');
         return false;
-
     }
 
     /**
@@ -122,7 +119,6 @@ class File extends Cache
                 }
             }
         } catch (\Throwable $t) {
-
             \Mii::warning("Unable to clear cache: {$t->getMessage()}", 'mii');
             return false;
         }
@@ -142,7 +138,6 @@ class File extends Cache
      */
     public function increment($id, $step = 1)
     {
-
     }
 
     /**
@@ -157,7 +152,6 @@ class File extends Cache
      */
     public function decrement($id, $step = 1)
     {
-
     }
 
 
@@ -181,6 +175,4 @@ class File extends Cache
         }
         return $this->path . DIRECTORY_SEPARATOR . $key;
     }
-
-
 }

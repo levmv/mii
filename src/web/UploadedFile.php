@@ -2,7 +2,6 @@
 
 namespace mii\web;
 
-
 class UploadedFile
 {
 
@@ -43,8 +42,9 @@ class UploadedFile
 
     public function __construct($config)
     {
-        foreach ($config as $key => $value)
+        foreach ($config as $key => $value) {
             $this->{$key} = $value;
+        }
     }
 
     /**
@@ -92,6 +92,4 @@ class UploadedFile
     {
         return strtolower(pathinfo($this->name, PATHINFO_EXTENSION));
     }
-
-
 }

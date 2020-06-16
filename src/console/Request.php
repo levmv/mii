@@ -2,7 +2,6 @@
 
 namespace mii\console;
 
-
 use mii\core\Component;
 use mii\core\Exception;
 use mii\util\Console;
@@ -27,8 +26,9 @@ class Request extends Component
 
     public function init(array $config = []): void
     {
-        foreach ($config as $key => $value)
+        foreach ($config as $key => $value) {
             $this->$key = $value;
+        }
 
         if (isset($_SERVER['argv'])) {
             $argv = $_SERVER['argv'];
@@ -37,8 +37,9 @@ class Request extends Component
             $argv = [];
         }
 
-        if (empty($argv))
+        if (empty($argv)) {
             return;
+        }
 
         $this->controller = ucfirst($argv[0]);
         array_shift($argv);
@@ -58,7 +59,7 @@ class Request extends Component
                 } else {
                     $params[$name] = $value;
                 }
-            } else if ($c === 0) {
+            } elseif ($c === 0) {
                 $this->action = $param;
             } else {
                 $params[] = $param;
@@ -67,12 +68,10 @@ class Request extends Component
         }
 
         $this->params = $params;
-
     }
 
     public function execute()
     {
-
         if (empty($this->controller)) {
             $this->genHelp();
             return 0;
@@ -90,20 +89,21 @@ class Request extends Component
         $namespaces[] = 'mii\\console\\controllers';
 
         while (count($namespaces)) {
-
             $controller_class = array_shift($namespaces) . '\\' . $this->controller;
 
             class_exists($controller_class); // always return false, but autoload class if it exist
 
             // real check
-            if (class_exists($controller_class, false))
+            if (class_exists($controller_class, false)) {
                 break;
+            }
 
             $controller_class = false;
         }
 
-        if (!$controller_class)
+        if (!$controller_class) {
             throw new Exception("Unknown command {$this->controller}");
+        }
 
         // Create a new instance of the controller
         $controller = new $controller_class;
@@ -121,7 +121,6 @@ class Request extends Component
 
     public function genHelp()
     {
-
         $namespaces = array_unique(array_merge(config('console.namespaces', [
             'app\\console',
             'mii\\console\\controllers'
@@ -135,9 +134,7 @@ class Request extends Component
 
         $list = [];
         foreach ($namespaces as $namespace) {
-
             if (!isset($paths[$namespace])) {
-
                 $this->error("Dont know path for $namespace. Skip");
                 continue;
             }
@@ -151,7 +148,6 @@ class Request extends Component
         $max = 0;
 
         foreach ($list as ['class' => $class, 'command' => $command]) {
-
             $reflection = new \ReflectionClass($class);
 
             $doc = $reflection->getStaticPropertyValue('description', '');
@@ -179,7 +175,6 @@ class Request extends Component
         foreach ($out as ['command' => $command,
                  'desc' => $doc,
                  'actions' => $actions]) {
-
             Console::stdout(static::padded($command, $max), Console::FG_YELLOW);
             Console::stdout("$doc\n");
 
@@ -227,7 +222,6 @@ class Request extends Component
 
 
             foreach ($namespaces as $ns) {
-
                 foreach ($data as $prefix => $path) {
                     if (strpos($ns, $prefix) === 0) {
                         $path[0] .= str_replace('\\', '/', substr($ns, \strlen($prefix) - 1));
@@ -246,7 +240,6 @@ class Request extends Component
 
     protected function findControllers($namespace, $path, &$files)
     {
-
         $dir = dir($path);
         while (false !== $entry = $dir->read()) {
             if ($entry == '.' || $entry == '..' || $entry == '.git' || is_dir($dir->path . "/" . $entry)) {
@@ -259,11 +252,12 @@ class Request extends Component
                 continue;
             }
 
-            if (!isset($files[$info['filename']]))
+            if (!isset($files[$info['filename']])) {
                 $files[$info['filename']] = [
                     'class' => $namespace . '\\' . $info['filename'],
                     'command' => mb_strtolower($info['filename'])
                 ];
+            }
         }
 
         // Clean up
@@ -280,9 +274,9 @@ class Request extends Component
          * @var \ReflectionMethod $method
          */
         foreach ($methods as $method) {
-
-            if (in_array($method->name, ['__construct', 'index', '_execute']))
+            if (in_array($method->name, ['__construct', 'index', '_execute'])) {
                 continue;
+            }
 
             $args = [];
 
@@ -315,8 +309,9 @@ class Request extends Component
     {
         $comment = $ref->getDocComment();
 
-        if (!$comment)
+        if (!$comment) {
             return ['', ''];
+        }
 
         $comment = preg_replace('#[ \t]*(?:/\*\*|\*/|\*)?[ \t]?(.*)?#u', '$1', $comment);
         $comment = trim($comment);
@@ -341,5 +336,4 @@ class Request extends Component
 
         return [$summary, $full];
     }
-
 }

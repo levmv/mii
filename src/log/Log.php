@@ -4,7 +4,6 @@ namespace mii\log;
 
 class Log
 {
-
     public static function error(...$args): void
     {
         static::log(Logger::ERROR, $args);
@@ -62,6 +61,4 @@ class Log
             \Mii::log($level, $e, 'app');
         }
     }
-
-
 }

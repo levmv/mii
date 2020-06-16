@@ -2,7 +2,6 @@
 
 namespace mii\console\controllers;
 
-
 use mii\console\Controller;
 use mii\db\DB;
 
@@ -22,19 +21,19 @@ class Migrate extends Controller
 
     protected function before()
     {
-
         $config = config('migrate', []);
 
-        foreach ($config as $name => $value)
+        foreach ($config as $name => $value) {
             $this->$name = $value;
+        }
 
-        if (empty($this->migrations_paths))
+        if (empty($this->migrations_paths)) {
             $this->migrations_paths = [path('app') . '/migrations'];
+        }
 
 
         try {
             $this->applied_migrations = DB::select('SELECT `name`, `date` FROM `' . $this->migrate_table . '`')->indexBy('name')->all();
-
         } catch (\Exception $e) {
             $this->info('Trying to create table :table', [':table' => $this->migrate_table]);
 
@@ -47,11 +46,11 @@ class Migrate extends Controller
             $this->applied_migrations = [];
         }
 
-        for ($i = 0; $i < \count($this->migrations_paths); $i++)
+        for ($i = 0; $i < \count($this->migrations_paths); $i++) {
             $this->migrations_paths[$i] = \Mii::resolve($this->migrations_paths[$i]);
+        }
 
         foreach ($this->migrations_paths as $migrations_path) {
-
             if (!is_dir($migrations_path)) {
                 $this->warning('Directory :dir does not exist', [':dir' => $migrations_path]);
                 mkdir($migrations_path, 0775);
@@ -59,13 +58,15 @@ class Migrate extends Controller
 
             $scan = scandir($migrations_path);
             foreach ($scan as $file) {
-                if ($file[0] == '.')
+                if ($file[0] == '.') {
                     continue;
+                }
 
                 $info = pathinfo($file);
 
-                if ($info['extension'] !== 'php')
+                if ($info['extension'] !== 'php') {
                     continue;
+                }
 
                 $name = $info['filename'];
 
@@ -76,11 +77,9 @@ class Migrate extends Controller
                     'date' => 0
                 ];
             }
-
         }
 
         uksort($this->migrations_list, 'strnatcmp');
-
     }
 
 
@@ -89,11 +88,11 @@ class Migrate extends Controller
      */
     public function create(string $name = null)
     {
-
         $custom_name = false;
 
-        if (count($this->request->params) && $name === null)
+        if (count($this->request->params) && $name === null) {
             $name = $this->request->params[0];
+        }
 
         if ($name) {
             $custom_name = mb_strtolower($name, 'utf-8');
@@ -137,12 +136,10 @@ class ' . $name . ' {
             DB::commit();
 
             $this->info('migration :name created', [':name' => $name]);
-
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;
         }
-
     }
 
     /**
@@ -150,7 +147,6 @@ class ' . $name . ' {
      */
     public function up($limit = null)
     {
-
         $applied = 0;
 
         $migrations = $this->migrations_list;
@@ -162,9 +158,9 @@ class ' . $name . ' {
         }
 
         foreach ($migrations as $migration) {
-
-            if ($migration['applied'])
+            if ($migration['applied']) {
                 continue;
+            }
 
             $name = $migration['name'];
 
@@ -184,15 +180,16 @@ class ' . $name . ' {
                 DB::rollback();
             }
 
-            DB::insert('INSERT INTO`' . $this->migrate_table . '`(`name`, `date`) VALUES(:name, :date)',
+            DB::insert(
+                'INSERT INTO`' . $this->migrate_table . '`(`name`, `date`) VALUES(:name, :date)',
                 [
                     ':name' => $name,
                     ':date' => time()
-                ]);
+                ]
+            );
 
             $this->info('Migration up successfully', [':name' => $name]);
             $applied++;
-
         }
         if (!$applied) {
             $this->warning('No new migration found');
@@ -205,5 +202,4 @@ class ' . $name . ' {
         require_once($migration['file']);
         return new $migration['name'];
     }
-
 }

@@ -81,7 +81,6 @@ class StaticBlocks extends BaseBlocks
         }
 
         if (!empty($this->_blocks[$block_name]->__inline_js)) {
-
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
                 $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
                 $this->_js[$position][] = "<script>{$inline[0]}</script>";

@@ -2,7 +2,6 @@
 
 namespace mii\db\field;
 
-
 use mii\db\DB;
 use mii\db\ORM;
 use mii\db\SelectQuery;
@@ -16,7 +15,7 @@ class Sort
     protected $_model;
     protected $_field;
 
-    public function __construct(?ORM $model = NULL, ?string $field_name = NULL)
+    public function __construct(?ORM $model = null, ?string $field_name = null)
     {
         $this->_model = $model;
         $this->_field = $field_name;
@@ -25,9 +24,7 @@ class Sort
 
     public function value(?string $parent_field = null)
     {
-
         if ($parent_field) {
-
             $value = (new SelectQuery)
                 ->select([
                     [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
@@ -39,9 +36,7 @@ class Sort
             if ($value) {
                 $value = $value[$this->_field] ?: 0;
             }
-
         } else {
-
             $value = (new SelectQuery)
                 ->select([
                     [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
@@ -52,11 +47,8 @@ class Sort
             if ($value) {
                 $value = $value[$this->_field] ?: 0;
             }
-
         }
 
         return $value + 1;
     }
-
-
 }

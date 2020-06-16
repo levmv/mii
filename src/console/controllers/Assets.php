@@ -2,7 +2,6 @@
 
 namespace mii\console\controllers;
 
-
 use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
@@ -50,7 +49,6 @@ class Assets extends Controller
 
     protected function before()
     {
-
         $this->_time = microtime(true);
         $this->_memory = memory_get_usage();
 
@@ -83,16 +81,13 @@ class Assets extends Controller
      */
     public function test()
     {
-
         if (\count($this->sets)) {
-
             foreach ($this->sets as $name => $set) {
                 $this->testSet($name);
             }
         } else {
             $this->testSet('default');
         }
-
     }
 
     /**
@@ -100,9 +95,7 @@ class Assets extends Controller
      */
     public function build()
     {
-
         if (\count($this->sets)) {
-
             foreach ($this->filtered_sets as $name) {
                 $this->buildSet($name);
             }
@@ -150,7 +143,6 @@ class Assets extends Controller
         $blocks = [];
 
         foreach ($this->libraries as $library) {
-
             if (!is_dir($library)) {
                 $this->error('Library path «' . $library . '» does not exist');
                 return;
@@ -160,7 +152,7 @@ class Assets extends Controller
             $filter = new \RecursiveCallbackFilterIterator($directory, static function ($current, $key, $iterator) {
                 // Skip hidden files and directories.
                 if ($current->getFilename()[0] === '.') {
-                    return FALSE;
+                    return false;
                 }
                 if ($current->isDir()) {
                     // Only recurse into intended subdirectories.
@@ -172,7 +164,6 @@ class Assets extends Controller
             $iterator = new \RecursiveIteratorIterator($filter);
 
             foreach ($iterator as $info) {
-
                 $type = $info->getExtension();
                 $path = trim(substr($info->getPath(), \strlen($library)), '/');
                 $block_name = implode('_', explode('/', $path));
@@ -199,7 +190,6 @@ class Assets extends Controller
                     }
 
                     foreach ($file[$type] as $block) {
-
                         if (isset($reverse[$type][$block])) {
                             $this->error('Double declaration of :b (in «:f1» and «:f2» files)', [
                                 ':b' => $block,
@@ -237,14 +227,12 @@ class Assets extends Controller
 
                 $this->stdout("$out],\n");
             }
-
         }
     }
 
 
     protected function initSet($set_name)
     {
-
         $this->base_path = null;
         $this->libraries = [];
 
@@ -321,7 +309,6 @@ class Assets extends Controller
 
     protected function buildFile($filename, $blocks, $type): string
     {
-
         $out_path = $this->base_path . '/';
 
         $files = [];
@@ -329,7 +316,6 @@ class Assets extends Controller
         $hashes = '';
 
         foreach ($blocks as $block_name) {
-
             $block_path = '/' . implode('/', explode('_', $block_name));
             $block_file = $block_path . '/' . $block_name;
 
@@ -337,7 +323,6 @@ class Assets extends Controller
                 $result_filename = Mii::resolve($library_path) . $block_file . '.' . $type;
 
                 if (is_file($result_filename)) {
-
                     $files[] = $result_filename;
                     $hashes .= hash_file('sha256', $result_filename, true) . pack('L', filesize($result_filename));
 
@@ -349,7 +334,6 @@ class Assets extends Controller
                 $library_path = Mii::resolve($library_path);
 
                 if (is_dir($library_path . $block_path . '/assets')) {
-
                     $output = $this->base_path . '/' . $block_name;
 
                     if (!is_link($output)) {
@@ -383,7 +367,6 @@ class Assets extends Controller
 
     protected function mergeFilesToOne($files, $path, $filename)
     {
-
         $tmp = '';
 
         foreach ($files as $file) {
@@ -402,5 +385,4 @@ class Assets extends Controller
 
         return $path . $filename;
     }
-
 }

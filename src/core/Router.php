@@ -2,7 +2,6 @@
 
 namespace mii\core;
 
-
 use mii\util\URL;
 use mii\web\Response;
 
@@ -51,15 +50,13 @@ class Router extends Component
 
     public function init(array $config = []): void
     {
-
         parent::init($config);
 
         if ($this->cache) {
-
             [$this->_routes_list, $this->_named_routes] = \Mii::$app->get($this->cache)->get($this->cache_id, [[], []]);
-            if (empty($this->_routes_list))
+            if (empty($this->_routes_list)) {
                 $this->initRoutes();
-
+            }
         } else {
             $this->initRoutes();
         }
@@ -94,8 +91,9 @@ class Router extends Component
 
                 $result[static::R_NAMESPACE] = $value['namespace'] ?? null;
 
-                if (isset($value['name']))
+                if (isset($value['name'])) {
                     $name = $value['name'];
+                }
 
                 if (!$is_static && isset($value['params'])) {
                     $params = \array_merge($this->default_parameters, $value['params']);
@@ -103,7 +101,6 @@ class Router extends Component
                 if (isset($value['values'])) {
                     $result[static::R_VALUES] = $value['values'];
                 }
-
             } elseif (\is_string($value)) {
                 $result[static::R_PATH] = $value;
             }
@@ -134,7 +131,7 @@ class Router extends Component
         // Escape everything preg_quote would escape except for : ( ) { }
         $expression = \preg_replace('#' . static::REGEX_ESCAPE . '#', '\\\\$0', $pattern);
 
-        if (\strpos($expression, '(') !== FALSE) {
+        if (\strpos($expression, '(') !== false) {
             // Make optional parts of the URI non-capturing and optional
             $expression = \str_replace(['(', ')'], ['(?:', ')?'], $expression);
         }
@@ -157,7 +154,6 @@ class Router extends Component
 
     public function match(string $uri)
     {
-
         if ($uri !== '/') {
             $uri = \trim($uri, '//');
         }
@@ -176,17 +172,16 @@ class Router extends Component
 
     protected function matchRoute(string $uri, array $route)
     {
-
         if (empty($route[static::R_COMPILED])) {
-
-            if ($uri !== $route[static::R_PATTERN])
+            if ($uri !== $route[static::R_PATTERN]) {
                 return false;
+            }
 
             $matches = [];
-
         } else {
-            if (!\preg_match($route[static::R_COMPILED], $uri, $matches))
+            if (!\preg_match($route[static::R_COMPILED], $uri, $matches)) {
                 return false;
+            }
         }
 
         $params = $route[static::R_VALUES] ?? [];
@@ -227,8 +222,9 @@ class Router extends Component
             ? $namespace . '\\' . \implode("\\", $path) . "\\" . \ucfirst($filename)
             : $namespace . '\\' . \ucfirst($filename);
 
-        if (!isset($params['action']))
+        if (!isset($params['action'])) {
             $params['action'] = 'index';
+        }
 
         return $params;
     }
@@ -242,7 +238,6 @@ class Router extends Component
 
     public function url(string $name, array $params = []): string
     {
-
         if (!isset($this->_named_routes[$name])) {
             throw new InvalidRouteException('Route :name doesnt exist', [':name' => $name]);
         }
@@ -275,7 +270,7 @@ class Router extends Component
 
                 if ($params !== null && isset($params[$param]) && $params[$param] !== ($defaults[$param] ?? null)) {
                     // Future optional params should be required
-                    $provided_optional = TRUE;
+                    $provided_optional = true;
 
                     // Replace the key with the parameter value
                     $replace = str_replace($key, $params[$param], $replace);
@@ -292,7 +287,6 @@ class Router extends Component
                     $replace = '';
                     break;
                 }
-
             }
 
             // Replace the group in the URI
@@ -322,6 +316,4 @@ class Router extends Component
 
         return URL::site($uri);
     }
-
 }
-

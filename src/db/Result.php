@@ -35,7 +35,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param mixed $as_object
      * @param array $params
      */
-    public function __construct($result, $as_object = false, array $params = NULL)
+    public function __construct($result, $as_object = false, array $params = null)
     {
         // Store the result locally
         $this->_result = $result;
@@ -43,7 +43,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         // Results as objects or associative arrays
         $this->_as_object = $as_object;
 
-        if ($params !== NULL) {
+        if ($params !== null) {
             // Object constructor params
             $this->_object_params = $params;
         }
@@ -96,7 +96,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     public function all(): array
     {
         if ($this->_index_by) {
-
             return $this->_as_object
                 ? $this->index($this)
                 : $this->index($this->_result->fetch_all(\MYSQLI_ASSOC));
@@ -122,13 +121,11 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         $result = [];
 
         if (!\is_string($this->_index_by)) {
-
             foreach ($rows as $row) {
                 $result[\call_user_func($this->_index_by, $row)] = $row;
             }
 
             return $result;
-
         }
 
         if ($this->_as_object) {
@@ -141,7 +138,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         }
 
         foreach ($rows as $row) {
-
             $result[$row[$this->_index_by]] = $row;
         }
 
@@ -198,7 +194,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             foreach ($properties as $key => $name) {
                 if (\is_int($key)) {
                     $result[$name] = $object->$name;
-                } else if (\is_string($name)) {
+                } elseif (\is_string($name)) {
                     $result[$key] = $object->$name;
                 } elseif ($name instanceof \Closure) {
                     $result[$key] = $name($object);
@@ -226,7 +222,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param mixed  $default default value if the column does not exist
      * @return  mixed
      */
-    public function column($name, $default = NULL)
+    public function column($name, $default = null)
     {
         $row = $this->current();
 
@@ -234,7 +230,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             if (isset($row->$name)) {
                 return $row->$name;
             }
-        } else if (isset($row[$name])) {
+        } elseif (isset($row[$name])) {
             return $row[$name];
         }
 
@@ -257,7 +253,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         }
 
         return $result;
-
     }
 
     public function scalar($default = 0)
@@ -304,8 +299,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      */
     public function offsetGet($offset)
     {
-        if (!$this->seek($offset))
-            return NULL;
+        if (!$this->seek($offset)) {
+            return null;
+        }
 
         return $this->current();
     }
@@ -412,5 +408,4 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     {
         return $this->_pagination;
     }
-
 }

@@ -128,6 +128,4 @@ abstract class BaseBlocks extends Component
 
 
     abstract public function render(): void;
-
 }
-

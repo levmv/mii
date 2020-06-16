@@ -37,7 +37,7 @@ class Debug
      */
     protected static function _dump(&$var, $length = 128, $limit = 10, $level = 0): string
     {
-        if ($var === NULL) {
+        if ($var === null) {
             return '<small>NULL</small>';
         } elseif (\is_bool($var)) {
             return '<small>bool</small> ' . ($var ? 'TRUE' : 'FALSE');
@@ -94,7 +94,7 @@ class Debug
 
             static $marker;
 
-            if ($marker === NULL) {
+            if ($marker === null) {
                 // Make a unique marker
                 $marker = uniqid("\x00");
             }
@@ -106,7 +106,7 @@ class Debug
             } elseif ($level < $limit) {
                 $output[] = "<span>(";
 
-                $var[$marker] = TRUE;
+                $var[$marker] = true;
                 foreach ($var as $key => & $val) {
                     if ($key === $marker) {
                         continue;
@@ -147,7 +147,7 @@ class Debug
             } elseif ($level < $limit) {
                 $output[] = "<code>{";
 
-                $objects[$hash] = TRUE;
+                $objects[$hash] = true;
                 foreach ($array as $key => & $val) {
                     if (!\is_int($key) && $key[0] === "\x00") {
                         // Determine if the access is protected or protected
@@ -172,7 +172,7 @@ class Debug
             return '<small>object</small> <span>' . \get_class($var) . '(' . count($array) . ')</span> ' . implode("\n", $output);
         }
 
-        return '<small>' . gettype($var) . '</small> ' . htmlspecialchars(print_r($var, TRUE), ENT_NOQUOTES, 'utf-8');
+        return '<small>' . gettype($var) . '</small> ' . htmlspecialchars(print_r($var, true), ENT_NOQUOTES, 'utf-8');
     }
 
     /**
@@ -186,7 +186,6 @@ class Debug
     public static function path($file)
     {
         if (!isset(\Mii::$paths['mii'])) {
-
             if (!isset(\Mii::$paths['vendor'])) {
                 \Mii::$paths['vendor'] = path('root') . '/vendor';
             }
@@ -222,7 +221,7 @@ class Debug
     {
         if (!$file || !is_readable($file)) {
             // Continuing will cause errors
-            return FALSE;
+            return false;
         }
 
         // Open the file and set the line position
@@ -236,7 +235,7 @@ class Debug
         $format = '% ' . strlen((string)$range['end']) . 'd';
 
         $source = '';
-        while (($row = fgets($file)) !== FALSE) {
+        while (($row = fgets($file)) !== false) {
             // Increment the line number
             if (++$line > $range['end']) {
                 break;
@@ -278,9 +277,9 @@ class Debug
      * @return  array
      * @throws \ReflectionException
      */
-    public static function trace(array $trace = NULL)
+    public static function trace(array $trace = null)
     {
-        if ($trace === NULL) {
+        if ($trace === null) {
             // Start a new trace
             $trace = debug_backtrace();
         }
@@ -320,9 +319,9 @@ class Debug
                     $args = array($step['args'][0]);
                 }
             } elseif (isset($step['args'])) {
-                if (!\function_exists($step['function']) or strpos($step['function'], '{closure}') !== FALSE) {
+                if (!\function_exists($step['function']) or strpos($step['function'], '{closure}') !== false) {
                     // Introspection on closures or language constructs in a stack trace is impossible
-                    $params = NULL;
+                    $params = null;
                 } else {
                     if (isset($step['class'])) {
                         if (method_exists($step['class'], $step['function'])) {
@@ -358,10 +357,10 @@ class Debug
 
             $output[] = array(
                 'function' => $function,
-                'args' => $args ?? NULL,
-                'file' => $file ?? NULL,
-                'line' => $line ?? NULL,
-                'source' => $source ?? NULL,
+                'args' => $args ?? null,
+                'file' => $file ?? null,
+                'line' => $line ?? null,
+                'source' => $source ?? null,
             );
 
             unset($function, $args, $file, $line, $source);
@@ -384,7 +383,6 @@ class Debug
             $args = [];
             if (\is_array($step['args'])) {
                 foreach ($step['args'] as $arg) {
-
                     if (\is_string($arg)) {
                         $args[] = "'" . Text::limitChars($arg, 45) . "'";
                     } elseif (\is_array($arg)) {
@@ -408,5 +406,4 @@ class Debug
             return "#$count $file [$line]: " . $step['function'] . "(" . implode(', ', $args) . ")";
         }, $trace));
     }
-
 }

@@ -2,7 +2,6 @@
 
 namespace mii\util;
 
-
 class Arr
 {
     /**
@@ -327,7 +326,7 @@ class Arr
         foreach ($array as $key => $value) {
             if (\is_array($value)) {
                 $flat = \array_merge($flat, static::flatten($value));
-            } else if ($is_assoc) {
+            } elseif ($is_assoc) {
                 $flat[$key] = $value;
             } else {
                 $flat[] = $value;
@@ -356,7 +355,7 @@ class Arr
                 foreach ($properties as $key => $name) {
                     if (\is_int($key)) {
                         $result[$name] = $object->$name;
-                    } else if (\is_string($name)) {
+                    } elseif (\is_string($name)) {
                         $result[$key] = $object->$name;
                     } elseif ($name instanceof \Closure) {
                         $result[$key] = $name($object);
@@ -376,5 +375,4 @@ class Arr
 
         return $object;
     }
-
 }

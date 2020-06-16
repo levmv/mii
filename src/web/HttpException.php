@@ -4,12 +4,10 @@ namespace mii\web;
 
 class HttpException extends Exception
 {
-
     public $status_code = 500;
 
     public function __construct($status = 500, $message = "", $code = 0, \Exception $previous = null)
     {
-
         $this->status_code = $status;
 
         parent::__construct($message, $code, $previous);
@@ -22,5 +20,4 @@ class HttpException extends Exception
     {
         return Response::$messages[$this->status_code] ?? 'Error';
     }
-
 }

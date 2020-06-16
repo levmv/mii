@@ -23,7 +23,6 @@ abstract class Target extends Component
     protected function filter(array $messages): array
     {
         foreach ($messages as $i => $msg) {
-
             if (!($this->levels & $msg[1])) {
                 unset($messages[$i]);
                 continue;
@@ -35,7 +34,6 @@ abstract class Target extends Component
                 foreach ($this->categories as $category) {
                     if ($msg[2] === $category ||
                         (\substr_compare($category, '*', -1, 1) === 0 && \strpos($msg[2], \rtrim($category, '*')) === 0)) {
-
                         $pass = true;
                         break;
                     }
@@ -50,7 +48,6 @@ abstract class Target extends Component
                         break;
                     }
                 }
-
             }
 
             if (!$pass) {
@@ -65,8 +62,9 @@ abstract class Target extends Component
     {
         $messages = $this->filter($messages);
 
-        if (!empty($messages))
+        if (!empty($messages)) {
             $this->process($messages);
+        }
     }
 
     abstract public function process(array $messages);
@@ -80,13 +78,11 @@ abstract class Target extends Component
         $extended = '';
 
         if (!\is_string($msg)) {
-
             if ($msg instanceof \Throwable) {
-
                 if ($this->exceptions_extended) {
-
                     if (\Mii::$app instanceof App) {
-                        $extended = sprintf("\n%s%s %s",
+                        $extended = sprintf(
+                            "\n%s%s %s",
                             \Mii::$app->request->method(),
                             \Mii::$app->request->isAjax() ? '[Ajax]' : '',
                             $_SERVER['REQUEST_URI']
@@ -101,7 +97,6 @@ abstract class Target extends Component
                 } else {
                     $msg = Exception::text($msg);
                 }
-
             } else {
                 $msg = var_export($msg, true);
             }
@@ -110,7 +105,6 @@ abstract class Target extends Component
         $prefix = '';
 
         if (\Mii::$app instanceof App) {
-
             $request = \Mii::$app->request;
             $ip = ($request instanceof Request) ? $request->getIp() : '-';
 
@@ -147,5 +141,4 @@ abstract class Target extends Component
 
         return $name . ': ' . $msg . $file;
     }
-
 }

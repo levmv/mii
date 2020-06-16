@@ -4,7 +4,6 @@ namespace mii\web;
 
 class ForbiddenHttpException extends HttpException
 {
-
     public function __construct($message = null)
     {
         if ($message === null) {
@@ -12,5 +11,4 @@ class ForbiddenHttpException extends HttpException
         }
         parent::__construct(403, $message);
     }
-
 }

@@ -2,10 +2,8 @@
 
 namespace mii\storage;
 
-
 interface StorageInterface
 {
-
     public function exist(string $path);
 
     public function get(string $path);
@@ -29,5 +27,4 @@ interface StorageInterface
     public function files(string $path);
 
     public function mkdir(string $path);
-
 }

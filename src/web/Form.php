@@ -34,7 +34,6 @@ class Form
      */
     public function __construct($data = null)
     {
-
         $this->validation = new Validation();
 
         $this->_fields = $this->fields();
@@ -61,9 +60,9 @@ class Form
 
     public function load($data = null): bool
     {
-
-        if ($this->_loaded && $data === null)
+        if ($this->_loaded && $data === null) {
             return true;
+        }
 
         if (\is_object($data) && $data instanceof ORM) {
             $this->_model = $data;
@@ -71,9 +70,7 @@ class Form
         }
 
         if (\is_array($data) && \count($data)) {
-
             $this->loadFields($data);
-
         } elseif ($this->posted()) {
             $data = \Mii::$app->request->post();
 
@@ -84,8 +81,9 @@ class Form
             $unchanged = array_diff(array_keys($this->_fields), $this->_changed);
             foreach ($unchanged as $key) {
                 $file = \Mii::$app->upload->getFile($key);
-                if ($file !== null)
+                if ($file !== null) {
                     $this->set($key, $file);
+                }
             }
         }
 
@@ -108,18 +106,15 @@ class Form
 
     public function beforeValidate()
     {
-
     }
 
 
     public function afterValidate($passed)
     {
-
     }
 
     public function prepare()
     {
-
     }
 
 
@@ -205,7 +200,6 @@ class Form
 
     public function set($name, $value = null)
     {
-
         if (!\is_array($name)) {
             $name = [$name => $value];
         }
@@ -219,7 +213,6 @@ class Form
 
     public function validate(): bool
     {
-
         $this->beforeValidate();
 
         $this->validation->rules($this->rules());
@@ -257,7 +250,6 @@ class Form
 
     public function open($action = null, ?array $attributes = null): string
     {
-
         return HTML::open($action, $attributes);
     }
 
@@ -306,8 +298,9 @@ class Form
 
     public function select($name, $data = null, $attributes = null): string
     {
-        if ($data !== null)
+        if ($data !== null) {
             $this->_select_data[$name] = $data;
+        }
         return $this->field('select', $name, $attributes);
     }
 
@@ -318,7 +311,6 @@ class Form
 
     public function field($type, $name, $attributes = null): string
     {
-
         if (!\array_key_exists($name, $this->_fields)) {
             $this->_fields[$name] = null;
         }

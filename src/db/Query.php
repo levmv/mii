@@ -118,7 +118,6 @@ class Query extends SelectQuery
         $query .= ' (' . implode(', ', array_map([$this->db, 'quoteColumn'], $this->_columns)) . ') ';
 
         if (\is_array($this->_values)) {
-
             $groups = [];
 
             foreach ($this->_values as $group) {

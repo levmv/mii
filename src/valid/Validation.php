@@ -2,7 +2,6 @@
 
 namespace mii\valid;
 
-
 use Mii;
 use mii\util\Arr;
 
@@ -47,15 +46,17 @@ class Validation
      */
     public function data($data = null)
     {
-        if ($data === null)
+        if ($data === null) {
             return $this->_data;
+        }
         $this->_data = $data;
     }
 
     public function field($name)
     {
-        if (isset($this->_data[$name]))
+        if (isset($this->_data[$name])) {
             return $this->_data[$name];
+        }
 
         return null;
     }
@@ -152,7 +153,6 @@ class Validation
             } else {
                 $this->rule($field, $rule, $params);
             }
-
         }
 
         return $this;
@@ -191,7 +191,6 @@ class Validation
         foreach ($expected as $field) {
             // Use the submitted value or NULL if no data exists
             $data[$field] = $this->_data[$field] ?? null;
-
         }
         // Overload the current array with the new one
         $this->_data = $data;
@@ -204,7 +203,6 @@ class Validation
 
 
             foreach ($set as [$rule, $params]) {
-
                 array_unshift($params, $value);
 
                 // Default the error name to be the rule (except array and lambda rules)
@@ -222,7 +220,7 @@ class Validation
                     $passed = \call_user_func_array($rule, $params);
                 } elseif (!\is_string($rule)) {
                     // This is a lambda function, there is no error name (errors must be added manually)
-                    $error_name = FALSE;
+                    $error_name = false;
                     array_unshift($params, $field);
                     array_unshift($params, $this);
                     $passed = \call_user_func_array($rule, $params);
@@ -232,9 +230,8 @@ class Validation
 
                     // Call static::$rule($this[$field], $param, ...) with Reflection
 
-                    $passed = $method->invokeArgs(NULL, $params);
-
-                } elseif (strpos($rule, '::') === FALSE) {
+                    $passed = $method->invokeArgs(null, $params);
+                } elseif (strpos($rule, '::') === false) {
 
                     // Use a function call
                     $function = new \ReflectionFunction($rule);
@@ -250,15 +247,15 @@ class Validation
 
 
                     // Call $Class::$method($this[$field], $param, ...) with Reflection
-                    $passed = $method->invokeArgs(NULL, $params);
-
+                    $passed = $method->invokeArgs(null, $params);
                 }
 
                 // Ignore return values from rules when the field is empty
-                if (!\in_array($rule, $this->_empty_rules) && !Rules::notEmpty($value))
+                if (!\in_array($rule, $this->_empty_rules) && !Rules::notEmpty($value)) {
                     continue;
+                }
 
-                if ($passed === FALSE && $error_name !== FALSE) {
+                if ($passed === false && $error_name !== false) {
                     // Add the rule to the errors
                     $this->error($field, $error_name, $params);
 
@@ -268,7 +265,6 @@ class Validation
                     // The callback added the error manually, stop checking rules
                     break;
                 }
-
             }
         }
 
@@ -289,7 +285,7 @@ class Validation
      * @param array  $params
      * @return  $this
      */
-    public function error($field, $error, array $params = NULL)
+    public function error($field, $error, array $params = null)
     {
         $this->_errors[$field] = $error;
 
@@ -328,7 +324,7 @@ class Validation
      */
     public function errors($file = null, $translate = false)
     {
-        if ($file === NULL) {
+        if ($file === null) {
             // Return the error list
             return $this->_errors;
         }
@@ -391,7 +387,6 @@ class Validation
 
 
             if ($message = Arr::path($this->_error_messages, "{$field}.{$error}") && \is_string($message)) {
-
             } elseif ($message = Mii::message($file, "{$field}.{$error}") && \is_string($message)) {
 
                 // Found a message for this field and error
@@ -430,5 +425,4 @@ class Validation
     {
         return $this->_errors;
     }
-
 }

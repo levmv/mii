@@ -2,10 +2,8 @@
 
 namespace mii\db;
 
-
 class ModelNotFoundException extends DatabaseException
 {
-
     public string $model = '';
 
     public string $id = '';

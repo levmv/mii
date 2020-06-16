@@ -6,7 +6,6 @@ use mii\core\Exception;
 
 class FS
 {
-
     public static function mkdir($path, $mode = 0775, $recursive = true)
     {
         $path = \Mii::resolve($path);
@@ -34,5 +33,4 @@ class FS
             throw new Exception("Failed to change permissions for directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
         }
     }
-
 }

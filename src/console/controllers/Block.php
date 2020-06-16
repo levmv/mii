@@ -2,7 +2,6 @@
 
 namespace mii\console\controllers;
 
-
 use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
@@ -29,13 +28,11 @@ class Block extends Controller
 
     protected function before()
     {
-
         $list = config('console.block.rules', []);
 
         if (empty($list)) {
             $this->warning('Warning: console.block.rules is empty');
         } else {
-
             foreach ($list as $namespace => $blocks) {
                 if (!isset($this->blocks[$namespace])) {
                     $this->blocks[$namespace] = [];
@@ -67,15 +64,12 @@ class Block extends Controller
 
     public function index($argv)
     {
-
         $this->force = $this->request->param('force', false);
 
         foreach ($this->blocks as $output_path => $blocks) {
-
             $this->info("\n# Processing $output_path");
 
             foreach ($blocks as $block => $func) {
-
                 $this->output_path = Mii::resolve($output_path);
 
                 if (!method_exists($this, $func)) {
@@ -174,7 +168,9 @@ class Block extends Controller
                 'select2/dist/js/select2.full.min.js',
                 'select2/dist/js/i18n/ru.js'
             ],
-            $block, 'js');
+            $block,
+            'js'
+        );
 
         $this->to_block('select2/dist/css/select2.min.css', $block, 'css');
     }
@@ -182,7 +178,6 @@ class Block extends Controller
 
     protected function do_fotorama($block)
     {
-
         $this->to_block('fotorama/fotorama.js', $block, 'js');
 
         $this->to_block('fotorama/fotorama.css', $block, 'css', function ($text) use ($block) {
@@ -203,7 +198,6 @@ class Block extends Controller
 
     protected function do_fancybox($block)
     {
-
         $this->to_block('fancyBox/source/jquery.fancybox.pack.js', $block, 'js');
 
         $this->to_block('fancyBox/source/jquery.fancybox.css', 'i_fancybox', 'css', function ($text) use ($block) {
@@ -227,7 +221,6 @@ class Block extends Controller
         $this->to_block('plupload/js/plupload.full.min.js', $block, 'js');
         $this->to_assets('plupload/js/Moxie.swf', $block);
         $this->to_assets('plupload/js/Moxie.xap', $block);
-
     }
 
     protected function do_jquery_ui($block)
@@ -241,14 +234,18 @@ class Block extends Controller
             'jquery-ui/ui/widgets/datepicker.js'
         ], $block, 'js');
 
-        $this->to_block([
+        $this->to_block(
+            [
             'jquery-ui/themes/base/datepicker.css',
             'jquery-ui/themes/base/sortable.css',
             'jquery-ui/themes/base/theme.css'
-        ], $block, 'css',
+        ],
+            $block,
+            'css',
             function ($text) use ($block) {
                 return str_replace('url("images', 'url("/assets/a/' . $block, $text);
-            });
+            }
+        );
 
         $this->iterate_dir('jquery-ui/themes/base/images', function ($file) use ($block) {
             $this->to_assets('jquery-ui/themes/base/images/' . $file, $block);
@@ -257,10 +254,14 @@ class Block extends Controller
 
     protected function do_fontawesome($block)
     {
-        $this->to_block('font-awesome/css/font-awesome.min.css', $block, 'css',
+        $this->to_block(
+            'font-awesome/css/font-awesome.min.css',
+            $block,
+            'css',
             function ($text) use ($block) {
                 return str_replace('../fonts', '/assets/' . $block, $text);
-            });
+            }
+        );
         $this->iterate_dir('font-awesome/fonts/', function ($file) use ($block) {
             $this->to_assets('font-awesome/fonts/' . $file, $block);
         });
@@ -292,7 +293,6 @@ class Block extends Controller
         $same = true;
 
         foreach ($from as $f) {
-
             if (!file_exists($this->input_path . '/' . $f)) {
                 throw new Exception("Source for $block_name not found. Skip.");
             }
@@ -323,8 +323,9 @@ class Block extends Controller
 
     protected function to_assets($from, $block_name, $callback = null)
     {
-        if (!\is_array($from))
+        if (!\is_array($from)) {
             $from = array($from);
+        }
 
         $dir = $this->output_path . '/' . implode('/', explode('_', $block_name)) . '/assets';
 
@@ -333,7 +334,6 @@ class Block extends Controller
         }
 
         foreach ($from as $f) {
-
             $filename = basename($f, PATHINFO_FILENAME);
 
             if ($callback) {
@@ -349,8 +349,9 @@ class Block extends Controller
     {
         $files = scandir($this->input_path . '/' . $from);
         array_map(function ($item) use ($callback) {
-            if ($item === '.' || $item === '..')
+            if ($item === '.' || $item === '..') {
                 return;
+            }
 
             $callback($item);
         }, $files);

@@ -10,13 +10,13 @@ use mii\util\Debug;
 
 class ErrorHandler extends \mii\core\ErrorHandler
 {
-
     public $route;
 
     public function prepareException(\Throwable $e): \Throwable
     {
-        if (config('debug'))
+        if (config('debug')) {
             return $e;
+        }
 
         if ($e instanceof ModelNotFoundException) {
             return new NotFoundHttpException($e->getMessage(), $e);
@@ -31,7 +31,6 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
     public function render($exception)
     {
-
         if (\Mii::$app->has('response')) {
             $response = \Mii::$app->response;
             $response->clear();
@@ -46,7 +45,6 @@ class ErrorHandler extends \mii\core\ErrorHandler
         }
 
         if ($response->format === Response::FORMAT_HTML) {
-
             if ($this->route && !\config('debug')) {
                 \Mii::$app->request->uri($this->route);
                 try {
@@ -55,13 +53,11 @@ class ErrorHandler extends \mii\core\ErrorHandler
                 } catch (\Throwable $t) {
                     $response->content(static::exceptionToText($exception));
                 }
-            } else if (config('debug')) {
-
+            } elseif (config('debug')) {
                 $response->content($this->renderFile(__DIR__ . '/Exception/error.php', ['exception' => $exception]));
             } else {
                 $response->content('<pre>' . e(static::exceptionToText($exception)) . '</pre>');
             }
-
         } elseif ($response->format === Response::FORMAT_JSON) {
             $response->content($this->exceptionToArray($exception));
         } else {
@@ -84,7 +80,6 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
     protected function exceptionToArray($e)
     {
-
         $arr = [
             'name' => 'Exception',
             'message' => 'An internal server error occurred.',
@@ -110,5 +105,4 @@ class ErrorHandler extends \mii\core\ErrorHandler
         }
         return $arr;
     }
-
 }

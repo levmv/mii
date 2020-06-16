@@ -2,7 +2,6 @@
 
 namespace mii\cache;
 
-
 use mii\core\Component;
 
 abstract class Cache extends Component

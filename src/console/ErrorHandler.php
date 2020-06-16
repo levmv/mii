@@ -11,7 +11,6 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
     public function render($exception)
     {
-
         if (config('debug')) {
             if ($exception instanceof ErrorException) {
                 $message = $this->formatMessage($exception->getName());

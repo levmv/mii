@@ -2,11 +2,9 @@
 
 namespace mii\console\controllers;
 
-
 use mii\console\Controller;
 use mii\db\DB;
 use mii\util\Debug;
-
 
 /**
  * Various utils
@@ -15,7 +13,6 @@ use mii\util\Debug;
  */
 class Util extends Controller
 {
-
     public function preload(string $fcgi = null, bool $save = false)
     {
         if (!$fcgi) {
@@ -30,7 +27,9 @@ class Util extends Controller
         }
 
         $tmp = tempnam('/tmp', 'ops') . '.php';
-        file_put_contents($tmp, <<<EOS
+        file_put_contents(
+            $tmp,
+            <<<EOS
         <?php echo json_encode(opcache_get_status(true));
         EOS
         );
@@ -79,17 +78,20 @@ class Util extends Controller
         foreach ($result['scripts'] as $key => ['full_path' => $path,
                  'hits' => $hits,
                  'memory_consumption' => $mem]) {
+            if ($hits === 0) {
+                continue;
+            }
 
-            if ($hits === 0)
+            if ($path === path('root') . '/index.php') {
                 continue;
+            }
 
-            if ($path === path('root') . '/index.php')
+            if (strpos($path, 'composer') !== false) {
                 continue;
-
-            if (strpos($path, 'composer') !== false)
+            }
+            if (strpos($path, 'preload.php') !== false) {
                 continue;
-            if (strpos($path, 'preload.php') !== false)
-                continue;
+            }
 
             if (strpos($path, 'blocks') !== false) {
                 $blocks[$path] = [$hits, $mem];
@@ -104,13 +106,13 @@ class Util extends Controller
 
         $this->info("\nTop scripts:\nhits   mem, kb  path\n--------------------------");
         foreach ($scripts as $path => [$hits, $mem]) {
-
             $mem = number_format($mem / 1024, 2);
 
             $this->info(
                 str_pad($hits, 7) . ' ' .
                 str_pad($mem, 6, ' ', STR_PAD_LEFT) . '  ' .
-                Debug::path($path));
+                Debug::path($path)
+            );
         }
 
         $this->info('Blocks:');
@@ -119,10 +121,11 @@ class Util extends Controller
         }
 
         if ($save) {
-
             $array = var_export(array_keys($scripts), true);
 
-            file_put_contents(path('root') . '/preload.php', <<<"EOS"
+            file_put_contents(
+                path('root') . '/preload.php',
+                <<<"EOS"
             <?php
             
                 require(__DIR__ . '/vendor/autoload.php');
@@ -142,20 +145,23 @@ class Util extends Controller
         $output = [];
         exec("ps aux | grep \"php-fpm\" | awk '{print $11}'", $output, $code);
 
-        if ($code !== 0 || !count($output))
+        if ($code !== 0 || !count($output)) {
             return null;
+        }
 
         $fpm = $output[0];
         $output = [];
         exec("$fpm -tt 2>&1 | grep 'listen = '", $output);
 
-        if (!count($output))
+        if (!count($output)) {
             return null;
+        }
 
         preg_match('/listen\s*=\s*(.*)/s', $output[0], $matches);
 
-        if (count($matches) !== 2)
+        if (count($matches) !== 2) {
             return null;
+        }
 
         return $matches[1];
     }
@@ -180,7 +186,6 @@ class Util extends Controller
             $column['type'] = $info['type'];
 
             if (preg_match('/^(\w+)(?:\(([^)]+)\))?/', $info['type'], $matches)) {
-
                 $column['type'] = $this->convertTypeNames(strtolower($matches[1]));
 
                 $type = strtolower($matches[1]);
@@ -216,17 +221,18 @@ class Util extends Controller
 
     private function convertTypeNames(string $type): string
     {
-
-        if ($type === 'int' || $type === 'smallint' || $type === 'tinyint')
+        if ($type === 'int' || $type === 'smallint' || $type === 'tinyint') {
             return 'int';
+        }
 
-        if ($type === 'bigint')
+        if ($type === 'bigint') {
             return 'bigint';
+        }
 
-        if ($type === 'double' || $type === 'float')
+        if ($type === 'double' || $type === 'float') {
             return 'float';
+        }
 
         return 'string';
     }
-
 }

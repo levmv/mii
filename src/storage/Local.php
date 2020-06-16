@@ -8,7 +8,6 @@ use mii\web\UploadedFile;
 
 class Local extends Component implements StorageInterface
 {
-
     protected string $path = '';
     protected string $url = '';
 
@@ -16,7 +15,6 @@ class Local extends Component implements StorageInterface
 
     protected function resolve(string $path): string
     {
-
         $path = ltrim($path, DIRECTORY_SEPARATOR);
 
         if ($this->levels) {
@@ -28,8 +26,9 @@ class Local extends Component implements StorageInterface
 
             $path = substr($path, $i);
 
-            if (!is_dir($this->path . $level))
+            if (!is_dir($this->path . $level)) {
                 FS::mkdir($this->path . $level);
+            }
 
             $path = $level . $path;
         }

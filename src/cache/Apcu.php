@@ -11,7 +11,7 @@ class Apcu extends Cache
      * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    public function get($id, $default = NULL)
+    public function get($id, $default = null)
     {
         $data = \apcu_fetch($this->sanitizeId($id), $success);
 
@@ -26,9 +26,9 @@ class Apcu extends Cache
      * @param integer $lifetime lifetime in seconds
      * @return  boolean
      */
-    public function set($id, $data, $lifetime = NULL)
+    public function set($id, $data, $lifetime = null)
     {
-        if ($lifetime === NULL) {
+        if ($lifetime === null) {
             $lifetime = $this->default_expire;
         }
 

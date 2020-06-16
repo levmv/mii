@@ -90,8 +90,9 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public static function all(array $value = null): array
     {
-        if (\is_null($value))
+        if (\is_null($value)) {
             return static::find()->all();
+        }
 
         assert(!is_array($value[0]), "This method accepts only array of int/string's");
 
@@ -163,7 +164,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @return array
      * @deprecated
      */
-    public static function selectList($key, $display, $first = NULL): array
+    public static function selectList($key, $display, $first = null): array
     {
         return static::find()->get()->toList($key, $display, $first);
     }
@@ -194,12 +195,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return $this->$key ?? null;
     }
 
-    public function set($values, $value = NULL): ORM
+    public function set($values, $value = null): ORM
     {
         if (\is_object($values) && $values instanceof \mii\web\Form) {
-
             $values = $values->changedFields();
-
         } elseif (!\is_array($values)) {
             $this->$values = $value;
         } else {
@@ -223,7 +222,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function __unset($key)
     {
-
         if (\array_key_exists($key, $this->attributes)) {
             unset($this->attributes[$key]);
 
@@ -256,7 +254,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             foreach ($properties as $key => $name) {
                 if (\is_int($key)) {
                     $result[$name] = $this->$name;
-                } else if (\is_string($name)) {
+                } elseif (\is_string($name)) {
                     $result[$key] = $this->$name;
                 } elseif ($name instanceof \Closure) {
                     $result[$key] = $name($this);
@@ -398,8 +396,9 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return 0;
         }
 
-        if ($this->onUpdate() === false)
+        if ($this->onUpdate() === false) {
             return 0;
+        }
 
         $this->onChange();
 

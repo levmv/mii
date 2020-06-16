@@ -34,6 +34,4 @@ class File extends Target
         flock($fp, LOCK_UN);
         fclose($fp);
     }
-
-
 }

@@ -2,7 +2,6 @@
 
 namespace mii\core;
 
-
 class ErrorException extends \ErrorException
 {
     /**

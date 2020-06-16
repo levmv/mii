@@ -55,7 +55,6 @@ class Mii
 
     public static function error($msg, $category = 'app')
     {
-
         static::log(Logger::ERROR, $msg, $category);
     }
 
@@ -71,8 +70,9 @@ class Mii
 
     public static function log($level, $msg, $category)
     {
-        if (static::$app->has(static::$log_component_name))
+        if (static::$app->has(static::$log_component_name)) {
             static::$app->get(static::$log_component_name)->log($level, $msg, $category);
+        }
     }
 
     public static function message(string $file, string $path = null, $default = null)
@@ -81,7 +81,6 @@ class Mii
         $file = self::resolve($file);
 
         if (!isset($messages[$file])) {
-
             if (file_exists($file . '.php')) {
                 $content = include($file . '.php');
             } elseif (isset(self::$paths['app']) && file_exists(\path('app') . '/messages/' . $file . '.php')) {
@@ -90,7 +89,6 @@ class Mii
                 throw new \Exception("Message file does not exist: $file.php");
             }
             $messages[$file] = $content;
-
         }
         if ($path === null) {
             // Return all of the messages

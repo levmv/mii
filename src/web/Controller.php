@@ -2,7 +2,6 @@
 
 namespace mii\web;
 
-
 use mii\core\InvalidRouteException;
 
 class Controller
@@ -21,7 +20,6 @@ class Controller
 
     protected function before()
     {
-
     }
 
     protected function after($content = null)
@@ -97,6 +95,4 @@ class Controller
 
         return \call_user_func_array([$this, $action], $args);
     }
-
-
 }

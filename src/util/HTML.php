@@ -61,7 +61,7 @@ class HTML
     /**
      * @var  boolean  automatically target external URLs to a new window?
      */
-    public static $windowed_urls = FALSE;
+    public static $windowed_urls = false;
 
 
     /**
@@ -74,7 +74,7 @@ class HTML
      * @param boolean $double_encode encode existing entities
      * @return  string
      */
-    public static function chars($value, $double_encode = TRUE)
+    public static function chars($value, $double_encode = true)
     {
         return \htmlspecialchars((string)$value, ENT_QUOTES, 'utf-8', $double_encode);
     }
@@ -90,7 +90,7 @@ class HTML
      * @param boolean $double_encode encode existing entities
      * @return  string
      */
-    public static function entities($value, $double_encode = TRUE)
+    public static function entities($value, $double_encode = true)
     {
         return htmlentities((string)$value, ENT_QUOTES, 'utf-8', $double_encode);
     }
@@ -118,9 +118,9 @@ class HTML
      * @uses    URL::site
      * @uses    HTML::attributes
      */
-    public static function anchor($uri, $title = NULL, array $attributes = NULL, $protocol = NULL)
+    public static function anchor($uri, $title = null, array $attributes = null, $protocol = null)
     {
-        if ($title === NULL) {
+        if ($title === null) {
             // Use the URI as the title
             $title = $uri;
         }
@@ -129,8 +129,8 @@ class HTML
             // Only use the base URL
             $uri = URL::base($protocol);
         } else {
-            if (strpos($uri, '://') !== FALSE) {
-                if (self::$windowed_urls === TRUE && empty($attributes['target'])) {
+            if (strpos($uri, '://') !== false) {
+                if (self::$windowed_urls === true && empty($attributes['target'])) {
                     // Make the link open in a new window
                     $attributes['target'] = '_blank';
                 }
@@ -160,9 +160,9 @@ class HTML
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function style($file, array $attributes = NULL, $protocol = NULL)
+    public static function style($file, array $attributes = null, $protocol = null)
     {
-        if (strpos($file, '://') === FALSE) {
+        if (strpos($file, '://') === false) {
             // Add the base URL
             $file = URL::site($file, $protocol);
         }
@@ -192,9 +192,9 @@ class HTML
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function script($file, array $attributes = NULL, $protocol = NULL)
+    public static function script($file, array $attributes = null, $protocol = null)
     {
-        if (\strpos($file, '://') === FALSE && \strpos($file, '//') !== 0) {
+        if (\strpos($file, '://') === false && \strpos($file, '//') !== 0) {
             // Add the base URL
             $file = URL::site($file, $protocol);
         }
@@ -217,9 +217,9 @@ class HTML
      * @uses    URL::base
      * @uses    HTML::attributes
      */
-    public static function image($file, array $attributes = NULL, $protocol = NULL)
+    public static function image($file, array $attributes = null, $protocol = null)
     {
-        if (strpos($file, '://') === FALSE) {
+        if (strpos($file, '://') === false) {
             // Add the base URL
             $file = URL::site($file, $protocol);
         }
@@ -239,10 +239,11 @@ class HTML
      * @param array $attributes attribute list
      * @return  string
      */
-    public static function attributes(array $attributes = NULL)
+    public static function attributes(array $attributes = null)
     {
-        if (empty($attributes))
+        if (empty($attributes)) {
             return '';
+        }
 
         $sorted = array();
         foreach (self::$attribute_order as $key) {
@@ -257,7 +258,7 @@ class HTML
 
         $compiled = '';
         foreach ($attributes as $key => $value) {
-            if ($value === NULL) {
+            if ($value === null) {
                 // Skip attributes that have NULL values
                 continue;
             }
@@ -265,7 +266,7 @@ class HTML
             if (\is_int($key)) {
                 // Assume non-associative keys are mirrored attributes
                 $key = $value;
-                $value = FALSE;
+                $value = false;
             }
 
             // Add the attribute key
@@ -299,7 +300,7 @@ class HTML
      * @uses    URL::site
      * @uses    HTML::attributes
      */
-    public static function open($action = NULL, array $attributes = NULL)
+    public static function open($action = null, array $attributes = null)
     {
         if ($action instanceof Request) {
             // Use the current URI
@@ -309,7 +310,7 @@ class HTML
         if (!$action) {
             // Allow empty form actions (submits back to the current url).
             $action = '';
-        } elseif (strpos($action, '://') === FALSE) {
+        } elseif (strpos($action, '://') === false) {
             // Make the URI absolute
             $action = URL::site($action);
         }
@@ -352,7 +353,7 @@ class HTML
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function input($name, $value = NULL, array $attributes = NULL)
+    public static function input($name, $value = null, array $attributes = null)
     {
         // Set the input name
         $attributes['name'] = $name;
@@ -379,7 +380,7 @@ class HTML
      * @return  string
      * @uses    Form::input
      */
-    public static function hidden($name, $value = NULL, array $attributes = NULL)
+    public static function hidden($name, $value = null, array $attributes = null)
     {
         $attributes['type'] = 'hidden';
 
@@ -397,7 +398,7 @@ class HTML
      * @return  string
      * @uses    Form::input
      */
-    public static function password($name, $value = NULL, array $attributes = NULL)
+    public static function password($name, $value = null, array $attributes = null)
     {
         $attributes['type'] = 'password';
 
@@ -414,11 +415,11 @@ class HTML
      * @return  string
      * @uses    Form::input
      */
-    public static function file($name, array $attributes = NULL)
+    public static function file($name, array $attributes = null)
     {
         $attributes['type'] = 'file';
 
-        return self::input($name, NULL, $attributes);
+        return self::input($name, null, $attributes);
     }
 
     /**
@@ -433,11 +434,11 @@ class HTML
      * @return  string
      * @uses    Form::input
      */
-    public static function checkbox($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
+    public static function checkbox($name, $value = null, $checked = false, array $attributes = null)
     {
         $attributes['type'] = 'checkbox';
 
-        if ($checked === TRUE) {
+        if ($checked === true) {
             // Make the checkbox active
             $attributes[] = 'checked';
         }
@@ -458,11 +459,11 @@ class HTML
      * @return  string
      * @uses    Form::input
      */
-    public static function radio($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
+    public static function radio($name, $value = null, $checked = false, array $attributes = null)
     {
         $attributes['type'] = 'radio';
 
-        if ($checked === TRUE) {
+        if ($checked === true) {
             // Make the radio active
             $attributes[] = 'checked';
         }
@@ -483,7 +484,7 @@ class HTML
      * @uses    HTML::attributes
      * @uses    HTML::chars
      */
-    public static function textarea($name, $body = '', array $attributes = NULL, $double_encode = TRUE)
+    public static function textarea($name, $body = '', array $attributes = null, $double_encode = true)
     {
         // Set the input name
         $attributes['name'] = $name;
@@ -508,7 +509,7 @@ class HTML
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function select($name, array $options = NULL, $selected = NULL, array $attributes = NULL)
+    public static function select($name, array $options = null, $selected = null, array $attributes = null)
     {
         // Set the input name
         $attributes['name'] = $name;
@@ -520,7 +521,7 @@ class HTML
         }
 
         if (!\is_array($selected)) {
-            if ($selected === NULL) {
+            if ($selected === null) {
                 // Use an empty array
                 $selected = array();
             } else {
@@ -552,7 +553,7 @@ class HTML
                         }
 
                         // Change the option to the HTML string
-                        $_options[] = '<option value=' . $_value . '>' . self::chars($_name, FALSE) . '</option>';
+                        $_options[] = '<option value=' . $_value . '>' . self::chars($_name, false) . '</option>';
                     }
 
                     // Compile the options into a string
@@ -571,7 +572,7 @@ class HTML
                     }
 
                     // Change the option to the HTML string
-                    $r_options[] = '<option value=' . $value . '>' . self::chars($name, FALSE) . '</option>';
+                    $r_options[] = '<option value=' . $value . '>' . self::chars($name, false) . '</option>';
                 }
             }
 
@@ -594,7 +595,7 @@ class HTML
      * @return  string
      * @uses    Form::input
      */
-    public static function submit($name, $value, array $attributes = NULL)
+    public static function submit($name, $value, array $attributes = null)
     {
         $attributes['type'] = 'submit';
 
@@ -614,7 +615,7 @@ class HTML
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function button($name, $body, array $attributes = NULL)
+    public static function button($name, $body, array $attributes = null)
     {
         // Set the input name
         $attributes['name'] = $name;
@@ -633,9 +634,9 @@ class HTML
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function label($input, $text = NULL, array $attributes = NULL)
+    public static function label($input, $text = null, array $attributes = null)
     {
-        if ($text === NULL) {
+        if ($text === null) {
             // Use the input name as the text
             $text = ucwords(preg_replace('/[\W_]+/', ' ', $input));
         }
@@ -666,8 +667,9 @@ class HTML
             $words = \preg_split('/\W+/u', $name, -1, PREG_SPLIT_NO_EMPTY);
 
             for ($i = 0; $i < 2; $i++) {
-                if (isset($words[$i]))
+                if (isset($words[$i])) {
                     $fl .= \mb_strtoupper(\mb_substr($words[$i], 0, 1));
+                }
             }
         }
 
@@ -679,5 +681,4 @@ class HTML
 
         return static::tag('span', $fl, \array_replace($params, $attributes));
     }
-
 }

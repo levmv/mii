@@ -388,7 +388,6 @@ class SelectQuery
      */
     public function andWhere($column, $op = null, $value = null): self
     {
-
         if ($column === null) {
             $this->_where[] = ['AND' => '('];
             $this->_last_condition_where = true;
@@ -433,16 +432,12 @@ class SelectQuery
     public function orWhere($column = null, $op = null, $value = null): self
     {
         if ($column === null) {
-
             $this->_where[] = ['OR' => '('];
             $this->_last_condition_where = true;
-
         } elseif (\is_array($column)) {
-
             foreach ($column as $row) {
                 $this->_where[] = ['OR' => $row];
             }
-
         } else {
             $this->_where[] = ['OR' => [$column, $op, $value]];
         }
@@ -463,9 +458,7 @@ class SelectQuery
             }
 
             $this->_where[] = ['' => ')'];
-
         } else {
-
             if ($check_for_empty !== false) {
                 $group = \end($this->_having);
 
@@ -476,7 +469,6 @@ class SelectQuery
             }
 
             $this->_having[] = ['' => ')'];
-
         }
 
         return $this;
@@ -559,8 +551,7 @@ class SelectQuery
             $query .= $table_aliased
                 ? ' FROM ' . $this->db->quoteTable($table)
                 : " FROM $table_q";
-
-        } else if (!empty($this->_from)) {
+        } elseif (!empty($this->_from)) {
             assert(!empty($this->_from), 'From must not be empty');
             $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quoteTable'], $this->_from));
         }
@@ -629,7 +620,6 @@ class SelectQuery
         $statements = [];
 
         foreach ($this->_joins as $join) {
-
             if ($join['type']) {
                 $sql = \strtoupper($join['type']) . ' JOIN';
             } else {
@@ -645,7 +635,6 @@ class SelectQuery
             } else {
                 $conditions = array();
                 foreach ($join['on'] as [$c1, $op, $c2]) {
-
                     if ($op) {
                         // Make the operator uppercase and spaced
                         $op = ' ' . \strtoupper($op);
@@ -682,7 +671,6 @@ class SelectQuery
         foreach ($conditions as $group) {
             // Process groups of conditions
             foreach ($group as $logic => $condition) {
-
                 if ($condition === '(') {
                     if (!empty($sql) && $last_condition !== '(') {
                         // Include logic operator
@@ -713,10 +701,8 @@ class SelectQuery
 
                     if ($op === 'IN' && \is_array($value)) {
                         $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
-
                     } elseif ($op === 'NOT IN' && \is_array($value)) {
                         $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
-
                     } elseif ($op === 'BETWEEN' && \is_array($value)) {
                         // BETWEEN always has exactly two arguments
                         [$min, $max] = $value;
@@ -749,7 +735,6 @@ class SelectQuery
 
     protected function _compileShortConditions(array $conditions): string
     {
-
         [$column, $op, $value] = \current($conditions[0]);
 
         $column = $this->db->quoteColumn($column);
@@ -787,7 +772,6 @@ class SelectQuery
     {
         $sort = [];
         foreach ($this->_order_by as [$column, $direction]) {
-
             $column = $this->db->quoteIdentifier($column);
 
             $sort[] = "$column $direction";
@@ -927,6 +911,4 @@ class SelectQuery
     {
         return $this->execute()->all();
     }
-
-
 }

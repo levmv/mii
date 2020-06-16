@@ -70,11 +70,11 @@ class UTF8
      */
     public static function transliterateToAscii($str, $case = 0)
     {
-        static $utf8_lower_accents = NULL;
-        static $utf8_upper_accents = NULL;
+        static $utf8_lower_accents = null;
+        static $utf8_upper_accents = null;
 
         if ($case <= 0) {
-            if ($utf8_lower_accents === NULL) {
+            if ($utf8_lower_accents === null) {
                 $utf8_lower_accents = array(
                     'à' => 'a', 'ô' => 'o', 'ď' => 'd', 'ḟ' => 'f', 'ë' => 'e', 'š' => 's', 'ơ' => 'o',
                     'ß' => 'ss', 'ă' => 'a', 'ř' => 'r', 'ț' => 't', 'ň' => 'n', 'ā' => 'a', 'ķ' => 'k',
@@ -102,7 +102,7 @@ class UTF8
         }
 
         if ($case >= 0) {
-            if ($utf8_upper_accents === NULL) {
+            if ($utf8_upper_accents === null) {
                 $utf8_upper_accents = array(
                     'À' => 'A', 'Ô' => 'O', 'Ď' => 'D', 'Ḟ' => 'F', 'Ë' => 'E', 'Š' => 'S', 'Ơ' => 'O',
                     'Ă' => 'A', 'Ř' => 'R', 'Ț' => 'T', 'Ň' => 'N', 'Ā' => 'A', 'Ķ' => 'K', 'Ĕ' => 'E',
@@ -130,7 +130,6 @@ class UTF8
         }
 
         return $str;
-
     }
 
 
@@ -146,8 +145,9 @@ class UTF8
      */
     public static function ucfirst($str)
     {
-        if (self::isAscii($str))
+        if (self::isAscii($str)) {
             return ucfirst($str);
+        }
 
         preg_match('/^(.?)(.*)$/us', $str, $matches);
         return mb_strtoupper($matches[1]) . $matches[2];
@@ -165,10 +165,11 @@ class UTF8
      * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function trim($str, $charlist = NULL)
+    public static function trim($str, $charlist = null)
     {
-        if ($charlist === NULL)
+        if ($charlist === null) {
             return trim($str);
+        }
 
         return self::ltrim(self::rtrim($str, $charlist), $charlist);
     }
@@ -184,13 +185,15 @@ class UTF8
      * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function ltrim($str, $charlist = NULL)
+    public static function ltrim($str, $charlist = null)
     {
-        if ($charlist === NULL)
+        if ($charlist === null) {
             return ltrim($str);
+        }
 
-        if (self::isAscii($charlist))
+        if (self::isAscii($charlist)) {
             return ltrim($str, $charlist);
+        }
 
         $charlist = preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
 
@@ -208,13 +211,15 @@ class UTF8
      * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function rtrim($str, $charlist = NULL)
+    public static function rtrim($str, $charlist = null)
     {
-        if ($charlist === NULL)
+        if ($charlist === null) {
             return rtrim($str);
+        }
 
-        if (self::isAscii($charlist))
+        if (self::isAscii($charlist)) {
             return rtrim($str, $charlist);
+        }
 
         $charlist = preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
 
@@ -262,5 +267,4 @@ class UTF8
 
         return $str;
     }
-
 }

@@ -2,10 +2,8 @@
 
 namespace mii\core;
 
-
 class ErrorHandler extends Component
 {
-
     public $current_exception;
 
     /**
@@ -48,7 +46,6 @@ class ErrorHandler extends Component
 
     public function render($exception)
     {
-
     }
 
 
@@ -80,7 +77,6 @@ class ErrorHandler extends Component
     public function handleError($code, $error, $file, $line)
     {
         if (error_reporting() & $code) {
-
             unset($this->_memory_reserve);
 
             // This error is not suppressed by current error reporting settings
@@ -104,8 +100,9 @@ class ErrorHandler extends Component
             $this->report($exception);
             $this->render($exception);
 
-            if (\Mii::$app->has(\Mii::$log_component_name))
+            if (\Mii::$app->has(\Mii::$log_component_name)) {
                 \Mii::$app->get(\Mii::$log_component_name)->flush();
+            }
 
             // Shutdown now to avoid a "death loop"
             exit(1);
@@ -140,5 +137,4 @@ class ErrorHandler extends Component
 
         return 'An internal server error occurred.';
     }
-
 }

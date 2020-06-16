@@ -107,7 +107,7 @@ class Expression
      * @param mixed    Database instance or name of instance
      * @return  string
      */
-    public function compile(Database $db = NULL): string
+    public function compile(Database $db = null): string
     {
         if ($db === null) {
             // Get the database instance
@@ -126,5 +126,4 @@ class Expression
 
         return $value;
     }
-
 }

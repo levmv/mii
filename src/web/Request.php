@@ -4,7 +4,6 @@ namespace mii\web;
 
 use mii\core\Component;
 
-
 class Request extends Component
 {
 
@@ -91,8 +90,9 @@ class Request extends Component
 
     public function init(array $config = []): void
     {
-        foreach ($config as $key => $value)
+        foreach ($config as $key => $value) {
             $this->$key = $value;
+        }
 
         $uri = \parse_url('http://domain.com' . $_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -122,9 +122,9 @@ class Request extends Component
      * @param string $uri
      * @return  string
      */
-    public function uri($uri = NULL): string
+    public function uri($uri = null): string
     {
-        if ($uri === NULL) {
+        if ($uri === null) {
             return empty($this->_uri) ? '/' : $this->_uri;
         }
 
@@ -133,7 +133,6 @@ class Request extends Component
 
     public function getHostname(): string
     {
-
         if (!$this->_hostname) {
             $http = $this->isSecure() ? 'https' : 'http';
             $domain = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'];
@@ -156,11 +155,13 @@ class Request extends Component
 
     public function getIp(): string
     {
-        if (!empty($_SERVER['HTTP_CLIENT_IP']))
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             return $_SERVER['HTTP_CLIENT_IP'];
+        }
 
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             return $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }
 
         return $_SERVER['REMOTE_ADDR'];
     }
@@ -173,9 +174,9 @@ class Request extends Component
      * @param string $method Method to use for this request
      * @return  mixed
      */
-    public function method($method = NULL)
+    public function method($method = null)
     {
-        if ($method === NULL) {
+        if ($method === null) {
             // Act as a getter
             return $this->_method;
         }
@@ -221,7 +222,6 @@ class Request extends Component
 
     public function csrfToken($new = false)
     {
-
         if ($this->_csrf_token === null || $new) {
             if ($new || ($this->_csrf_token = $this->loadCsrfToken()) === null) {
                 // Generate a new unique token
@@ -300,7 +300,6 @@ class Request extends Component
 
     public function json($key, $default = null)
     {
-
         if (!$this->_json_items && \strtolower($this->getContentType()) === 'application/json') {
             $this->_json_items = \json_decode(\file_get_contents('php://input'), true);
         } else {
@@ -333,8 +332,9 @@ class Request extends Component
             return $default;
         }
 
-        if (!$this->cookie_validation)
+        if (!$this->cookie_validation) {
             return $_COOKIE[$key];
+        }
 
         // Get the cookie value
         $cookie = $_COOKIE[$key];
@@ -385,7 +385,9 @@ class Request extends Component
             $value = $this->salt($name, (string)$value) . $value;
         }
 
-        return \setcookie($name, $value,
+        return \setcookie(
+            $name,
+            $value,
             [
                 'expires' => $expiration,
                 'path' => $this->cookie_path,
@@ -393,7 +395,8 @@ class Request extends Component
                 'secure' => $this->cookie_secure,
                 'httpOnly' => $this->cookie_httponly,
                 'sameSite' => $this->cookie_samesite,
-            ]);
+            ]
+        );
     }
 
 

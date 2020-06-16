@@ -1,4 +1,6 @@
-<?php namespace mii\util; ?>
+<?php namespace mii\util;
+
+?>
 
 <style type="text/css">
     .mii {
@@ -165,7 +167,7 @@ $application_cols = array('min', 'max', 'average', 'current');
             <th class="name" rowspan="2"
                 scope="rowgroup"><?php echo 'Application Execution' . ' (' . $stats['count'] . ')' ?></th>
             <?php try {
-                foreach ($application_cols as $key): ?>
+    foreach ($application_cols as $key): ?>
                     <td class="<?php echo $key ?>">
                         <?php if ($stats[$key]['time'] > 2): ?>
                             <?php echo number_format($stats[$key]['time'], 3, ',', '') ?> <abbr title="seconds">s</abbr>
@@ -175,9 +177,9 @@ $application_cols = array('min', 'max', 'average', 'current');
                         <?php endif; ?>
                     </td>
                 <?php endforeach;
-            } catch (\Throwable $t) {
-                throw  $t;
-            } ?>
+} catch (\Throwable $t) {
+    throw  $t;
+} ?>
         </tr>
         <tr class="final mark memory">
             <?php foreach ($application_cols as $key): ?>
@@ -208,13 +210,17 @@ $application_cols = array('min', 'max', 'average', 'current');
                     <th class="name" rowspan="2"
                         scope="rowgroup"><?php echo HTML::chars($name);
                         $count = \count($tokens);
-                        if ($count > 1) echo " <sup>($count)</sup>" ?></th>
+                        if ($count > 1) {
+                            echo " <sup>($count)</sup>";
+                        } ?></th>
                     <?php foreach ($group_cols as $key):
                         $is_total = $key === 'total'; ?>
                         <td class="<?php echo $key ?>">
                             <div>
                                 <div class="value"><?php echo number_format($stats[$key]['time'], 6) * 1000 ?><?php
-                                    if ($is_total) echo "&thinsp;<abbr>ms</abbr>"
+                                    if ($is_total) {
+                                        echo "&thinsp;<abbr>ms</abbr>";
+                                    }
                                     ?>
                                 </div>
                                 <?php if ($is_total): ?>
@@ -231,7 +237,9 @@ $application_cols = array('min', 'max', 'average', 'current');
                         <td class="<?php echo $key ?>">
                             <div>
                                 <div class="value"><?php echo number_format($stats[$key]['memory'] / 1024, 4) ?><?php
-                                    if ($is_total) echo "&thinsp;<abbr>kB</abbr>"
+                                    if ($is_total) {
+                                        echo "&thinsp;<abbr>kB</abbr>";
+                                    }
                                     ?></div>
                                 <?php if ($is_total): ?>
                                     <div class="graph"

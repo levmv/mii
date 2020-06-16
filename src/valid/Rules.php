@@ -7,8 +7,6 @@ use mii\web\UploadedFile;
 
 class Rules
 {
-
-
     public static function validCaptcha($value)
     {
         return \Mii::$app->captcha->valid($value);
@@ -46,7 +44,7 @@ class Rules
         }
 
         // Value cannot be NULL, FALSE, '', or an empty array
-        return !\in_array($value, array(NULL, FALSE, '', array()), TRUE);
+        return !\in_array($value, array(null, false, '', array()), true);
     }
 
     /**
@@ -70,7 +68,6 @@ class Rules
      */
     public static function min($value, $length)
     {
-
         return static::_checkSize($value, $length, 1);
     }
 
@@ -89,8 +86,9 @@ class Rules
 
     public static function _checkSize($value, $length, $dir)
     {
-        if (\is_object($value) && $value instanceof UploadedFile)
+        if (\is_object($value) && $value instanceof UploadedFile) {
             return static::fileSize($value, $length, $dir);
+        }
 
         if (\is_string($value)) {
             return (mb_strlen($value) <=> $length) === $dir;
@@ -111,10 +109,11 @@ class Rules
     {
         if (\is_array($length)) {
             foreach ($length as $strlen) {
-                if (mb_strlen($value) === $strlen)
-                    return TRUE;
+                if (mb_strlen($value) === $strlen) {
+                    return true;
+                }
             }
-            return FALSE;
+            return false;
         }
 
         return static::_checkSize($value, $length, 0);
@@ -142,13 +141,13 @@ class Rules
      * @param boolean $strict strict RFC compatibility
      * @return  boolean
      */
-    public static function email($email, $strict = FALSE)
+    public static function email($email, $strict = false)
     {
         if (mb_strlen($email) > 254) {
-            return FALSE;
+            return false;
         }
 
-        if ($strict === TRUE) {
+        if ($strict === true) {
             $qtext = '[^\\x0d\\x22\\x5c\\x80-\\xff]';
             $dtext = '[^\\x0d\\x5b-\\x5d\\x80-\\xff]';
             $atom = '[^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+';
@@ -180,8 +179,9 @@ class Rules
      */
     public static function emailDomain($email)
     {
-        if (!Rules::notEmpty($email))
-            return FALSE; // Empty fields cause issues with checkdnsrr()
+        if (!Rules::notEmpty($email)) {
+            return false;
+        } // Empty fields cause issues with checkdnsrr()
 
         // Check if the email domain has a valid MX record
         return (bool)checkdnsrr(preg_replace('/^[^@]++@/', '', $email), 'MX');
@@ -228,17 +228,23 @@ class Rules
             # path (optional)
             (?:/.*)?
 
-            $~iDx', $url, $matches))
-            return FALSE;
+            $~iDx',
+            $url,
+            $matches
+        )) {
+            return false;
+        }
 
         // We matched an IP address
-        if (!isset($matches[1]))
-            return TRUE;
+        if (!isset($matches[1])) {
+            return true;
+        }
 
         // Check maximum length of the whole hostname
         // http://en.wikipedia.org/wiki/Domain_name#cite_note-0
-        if (\strlen($matches[1]) > 253)
-            return FALSE;
+        if (\strlen($matches[1]) > 253) {
+            return false;
+        }
 
         // An extra check for the top level domain
         // It must start with a letter
@@ -253,12 +259,12 @@ class Rules
      * @param boolean $allow_private allow private IP networks
      * @return  boolean
      */
-    public static function ip($ip, $allow_private = TRUE)
+    public static function ip($ip, $allow_private = true)
     {
         // Do not allow reserved addresses
         $flags = FILTER_FLAG_NO_RES_RANGE;
 
-        if ($allow_private === FALSE) {
+        if ($allow_private === false) {
             // Do not allow private or reserved addresses
             $flags |= FILTER_FLAG_NO_PRIV_RANGE;
         }
@@ -273,7 +279,7 @@ class Rules
      * @param array  $lengths
      * @return  boolean
      */
-    public static function phone($number, $lengths = NULL)
+    public static function phone($number, $lengths = null)
     {
         if (!\is_array($lengths)) {
             $lengths = array(7, 10, 11);
@@ -294,7 +300,7 @@ class Rules
      */
     public static function date($str)
     {
-        return (strtotime($str) !== FALSE);
+        return (strtotime($str) !== false);
     }
 
     /**
@@ -304,11 +310,11 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alpha($str, $utf8 = FALSE)
+    public static function alpha($str, $utf8 = false)
     {
         $str = (string)$str;
 
-        if ($utf8 === TRUE) {
+        if ($utf8 === true) {
             return (bool)preg_match('/^\pL++$/uD', $str);
         }
 
@@ -322,9 +328,9 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alphaNumeric($str, $utf8 = FALSE)
+    public static function alphaNumeric($str, $utf8 = false)
     {
-        if ($utf8 === TRUE) {
+        if ($utf8 === true) {
             return (bool)preg_match('/^[\pL\pN]++$/uD', $str);
         }
 
@@ -338,9 +344,9 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alphaDash($str, $utf8 = FALSE)
+    public static function alphaDash($str, $utf8 = false)
     {
-        if ($utf8 === TRUE) {
+        if ($utf8 === true) {
             $regex = '/^[-\pL\pN_]++$/uD';
         } else {
             $regex = '/^[-a-z0-9_]++$/iD';
@@ -356,9 +362,9 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function digit($str, $utf8 = FALSE)
+    public static function digit($str, $utf8 = false)
     {
-        if ($utf8 === TRUE) {
+        if ($utf8 === true) {
             return (bool)preg_match('/^\pN++$/uD', $str);
         }
 
@@ -392,11 +398,11 @@ class Rules
      * @param integer $step increment size
      * @return  boolean
      */
-    public static function range($number, $min, $max, $step = NULL)
+    public static function range($number, $min, $max, $step = null)
     {
         if ($number <= $min || $number >= $max) {
             // Number is outside of range
-            return FALSE;
+            return false;
         }
 
         if (!$step) {
@@ -417,7 +423,7 @@ class Rules
      * @param integer $digits number of digits
      * @return  boolean
      */
-    public static function decimal($str, $places = 2, $digits = NULL)
+    public static function decimal($str, $places = 2, $digits = null)
     {
         if ($digits > 0) {
             // Specific number of digits
@@ -480,12 +486,13 @@ class Rules
      */
     public static function fileType($file, array $allowed): bool
     {
-
-        if (!$file instanceof UploadedFile)
+        if (!$file instanceof UploadedFile) {
             return true;
+        }
 
-        if ($file->hasError())
+        if ($file->hasError()) {
             return true;
+        }
 
         $ext = strtolower(pathinfo($file->name, PATHINFO_EXTENSION));
 
@@ -511,12 +518,12 @@ class Rules
     {
         if ($file->error === UPLOAD_ERR_INI_SIZE) {
             // Upload is larger than PHP allowed size (upload_max_filesize)
-            return FALSE;
+            return false;
         }
 
         if ($file->error !== UPLOAD_ERR_OK) {
             // The upload failed, no size to check
-            return TRUE;
+            return true;
         }
 
         // Convert the provided size to bytes for comparison
@@ -531,7 +538,5 @@ class Rules
         $recaptcha = new \ReCaptcha\ReCaptcha(config('google.recaptcha.secret'));
         $response = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);
         return $response->isSuccess();
-
     }
-
 }

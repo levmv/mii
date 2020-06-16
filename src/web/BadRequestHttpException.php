@@ -6,7 +6,6 @@ use Mii;
 
 class BadRequestHttpException extends HttpException
 {
-
     public function __construct($message = null)
     {
         if ($message === null) {
@@ -14,5 +13,4 @@ class BadRequestHttpException extends HttpException
         }
         parent::__construct(400, $message);
     }
-
 }

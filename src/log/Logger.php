@@ -46,17 +46,20 @@ class Logger extends Component
     {
         $this->messages[] = [$message, $level, $category, \time()];
 
-        if ($this->flush_interval > 0 && \count($this->messages) > $this->flush_interval)
+        if ($this->flush_interval > 0 && \count($this->messages) > $this->flush_interval) {
             $this->flush();
+        }
     }
 
     public function flush()
     {
-        if (empty($this->messages))
+        if (empty($this->messages)) {
             return;
+        }
 
-        if (!empty($this->targets) && empty($this->targets_objs))
+        if (!empty($this->targets) && empty($this->targets_objs)) {
             $this->initTargets();
+        }
 
         foreach ($this->targets_objs as $target) {
             $target->collect($this->messages);
@@ -69,11 +72,8 @@ class Logger extends Component
     protected function initTargets()
     {
         foreach ($this->targets as $name => $logger) {
-
             $ref = new \ReflectionClass($logger['class']);
             $this->targets_objs[$name] = $ref->newInstanceArgs([$logger]);
         }
     }
-
-
 }

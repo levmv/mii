@@ -22,7 +22,6 @@ class App extends \mii\core\App
     public function run()
     {
         try {
-
             $uri = $this->request->uri();
 
             $params = $this->router->match($uri);
@@ -50,11 +49,8 @@ class App extends \mii\core\App
             $this->controller->response = $this->response;
 
             $this->controller->execute($this->request->action, $params);
-
         } catch (RedirectHttpException $e) {
-
             $this->response->redirect($e->url);
-
         }
 
         $this->response->send();
@@ -76,6 +72,4 @@ class App extends \mii\core\App
             'error' => 'mii\web\ErrorHandler'
         ];
     }
-
-
 }

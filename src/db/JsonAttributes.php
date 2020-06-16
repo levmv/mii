@@ -13,7 +13,6 @@ namespace mii\db;
  */
 trait JsonAttributes
 {
-
     protected array $_serialize_cache = [];
     protected bool $_serialize_cache_dirty = false;
 
@@ -51,8 +50,9 @@ trait JsonAttributes
 
     public function create(): int
     {
-        if ($this->_serialize_cache_dirty)
+        if ($this->_serialize_cache_dirty) {
             $this->_invalidateSerializeCache();
+        }
         return parent::create();
     }
 
@@ -79,7 +79,6 @@ trait JsonAttributes
         $this->_serialize_cache_dirty = false;
 
         foreach ($this->_serialize_cache as $key => $value) {
-
             $value = \is_null($value)
                 ? null
                 : $this->_serializeValue($value);
@@ -99,13 +98,12 @@ trait JsonAttributes
     protected function _unserialize_value($key)
     {
         if (!\array_key_exists($key, $this->_serialize_cache)) {
-
             assert(array_key_exists($key, $this->attributes), 'Source field must exist');
             assert(is_string($this->attributes[$key]) || \is_null($this->attributes[$key]), 'Source field must have string type or be null');
 
             $this->_serialize_cache[$key] = \is_null($this->attributes[$key])
                 ? null
-                : \json_decode($this->attributes[$key], TRUE);
+                : \json_decode($this->attributes[$key], true);
         }
         return $this->_serialize_cache[$key];
     }

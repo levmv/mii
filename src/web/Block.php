@@ -4,7 +4,6 @@ namespace mii\web;
 
 use Mii;
 
-
 class Block
 {
     // Block name
@@ -164,13 +163,13 @@ class Block
         return $this;
     }
 
-    public function get(string $key, $default = NULL)
+    public function get(string $key, $default = null)
     {
         if (\array_key_exists($key, $this->_data)) {
             return $this->_data[$key];
         }
 
-        if ($default !== NULL) {
+        if ($default !== null) {
             return $default;
         }
 
@@ -193,7 +192,7 @@ class Block
      * @param mixed $value value
      * @return  $this
      */
-    public function set($key, $value = NULL)
+    public function set($key, $value = null)
     {
         if (\is_array($key)) {
             foreach ($key as $name => $value) {
@@ -261,7 +260,6 @@ class Block
         }
 
         if (empty($this->_file)) {
-
             $this->_file = Mii::$app->blocks->getBlockPhpFile($this->__name);
 
             if ($this->_file === null) {
@@ -293,7 +291,6 @@ class Block
      */
     protected function capture(string $block_filename): string
     {
-
         if (!empty($this->_data)) {
             // Import the view variables to local namespace
             \extract($this->_data, EXTR_OVERWRITE);
@@ -312,7 +309,6 @@ class Block
 
             // Load the view within the current scope
             require $block_filename;
-
         } catch (\Throwable $e) {
 
             // Delete the output buffer
@@ -325,8 +321,4 @@ class Block
         // Get the captured output and close the buffer
         return \ob_get_clean();
     }
-
-
 }
-
-

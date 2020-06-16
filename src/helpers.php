@@ -15,7 +15,6 @@ if (!\function_exists('abort')) {
         }
         throw new \mii\web\HttpException($code, $message);
     }
-
 }
 
 if (!\function_exists('redirect')) {
@@ -26,7 +25,6 @@ if (!\function_exists('redirect')) {
      */
     function redirect($url, $use_back_url = false)
     {
-
         if ($use_back_url) {
             $url = \mii\util\URL::back_url($url);
         }
@@ -78,9 +76,7 @@ if (!\function_exists('get_cached')) {
      */
     function get_cached($id, $default = null, $lifetime = null)
     {
-
         if ($default instanceof \Closure) {
-
             $cached = Mii::$app->cache->get($id);
             if ($cached === null) {
                 $cached = $default();
@@ -91,7 +87,6 @@ if (!\function_exists('get_cached')) {
         }
 
         return Mii::$app->cache->get($id, $default);
-
     }
 }
 
@@ -132,8 +127,9 @@ if (!\function_exists('clear_cache')) {
 
     function clear_cache($id = null)
     {
-        if ($id === null)
+        if ($id === null) {
             return Mii::$app->cache->deleteAll();
+        }
 
         return Mii::$app->cache->delete($id);
     }
@@ -160,7 +156,6 @@ if (!\function_exists('dd')) {
     function dd(...$params)
     {
         if (Mii::$app instanceof \mii\web\App && Mii::$app->response->format === \mii\web\Response::FORMAT_HTML) {
-
             echo "<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }";
             echo "pre small { font-size: 1em; color: #000080;font-weight:bold}";
             echo "</style><pre>\n";
@@ -171,7 +166,6 @@ if (!\function_exists('dd')) {
 
             echo "</pre>\n";
         } else {
-
             array_map(static function ($a) {
                 var_dump($a);
             }, $params);
@@ -183,8 +177,9 @@ if (!\function_exists('dd')) {
 if (!\function_exists('config')) {
     function config(string $key, $default = null)
     {
-        if (isset(Mii::$app->_config[$key]))
+        if (isset(Mii::$app->_config[$key])) {
             return Mii::$app->_config[$key];
+        }
 
         $keys = \explode('.', $key);
         $array = Mii::$app->_config;

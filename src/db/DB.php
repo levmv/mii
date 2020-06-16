@@ -4,7 +4,6 @@ namespace mii\db;
 
 class DB
 {
-
     public static function raw(string $q, array $params = [])
     {
         return static::query(null, $q, $params);
@@ -30,7 +29,6 @@ class DB
      */
     public static function query(?int $type, string $q, array $params = [])
     {
-
         $db = \Mii::$app->db;
 
         if (!empty($params)) {
@@ -136,5 +134,4 @@ class DB
     {
         \Mii::$app->db->rollback();
     }
-
 }
