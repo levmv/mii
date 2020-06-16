@@ -158,7 +158,7 @@ class Form
         }
 
         if (\is_array($field_name)) {
-            return \count(array_intersect($field_name, array_keys($this->_changed)));
+            return \count(array_intersect($field_name, array_keys($this->_changed))) > 0;
         }
 
         return isset($this->_changed[$field_name]);
