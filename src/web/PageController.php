@@ -56,7 +56,7 @@ class PageController extends Controller
 
     protected function before()
     {
-        if (!Mii::$app->request->isAjax() && $this->render_layout) {
+        if ($this->render_layout && !Mii::$app->request->isAjax()) {
             $this->setupLayout();
         }
 
@@ -116,7 +116,7 @@ class PageController extends Controller
             ->depends($depends);
     }
 
-    protected function onAccessDenied()
+    protected function onAccessDenied(): void
     {
         throw new ForbiddenHttpException('User has no rights to access ' . $this->request->uri());
     }

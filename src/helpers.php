@@ -21,14 +21,12 @@ if (!\function_exists('redirect')) {
     /**
      * @param      $url
      * @param bool $use_back_url
-     * @throws \mii\web\RedirectHttpException
      */
     function redirect($url, $use_back_url = false)
     {
         if ($use_back_url) {
             $url = \mii\util\URL::back_url($url);
         }
-
         throw new \mii\web\RedirectHttpException($url);
     }
 }
@@ -47,20 +45,20 @@ if (!\function_exists('block')) {
     }
 }
 
-if (!\function_exists('render_block')) {
+if (!\function_exists('renderBlock')) {
     /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param string $name
      * @return string
      */
-    function render_block(string $name): string
+    function renderBlock(string $name): string
     {
         /** @noinspection PhpUnhandledExceptionInspection */
         return Mii::$app->blocks->get($name)->render(true);
     }
 }
 
-if (!\function_exists('get_cached')) {
+if (!\function_exists('getCached')) {
     /**
      * Retrieve a cached value entry by id.
      *
@@ -74,7 +72,7 @@ if (!\function_exists('get_cached')) {
      * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    function get_cached($id, $default = null, $lifetime = null)
+    function getCached($id, $default = null, $lifetime = null)
     {
         if ($default instanceof \Closure) {
             $cached = Mii::$app->cache->get($id);
@@ -114,7 +112,7 @@ if (!\function_exists('cache')) {
     }
 }
 
-if (!\function_exists('clear_cache')) {
+if (!\function_exists('clearCache')) {
     /**
      * Delete a cache entry based on id, or delete all cache entries.
      *
@@ -125,7 +123,7 @@ if (!\function_exists('clear_cache')) {
      * @return  boolean
      */
 
-    function clear_cache($id = null)
+    function clearCache($id = null)
     {
         if ($id === null) {
             return Mii::$app->cache->deleteAll();
@@ -209,8 +207,8 @@ if (!\function_exists('config')) {
     }
 }
 
-if (!\function_exists('config_set')) {
-    function config_set(string $key, $value)
+if (!\function_exists('configSet')) {
+    function configSet(string $key, $value)
     {
         \mii\util\Arr::setPath(Mii::$app->_config, $key, $value, '.');
     }
