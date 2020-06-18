@@ -126,7 +126,7 @@ class PageController extends Controller
         $this->access_rules();
 
         if ($this->acl !== null) {
-            $roles = Mii::$app->auth->getUser() ? Mii::$app->auth->get_user()->getRoles() : '*';
+            $roles = Mii::$app->auth->getUser() ? Mii::$app->auth->getUser()->getRoles() : '*';
 
             if (empty($roles)) {
                 $roles = '*';

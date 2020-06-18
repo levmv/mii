@@ -14,8 +14,6 @@ use mii\util\FS;
  */
 class Block extends Controller
 {
-    public static $description = 'Blocks builder';
-
     protected $input_path;
 
     protected $output_path;
@@ -32,31 +30,35 @@ class Block extends Controller
 
         if (empty($list)) {
             $this->warning('Warning: console.block.rules is empty');
-        } else {
-            foreach ($list as $namespace => $blocks) {
-                if (!isset($this->blocks[$namespace])) {
-                    $this->blocks[$namespace] = [];
-                }
+        }
 
-                foreach ($blocks as $index => $value) {
-                    // Block can be defined either by simply name or by name => func_name
+        foreach ($list as $namespace => $blocks) {
+            if (!isset($this->blocks[$namespace])) {
+                $this->blocks[$namespace] = [];
+            }
 
-                    if (\is_int($index)) {
-                        $index = $value;
+            foreach ($blocks as $index => $value) {
+                // Block can be defined either by simply name or by name => func_name
 
-                        // Drop 'i_' prefix.
-                        if (strpos($value, 'i_') === 0) {
-                            $name = substr($index, 2);
-                        } else {
-                            $name = $index;
-                        }
-                        $value = 'do_' . str_replace('-', '_', $name);
+                if (\is_int($index)) {
+                    $index = $value;
+
+                    // Drop 'i_' prefix.
+                    if (strpos($value, 'i_') === 0) {
+                        $name = substr($index, 2);
+                    } else {
+                        $name = $index;
                     }
-
-                    $this->blocks[$namespace][$index] = $value;
+                    $name = str_replace('-', '_', $name);
+                    $parts = explode('_', $name);
+                    $parts = array_map('ucfirst', $parts);
+                    $value = 'do' . implode($parts);
                 }
+
+                $this->blocks[$namespace][$index] = $value;
             }
         }
+
 
         $this->input_path = Mii::resolve(config('console.block.input_path', '@root/node_modules/'));
     }
@@ -89,182 +91,64 @@ class Block extends Controller
     }
 
 
-    protected function do_fetch($block)
+    protected function doFetch($block)
     {
-        $this->to_block('unfetch/polyfill/index.js', $block, 'js');
+        $this->toBlock('unfetch/polyfill/index.js', $block, 'js');
     }
 
-    protected function do_promise($block)
+    protected function doPromise($block)
     {
-        $this->to_block('promise-polyfill/dist/polyfill.js', $block, 'js');
+        $this->toBlock('promise-polyfill/dist/polyfill.js', $block, 'js');
+    }
+
+    protected function doM1k($block)
+    {
+        $this->to_block('m1k/dist/m1k.js', $block, 'js');
+        $this->to_block('m1k/dist/m1k.css', $block, 'css');
+    }
+
+    protected function doJquery($block)
+    {
+        $this->toBlock('jquery/dist/jquery.min.js', $block, 'js');
     }
 
 
-    protected function do_jquery($block)
+    protected function doJcrop($block)
     {
-        $this->to_block('jquery/dist/jquery.min.js', $block, 'js');
-    }
-
-
-    protected function do_jcrop($block)
-    {
-        $this->to_block('Jcrop/js/Jcrop.min.js', $block, 'js');
-        $this->to_block('Jcrop/css/Jcrop.min.css', $block, 'css', function ($text) use ($block) {
+        $this->toBlock('Jcrop/js/Jcrop.min.js', $block, 'js');
+        $this->toBlock('Jcrop/css/Jcrop.min.css', $block, 'css', function ($text) use ($block) {
             return str_replace('url(', 'url(/assets/' . $block . '/', $text);
         });
-        $this->to_assets('Jcrop/css/Jcrop.gif', $block);
-    }
-
-    protected function do_dot($block)
-    {
-        $this->to_block('doT/doT.min.js', $block, 'js');
-    }
-
-    protected function do_tinymce($block)
-    {
-        $this->to_block(
-            [
-                'tinymce/tinymce.min.js',
-                'tinymce/themes/modern/theme.min.js',
-
-                'tinymce/plugins/autoresize/plugin.min.js',
-                'tinymce/plugins/link/plugin.min.js',
-                'tinymce/plugins/code/plugin.min.js',
-                'tinymce/plugins/image/plugin.min.js',
-                'tinymce/plugins/wordcount/plugin.min.js',
-                'tinymce/plugins/media/plugin.min.js',
-                'tinymce/plugins/paste/plugin.min.js',
-                'tinymce/plugins/table/plugin.min.js',
-                'tinymce/plugins/hr/plugin.min.js',
-                'tinymce/plugins/lists/plugin.min.js'
-            ],
-            $block,
-            'js'
-        );
-
-        $this->to_assets(
-            [
-                'tinymce/skins/lightgray/skin.min.css',
-                'tinymce/skins/lightgray/content.min.css'
-            ],
-            $block,
-            function ($text) use ($block) {
-                return str_replace('fonts', '/assets/a/' . $block, $text);
-            }
-        );
-
-        $this->to_assets([
-            'tinymce-i18n/langs/ru.js',
-            'tinymce/skins/lightgray/fonts/tinymce.woff',
-            'tinymce/skins/lightgray/fonts/tinymce.ttf'
-        ], $block);
+        $this->toAssets('Jcrop/css/Jcrop.gif', $block);
     }
 
 
-    protected function do_select2($block)
+    protected function doFotorama($block)
     {
-        $this->to_block(
-            [
-                'select2/dist/js/select2.full.min.js',
-                'select2/dist/js/i18n/ru.js'
-            ],
-            $block,
-            'js'
-        );
+        $this->toBlock('fotorama/fotorama.js', $block, 'js');
 
-        $this->to_block('select2/dist/css/select2.min.css', $block, 'css');
-    }
-
-
-    protected function do_fotorama($block)
-    {
-        $this->to_block('fotorama/fotorama.js', $block, 'js');
-
-        $this->to_block('fotorama/fotorama.css', $block, 'css', function ($text) use ($block) {
+        $this->toBlock('fotorama/fotorama.css', $block, 'css', function ($text) use ($block) {
             return str_replace('url(fotorama', 'url(/assets/' . $block . '/fotorama', $text);
         });
 
-        $this->to_assets('fotorama/fotorama.png', $block);
-        $this->to_assets('fotorama/fotorama@2x.png', $block);
+        $this->toAssets('fotorama/fotorama.png', $block);
+        $this->toAssets('fotorama/fotorama@2x.png', $block);
+    }
+
+    protected function doPlupload($block)
+    {
+        $this->toBlock('plupload/js/plupload.full.min.js', $block, 'js');
+        $this->toAssets('plupload/js/Moxie.swf', $block);
+        $this->toAssets('plupload/js/Moxie.xap', $block);
     }
 
 
-    protected function do_magnific($block)
+    /**
+     * @deprecated
+     */
+    protected function to_block($from, $block_name, $ext, $callback = null)
     {
-        $this->to_block('magnific-popup/dist/jquery.magnific-popup.min.js', $block, 'js');
-        $this->to_block('magnific-popup/dist/magnific-popup.css', $block, 'css');
-    }
-
-
-    protected function do_fancybox($block)
-    {
-        $this->to_block('fancyBox/source/jquery.fancybox.pack.js', $block, 'js');
-
-        $this->to_block('fancyBox/source/jquery.fancybox.css', 'i_fancybox', 'css', function ($text) use ($block) {
-            return str_replace("url('", "url('/assets/" . $block . "/", $text);
-        });
-
-        $this->to_assets('fancyBox/source/fancybox_loading.gif', $block);
-        $this->to_assets('fancyBox/source/fancybox_loading@2x.gif', $block);
-
-        $this->to_assets('fancyBox/source/blank.gif', $block);
-        $this->to_assets('fancyBox/source/fancybox_overlay.png', $block);
-        $this->to_assets('fancyBox/source/fancybox_sprite.png', $block);
-        $this->to_assets('fancyBox/source/fancybox_sprite@2x.png', $block);
-
-        //$this->to_assets('fancybox/source/fotorama@2x.png', $block);
-    }
-
-
-    protected function do_plupload($block)
-    {
-        $this->to_block('plupload/js/plupload.full.min.js', $block, 'js');
-        $this->to_assets('plupload/js/Moxie.swf', $block);
-        $this->to_assets('plupload/js/Moxie.xap', $block);
-    }
-
-    protected function do_jquery_ui($block)
-    {
-        $this->to_block([
-            'jquery-ui/ui/data.js',
-            'jquery-ui/ui/scroll-parent.js',
-            'jquery-ui/ui/widget.js',
-            'jquery-ui/ui/widgets/mouse.js',
-            'jquery-ui/ui/widgets/sortable.js',
-            'jquery-ui/ui/widgets/datepicker.js'
-        ], $block, 'js');
-
-        $this->to_block(
-            [
-            'jquery-ui/themes/base/datepicker.css',
-            'jquery-ui/themes/base/sortable.css',
-            'jquery-ui/themes/base/theme.css'
-        ],
-            $block,
-            'css',
-            function ($text) use ($block) {
-                return str_replace('url("images', 'url("/assets/a/' . $block, $text);
-            }
-        );
-
-        $this->iterate_dir('jquery-ui/themes/base/images', function ($file) use ($block) {
-            $this->to_assets('jquery-ui/themes/base/images/' . $file, $block);
-        });
-    }
-
-    protected function do_fontawesome($block)
-    {
-        $this->to_block(
-            'font-awesome/css/font-awesome.min.css',
-            $block,
-            'css',
-            function ($text) use ($block) {
-                return str_replace('../fonts', '/assets/' . $block, $text);
-            }
-        );
-        $this->iterate_dir('font-awesome/fonts/', function ($file) use ($block) {
-            $this->to_assets('font-awesome/fonts/' . $file, $block);
-        });
+        $this->toBlock($from, $block_name, $ext, $callback);
     }
 
     /**
@@ -274,7 +158,7 @@ class Block extends Controller
      * @param null $callback
      * @throws Exception
      */
-    protected function to_block($from, $block_name, $ext, $callback = null)
+    protected function toBlock($from, $block_name, $ext, $callback = null): void
     {
         if (!\is_array($from)) {
             $from = array($from);
@@ -321,7 +205,16 @@ class Block extends Controller
         $this->changed_files++;
     }
 
+
+    /**
+     * @deprecated
+     */
     protected function to_assets($from, $block_name, $callback = null)
+    {
+        $this->toAssets($from, $block_name, $callback);
+    }
+
+    protected function toAssets($from, $block_name, $callback = null)
     {
         if (!\is_array($from)) {
             $from = array($from);
@@ -345,10 +238,24 @@ class Block extends Controller
         }
     }
 
+
+    /**
+     * @deprecated
+     */
     protected function iterate_dir($from, $callback)
     {
+        $this->iterateDir($from, $callback);
+    }
+
+
+    /**
+     * @param string   $from
+     * @param callable $callback
+     */
+    protected function iterateDir(string $from, Callable $callback): void
+    {
         $files = scandir($this->input_path . '/' . $from);
-        array_map(function ($item) use ($callback) {
+        array_map(static function ($item) use ($callback) {
             if ($item === '.' || $item === '..') {
                 return;
             }
