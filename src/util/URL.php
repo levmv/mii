@@ -75,13 +75,12 @@ class URL
      */
     public static function base($protocol = null): string
     {
-        $base = \Mii::$app->base_url ?? '/';
         if ($protocol === null) {
-            return $base;
+            return \Mii::$app->base_url ?? '/';
         }
 
         if ($protocol === true) {
-            return \Mii::$app->request->getHostname() . $base;
+            return \Mii::$app->request->getHostname() . \Mii::$app->base_url;
         }
 
         if ($protocol !== '//') {
@@ -90,7 +89,7 @@ class URL
 
         $domain = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'];
 
-        return $protocol . $domain . $base;
+        return $protocol . $domain . \Mii::$app->base_url;
     }
 
     /**
