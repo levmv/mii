@@ -71,11 +71,11 @@ class ErrorHandler extends \mii\core\ErrorHandler
     public function renderFile($__file, $__params)
     {
         $__params['handler'] = $this;
-        ob_start();
-        ob_implicit_flush(0);
-        extract($__params, EXTR_OVERWRITE);
-        require($__file);
-        return ob_get_clean();
+        \ob_start();
+        \ob_implicit_flush(0);
+        \extract($__params, \EXTR_OVERWRITE);
+        require $__file;
+        return \ob_get_clean();
     }
 
     protected function exceptionToArray($e)
@@ -83,7 +83,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         $arr = [
             'name' => 'Exception',
             'message' => 'An internal server error occurred.',
-            'code' => $e->getCode()
+            'code' => $e->getCode(),
         ];
 
         if ($e instanceof UserException || config('debug')) {

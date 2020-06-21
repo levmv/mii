@@ -28,7 +28,7 @@ class Router extends Component
     protected array $default_parameters = [
         'id' => '[0-9]+',
         'slug' => '[a-zA-Z0-9-_.]+',
-        'path' => '[a-zA-Z0-9-_./]+'
+        'path' => '[a-zA-Z0-9-_./]+',
     ];
 
     protected $cache = null;
@@ -78,7 +78,7 @@ class Router extends Component
             $result = [
                 static::R_COMPILED => '',
                 static::R_PATTERN => $pattern,
-                static::R_PATH => ''
+                static::R_PATH => '',
             ];
 
             $params = null;
@@ -206,7 +206,7 @@ class Router extends Component
             }
         }
 
-        if (strpos($path, ':') !== false) {
+        if (\strpos($path, ':') !== false) {
             [$path, $params['action']] = \explode(':', $path);
         }
 
@@ -219,7 +219,7 @@ class Router extends Component
         }
 
         $params['controller'] = (\count($path))
-            ? $namespace . '\\' . \implode("\\", $path) . "\\" . \ucfirst($filename)
+            ? $namespace . '\\' . \implode('\\', $path) . '\\' . \ucfirst($filename)
             : $namespace . '\\' . \ucfirst($filename);
 
         if (!isset($params['action'])) {
@@ -256,15 +256,15 @@ class Router extends Component
 
         $defaults = ['action' => 'index'];
 
-        while (preg_match('#\([^()]++\)#', $uri, $match)) {
+        while (\preg_match('#\([^()]++\)#', $uri, $match)) {
             // Search for the matched value
             $search = $match[0];
 
             // Remove the parenthesis from the match as the replace
-            $replace = substr($match[0], 1, -1);
+            $replace = \substr($match[0], 1, -1);
 
 
-            while (preg_match('#' . static::REGEX_KEY . '#', $replace, $match)) {
+            while (\preg_match('#' . static::REGEX_KEY . '#', $replace, $match)) {
                 [$key, $param] = $match;
 
 
@@ -273,11 +273,11 @@ class Router extends Component
                     $provided_optional = true;
 
                     // Replace the key with the parameter value
-                    $replace = str_replace($key, $params[$param], $replace);
+                    $replace = \str_replace($key, $params[$param], $replace);
                 } elseif ($provided_optional) {
                     // Look for a default
                     if (isset($defaults[$param])) {
-                        $replace = str_replace($key, $defaults[$param], $replace);
+                        $replace = \str_replace($key, $defaults[$param], $replace);
                     } else {
                         // Ungrouped parameters are required
                         throw new InvalidRouteException("Required route parameter not passed: $param");
@@ -290,11 +290,11 @@ class Router extends Component
             }
 
             // Replace the group in the URI
-            $uri = str_replace($search, $replace, $uri);
+            $uri = \str_replace($search, $replace, $uri);
         }
 
 
-        while (preg_match('#' . static::REGEX_KEY . '#', $uri, $match)) {
+        while (\preg_match('#' . static::REGEX_KEY . '#', $uri, $match)) {
             [$key, $param] = $match;
 
             if (!isset($params[$param])) {
@@ -307,11 +307,11 @@ class Router extends Component
                 }
             }
 
-            $uri = str_replace($key, $params[$param], $uri);
+            $uri = \str_replace($key, $params[$param], $uri);
         }
 
         // Trim all extra slashes from the URI
-        $uri = preg_replace('#//+#', '/', rtrim($uri, '/'));
+        $uri = \preg_replace('#//+#', '/', \rtrim($uri, '/'));
 
 
         return URL::site($uri);

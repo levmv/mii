@@ -118,7 +118,7 @@ class Block
 
     public function depends(array $depends): Block
     {
-        $this->_depends = array_unique(array_merge($this->_depends, $depends));
+        $this->_depends = \array_unique(\array_merge($this->_depends, $depends));
 
         foreach ($this->_depends as $depend) {
             Mii::$app->blocks->get($depend)->__has_parent = true;
@@ -135,7 +135,7 @@ class Block
 
     public function path(): string
     {
-        return '/' . implode('/', explode('_', $this->__name));
+        return '/' . \implode('/', \explode('_', $this->__name));
     }
 
 
@@ -222,7 +222,7 @@ class Block
      */
     public function bind(string $key, &$value)
     {
-        $this->_data[$key] =& $value;
+        $this->_data[$key] =&$value;
 
         return $this;
     }
@@ -236,7 +236,7 @@ class Block
 
     public function loaded(): bool
     {
-        return (bool)$this->_loaded;
+        return (bool) $this->_loaded;
     }
 
 
@@ -267,7 +267,7 @@ class Block
             }
         }
 
-        assert(
+        \assert(
             (config('debug') &&
                 ($benchmark = \mii\util\Profiler::start('Block:render', \mii\util\Debug::path($this->_file))))
             || 1
@@ -275,7 +275,7 @@ class Block
         // Combine local and global data and capture the output
         $c = $this->capture($this->_file);
 
-        assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
+        \assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
 
         return $c;
     }
@@ -293,12 +293,12 @@ class Block
     {
         if (!empty($this->_data)) {
             // Import the view variables to local namespace
-            \extract($this->_data, EXTR_OVERWRITE);
+            \extract($this->_data, \EXTR_OVERWRITE);
         }
 
         if (!empty(self::$_global_data)) {
             // Import the global view variables to local namespace
-            \extract(self::$_global_data, EXTR_SKIP | EXTR_REFS);
+            \extract(self::$_global_data, \EXTR_SKIP | \EXTR_REFS);
         }
 
         // Capture the view output

@@ -14,7 +14,7 @@ class StaticBlocks extends BaseBlocks
     public function render(): void
     {
         $this->assets_map_path = Mii::resolve($this->assets_map_path);
-        $this->assets = require($this->assets_map_path . "/{$this->current_set}.assets");
+        $this->assets = require $this->assets_map_path . "/{$this->current_set}.assets";
 
         foreach ($this->_blocks as $block_name => $block) {
             if ($block->__has_parent) {

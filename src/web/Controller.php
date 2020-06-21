@@ -30,13 +30,13 @@ class Controller
     public function execute(string $action, $params): void
     {
         if (!\method_exists($this, $action)) {
-            throw new InvalidRouteException('Method "' . get_class($this) . "::$action\" does not exists");
+            throw new InvalidRouteException('Method "' . \get_class($this) . "::$action\" does not exists");
         }
 
         $method = new \ReflectionMethod($this, $action);
 
         if (!$method->isPublic()) {
-            throw new BadRequestHttpException("Cannot access not public method");
+            throw new BadRequestHttpException('Cannot access not public method');
         }
 
         $this->before();
@@ -55,7 +55,7 @@ class Controller
                 $is_valid = true;
 
                 if ($param->isArray()) {
-                    $params[$name] = (array)$params[$name];
+                    $params[$name] = (array) $params[$name];
                 } elseif (\is_array($params[$name])) {
                     $is_valid = false;
                 } elseif (
@@ -66,13 +66,13 @@ class Controller
                     $type_name = $type->getName();
                     switch ($type_name) {
                         case 'int':
-                            $params[$name] = filter_var($params[$name], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+                            $params[$name] = \filter_var($params[$name], \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE);
                             break;
                         case 'float':
-                            $params[$name] = filter_var($params[$name], FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE);
+                            $params[$name] = \filter_var($params[$name], \FILTER_VALIDATE_FLOAT, \FILTER_NULL_ON_FAILURE);
                             break;
                         case 'bool':
-                            $params[$name] = filter_var($params[$name], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                            $params[$name] = \filter_var($params[$name], \FILTER_VALIDATE_BOOLEAN, \FILTER_NULL_ON_FAILURE);
                             break;
                     }
                     if ($params[$name] === null) {
@@ -90,7 +90,7 @@ class Controller
             }
         }
         if (!empty($missing)) {
-            throw new BadRequestHttpException('Missing required parameters: "' . implode(', ', $missing) . '"');
+            throw new BadRequestHttpException('Missing required parameters: "' . \implode(', ', $missing) . '"');
         }
 
         return \call_user_func_array([$this, $action], $args);

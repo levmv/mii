@@ -1,7 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 
 // Unique error identifier
-$error_id = uniqid('error');
+$error_id = \uniqid('error');
 
 ?>
 <style type="text/css">
@@ -189,10 +189,10 @@ $error_id = uniqid('error');
     <h2><a href="#<?php echo $env_id = $error_id . 'environment' ?>"
            onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Environment' ?></a></h2>
     <div id="<?php echo $env_id ?>" class="content collapsed">
-        <?php $included = get_included_files() ?>
+        <?php $included = \get_included_files() ?>
         <h3><a href="#<?php echo $env_id = $error_id . 'environment_included' ?>"
                onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Included files' ?></a>
-            (<?php echo count($included) ?>)</h3>
+            (<?php echo \count($included) ?>)</h3>
         <div id="<?php echo $env_id ?>" class="collapsed">
             <table>
                 <?php foreach ($included as $file): ?>
@@ -202,10 +202,10 @@ $error_id = uniqid('error');
                 <?php endforeach ?>
             </table>
         </div>
-        <?php $included = get_loaded_extensions() ?>
+        <?php $included = \get_loaded_extensions() ?>
         <h3><a href="#<?php echo $env_id = $error_id . 'environment_loaded' ?>"
                onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Loaded extensions' ?></a>
-            (<?php echo count($included) ?>)</h3>
+            (<?php echo \count($included) ?>)</h3>
         <div id="<?php echo $env_id ?>" class="collapsed">
             <table>
                 <?php foreach ($included as $file): ?>
@@ -215,11 +215,11 @@ $error_id = uniqid('error');
                 <?php endforeach ?>
             </table>
         </div>
-        <?php foreach (array('_SESSION', '_GET', '_POST', '_FILES', '_COOKIE', '_SERVER') as $var): ?>
+        <?php foreach (['_SESSION', '_GET', '_POST', '_FILES', '_COOKIE', '_SERVER'] as $var): ?>
             <?php if (empty($GLOBALS[$var]) or !\is_array($GLOBALS[$var])) {
         continue;
     } ?>
-            <h3><a href="#<?php echo $env_id = $error_id . 'environment' . strtolower($var) ?>"
+            <h3><a href="#<?php echo $env_id = $error_id . 'environment' . \strtolower($var) ?>"
                    onclick="return koggle('<?php echo $env_id ?>')">$<?php echo $var ?></a></h3>
             <div id="<?php echo $env_id ?>" class="collapsed">
                 <table>

@@ -19,10 +19,10 @@ class Text
      */
     public static function limitWords($str, $limit = 100, $end_char = null): string
     {
-        $limit = (int)$limit;
+        $limit = (int) $limit;
         $end_char = $end_char ?? '…';
 
-        if (trim($str) === '') {
+        if (\trim($str) === '') {
             return $str;
         }
 
@@ -30,11 +30,11 @@ class Text
             return $end_char;
         }
 
-        preg_match('/^\s*+(?:\S++\s*+){1,' . $limit . '}/u', $str, $matches);
+        \preg_match('/^\s*+(?:\S++\s*+){1,' . $limit . '}/u', $str, $matches);
 
         // Only attach the end character if the matched string is shorter
         // than the starting string.
-        return rtrim($matches[0]) . ((\strlen($matches[0]) === \strlen($str)) ? '' : $end_char);
+        return \rtrim($matches[0]) . ((\strlen($matches[0]) === \strlen($str)) ? '' : $end_char);
     }
 
     /**
@@ -50,9 +50,12 @@ class Text
      */
     public static function limitChars($str, $limit = 100, $end_char = null, $preserve_words = false): string
     {
+        if(!$str)
+            return '';
+
         $end_char = $end_char ?? '…';
 
-        $limit = (int)$limit;
+        $limit = (int) $limit;
 
         if (\trim($str) === '' || \mb_strlen($str) <= $limit) {
             return $str;
@@ -111,12 +114,12 @@ class Text
                 $pool = '0123456789abcdef';
                 break;
             default:
-                $pool = (string)$type;
+                $pool = (string) $type;
                 break;
         }
 
         // Split the pool into an array of characters
-        $pool = str_split($pool, 1);
+        $pool = \str_split($pool, 1);
 
         // Largest pool key
         $max = \count($pool) - 1;
@@ -124,15 +127,15 @@ class Text
         $str = '';
         for ($i = 0; $i < $length; $i++) {
             // Select a random character from the pool and add it to the string
-            $str .= $pool[mt_rand(0, $max)];
+            $str .= $pool[\mt_rand(0, $max)];
         }
 
         // Make sure alnum strings contain at least one letter and one digit
         if ($type === 'alnum' && $length > 1) {
-            if (ctype_alpha($str)) {
+            if (\ctype_alpha($str)) {
                 // Add a random digit
                 $str[\mt_rand(0, $length - 1)] = \chr(\mt_rand(48, 57));
-            } elseif (ctype_digit($str)) {
+            } elseif (\ctype_digit($str)) {
                 // Add a random letter
                 $str[\mt_rand(0, $length - 1)] = \chr(\mt_rand(65, 90));
             }
@@ -171,41 +174,41 @@ class Text
     public static function autoP(string $str, $br = true): string
     {
         // Trim whitespace
-        if (($str = trim($str)) === '') {
+        if (($str = \trim($str)) === '') {
             return '';
         }
 
         // Standardize newlines
-        $str = str_replace(["\r\n", "\r"], "\n", $str);
+        $str = \str_replace(["\r\n", "\r"], "\n", $str);
 
         // Trim whitespace on each line
-        $str = preg_replace('~^[ \t]+~m', '', $str);
-        $str = preg_replace('~[ \t]+$~m', '', $str);
+        $str = \preg_replace('~^[ \t]+~m', '', $str);
+        $str = \preg_replace('~[ \t]+$~m', '', $str);
 
         // The following regexes only need to be executed if the string contains html
-        if ($html_found = (strpos($str, '<') !== false)) {
+        if ($html_found = (\strpos($str, '<') !== false)) {
             // Elements that should not be surrounded by p tags
             $no_p = '(?:p|div|h[1-6r]|ul|ol|li|blockquote|d[dlt]|pre|t[dhr]|t(?:able|body|foot|head)|c(?:aption|olgroup)|form|s(?:elect|tyle)|a(?:ddress|rea)|ma(?:p|th))';
 
             // Put at least two linebreaks before and after $no_p elements
-            $str = preg_replace('~^<' . $no_p . '[^>]*+>~im', "\n$0", $str);
-            $str = preg_replace('~</' . $no_p . '\s*+>$~im', "$0\n", $str);
+            $str = \preg_replace('~^<' . $no_p . '[^>]*+>~im', "\n$0", $str);
+            $str = \preg_replace('~</' . $no_p . '\s*+>$~im', "$0\n", $str);
         }
 
         // Do the <p> magic!
-        $str = '<p>' . trim($str) . '</p>';
-        $str = preg_replace('~\n{2,}~', "</p>\n\n<p>", $str);
+        $str = '<p>' . \trim($str) . '</p>';
+        $str = \preg_replace('~\n{2,}~', "</p>\n\n<p>", $str);
 
         // The following regexes only need to be executed if the string contains html
         if ($html_found !== false) {
             // Remove p tags around $no_p elements
-            $str = preg_replace('~<p>(?=</?' . $no_p . '[^>]*+>)~i', '', $str);
-            $str = preg_replace('~(</?' . $no_p . '[^>]*+>)</p>~i', '$1', $str);
+            $str = \preg_replace('~<p>(?=</?' . $no_p . '[^>]*+>)~i', '', $str);
+            $str = \preg_replace('~(</?' . $no_p . '[^>]*+>)</p>~i', '$1', $str);
         }
 
         // Convert single linebreaks to <br />
         if ($br === true) {
-            $str = preg_replace('~(?<!\n)\n(?!\n)~', "<br />\n", $str);
+            $str = \preg_replace('~(?<!\n)\n(?!\n)~', "<br />\n", $str);
         }
 
         return $str;
@@ -222,11 +225,11 @@ class Text
      */
     public static function widont(string $str): string
     {
-        $str = rtrim($str);
-        $space = strrpos($str, ' ');
+        $str = \rtrim($str);
+        $space = \strrpos($str, ' ');
 
         if ($space !== false) {
-            $str = substr($str, 0, $space) . '&nbsp;' . substr($str, $space + 1);
+            $str = \substr($str, 0, $space) . '&nbsp;' . \substr($str, $space + 1);
         }
 
         return $str;
@@ -254,16 +257,16 @@ class Text
         $value = UTF8::stripNonAscii($value);
 
         // Set preserved characters
-        $preserved_characters = preg_quote($separator, '!');
+        $preserved_characters = \preg_quote($separator, '!');
 
         // Remove all characters that are not in preserved characters, a-z, 0-9, point or whitespace
-        $value = preg_replace('![^' . $preserved_characters . 'a-z0-9.\s]+!', '', strtolower($value));
+        $value = \preg_replace('![^' . $preserved_characters . 'a-z0-9.\s]+!', '', \strtolower($value));
 
         // Replace all separator characters and whitespace by a single separator
-        $value = preg_replace('![' . $preserved_characters . '\s]+!u', $separator, $value);
+        $value = \preg_replace('![' . $preserved_characters . '\s]+!u', $separator, $value);
 
         // Trim separators from the beginning and end
-        return trim($value, $separator);
+        return \trim($value, $separator);
     }
 
 
@@ -287,7 +290,7 @@ class Text
      */
     public static function decl($number, array $array)
     {
-        $cases = array(2, 0, 1, 1, 1, 2);
+        $cases = [2, 0, 1, 1, 1, 2];
 
         if ($number % 100 > 4 && $number % 100 < 20) {
             return $array[2];
@@ -304,7 +307,7 @@ class Text
         'M' => 20,
         'MB' => 20,
         'G' => 30,
-        'GB' => 30
+        'GB' => 30,
     ];
 
     /**
@@ -325,17 +328,17 @@ class Text
     public static function bytes(string $size)
     {
         // Prepare the size
-        $size = trim($size);
+        $size = \trim($size);
         // Construct an OR list of byte units for the regex
-        $accepted = implode('|', array_keys(self::$byte_units));
+        $accepted = \implode('|', \array_keys(self::$byte_units));
         // Construct the regex pattern for verifying the size format
         $pattern = '/^([0-9]+(?:\.[0-9]+)?)(' . $accepted . ')?$/Di';
         // Verify the size format and store the matching parts
-        if (!preg_match($pattern, $size, $matches)) {
+        if (!\preg_match($pattern, $size, $matches)) {
             throw new Exception('The byte unit size, "' . $size . '", is improperly formatted.');
         }
         // Find the float value of the size
-        $size = (float)$matches[1];
+        $size = (float) $matches[1];
         // Find the actual unit, assume B if no unit specified
         $unit = $matches[2] ?? 'B';
         // Convert the size into bytes

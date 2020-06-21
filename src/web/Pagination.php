@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\web;
 
@@ -63,7 +63,7 @@ class Pagination
     protected $route;
 
     // Parameters to use with Route to create URIs
-    protected $route_params = array();
+    protected $route_params = [];
 
     // Request object
     protected $request;
@@ -108,29 +108,29 @@ class Pagination
                 case 'query_string':
                 case 'mixed':
 
-                    $this->current_page = (int)$this->request->get($query_key, 1);
+                    $this->current_page = (int) $this->request->get($query_key, 1);
                     break;
 
                 case 'route':
 
-                    $this->current_page = (int)$this->request->param($query_key, 1);
+                    $this->current_page = (int) $this->request->param($query_key, 1);
 
                     break;
             }
         }
 
         // Calculate and clean all pagination variables
-        $this->total_items = (int)max(0, $this->total_items);
-        $this->items_per_page = (int)max(1, $this->items_per_page);
-        $this->total_pages = (int)ceil($this->total_items / $this->items_per_page);
-        $this->current_page = (int)min(max(1, $this->current_page), max(1, $this->total_pages));
-        $this->current_first_item = (int)min((($this->current_page - 1) * $this->items_per_page) + 1, $this->total_items);
-        $this->current_last_item = (int)min($this->current_first_item + $this->items_per_page - 1, $this->total_items);
+        $this->total_items = (int) \max(0, $this->total_items);
+        $this->items_per_page = (int) \max(1, $this->items_per_page);
+        $this->total_pages = (int) \ceil($this->total_items / $this->items_per_page);
+        $this->current_page = (int) \min(\max(1, $this->current_page), \max(1, $this->total_pages));
+        $this->current_first_item = (int) \min((($this->current_page - 1) * $this->items_per_page) + 1, $this->total_items);
+        $this->current_last_item = (int) \min($this->current_first_item + $this->items_per_page - 1, $this->total_items);
         $this->previous_page = ($this->current_page > 1) ? $this->current_page - 1 : false;
         $this->next_page = ($this->current_page < $this->total_pages) ? $this->current_page + 1 : false;
         $this->first_page = ($this->current_page === 1) ? false : 1;
         $this->last_page = ($this->current_page >= $this->total_pages) ? false : $this->total_pages;
-        $this->offset = (int)(($this->current_page - 1) * $this->items_per_page);
+        $this->offset = (int) (($this->current_page - 1) * $this->items_per_page);
 
 
         // Chainable method
@@ -146,7 +146,7 @@ class Pagination
     public function url($page = 1)
     {
         // Clean the page number
-        $page = max(1, (int)$page);
+        $page = \max(1, (int) $page);
 
         // No page number in URLs to first page
         if ($page === 1 && !$this->first_page_in_url) {
@@ -162,9 +162,9 @@ class Pagination
 
             case 'route':
 
-                return URL::site($this->route->url(array_merge(
+                return URL::site($this->route->url(\array_merge(
                     $this->route_params,
-                    array($this->current_page_source_key => $page)
+                    [$this->current_page_source_key => $page]
                 )) . $this->query());
         }
 
@@ -206,7 +206,7 @@ class Pagination
         }
 
         // Pass on the whole Pagination object
-        return $block->set(get_object_vars($this))->set('page', $this)->render();
+        return $block->set(\get_object_vars($this))->set('page', $this)->render();
     }
 
     public function getOffset()
@@ -235,14 +235,14 @@ class Pagination
         if ($this->nextPage()) {
             $links[] = [
                 'rel' => 'next',
-                'href' => $this->url($this->nextPage())
+                'href' => $this->url($this->nextPage()),
             ];
         }
 
         if ($this->prevPage()) {
             $links[] = [
                 'rel' => 'prev',
-                'href' => $this->url($this->prevPage())
+                'href' => $this->url($this->prevPage()),
             ];
         }
         return [];
@@ -262,7 +262,7 @@ class Pagination
             $params = $this->request->get();
         } else {
             // Merge the current and new parameters
-            $params = array_merge($this->request->get(), $params);
+            $params = \array_merge($this->request->get(), $params);
         }
 
         if (empty($params)) {
@@ -271,7 +271,7 @@ class Pagination
         }
 
         // Note: http_build_query returns an empty string for a params array with only NULL values
-        $query = http_build_query($params, '', '&');
+        $query = \http_build_query($params, '', '&');
 
         // Don't prepend '?' to an empty string
         return ($query === '') ? '' : ('?' . $query);

@@ -130,7 +130,6 @@ class SelectQuery
      * select like 'table.*'
      *
      * @param array     $columns column list
-     * @param bool|null $any String like `table`.*
      * @return  Query
      */
     public function select(array $columns = null): self
@@ -187,9 +186,9 @@ class SelectQuery
             return $this;
         }
 
-        $table_ar = (array)$table;
+        $table_ar = (array) $table;
         foreach ($this->_from as $index => $from) {
-            $from = (array)$from;
+            $from = (array) $from;
             if ($from[0] === $table_ar[0]) {
                 $this->_from[$index] = $table;
             }
@@ -210,7 +209,7 @@ class SelectQuery
             'table' => $table,
             'type' => $type,
             'on' => [],
-            'using' => []
+            'using' => [],
         ];
 
         $this->_last_join = \count($this->_joins) - 1;
@@ -254,7 +253,7 @@ class SelectQuery
      */
     public function groupBy(...$columns): self
     {
-        $this->_group_by = array_merge($this->_group_by, $columns);
+        $this->_group_by = \array_merge($this->_group_by, $columns);
 
         return $this;
     }
@@ -339,7 +338,7 @@ class SelectQuery
         $this->_pagination = new Pagination([
             'block' => $block_name,
             'total_items' => $this->count(),
-            'items_per_page' => $count
+            'items_per_page' => $count,
         ]);
 
         $this
@@ -413,7 +412,7 @@ class SelectQuery
      */
     public function andFilter($column, $op, $value): self
     {
-        if ($value === null || $value === "" || !Rules::notEmpty((\is_string($value) ? trim($value) : $value))) {
+        if ($value === null || $value === '' || !Rules::notEmpty((\is_string($value) ? \trim($value) : $value))) {
             return $this;
         }
 
@@ -522,7 +521,7 @@ class SelectQuery
             : 'SELECT ';
 
         if (empty($this->_from)) {
-            assert(!empty($this->_model_class), "You must specify 'from' table or set model class");
+            \assert(!empty($this->_model_class), "You must specify 'from' table or set model class");
             $table = $this->_model_class::table();
             $table_aliased = false;
             $table_q = $this->db->quoteTable($table);
@@ -535,13 +534,19 @@ class SelectQuery
 
         if ($this->_select_any === true) {
             $query .= "$table_q.*";
-        } else {
+        }
+        if (!empty($this->_select)) {
+            if ($this->_select_any) {
+                $query .= ', ';
+            }
+
             $columns = [];
 
             foreach ($this->_select as $column) {
                 $columns[] = $this->db->quoteColumn($column, $table_q);
             }
-            assert(count($columns) === count(array_unique($columns)), 'Columns in select query must be unique');
+            \assert(\count($columns) === \count(\array_unique($columns)), 'Columns in select query must be unique');
+
             $query .= \implode(', ', $columns);
         }
 
@@ -552,7 +557,7 @@ class SelectQuery
                 ? ' FROM ' . $this->db->quoteTable($table)
                 : " FROM $table_q";
         } elseif (!empty($this->_from)) {
-            assert(!empty($this->_from), 'From must not be empty');
+            \assert(!empty($this->_from), 'From must not be empty');
             $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quoteTable'], $this->_from));
         }
 
@@ -631,9 +636,9 @@ class SelectQuery
 
             if (!empty($join['using'])) {
                 // Quote and concat the columns
-                $sql .= ' USING (' . \implode(', ', \array_map(array($this->db, 'quoteColumn'), $join['using'])) . ')';
+                $sql .= ' USING (' . \implode(', ', \array_map([$this->db, 'quoteColumn'], $join['using'])) . ')';
             } else {
-                $conditions = array();
+                $conditions = [];
                 foreach ($join['on'] as [$c1, $op, $c2]) {
                     if ($op) {
                         // Make the operator uppercase and spaced
@@ -849,11 +854,11 @@ class SelectQuery
         if ($this->_distinct) {
             $dt_column = $db->quoteColumn($this->_select[0]);
             $this->select([
-                new Expression("COUNT(DISTINCT $dt_column)")
+                new Expression("COUNT(DISTINCT $dt_column)"),
             ]);
         } else {
             $this->select([
-                new Expression('COUNT(*)')
+                new Expression('COUNT(*)'),
             ]);
         }
         $as_array = $this->_as_array;
@@ -868,7 +873,7 @@ class SelectQuery
         $this->_order_by = $old_order;
         $this->_as_array = $as_array;
 
-        return (int)$count;
+        return (int) $count;
     }
 
     /**
@@ -901,7 +906,7 @@ class SelectQuery
         if ($result === null) {
             /** @noinspection PhpUnhandledExceptionInspection */
             throw (
-            (new ModelNotFoundException("Model not found"))->setModel((string)$this->_model_class)
+            (new ModelNotFoundException('Model not found'))->setModel((string) $this->_model_class)
             );
         }
         return $result;

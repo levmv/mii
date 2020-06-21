@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\console\controllers;
 
@@ -44,15 +44,15 @@ class Block extends Controller
                     $index = $value;
 
                     // Drop 'i_' prefix.
-                    if (strpos($value, 'i_') === 0) {
-                        $name = substr($index, 2);
+                    if (\strpos($value, 'i_') === 0) {
+                        $name = \substr($index, 2);
                     } else {
                         $name = $index;
                     }
-                    $name = str_replace('-', '_', $name);
-                    $parts = explode('_', $name);
-                    $parts = array_map('ucfirst', $parts);
-                    $value = 'do' . implode($parts);
+                    $name = \str_replace('-', '_', $name);
+                    $parts = \explode('_', $name);
+                    $parts = \array_map('ucfirst', $parts);
+                    $value = 'do' . \implode($parts);
                 }
 
                 $this->blocks[$namespace][$index] = $value;
@@ -74,7 +74,7 @@ class Block extends Controller
             foreach ($blocks as $block => $func) {
                 $this->output_path = Mii::resolve($output_path);
 
-                if (!method_exists($this, $func)) {
+                if (!\method_exists($this, $func)) {
                     $this->error("Method $func doesnt exist");
                 } else {
                     try {
@@ -116,8 +116,8 @@ class Block extends Controller
     protected function doJcrop($block)
     {
         $this->toBlock('Jcrop/js/Jcrop.min.js', $block, 'js');
-        $this->toBlock('Jcrop/css/Jcrop.min.css', $block, 'css', function ($text) use ($block) {
-            return str_replace('url(', 'url(/assets/' . $block . '/', $text);
+        $this->toBlock('Jcrop/css/Jcrop.min.css', $block, 'css', static function ($text) use ($block) {
+            return \str_replace('url(', 'url(/assets/' . $block . '/', $text);
         });
         $this->toAssets('Jcrop/css/Jcrop.gif', $block);
     }
@@ -127,8 +127,8 @@ class Block extends Controller
     {
         $this->toBlock('fotorama/fotorama.js', $block, 'js');
 
-        $this->toBlock('fotorama/fotorama.css', $block, 'css', function ($text) use ($block) {
-            return str_replace('url(fotorama', 'url(/assets/' . $block . '/fotorama', $text);
+        $this->toBlock('fotorama/fotorama.css', $block, 'css', static function ($text) use ($block) {
+            return \str_replace('url(fotorama', 'url(/assets/' . $block . '/fotorama', $text);
         });
 
         $this->toAssets('fotorama/fotorama.png', $block);
@@ -161,27 +161,27 @@ class Block extends Controller
     protected function toBlock($from, $block_name, $ext, $callback = null): void
     {
         if (!\is_array($from)) {
-            $from = array($from);
+            $from = [$from];
         }
 
-        $dir = $this->output_path . '/' . implode('/', explode('_', $block_name));
+        $dir = $this->output_path . '/' . \implode('/', \explode('_', $block_name));
 
-        if (!is_dir($dir)) {
+        if (!\is_dir($dir)) {
             FS::mkdir($dir, 0777, true);
         }
 
         $to = $dir . '/' . $block_name . '.' . $ext;
-        $exist = file_exists($to);
+        $exist = \file_exists($to);
 
         $out = '';
         $same = true;
 
         foreach ($from as $f) {
-            if (!file_exists($this->input_path . '/' . $f)) {
+            if (!\file_exists($this->input_path . '/' . $f)) {
                 throw new Exception("Source for $block_name not found. Skip.");
             }
 
-            if (!$exist || filemtime($this->input_path . '/' . $f) > filemtime($to)) {
+            if (!$exist || \filemtime($this->input_path . '/' . $f) > \filemtime($to)) {
                 $same = false;
             }
         }
@@ -191,7 +191,7 @@ class Block extends Controller
         }
 
         foreach ($from as $f) {
-            $text = file_get_contents($this->input_path . '/' . $f);
+            $text = \file_get_contents($this->input_path . '/' . $f);
 
             if ($callback) {
                 $text = $callback($text);
@@ -200,7 +200,7 @@ class Block extends Controller
             $out .= $text . "\n";
         }
 
-        file_put_contents($to, $out);
+        \file_put_contents($to, $out);
 
         $this->changed_files++;
     }
@@ -217,23 +217,23 @@ class Block extends Controller
     protected function toAssets($from, $block_name, $callback = null)
     {
         if (!\is_array($from)) {
-            $from = array($from);
+            $from = [$from];
         }
 
-        $dir = $this->output_path . '/' . implode('/', explode('_', $block_name)) . '/assets';
+        $dir = $this->output_path . '/' . \implode('/', \explode('_', $block_name)) . '/assets';
 
-        if (!is_dir($dir)) {
+        if (!\is_dir($dir)) {
             FS::mkdir($dir);
         }
 
         foreach ($from as $f) {
-            $filename = basename($f, PATHINFO_FILENAME);
+            $filename = \basename($f, \PATHINFO_FILENAME);
 
             if ($callback) {
-                $file = file_get_contents($this->input_path . '/' . $f);
-                file_put_contents($dir . '/' . $filename, $callback($file));
+                $file = \file_get_contents($this->input_path . '/' . $f);
+                \file_put_contents($dir . '/' . $filename, $callback($file));
             } else {
-                copy($this->input_path . '/' . $f, $dir . '/' . $filename);
+                \copy($this->input_path . '/' . $f, $dir . '/' . $filename);
             }
         }
     }
@@ -252,10 +252,10 @@ class Block extends Controller
      * @param string   $from
      * @param callable $callback
      */
-    protected function iterateDir(string $from, Callable $callback): void
+    protected function iterateDir(string $from, callable $callback): void
     {
-        $files = scandir($this->input_path . '/' . $from);
-        array_map(static function ($item) use ($callback) {
+        $files = \scandir($this->input_path . '/' . $from);
+        \array_map(static function ($item) use ($callback) {
             if ($item === '.' || $item === '..') {
                 return;
             }

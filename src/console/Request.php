@@ -32,7 +32,7 @@ class Request extends Component
 
         if (isset($_SERVER['argv'])) {
             $argv = $_SERVER['argv'];
-            array_shift($argv);
+            \array_shift($argv);
         } else {
             $argv = [];
         }
@@ -41,20 +41,20 @@ class Request extends Component
             return;
         }
 
-        $this->controller = ucfirst($argv[0]);
-        array_shift($argv);
+        $this->controller = \ucfirst($argv[0]);
+        \array_shift($argv);
 
         $this->action = 'index';
 
         $params = [];
         $c = 0;
         foreach ($argv as $param) {
-            if (preg_match('/^--(\w+)(=(.*))?$/', $param, $matches)) {
+            if (\preg_match('/^--(\w+)(=(.*))?$/', $param, $matches)) {
                 $name = $matches[1];
                 $value = $matches[3] ?? true;
 
                 if (isset($params[$name])) {
-                    $params[$name] = (array)$params[$name];
+                    $params[$name] = (array) $params[$name];
                     $params[$name][] = $value;
                 } else {
                     $params[$name] = $value;
@@ -78,23 +78,23 @@ class Request extends Component
         }
 
         $namespaces = config('console.namespaces', [
-            'app\\console'
+            'app\\console',
         ]);
 
         if (!\count($namespaces)) {
-            throw new Exception("console.namespaces is empty");
+            throw new Exception('console.namespaces is empty');
         }
 
         // Failback namespace
         $namespaces[] = 'mii\\console\\controllers';
 
-        while (count($namespaces)) {
-            $controller_class = array_shift($namespaces) . '\\' . $this->controller;
+        while (\count($namespaces)) {
+            $controller_class = \array_shift($namespaces) . '\\' . $this->controller;
 
-            class_exists($controller_class); // always return false, but autoload class if it exist
+            \class_exists($controller_class); // always return false, but autoload class if it exist
 
             // real check
-            if (class_exists($controller_class, false)) {
+            if (\class_exists($controller_class, false)) {
                 break;
             }
 
@@ -109,7 +109,7 @@ class Request extends Component
         $controller = new $controller_class;
         $controller->request = $this;
 
-        return (int)$controller->_execute();
+        return (int) $controller->_execute();
     }
 
 
@@ -121,15 +121,15 @@ class Request extends Component
 
     public function genHelp()
     {
-        $namespaces = array_unique(array_merge(config('console.namespaces', [
+        $namespaces = \array_unique(\array_merge(config('console.namespaces', [
             'app\\console',
-            'mii\\console\\controllers'
+            'mii\\console\\controllers',
         ]), ['mii\\console\\controllers']));
 
 
-        $paths = array_replace([
+        $paths = \array_replace([
             'app\\console' => '@app/console',
-            'mii\\console\\controllers' => __DIR__//.'\\controllers'
+            'mii\\console\\controllers' => __DIR__,//.'\\controllers'
         ], config('console.ns_paths', static::get_paths_from_composer($namespaces)));
 
         $list = [];
@@ -156,17 +156,17 @@ class Request extends Component
                 [$doc,] = static::getPhpdocSummary($reflection);
             }
 
-            $max = max($max, mb_strlen($command));
+            $max = \max($max, \mb_strlen($command));
 
             $result = [
                 'command' => $command,
                 'desc' => $doc,
-                'actions' => []
+                'actions' => [],
             ];
 
             $result['actions'] = static::getControllerActions($reflection);
             foreach ($result['actions'] as ['name' => $name]) {
-                $max = max($max, mb_strlen($name));
+                $max = \max($max, \mb_strlen($name));
             }
 
             $out[] = $result;
@@ -174,13 +174,13 @@ class Request extends Component
 
         foreach ($out as ['command' => $command,
                  'desc' => $doc,
-                 'actions' => $actions]) {
+                 'actions' => $actions, ]) {
             Console::stdout(static::padded($command, $max), Console::FG_YELLOW);
             Console::stdout("$doc\n");
 
             foreach ($actions as ['name' => $action,
-                     'summary' => $desc]) {
-                Console::stdout(static::padded("  " . $action, $max), Console::FG_GREEN);
+                     'summary' => $desc, ]) {
+                Console::stdout(static::padded('  ' . $action, $max), Console::FG_GREEN);
                 Console::stdout("$desc\n", Console::FG_GREY);
             }
             Console::stdout("\n");
@@ -189,12 +189,12 @@ class Request extends Component
 
     private static function padded(string $string, int $length)
     {
-        return str_pad($string, $length + 5, " ", STR_PAD_RIGHT);
+        return \str_pad($string, $length + 5, ' ', \STR_PAD_RIGHT);
     }
 
     private static function get_paths_from_composer($namespaces): ?array
     {
-        $compdir = realpath(__DIR__ . '/../../../../composer');
+        $compdir = \realpath(__DIR__ . '/../../../../composer');
         if (!$compdir) {
             $compdir = path('root') . '/vendor/composer';
         }
@@ -223,8 +223,8 @@ class Request extends Component
 
             foreach ($namespaces as $ns) {
                 foreach ($data as $prefix => $path) {
-                    if (strpos($ns, $prefix) === 0) {
-                        $path[0] .= str_replace('\\', '/', substr($ns, \strlen($prefix) - 1));
+                    if (\strpos($ns, $prefix) === 0) {
+                        $path[0] .= \str_replace('\\', '/', \substr($ns, \strlen($prefix) - 1));
                         $paths[$ns] = $path[0];
                         break;
                     }
@@ -240,13 +240,13 @@ class Request extends Component
 
     protected function findControllers($namespace, $path, &$files)
     {
-        $dir = dir($path);
+        $dir = \dir($path);
         while (false !== $entry = $dir->read()) {
-            if ($entry == '.' || $entry == '..' || $entry == '.git' || is_dir($dir->path . "/" . $entry)) {
+            if ($entry == '.' || $entry == '..' || $entry == '.git' || \is_dir($dir->path . '/' . $entry)) {
                 continue;
             }
 
-            $info = pathinfo($path . '/' . $entry);
+            $info = \pathinfo($path . '/' . $entry);
 
             if (!isset($info['extension']) || $info['extension'] !== 'php') {
                 continue;
@@ -255,7 +255,7 @@ class Request extends Component
             if (!isset($files[$info['filename']])) {
                 $files[$info['filename']] = [
                     'class' => $namespace . '\\' . $info['filename'],
-                    'command' => mb_strtolower($info['filename'])
+                    'command' => \mb_strtolower($info['filename']),
                 ];
             }
         }
@@ -274,7 +274,7 @@ class Request extends Component
          * @var \ReflectionMethod $method
          */
         foreach ($methods as $method) {
-            if (in_array($method->name, ['__construct', 'index', '_execute'])) {
+            if (\in_array($method->name, ['__construct', 'index', '_execute'])) {
                 continue;
             }
 
@@ -285,7 +285,7 @@ class Request extends Component
                 $optional = $param->isDefaultValueAvailable();
                 $type = $param->getType();
 
-                $args[] = $optional ? "[" . $name . "]" : "<$name>";
+                $args[] = $optional ? '[' . $name . ']' : "<$name>";
             }
 
             [$summary, $desc] = static::getPhpdocSummary($obj->getMethod($method->name));
@@ -294,7 +294,7 @@ class Request extends Component
                 'name' => $method->name,
                 'summary' => $summary,
                 'desc' => $desc,
-                'args' => $args
+                'args' => $args,
             ];
         }
 
@@ -313,22 +313,22 @@ class Request extends Component
             return ['', ''];
         }
 
-        $comment = preg_replace('#[ \t]*(?:/\*\*|\*/|\*)?[ \t]?(.*)?#u', '$1', $comment);
-        $comment = trim($comment);
+        $comment = \preg_replace('#[ \t]*(?:/\*\*|\*/|\*)?[ \t]?(.*)?#u', '$1', $comment);
+        $comment = \trim($comment);
 
-        if (substr($comment, -2) === '*/') {
-            $comment = trim(substr($comment, 0, -2));
+        if (\substr($comment, -2) === '*/') {
+            $comment = \trim(\substr($comment, 0, -2));
         }
 
-        $comment = str_replace(["\r\n", "\r"], "\n", $comment);
+        $comment = \str_replace(["\r\n", "\r"], "\n", $comment);
 
-        $lines = explode("\n", $comment);
+        $lines = \explode("\n", $comment);
 
         $summary = $lines[0];
         $full = '';
 
-        for ($i = 1; $i < count($lines); $i++) {
-            if (mb_strpos(trim($lines[$i]), '@') === 0) {
+        for ($i = 1; $i < \count($lines); $i++) {
+            if (\mb_strpos(\trim($lines[$i]), '@') === 0) {
                 break;
             }
             $full .= $lines[$i] . "\n";

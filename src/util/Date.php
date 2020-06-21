@@ -40,7 +40,7 @@ class Date
 
     public static function fuzzy(int $timestamp, int $local_timestamp = null): string
     {
-        $local_timestamp = $local_timestamp ?? time();
+        $local_timestamp = $local_timestamp ?? \time();
 
         // Determine the difference in seconds
         $offset = \abs($local_timestamp - $timestamp);
@@ -53,7 +53,7 @@ class Date
         if ($offset < 61) {
             return 'только что';
         } elseif ($offset < 60 * 55) {
-            $minutes = round($offset / 60);
+            $minutes = \round($offset / 60);
             return $minutes . ' ' . Text::decl($minutes, ['минуту', 'минуты', 'минут']) . ' назад';
         } elseif ($offset < 3600 + 60 * 15) {
             return 'час назад';
@@ -71,17 +71,17 @@ class Date
         if ($offset < 60) {
             return 'через мгновение';
         } elseif ($offset < 60 * 55) {
-            $minutes = round($offset / 60);
+            $minutes = \round($offset / 60);
             return "через $minutes " . Text::decl($minutes, ['минуту', 'минуты', 'минут']);
         } elseif ($offset < 60 * 65) {
-            return "через час";
+            return 'через час';
         }
 
         static::$today ??= \mktime(0, 0, 0);
 
         if ($offset < self::DAY) {
-            $tomorrow = mktime(24, 0, 1);
-            return ($timestamp < $tomorrow ? 'сегодня в ' : 'завтра в ') . date('H:i', $timestamp);
+            $tomorrow = \mktime(24, 0, 1);
+            return ($timestamp < $tomorrow ? 'сегодня в ' : 'завтра в ') . \date('H:i', $timestamp);
         }
 
         return \strftime('%e %B в %k:%M', $timestamp);
@@ -101,17 +101,17 @@ class Date
         $days = [
             'воскресенье', 'понедельник',
             'вторник', 'среда',
-            'четверг', 'пятница', 'суббота'
+            'четверг', 'пятница', 'суббота',
         ];
 
         $uf_days = [
             'Воскресенье', 'Понедельник',
             'Вторник', 'Среда',
-            'Четверг', 'Пятница', 'Суббота'
+            'Четверг', 'Пятница', 'Суббота',
         ];
 
 
-        return ($ucfirst) ? $uf_days[date('w', $date)] : $days[date('w', $date)];
+        return ($ucfirst) ? $uf_days[\date('w', $date)] : $days[\date('w', $date)];
     }
 
     public static function month(int $date = null, bool $genitive = true): string

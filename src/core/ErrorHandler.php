@@ -21,20 +21,20 @@ class ErrorHandler extends Component
 
     public function register()
     {
-        ini_set('display_errors', '0');
-        set_exception_handler([$this, 'handleException']);
-        set_error_handler([$this, 'handleError']);
+        \ini_set('display_errors', '0');
+        \set_exception_handler([$this, 'handleException']);
+        \set_error_handler([$this, 'handleError']);
 
         if ($this->memory_reserve_size > 0) {
-            $this->_memory_reserve = str_repeat('x', $this->memory_reserve_size);
+            $this->_memory_reserve = \str_repeat('x', $this->memory_reserve_size);
         }
-        register_shutdown_function([$this, 'handleFatalError']);
+        \register_shutdown_function([$this, 'handleFatalError']);
     }
 
     public function unregister()
     {
-        restore_error_handler();
-        restore_exception_handler();
+        \restore_error_handler();
+        \restore_exception_handler();
     }
 
 
@@ -62,7 +62,7 @@ class ErrorHandler extends Component
             $this->clearOutput();
             $this->render($e);
         } catch (\Throwable $e) {
-            http_response_code(500);
+            \http_response_code(500);
             echo static::exceptionToText($e);
         }
         exit(1);
@@ -76,7 +76,7 @@ class ErrorHandler extends Component
 
     public function handleError($code, $error, $file, $line)
     {
-        if (error_reporting() & $code) {
+        if (\error_reporting() & $code) {
             unset($this->_memory_reserve);
 
             // This error is not suppressed by current error reporting settings
@@ -93,7 +93,7 @@ class ErrorHandler extends Component
         unset($this->_memory_reserve);
 
         // is it fatal ?
-        if ($error = error_get_last() && \in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING])) {
+        if ($error = \error_get_last() && \in_array($error['type'], [\E_ERROR, \E_PARSE, \E_CORE_ERROR, \E_CORE_WARNING, \E_COMPILE_ERROR, \E_COMPILE_WARNING])) {
             $this->clearOutput();
             $exception = new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']);
 
@@ -117,9 +117,9 @@ class ErrorHandler extends Component
     public function clearOutput()
     {
         // the following manual level counting is to deal with zlib.output_compression set to On
-        for ($level = ob_get_level(); $level > 0; --$level) {
-            if (!@ob_end_clean()) {
-                ob_clean();
+        for ($level = \ob_get_level(); $level > 0; --$level) {
+            if (!@\ob_end_clean()) {
+                \ob_clean();
             }
         }
     }
@@ -128,11 +128,11 @@ class ErrorHandler extends Component
     public static function exceptionToText($e)
     {
         if (\config('debug')) {
-            return (string)$e;
+            return (string) $e;
         }
 
         if ($e instanceof UserException) {
-            return \get_class($e) . " : " . $e->getMessage();
+            return \get_class($e) . ' : ' . $e->getMessage();
         }
 
         return 'An internal server error occurred.';

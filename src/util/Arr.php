@@ -19,11 +19,11 @@ class Arr
     public static function isAssoc(array $array)
     {
         // Keys of the array
-        $keys = array_keys($array);
+        $keys = \array_keys($array);
 
         // If the array keys of the keys match the keys, then the array must
         // not be associative (e.g. the keys array looked like {0:0, 1:1...}).
-        return array_keys($keys) !== $keys;
+        return \array_keys($keys) !== $keys;
     }
 
     /**
@@ -75,7 +75,7 @@ class Arr
                     return $array[$key];
                 }
 
-                if (!is_array($array[$key]) && !\is_iterable($array[$key])) {
+                if (!\is_array($array[$key]) && !\is_iterable($array[$key])) {
                     // Unable to dig deeper
                     break;
                 }
@@ -114,16 +114,16 @@ class Arr
         while (\count($keys) > 1) {
             $key = \array_shift($keys);
 
-            if (\is_string($key) && ctype_digit($key)) {
+            if (\is_string($key) && \ctype_digit($key)) {
                 // Make the key an integer
-                $key = (int)$key;
+                $key = (int) $key;
             }
 
             if (!isset($array[$key])) {
                 $array[$key] = [];
             }
 
-            $array =& $array[$key];
+            $array =&$array[$key];
         }
 
         // Set key on inner-most array
@@ -292,7 +292,7 @@ class Arr
 
         if (\func_num_args() > 2) {
             foreach (\array_slice(\func_get_args(), 2) as $array2) {
-                foreach (array_intersect_key($array2, $array1) as $key => $value) {
+                foreach (\array_intersect_key($array2, $array1) as $key => $value) {
                     $array1[$key] = $value;
                 }
             }
@@ -322,7 +322,7 @@ class Arr
     {
         $is_assoc = static::isAssoc($array);
 
-        $flat = array();
+        $flat = [];
         foreach ($array as $key => $value) {
             if (\is_array($value)) {
                 $flat = \array_merge($flat, static::flatten($value));
@@ -336,7 +336,7 @@ class Arr
     }
 
 
-    public static function toArray($object, array $properties = [], bool $recursive = true)
+    public static function toArray($object, array $properties = [], bool $recursive = true) : array
     {
         if (\is_array($object)) {
             if ($recursive) {

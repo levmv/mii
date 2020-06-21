@@ -56,14 +56,14 @@ class Controller
             return;
         }
 
-        $controller = strtolower($this->request->controller);
+        $controller = \strtolower($this->request->controller);
 
         foreach ($methods as ['name' => $method,
                  'summary' => $summary,
                  'desc' => $desc,
-                 'args' => $args]
+                 'args' => $args, ]
         ) {
-            $args = implode(' ', $args);
+            $args = \implode(' ', $args);
             Console::stdout("\n$controller $method $args", Console::FG_YELLOW);
 
             $this->stdout("\n$summary\n$desc", Console::FG_GREY);
@@ -77,7 +77,7 @@ class Controller
         $method = new \ReflectionMethod($this, $action);
 
         if (!$method->isPublic()) {
-            throw new Exception("Cannot access not public method");
+            throw new Exception('Cannot access not public method');
         }
 
         $args = [];
@@ -103,7 +103,7 @@ class Controller
             if ($missing[0] === 'argv' && $action === 'index') {
                 $args = [$params]; // Emulate old behavior for backwards compatibility
             } else {
-                throw new Exception('Missing required parameters: "' . implode(', ', $missing) . '"');
+                throw new Exception('Missing required parameters: "' . \implode(', ', $missing) . '"');
             }
         }
 
@@ -129,9 +129,9 @@ class Controller
         $this->before();
 
         if ($this->auto_params) {
-            $this->response_code = (int)$this->execute_action($this->request->action, $this->request->params);
+            $this->response_code = (int) $this->execute_action($this->request->action, $this->request->params);
         } else {
-            $this->response_code = (int)\call_user_func([$this, $this->request->action], $this->request->params);
+            $this->response_code = (int) \call_user_func([$this, $this->request->action], $this->request->params);
         }
 
         $this->after();
@@ -166,22 +166,22 @@ class Controller
 
     protected function info($msg, $options = [])
     {
-        $msg = strtr($msg, $options);
+        $msg = \strtr($msg, $options);
         Console::stdout($msg . "\n", Console::FG_GREEN);
         \Mii::info($msg, 'console');
     }
 
     protected function warning($msg, $options = [])
     {
-        $msg = strtr($msg, $options);
+        $msg = \strtr($msg, $options);
         Console::stdout($msg . "\n", Console::FG_PURPLE);
-        \Mii::warning(strtr($msg, $options), 'console');
+        \Mii::warning(\strtr($msg, $options), 'console');
     }
 
     protected function error($msg, $options = [])
     {
-        $msg = strtr($msg, $options);
+        $msg = \strtr($msg, $options);
         Console::stderr($msg . "\n", Console::FG_RED);
-        \Mii::error(strtr($msg, $options), 'console');
+        \Mii::error(\strtr($msg, $options), 'console');
     }
 }

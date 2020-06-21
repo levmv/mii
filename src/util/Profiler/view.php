@@ -1,4 +1,5 @@
-<?php namespace mii\util;
+<?php declare(strict_types=1);
+namespace mii\util;
 
 ?>
 
@@ -155,8 +156,8 @@
 
 <?php
 $group_stats = Profiler::groupStats();
-$group_cols = array('min', 'max', 'average', 'total');
-$application_cols = array('min', 'max', 'average', 'current');
+$group_cols = ['min', 'max', 'average', 'total'];
+$application_cols = ['min', 'max', 'average', 'current'];
 ?>
 
 <div class="mii">
@@ -170,10 +171,10 @@ $application_cols = array('min', 'max', 'average', 'current');
     foreach ($application_cols as $key): ?>
                     <td class="<?php echo $key ?>">
                         <?php if ($stats[$key]['time'] > 2): ?>
-                            <?php echo number_format($stats[$key]['time'], 3, ',', '') ?> <abbr title="seconds">s</abbr>
+                            <?php echo \number_format($stats[$key]['time'], 3, ',', '') ?> <abbr title="seconds">s</abbr>
                         <?php else: ?>
 
-                            <?php echo number_format($stats[$key]['time'], 5) * 1000 ?> <abbr title="seconds">ms</abbr>
+                            <?php echo \number_format($stats[$key]['time'], 5) * 1000 ?> <abbr title="seconds">ms</abbr>
                         <?php endif; ?>
                     </td>
                 <?php endforeach;
@@ -183,7 +184,7 @@ $application_cols = array('min', 'max', 'average', 'current');
         </tr>
         <tr class="final mark memory">
             <?php foreach ($application_cols as $key): ?>
-                <td class="<?php echo $key ?>"><?php echo number_format($stats[$key]['memory'] / 1024, 4) ?> <abbr
+                <td class="<?php echo $key ?>"><?php echo \number_format($stats[$key]['memory'] / 1024, 4) ?> <abbr
                             title="kilobyte">kB</abbr></td>
             <?php endforeach ?>
         </tr>
@@ -191,17 +192,17 @@ $application_cols = array('min', 'max', 'average', 'current');
     <?php foreach (Profiler::groups() as $group => $benchmarks): ?>
         <table class="profiler">
             <tr class="group">
-                <th class="name"><?php echo ucfirst($group) ?></th>
+                <th class="name"><?php echo \ucfirst($group) ?></th>
                 <td class="time"
                     colspan="4">
-                    <?= number_format($group_stats[$group]['total']['memory'] / 1024, 3) ?>&thinsp;kB |
-                    <span style="color:#bbb"><?= number_format($group_stats[$group]['total']['time'], 6) * 1000 ?></span>&thinsp;ms
+                    <?= \number_format($group_stats[$group]['total']['memory'] / 1024, 3) ?>&thinsp;kB |
+                    <span style="color:#bbb"><?= \number_format($group_stats[$group]['total']['time'], 6) * 1000 ?></span>&thinsp;ms
                 </td>
             </tr>
             <tr class="headers">
                 <th class="name"><?php echo 'Benchmark' ?></th>
                 <?php foreach ($group_cols as $key): ?>
-                    <th class="<?php echo $key ?>"><?php echo ucfirst($key) ?></th>
+                    <th class="<?php echo $key ?>"><?php echo \ucfirst($key) ?></th>
                 <?php endforeach ?>
             </tr>
             <?php foreach ($benchmarks as $name => $tokens): ?>
@@ -217,15 +218,15 @@ $application_cols = array('min', 'max', 'average', 'current');
                         $is_total = $key === 'total'; ?>
                         <td class="<?php echo $key ?>">
                             <div>
-                                <div class="value"><?php echo number_format($stats[$key]['time'], 6) * 1000 ?><?php
+                                <div class="value"><?php echo \number_format($stats[$key]['time'], 6) * 1000 ?><?php
                                     if ($is_total) {
-                                        echo "&thinsp;<abbr>ms</abbr>";
+                                        echo '&thinsp;<abbr>ms</abbr>';
                                     }
                                     ?>
                                 </div>
                                 <?php if ($is_total): ?>
                                     <div class="graph"
-                                         style="left: <?php echo max(0, 100 - $stats[$key]['time'] / max(1, $group_stats[$group]['max']['time']) * 100) ?>%"></div>
+                                         style="left: <?php echo \max(0, 100 - $stats[$key]['time'] / \max(1, $group_stats[$group]['max']['time']) * 100) ?>%"></div>
                                 <?php endif ?>
                             </div>
                         </td>
@@ -236,14 +237,14 @@ $application_cols = array('min', 'max', 'average', 'current');
                         $is_total = $key === 'total'; ?>
                         <td class="<?php echo $key ?>">
                             <div>
-                                <div class="value"><?php echo number_format($stats[$key]['memory'] / 1024, 4) ?><?php
+                                <div class="value"><?php echo \number_format($stats[$key]['memory'] / 1024, 4) ?><?php
                                     if ($is_total) {
-                                        echo "&thinsp;<abbr>kB</abbr>";
+                                        echo '&thinsp;<abbr>kB</abbr>';
                                     }
                                     ?></div>
                                 <?php if ($is_total): ?>
                                     <div class="graph"
-                                         style="left: <?php echo max(0, 100 - $stats[$key]['memory'] / max(1, $group_stats[$group]['max']['memory']) * 100) ?>%"></div>
+                                         style="left: <?php echo \max(0, 100 - $stats[$key]['memory'] / \max(1, $group_stats[$group]['max']['memory']) * 100) ?>%"></div>
                                 <?php endif ?>
                             </div>
                         </td>

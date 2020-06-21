@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 use mii\log\Logger;
 
-assert(defined('MII_START_TIME') or define('MII_START_TIME', hrtime(true) / 1e9));
-assert(defined('MII_START_MEMORY') or define('MII_START_MEMORY', memory_get_usage()));
+\assert(\defined('MII_START_TIME') or \define('MII_START_TIME', \hrtime(true) / 1e9));
+\assert(\defined('MII_START_MEMORY') or \define('MII_START_MEMORY', \memory_get_usage()));
 
 class Mii
 {
@@ -81,10 +81,10 @@ class Mii
         $file = self::resolve($file);
 
         if (!isset($messages[$file])) {
-            if (file_exists($file . '.php')) {
-                $content = include($file . '.php');
-            } elseif (isset(self::$paths['app']) && file_exists(\path('app') . '/messages/' . $file . '.php')) {
-                $content = include(\path('app') . '/messages/' . $file . '.php');
+            if (\file_exists($file . '.php')) {
+                $content = include $file . '.php';
+            } elseif (isset(self::$paths['app']) && \file_exists(\path('app') . '/messages/' . $file . '.php')) {
+                $content = include \path('app') . '/messages/' . $file . '.php';
             } else {
                 throw new \Exception("Message file does not exist: $file.php");
             }

@@ -76,7 +76,7 @@ class HTML
      */
     public static function chars($value, $double_encode = true)
     {
-        return \htmlspecialchars((string)$value, ENT_QUOTES, 'utf-8', $double_encode);
+        return \htmlspecialchars((string) $value, \ENT_QUOTES, 'utf-8', $double_encode);
     }
 
     /**
@@ -92,13 +92,13 @@ class HTML
      */
     public static function entities($value, $double_encode = true)
     {
-        return htmlentities((string)$value, ENT_QUOTES, 'utf-8', $double_encode);
+        return \htmlentities((string) $value, \ENT_QUOTES, 'utf-8', $double_encode);
     }
 
     public static function tag($name, $content = '', array $attributes = null)
     {
         $html = "<$name" . static::attributes($attributes) . '>';
-        return isset(static::$void_elements[strtolower($name)]) ? $html : "$html$content</$name>";
+        return isset(static::$void_elements[\strtolower($name)]) ? $html : "$html$content</$name>";
     }
 
 
@@ -129,7 +129,7 @@ class HTML
             // Only use the base URL
             $uri = URL::base($protocol);
         } else {
-            if (strpos($uri, '://') !== false) {
+            if (\strpos($uri, '://') !== false) {
                 if (self::$windowed_urls === true && empty($attributes['target'])) {
                     // Make the link open in a new window
                     $attributes['target'] = '_blank';
@@ -162,7 +162,7 @@ class HTML
      */
     public static function style($file, array $attributes = null, $protocol = null)
     {
-        if (strpos($file, '://') === false) {
+        if (\strpos($file, '://') === false) {
             // Add the base URL
             $file = URL::site($file, $protocol);
         }
@@ -219,7 +219,7 @@ class HTML
      */
     public static function image($file, array $attributes = null, $protocol = null)
     {
-        if (strpos($file, '://') === false) {
+        if (\strpos($file, '://') === false) {
             // Add the base URL
             $file = URL::site($file, $protocol);
         }
@@ -245,7 +245,7 @@ class HTML
             return '';
         }
 
-        $sorted = array();
+        $sorted = [];
         foreach (self::$attribute_order as $key) {
             if (isset($attributes[$key])) {
                 // Add the attribute to the sorted list
@@ -310,7 +310,7 @@ class HTML
         if (!$action) {
             // Allow empty form actions (submits back to the current url).
             $action = '';
-        } elseif (strpos($action, '://') === false) {
+        } elseif (\strpos($action, '://') === false) {
             // Make the URI absolute
             $action = URL::site($action);
         }
@@ -490,7 +490,7 @@ class HTML
         $attributes['name'] = $name;
 
         // Add default rows and cols attributes (required)
-        $attributes += array('rows' => 10, 'cols' => 50);
+        $attributes += ['rows' => 10, 'cols' => 50];
 
         return '<textarea' . self::attributes($attributes) . '>' . self::chars($body, $double_encode) . '</textarea>';
     }
@@ -523,10 +523,10 @@ class HTML
         if (!\is_array($selected)) {
             if ($selected === null) {
                 // Use an empty array
-                $selected = array();
+                $selected = [];
             } else {
                 // Convert the selected options to an array
-                $selected = array((string)$selected);
+                $selected = [(string) $selected];
             }
         }
 
@@ -557,7 +557,7 @@ class HTML
                     }
 
                     // Compile the options into a string
-                    $_options = "\n" . implode("\n", $_options) . "\n";
+                    $_options = "\n" . \implode("\n", $_options) . "\n";
 
                     $r_options[] = '<optgroup' . self::attributes($group) . '>' . $_options . '</optgroup>';
                 } else {
@@ -577,7 +577,7 @@ class HTML
             }
 
             // Compile the options into a single string
-            $options = "\n" . implode("\n", $r_options) . "\n";
+            $options = "\n" . \implode("\n", $r_options) . "\n";
         }
 
 
@@ -638,7 +638,7 @@ class HTML
     {
         if ($text === null) {
             // Use the input name as the text
-            $text = ucwords(preg_replace('/[\W_]+/', ' ', $input));
+            $text = \ucwords(\preg_replace('/[\W_]+/', ' ', $input));
         }
 
         // Set the label target
@@ -659,12 +659,12 @@ class HTML
     {
         $fl = '';
 
-        if (is_array($name)) {
+        if (\is_array($name)) {
             $fl = \mb_strtoupper(\mb_substr($name[0], 0, 1)) .
                 \mb_strtoupper(\mb_substr($name[1], 0, 1));
             $name = $name[0] . ' ' . $name[1];
         } else {
-            $words = \preg_split('/\W+/u', $name, -1, PREG_SPLIT_NO_EMPTY);
+            $words = \preg_split('/\W+/u', $name, -1, \PREG_SPLIT_NO_EMPTY);
 
             for ($i = 0; $i < 2; $i++) {
                 if (isset($words[$i])) {
@@ -676,7 +676,7 @@ class HTML
         $color = 'hsl(' . (\crc32($name) % 360) . ', 34%, 77%)';
 
         $params = [
-            'style' => 'background-color:' . $color
+            'style' => 'background-color:' . $color,
         ];
 
         return static::tag('span', $fl, \array_replace($params, $attributes));

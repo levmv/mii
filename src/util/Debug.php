@@ -43,20 +43,20 @@ class Debug
             return '<small>bool</small> ' . ($var ? 'TRUE' : 'FALSE');
         } elseif (\is_int($var)) {
             return "<small>int</small> $var";
-        } elseif (is_float($var)) {
+        } elseif (\is_float($var)) {
             return "<small>float</small> $var";
         } elseif (\is_resource($var)) {
-            if (($type = get_resource_type($var)) === 'stream' && $meta = stream_get_meta_data($var)) {
-                $meta = stream_get_meta_data($var);
+            if (($type = \get_resource_type($var)) === 'stream' && $meta = \stream_get_meta_data($var)) {
+                $meta = \stream_get_meta_data($var);
 
                 if (isset($meta['uri'])) {
                     $file = $meta['uri'];
 
-                    if (stream_is_local($file)) {
+                    if (\stream_is_local($file)) {
                         $file = Debug::path($file);
                     }
 
-                    return "<small>resource</small><span>($type)</span> " . htmlspecialchars($file, ENT_NOQUOTES, 'utf-8');
+                    return "<small>resource</small><span>($type)</span> " . \htmlspecialchars($file, \ENT_NOQUOTES, 'utf-8');
                 }
             } else {
                 return "<small>resource</small><span>($type)</span>";
@@ -70,33 +70,33 @@ class Debug
 
             if (!UTF8::isAscii($var)) {
                 // Disable notices
-                $error_reporting = error_reporting(~E_NOTICE);
+                $error_reporting = \error_reporting(~\E_NOTICE);
                 // iconv is expensive, so it is only used when needed
-                $var = iconv('UTF-8', 'UTF-8//IGNORE', $var);
+                $var = \iconv('UTF-8', 'UTF-8//IGNORE', $var);
                 // Turn notices back on
-                error_reporting($error_reporting);
+                \error_reporting($error_reporting);
             }
 
             if (\mb_strlen($var) > $length) {
                 // Encode the truncated string
-                $str = htmlspecialchars(mb_substr($var, 0, $length), ENT_NOQUOTES, 'utf-8') . '&nbsp;&hellip;';
+                $str = \htmlspecialchars(\mb_substr($var, 0, $length), \ENT_NOQUOTES, 'utf-8') . '&nbsp;&hellip;';
             } else {
                 // Encode the string
-                $str = htmlspecialchars($var, ENT_NOQUOTES, 'utf-8');
+                $str = \htmlspecialchars($var, \ENT_NOQUOTES, 'utf-8');
             }
 
-            return '<small>string</small><span>(' . strlen($var) . ')</span> "' . $str . '"';
+            return '<small>string</small><span>(' . \strlen($var) . ')</span> "' . $str . '"';
         } elseif (\is_array($var)) {
-            $output = array();
+            $output = [];
 
             // Indentation for this variable
-            $space = str_repeat($s = '    ', $level);
+            $space = \str_repeat($s = '    ', $level);
 
             static $marker;
 
             if ($marker === null) {
                 // Make a unique marker
-                $marker = uniqid("\x00");
+                $marker = \uniqid("\x00");
             }
 
             if (empty($var)) {
@@ -104,15 +104,15 @@ class Debug
             } elseif (isset($var[$marker])) {
                 $output[] = "(\n$space$s*RECURSION*\n$space)";
             } elseif ($level < $limit) {
-                $output[] = "<span>(";
+                $output[] = '<span>(';
 
                 $var[$marker] = true;
-                foreach ($var as $key => & $val) {
+                foreach ($var as $key => &$val) {
                     if ($key === $marker) {
                         continue;
                     }
                     if (!\is_int($key)) {
-                        $key = '"' . htmlspecialchars($key, ENT_NOQUOTES, 'utf-8') . '"';
+                        $key = '"' . \htmlspecialchars($key, \ENT_NOQUOTES, 'utf-8') . '"';
                     }
 
                     $output[] = "$space$s$key => " . Debug::_dump($val, $length, $limit, $level + 1);
@@ -125,36 +125,36 @@ class Debug
                 $output[] = "(\n$space$s...\n$space)";
             }
 
-            return '<small>array</small><span>(' . count($var) . ')</span> ' . implode("\n", $output);
+            return '<small>array</small><span>(' . \count($var) . ')</span> ' . \implode("\n", $output);
         } elseif (\is_object($var)) {
             // Copy the object as an array
-            $array = (array)$var;
+            $array = (array) $var;
 
-            $output = array();
+            $output = [];
 
             // Indentation for this variable
-            $space = str_repeat($s = '    ', $level);
+            $space = \str_repeat($s = '    ', $level);
 
-            $hash = spl_object_hash($var);
+            $hash = \spl_object_hash($var);
 
             // Objects that are being dumped
-            static $objects = array();
+            static $objects = [];
 
             if (empty($var)) {
                 // Do nothing
             } elseif (isset($objects[$hash])) {
                 $output[] = "{\n$space$s*RECURSION*\n$space}";
             } elseif ($level < $limit) {
-                $output[] = "<code>{";
+                $output[] = '<code>{';
 
                 $objects[$hash] = true;
-                foreach ($array as $key => & $val) {
+                foreach ($array as $key => &$val) {
                     if (!\is_int($key) && $key[0] === "\x00") {
                         // Determine if the access is protected or protected
                         $access = '<small>' . (($key[1] === '*') ? 'protected' : 'private') . '</small>';
 
                         // Remove the access level from the variable name
-                        $key = substr($key, strrpos($key, "\x00") + 1);
+                        $key = \substr($key, \strrpos($key, "\x00") + 1);
                     } else {
                         $access = '<small>public</small>';
                     }
@@ -169,10 +169,10 @@ class Debug
                 $output[] = "{\n$space$s...\n$space}";
             }
 
-            return '<small>object</small> <span>' . \get_class($var) . '(' . count($array) . ')</span> ' . implode("\n", $output);
+            return '<small>object</small> <span>' . \get_class($var) . '(' . \count($array) . ')</span> ' . \implode("\n", $output);
         }
 
-        return '<small>' . gettype($var) . '</small> ' . htmlspecialchars(print_r($var, true), ENT_NOQUOTES, 'utf-8');
+        return '<small>' . \gettype($var) . '</small> ' . \htmlspecialchars(\print_r($var, true), \ENT_NOQUOTES, 'utf-8');
     }
 
     /**
@@ -191,13 +191,13 @@ class Debug
             }
 
             \Mii::$paths['mii'] = path('vendor') . '/levmorozov/mii';
-            uasort(\Mii::$paths, static function ($a, $b) {
+            \uasort(\Mii::$paths, static function ($a, $b) {
                 return \strlen($b) - \strlen($a);
             });
         }
         foreach (\Mii::$paths as $name => $path) {
-            if (strpos($file, $path) === 0) {
-                $file = '{' . $name . '}' . substr($file, strlen($path));
+            if (\strpos($file, $path) === 0) {
+                $file = '{' . $name . '}' . \substr($file, \strlen($path));
             }
         }
 
@@ -219,23 +219,23 @@ class Debug
      */
     public static function source($file, $line_number, $padding = 5)
     {
-        if (!$file || !is_readable($file)) {
+        if (!$file || !\is_readable($file)) {
             // Continuing will cause errors
             return false;
         }
 
         // Open the file and set the line position
-        $file = fopen($file, 'r');
+        $file = \fopen($file, 'r');
         $line = 0;
 
         // Set the reading range
-        $range = array('start' => $line_number - $padding, 'end' => $line_number + $padding);
+        $range = ['start' => $line_number - $padding, 'end' => $line_number + $padding];
 
         // Set the zero-padding amount for line numbers
-        $format = '% ' . strlen((string)$range['end']) . 'd';
+        $format = '% ' . \strlen((string) $range['end']) . 'd';
 
         $source = '';
-        while (($row = fgets($file)) !== false) {
+        while (($row = \fgets($file)) !== false) {
             // Increment the line number
             if (++$line > $range['end']) {
                 break;
@@ -243,10 +243,10 @@ class Debug
 
             if ($line >= $range['start']) {
                 // Make the row safe for output
-                $row = htmlspecialchars($row, ENT_NOQUOTES, 'utf-8');
+                $row = \htmlspecialchars($row, \ENT_NOQUOTES, 'utf-8');
 
                 // Trim whitespace and sanitize the row
-                $row = '<span class="number">' . sprintf($format, $line) . '</span> ' . $row;
+                $row = '<span class="number">' . \sprintf($format, $line) . '</span> ' . $row;
 
                 if ($line === $line_number) {
                     // Apply highlighting to this row
@@ -261,7 +261,7 @@ class Debug
         }
 
         // Close the file
-        fclose($file);
+        \fclose($file);
         //$source = highlight_string($source);
 
         return '<pre class="source"><code>' . $source . '</code></pre>';
@@ -281,7 +281,7 @@ class Debug
     {
         if ($trace === null) {
             // Start a new trace
-            $trace = debug_backtrace();
+            $trace = \debug_backtrace();
         }
 
         // Non-standard function calls
@@ -313,18 +313,18 @@ class Debug
             if (\in_array($step['function'], $statements)) {
                 if (empty($step['args'])) {
                     // No arguments
-                    $args = array();
+                    $args = [];
                 } else {
                     // Sanitize the file path
-                    $args = array($step['args'][0]);
+                    $args = [$step['args'][0]];
                 }
             } elseif (isset($step['args'])) {
-                if (!\function_exists($step['function']) or strpos($step['function'], '{closure}') !== false) {
+                if (!\function_exists($step['function']) or \strpos($step['function'], '{closure}') !== false) {
                     // Introspection on closures or language constructs in a stack trace is impossible
                     $params = null;
                 } else {
                     if (isset($step['class'])) {
-                        if (method_exists($step['class'], $step['function'])) {
+                        if (\method_exists($step['class'], $step['function'])) {
                             $reflection = new \ReflectionMethod($step['class'], $step['function']);
                         } else {
                             $reflection = new \ReflectionMethod($step['class'], '__call');
@@ -337,7 +337,7 @@ class Debug
                     $params = $reflection->getParameters();
                 }
 
-                $args = array();
+                $args = [];
 
                 foreach ($step['args'] as $i => $arg) {
                     if (isset($params[$i])) {
@@ -355,13 +355,13 @@ class Debug
                 $function = $step['class'] . $step['type'] . $step['function'];
             }
 
-            $output[] = array(
+            $output[] = [
                 'function' => $function,
                 'args' => $args ?? null,
                 'file' => $file ?? null,
                 'line' => $line ?? null,
                 'source' => $source ?? null,
-            );
+            ];
 
             unset($function, $args, $file, $line, $source);
         }
@@ -376,7 +376,7 @@ class Debug
 
         $count = 0;
 
-        return implode("\n", array_map(function ($step) use (&$count) {
+        return \implode("\n", \array_map(static function ($step) use (&$count) {
             $file = $step['file'] ? Debug::path($step['file']) : 'PHP internal call';
             $line = $step['line'];
 
@@ -386,15 +386,15 @@ class Debug
                     if (\is_string($arg)) {
                         $args[] = "'" . Text::limitChars($arg, 45) . "'";
                     } elseif (\is_array($arg)) {
-                        $args[] = "Array";
+                        $args[] = 'Array';
                     } elseif (\is_null($arg)) {
                         $args[] = 'null';
                     } elseif (\is_bool($arg)) {
-                        $args[] = ($arg) ? "true" : "false";
+                        $args[] = ($arg) ? 'true' : 'false';
                     } elseif (\is_object($arg)) {
                         $args[] = \get_class($arg);
                     } elseif (\is_resource($arg)) {
-                        $args[] = get_resource_type($arg);
+                        $args[] = \get_resource_type($arg);
                     } else {
                         $args[] = $arg;
                     }
@@ -403,7 +403,7 @@ class Debug
 
             $count++;
 
-            return "#$count $file [$line]: " . $step['function'] . "(" . implode(', ', $args) . ")";
+            return "#$count $file [$line]: " . $step['function'] . '(' . \implode(', ', $args) . ')';
         }, $trace));
     }
 }

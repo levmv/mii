@@ -26,7 +26,7 @@ class Logger extends Component
         8 => 'warn',
         16 => 'error',
         32 => 'crit',
-        64 => 'alert'
+        64 => 'alert',
     ];
 
     protected array $messages = [];
@@ -37,7 +37,7 @@ class Logger extends Component
     {
         parent::init($config);
 
-        register_shutdown_function(function () {
+        \register_shutdown_function(function () {
             $this->flush();
         });
     }

@@ -18,7 +18,7 @@ class File extends Cache
         parent::init($config);
 
         $this->path = \Mii::resolve($this->path);
-        if (!is_dir($this->path)) {
+        if (!\is_dir($this->path)) {
             FS::mkdir($this->path, 0777);
         }
     }
@@ -34,12 +34,12 @@ class File extends Cache
     {
         $filename = $this->cacheFile($id);
 
-        if (@\file_exists($filename) && @\filemtime($filename) > time()) {
+        if (@\file_exists($filename) && @\filemtime($filename) > \time()) {
             $fp = @\fopen($filename, 'r');
             if ($fp !== false) {
-                \flock($fp, LOCK_SH);
-                $value = stream_get_contents($fp);
-                \flock($fp, LOCK_UN);
+                \flock($fp, \LOCK_SH);
+                $value = \stream_get_contents($fp);
+                \flock($fp, \LOCK_UN);
                 \fclose($fp);
 
                 return $this->serialize ? \unserialize($value) : $value;
@@ -68,16 +68,16 @@ class File extends Cache
         if ($this->directory_level > 0) {
             FS::mkdir(\dirname($filename), $this->chmode);
         }
-        if (\file_put_contents($filename, $this->serialize ? \serialize($data) : $data, LOCK_EX) !== false) {
+        if (\file_put_contents($filename, $this->serialize ? \serialize($data) : $data, \LOCK_EX) !== false) {
             if ($this->chmode !== null) {
                 \chmod($filename, $this->chmode);
             }
             if ($lifetime <= 0) {
                 $lifetime = 60 * 60 * 24 * 7;
             }
-            return touch($filename, $lifetime + time());
+            return \touch($filename, $lifetime + \time());
         }
-        $error = error_get_last();
+        $error = \error_get_last();
 
         \Mii::warning("Unable to write cache file '{$filename}': {$error['message']}", 'mii');
         return false;
@@ -91,7 +91,7 @@ class File extends Cache
      */
     public function delete($id)
     {
-        return unlink($this->cacheFile($id));
+        return \unlink($this->cacheFile($id));
     }
 
     /**
@@ -111,11 +111,11 @@ class File extends Cache
             foreach ((new \DirectoryIterator($path)) as $fi) {
                 if ($fi->isDir() && !$fi->isDot()) {
                     $result = $this->recursiveRemove($fi->getPathname());
-                    rmdir($fi->getPathname());
+                    \rmdir($fi->getPathname());
                 }
 
                 if ($fi->isFile()) {
-                    unlink($fi->getPathname());
+                    \unlink($fi->getPathname());
                 }
             }
         } catch (\Throwable $t) {
@@ -168,11 +168,11 @@ class File extends Cache
             $base = $this->path;
             for ($i = 0; $i < $this->directory_level; ++$i) {
                 if (($prefix = \substr($key, $i + $i, 2)) !== false) {
-                    $base .= DIRECTORY_SEPARATOR . $prefix;
+                    $base .= \DIRECTORY_SEPARATOR . $prefix;
                 }
             }
-            return $base . DIRECTORY_SEPARATOR . $key;
+            return $base . \DIRECTORY_SEPARATOR . $key;
         }
-        return $this->path . DIRECTORY_SEPARATOR . $key;
+        return $this->path . \DIRECTORY_SEPARATOR . $key;
     }
 }

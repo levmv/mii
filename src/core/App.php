@@ -39,7 +39,7 @@ abstract class App
         }
 
         if ($this->locale !== null) {
-            \setlocale(LC_TIME, $this->locale);
+            \setlocale(\LC_TIME, $this->locale);
         }
 
         if ($this->timezone !== null) {

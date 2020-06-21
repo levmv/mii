@@ -19,7 +19,7 @@ class ErrorException extends \ErrorException
         parent::__construct($message, $code, $severity, $filename, $lineno, $previous);
 
         if (\function_exists('xdebug_get_function_stack')) {
-            $trace = \array_slice(array_reverse(xdebug_get_function_stack()), 3, -1);
+            $trace = \array_slice(\array_reverse(xdebug_get_function_stack()), 3, -1);
             foreach ($trace as &$frame) {
                 if (!isset($frame['function'])) {
                     $frame['function'] = 'unknown';
@@ -51,21 +51,21 @@ class ErrorException extends \ErrorException
     public function getName()
     {
         static $names = [
-            E_COMPILE_ERROR => 'PHP Compile Error',
-            E_COMPILE_WARNING => 'PHP Compile Warning',
-            E_CORE_ERROR => 'PHP Core Error',
-            E_CORE_WARNING => 'PHP Core Warning',
-            E_DEPRECATED => 'PHP Deprecated Warning',
-            E_ERROR => 'PHP Fatal Error',
-            E_NOTICE => 'PHP Notice',
-            E_PARSE => 'PHP Parse Error',
-            E_RECOVERABLE_ERROR => 'PHP Recoverable Error',
-            E_STRICT => 'PHP Strict Warning',
-            E_USER_DEPRECATED => 'PHP User Deprecated Warning',
-            E_USER_ERROR => 'PHP User Error',
-            E_USER_NOTICE => 'PHP User Notice',
-            E_USER_WARNING => 'PHP User Warning',
-            E_WARNING => 'PHP Warning',
+            \E_COMPILE_ERROR => 'PHP Compile Error',
+            \E_COMPILE_WARNING => 'PHP Compile Warning',
+            \E_CORE_ERROR => 'PHP Core Error',
+            \E_CORE_WARNING => 'PHP Core Warning',
+            \E_DEPRECATED => 'PHP Deprecated Warning',
+            \E_ERROR => 'PHP Fatal Error',
+            \E_NOTICE => 'PHP Notice',
+            \E_PARSE => 'PHP Parse Error',
+            \E_RECOVERABLE_ERROR => 'PHP Recoverable Error',
+            \E_STRICT => 'PHP Strict Warning',
+            \E_USER_DEPRECATED => 'PHP User Deprecated Warning',
+            \E_USER_ERROR => 'PHP User Error',
+            \E_USER_NOTICE => 'PHP User Notice',
+            \E_USER_WARNING => 'PHP User Warning',
+            \E_WARNING => 'PHP Warning',
         ];
 
         return $names[$this->getCode()] ?? 'Error';

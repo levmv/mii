@@ -40,7 +40,7 @@ trait JsonAttributes
 
     public function __get($key)
     {
-        assert(isset(static::$json_attributes), 'You must define property $json_attributes in your model');
+        \assert(isset(static::$json_attributes), 'You must define property $json_attributes in your model');
 
         return (static::$json_attributes && \in_array($key, static::$json_attributes, true))
             ? $this->_unserialize_value($key)
@@ -83,7 +83,7 @@ trait JsonAttributes
                 ? null
                 : $this->_serializeValue($value);
 
-            if (!array_key_exists($key, $this->attributes) || $value !== $this->attributes[$key]) {
+            if (!\array_key_exists($key, $this->attributes) || $value !== $this->attributes[$key]) {
                 $this->attributes[$key] = $value;
                 $this->_changed[$key] = true;
             }
@@ -92,14 +92,14 @@ trait JsonAttributes
 
     protected function _serializeValue($value)
     {
-        return \json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return \json_encode($value, \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
     }
 
     protected function _unserialize_value($key)
     {
         if (!\array_key_exists($key, $this->_serialize_cache)) {
-            assert(array_key_exists($key, $this->attributes), 'Source field must exist');
-            assert(is_string($this->attributes[$key]) || \is_null($this->attributes[$key]), 'Source field must have string type or be null');
+            \assert(\array_key_exists($key, $this->attributes), 'Source field must exist');
+            \assert(\is_string($this->attributes[$key]) || \is_null($this->attributes[$key]), 'Source field must have string type or be null');
 
             $this->_serialize_cache[$key] = \is_null($this->attributes[$key])
                 ? null

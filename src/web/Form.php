@@ -44,7 +44,7 @@ class Form
         }
 
         if (\is_array($data)) {
-            foreach (array_intersect_key($data, $this->_fields) as $key => $value) {
+            foreach (\array_intersect_key($data, $this->_fields) as $key => $value) {
                 $this->set($key, $value);
             }
         }
@@ -78,7 +78,7 @@ class Form
 
             // try to detect possible file fields and load them
 
-            $unchanged = array_diff(array_keys($this->_fields), $this->_changed);
+            $unchanged = \array_diff(\array_keys($this->_fields), $this->_changed);
             foreach ($unchanged as $key) {
                 $file = \Mii::$app->upload->getFile($key);
                 if ($file !== null) {
@@ -97,7 +97,7 @@ class Form
 
     private function loadFields($data): void
     {
-        foreach (array_intersect_key($data, $this->_fields) as $key => $value) {
+        foreach (\array_intersect_key($data, $this->_fields) as $key => $value) {
             $this->set($key, $value);
         }
         $this->_loaded = true;
@@ -150,7 +150,7 @@ class Form
 
     public function changedFields(): array
     {
-        return array_intersect_key($this->_fields, $this->_changed);
+        return \array_intersect_key($this->_fields, $this->_changed);
     }
 
     /**
@@ -167,7 +167,7 @@ class Form
         }
 
         if (\is_array($field_name)) {
-            return \count(array_intersect($field_name, array_keys($this->_changed))) > 0;
+            return \count(\array_intersect($field_name, \array_keys($this->_changed))) > 0;
         }
 
         return isset($this->_changed[$field_name]);
@@ -335,7 +335,7 @@ class Form
                     $hidden = HTML::hidden($name, $uncheck);
                 }
 
-                return $hidden . HTML::checkbox($name, 1, (bool)$this->_fields[$name], $attributes);
+                return $hidden . HTML::checkbox($name, 1, (bool) $this->_fields[$name], $attributes);
             case 'password':
                 return HTML::password($name, $this->_fields[$name], $attributes);
             case 'select':

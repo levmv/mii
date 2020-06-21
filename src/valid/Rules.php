@@ -44,7 +44,7 @@ class Rules
         }
 
         // Value cannot be NULL, FALSE, '', or an empty array
-        return !\in_array($value, array(null, false, '', array()), true);
+        return !\in_array($value, [null, false, '', []], true);
     }
 
     /**
@@ -56,7 +56,7 @@ class Rules
      */
     public static function regex($value, $expression)
     {
-        return (bool)preg_match($expression, (string)$value);
+        return (bool) \preg_match($expression, (string) $value);
     }
 
     /**
@@ -91,7 +91,7 @@ class Rules
         }
 
         if (\is_string($value)) {
-            return (mb_strlen($value) <=> $length) === $dir;
+            return (\mb_strlen($value) <=> $length) === $dir;
         }
 
         return ($value <=> $length) === $dir;
@@ -109,7 +109,7 @@ class Rules
     {
         if (\is_array($length)) {
             foreach ($length as $strlen) {
-                if (mb_strlen($value) === $strlen) {
+                if (\mb_strlen($value) === $strlen) {
                     return true;
                 }
             }
@@ -143,7 +143,7 @@ class Rules
      */
     public static function email($email, $strict = false)
     {
-        if (mb_strlen($email) > 254) {
+        if (\mb_strlen($email) > 254) {
             return false;
         }
 
@@ -165,7 +165,7 @@ class Rules
             $expression = '/^[-_a-z0-9\'+*$^&%=~!?{}]++(?:\.[-_a-z0-9\'+*$^&%=~!?{}]+)*+@(?:(?![-.])[-a-z0-9.]+(?<![-.])\.[a-z]{2,6}|\d{1,3}(?:\.\d{1,3}){3})$/iD';
         }
 
-        return (bool)preg_match($expression, (string)$email);
+        return (bool) \preg_match($expression, (string) $email);
     }
 
     /**
@@ -184,7 +184,7 @@ class Rules
         } // Empty fields cause issues with checkdnsrr()
 
         // Check if the email domain has a valid MX record
-        return (bool)checkdnsrr(preg_replace('/^[^@]++@/', '', $email), 'MX');
+        return (bool) \checkdnsrr(\preg_replace('/^[^@]++@/', '', $email), 'MX');
     }
 
     /**
@@ -196,7 +196,7 @@ class Rules
     public static function url($url)
     {
         // Based on http://www.apps.ietf.org/rfc/rfc1738.html#sec-5
-        if (!preg_match(
+        if (!\preg_match(
             '~^
 
             # scheme
@@ -248,8 +248,8 @@ class Rules
 
         // An extra check for the top level domain
         // It must start with a letter
-        $tld = ltrim(substr($matches[1], (int)strrpos($matches[1], '.')), '.');
-        return ctype_alpha($tld[0]);
+        $tld = \ltrim(\substr($matches[1], (int) \strrpos($matches[1], '.')), '.');
+        return \ctype_alpha($tld[0]);
     }
 
     /**
@@ -262,14 +262,14 @@ class Rules
     public static function ip($ip, $allow_private = true)
     {
         // Do not allow reserved addresses
-        $flags = FILTER_FLAG_NO_RES_RANGE;
+        $flags = \FILTER_FLAG_NO_RES_RANGE;
 
         if ($allow_private === false) {
             // Do not allow private or reserved addresses
-            $flags |= FILTER_FLAG_NO_PRIV_RANGE;
+            $flags |= \FILTER_FLAG_NO_PRIV_RANGE;
         }
 
-        return (bool)filter_var($ip, FILTER_VALIDATE_IP, $flags);
+        return (bool) \filter_var($ip, \FILTER_VALIDATE_IP, $flags);
     }
 
     /**
@@ -282,14 +282,14 @@ class Rules
     public static function phone($number, $lengths = null)
     {
         if (!\is_array($lengths)) {
-            $lengths = array(7, 10, 11);
+            $lengths = [7, 10, 11];
         }
 
         // Remove all non-digit characters from the number
-        $number = preg_replace('/\D+/', '', $number);
+        $number = \preg_replace('/\D+/', '', $number);
 
         // Check if the number is within range
-        return \in_array(strlen($number), $lengths);
+        return \in_array(\strlen($number), $lengths);
     }
 
     /**
@@ -300,7 +300,7 @@ class Rules
      */
     public static function date($str)
     {
-        return (strtotime($str) !== false);
+        return (\strtotime($str) !== false);
     }
 
     /**
@@ -312,13 +312,13 @@ class Rules
      */
     public static function alpha($str, $utf8 = false)
     {
-        $str = (string)$str;
+        $str = (string) $str;
 
         if ($utf8 === true) {
-            return (bool)preg_match('/^\pL++$/uD', $str);
+            return (bool) \preg_match('/^\pL++$/uD', $str);
         }
 
-        return ctype_alpha($str);
+        return \ctype_alpha($str);
     }
 
     /**
@@ -331,10 +331,10 @@ class Rules
     public static function alphaNumeric($str, $utf8 = false)
     {
         if ($utf8 === true) {
-            return (bool)preg_match('/^[\pL\pN]++$/uD', $str);
+            return (bool) \preg_match('/^[\pL\pN]++$/uD', $str);
         }
 
-        return ctype_alnum($str);
+        return \ctype_alnum($str);
     }
 
     /**
@@ -352,7 +352,7 @@ class Rules
             $regex = '/^[-a-z0-9_]++$/iD';
         }
 
-        return (bool)preg_match($regex, $str);
+        return (bool) \preg_match($regex, $str);
     }
 
     /**
@@ -365,10 +365,10 @@ class Rules
     public static function digit($str, $utf8 = false)
     {
         if ($utf8 === true) {
-            return (bool)preg_match('/^\pN++$/uD', $str);
+            return (bool) \preg_match('/^\pN++$/uD', $str);
         }
 
-        return (\is_int($str) and $str >= 0) or ctype_digit($str);
+        return (\is_int($str) and $str >= 0) or \ctype_digit($str);
     }
 
     /**
@@ -383,10 +383,10 @@ class Rules
     public static function numeric($str)
     {
         // Get the decimal point for the current locale
-        list($decimal) = array_values(localeconv());
+        [$decimal] = \array_values(\localeconv());
 
         // A lookahead is used to make sure the string contains at least one digit (before or after the decimal point)
-        return (bool)preg_match('/^-?+(?=.*[0-9])[0-9]*+' . preg_quote($decimal) . '?+[0-9]*+$/D', (string)$str);
+        return (bool) \preg_match('/^-?+(?=.*[0-9])[0-9]*+' . \preg_quote($decimal) . '?+[0-9]*+$/D', (string) $str);
     }
 
     /**
@@ -427,16 +427,16 @@ class Rules
     {
         if ($digits > 0) {
             // Specific number of digits
-            $digits = '{' . ((int)$digits) . '}';
+            $digits = '{' . ((int) $digits) . '}';
         } else {
             // Any number of digits
             $digits = '+';
         }
 
         // Get the decimal point for the current locale
-        list($decimal) = array_values(localeconv());
+        [$decimal] = \array_values(\localeconv());
 
-        return (bool)preg_match('/^[+-]?[0-9]' . $digits . preg_quote($decimal) . '[0-9]{' . ((int)$places) . '}$/D', $str);
+        return (bool) \preg_match('/^[+-]?[0-9]' . $digits . \preg_quote($decimal) . '[0-9]{' . ((int) $places) . '}$/D', $str);
     }
 
     /**
@@ -449,7 +449,7 @@ class Rules
      */
     public static function color($str)
     {
-        return (bool)preg_match('/^#?+[0-9a-f]{3}(?:[0-9a-f]{3})?$/iD', $str);
+        return (bool) \preg_match('/^#?+[0-9a-f]{3}(?:[0-9a-f]{3})?$/iD', $str);
     }
 
     /**
@@ -494,7 +494,7 @@ class Rules
             return true;
         }
 
-        $ext = strtolower(pathinfo($file->name, PATHINFO_EXTENSION));
+        $ext = \strtolower(\pathinfo($file->name, \PATHINFO_EXTENSION));
 
         return \in_array($ext, $allowed);
     }
@@ -516,12 +516,12 @@ class Rules
      */
     public static function fileSize(UploadedFile $file, $size, $dir = -1)
     {
-        if ($file->error === UPLOAD_ERR_INI_SIZE) {
+        if ($file->error === \UPLOAD_ERR_INI_SIZE) {
             // Upload is larger than PHP allowed size (upload_max_filesize)
             return false;
         }
 
-        if ($file->error !== UPLOAD_ERR_OK) {
+        if ($file->error !== \UPLOAD_ERR_OK) {
             // The upload failed, no size to check
             return true;
         }

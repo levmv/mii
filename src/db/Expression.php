@@ -43,7 +43,7 @@ class Expression
      */
     public function bind($param, &$var)
     {
-        $this->params[$param] =& $var;
+        $this->params[$param] =&$var;
 
         return $this;
     }
@@ -84,7 +84,7 @@ class Expression
      */
     public function value(): string
     {
-        return (string)$this->value;
+        return (string) $this->value;
     }
 
     /**
@@ -118,10 +118,10 @@ class Expression
 
         if (!empty($this->params)) {
             // Quote all of the parameter values
-            $params = array_map([$db, 'quote'], $this->params);
+            $params = \array_map([$db, 'quote'], $this->params);
 
             // Replace the values in the expression
-            $value = strtr($value, $params);
+            $value = \strtr($value, $params);
         }
 
         return $value;

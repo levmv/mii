@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace mii\console\controllers;
 
@@ -51,18 +51,18 @@ class Migrate extends Controller
         }
 
         foreach ($this->migrations_paths as $migrations_path) {
-            if (!is_dir($migrations_path)) {
+            if (!\is_dir($migrations_path)) {
                 $this->warning('Directory :dir does not exist', [':dir' => $migrations_path]);
-                mkdir($migrations_path, 0775);
+                \mkdir($migrations_path, 0775);
             }
 
-            $scan = scandir($migrations_path);
+            $scan = \scandir($migrations_path);
             foreach ($scan as $file) {
                 if ($file[0] == '.') {
                     continue;
                 }
 
-                $info = pathinfo($file);
+                $info = \pathinfo($file);
 
                 if ($info['extension'] !== 'php') {
                     continue;
@@ -74,12 +74,12 @@ class Migrate extends Controller
                     'name' => $name,
                     'file' => $migrations_path . '/' . $file,
                     'applied' => isset($this->applied_migrations[$name]),
-                    'date' => 0
+                    'date' => 0,
                 ];
             }
         }
 
-        uksort($this->migrations_list, 'strnatcmp');
+        \uksort($this->migrations_list, 'strnatcmp');
     }
 
 
@@ -90,23 +90,23 @@ class Migrate extends Controller
     {
         $custom_name = false;
 
-        if (count($this->request->params) && $name === null) {
+        if (\count($this->request->params) && $name === null) {
             $name = $this->request->params[0];
         }
 
         if ($name) {
-            $custom_name = mb_strtolower($name, 'utf-8');
+            $custom_name = \mb_strtolower($name, 'utf-8');
         }
 
         DB::begin();
         try {
-            $name = 'm' . gmdate('ymd_His');
+            $name = 'm' . \gmdate('ymd_His');
             if ($custom_name) {
                 $name .= '_' . $custom_name;
             }
 
             $file = '<?php
-// ' . strftime('%F %T') . '
+// ' . \strftime('%F %T') . '
 
 use mii\db\DB;
 
@@ -130,8 +130,8 @@ class ' . $name . ' {
 
 }
 ';
-            reset($this->migrations_paths);
-            file_put_contents(current($this->migrations_paths) . '/' . $name . '.php', $file);
+            \reset($this->migrations_paths);
+            \file_put_contents(\current($this->migrations_paths) . '/' . $name . '.php', $file);
 
             DB::commit();
 
@@ -151,7 +151,7 @@ class ' . $name . ' {
 
         $migrations = $this->migrations_list;
 
-        $limit = (int)$limit;
+        $limit = (int) $limit;
 
         if ($limit > 0) {
             $migrations = \array_slice($migrations, 0, $limit);
@@ -184,7 +184,7 @@ class ' . $name . ' {
                 'INSERT INTO`' . $this->migrate_table . '`(`name`, `date`) VALUES(:name, :date)',
                 [
                     ':name' => $name,
-                    ':date' => time()
+                    ':date' => \time(),
                 ]
             );
 
@@ -199,7 +199,7 @@ class ' . $name . ' {
 
     protected function loadMigration($migration)
     {
-        require_once($migration['file']);
+        require_once $migration['file'];
         return new $migration['name'];
     }
 }

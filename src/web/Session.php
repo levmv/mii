@@ -83,7 +83,7 @@ class Session extends Component
         }
 
         if ($this->lifetime > 0) {
-            \ini_set('session.gc_maxlifetime', (string)$this->lifetime);
+            \ini_set('session.gc_maxlifetime', (string) $this->lifetime);
         }
 
         // Sync up the session cookie with Cookie parameters
@@ -96,7 +96,7 @@ class Session extends Component
         );
 
         // Do not allow PHP to send Cache-Control headers
-        \session_cache_limiter("");
+        \session_cache_limiter('');
 
         // Set the session cookie name
         \session_name($this->name);
@@ -107,10 +107,10 @@ class Session extends Component
         }
 
         // Start the session
-        @session_start();
+        @\session_start();
 
         // Use the $_SESSION global for storing data
-        $this->_data =& $_SESSION;
+        $this->_data =&$_SESSION;
 
         // Write the session at shutdown
         \register_shutdown_function([$this, 'close']);
@@ -120,7 +120,7 @@ class Session extends Component
 
     public function isActive(): bool
     {
-        return \session_status() === PHP_SESSION_ACTIVE;
+        return \session_status() === \PHP_SESSION_ACTIVE;
     }
 
     /**
@@ -154,7 +154,7 @@ class Session extends Component
     {
         $this->open();
 
-        $this->_data[$key] =& $value;
+        $this->_data[$key] =&$value;
 
         return $this;
     }
@@ -190,12 +190,12 @@ class Session extends Component
     {
         if ($this->isActive()) {
             // Regenerate the session id
-            @session_regenerate_id($delete_old);
+            @\session_regenerate_id($delete_old);
         } else {
             $this->open();
         }
 
-        return session_id();
+        return \session_id();
     }
 
     /**
@@ -213,10 +213,10 @@ class Session extends Component
         if ($this->isActive()) {
 
             // Set the last active timestamp
-            $this->_data['last_active'] = time();
+            $this->_data['last_active'] = \time();
 
             // Write and close the session
-            config('debug') ? session_write_close() : @session_write_close();
+            config('debug') ? \session_write_close() : @\session_write_close();
         }
     }
 
@@ -227,8 +227,8 @@ class Session extends Component
     public function destroy(): void
     {
         if ($this->isActive()) {
-            session_unset();
-            session_destroy();
+            \session_unset();
+            \session_destroy();
             $this->_data = [];
 
             // Make sure the session cannot be restarted
@@ -238,7 +238,7 @@ class Session extends Component
 
     public function id(): string
     {
-        return session_id();
+        return \session_id();
     }
 
 

@@ -59,6 +59,6 @@ abstract class Cache extends Component
     protected function sanitizeId($id): string
     {
         // Change slashes and spaces to underscores
-        return $this->prefix . str_replace(['/', '\\', ' '], '_', $id);
+        return $this->prefix . \str_replace(['/', '\\', ' '], '_', $id);
     }
 }

@@ -62,11 +62,11 @@ class UploadedFile
 
         if ($this->error === \UPLOAD_ERR_OK) {
             if ($delete_tmp) {
-                return move_uploaded_file($this->tmp_name, $file);
+                return \move_uploaded_file($this->tmp_name, $file);
             }
 
-            if (is_uploaded_file($this->tmp_name)) {
-                return copy($this->tmp_name, $file);
+            if (\is_uploaded_file($this->tmp_name)) {
+                return \copy($this->tmp_name, $file);
             }
         }
         return false;
@@ -74,22 +74,22 @@ class UploadedFile
 
     public function basename(): string
     {
-        return basename($this->name);
+        return \basename($this->name);
     }
 
     public function hasError(): bool
     {
-        return $this->error !== UPLOAD_ERR_OK;
+        return $this->error !== \UPLOAD_ERR_OK;
     }
 
     public function isUploadedFile(): bool
     {
-        return is_uploaded_file($this->tmp_name);
+        return \is_uploaded_file($this->tmp_name);
     }
 
 
     public function extension(): string
     {
-        return strtolower(pathinfo($this->name, PATHINFO_EXTENSION));
+        return \strtolower(\pathinfo($this->name, \PATHINFO_EXTENSION));
     }
 }

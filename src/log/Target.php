@@ -43,7 +43,7 @@ abstract class Target extends Component
             if ($pass && !empty($this->except)) {
                 foreach ($this->except as $category) {
                     $prefix = \rtrim($category, '*');
-                    if (($msg[2] === $category || $prefix !== $category) && strpos($msg[2], $prefix) === 0) {
+                    if (($msg[2] === $category || $prefix !== $category) && \strpos($msg[2], $prefix) === 0) {
                         $pass = false;
                         break;
                     }
@@ -81,7 +81,7 @@ abstract class Target extends Component
             if ($msg instanceof \Throwable) {
                 if ($this->exceptions_extended) {
                     if (\Mii::$app instanceof App) {
-                        $extended = sprintf(
+                        $extended = \sprintf(
                             "\n%s%s %s",
                             \Mii::$app->request->method(),
                             \Mii::$app->request->isAjax() ? '[Ajax]' : '',
@@ -98,7 +98,7 @@ abstract class Target extends Component
                     $msg = Exception::text($msg);
                 }
             } else {
-                $msg = var_export($msg, true);
+                $msg = \var_export($msg, true);
             }
         }
 
@@ -129,11 +129,11 @@ abstract class Target extends Component
 
     public static function shortExceptionText(\Throwable $e): string
     {
-        $name = get_class($e);
+        $name = \get_class($e);
         $msg = $e->getMessage();
         $file = \mii\util\Debug::path($e->getFile());
 
-        if (strpos($file, '/src/web/App.php') !== false) {
+        if (\strpos($file, '/src/web/App.php') !== false) {
             $file = '';
         } else {
             $file = ' ~' . $file . '[' . $e->getLine() . ']';

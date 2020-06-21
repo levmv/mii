@@ -34,11 +34,11 @@ class Opcache extends File
 
         @include $filename;
 
-        if (isset($ttl) and $ttl < time()) {
+        if (isset($ttl) and $ttl < \time()) {
             return $default;
         }
 
-        return isset($val) ? $val : $default;
+        return $val ?? $default;
     }
 
     /**
@@ -62,16 +62,16 @@ class Opcache extends File
             FS::mkdir(\dirname($filename), $this->chmode, true);
         }
 
-        $val = var_export($data, true);
+        $val = \var_export($data, true);
         // Write to temp file first to ensure atomicity
-        $tmp = tempnam("/tmp", "ocache");
-        if (file_put_contents($tmp, '<?php $ttl = ' . (time() + $lifetime) . '; $val = ' . $val . ';', LOCK_EX)
-            && rename($tmp, $filename)) {
-            opcache_invalidate($filename, true);
+        $tmp = \tempnam('/tmp', 'ocache');
+        if (\file_put_contents($tmp, '<?php $ttl = ' . (\time() + $lifetime) . '; $val = ' . $val . ';', \LOCK_EX)
+            && \rename($tmp, $filename)) {
+            \opcache_invalidate($filename, true);
             return true;
         }
 
-        $error = error_get_last();
+        $error = \error_get_last();
 
         \Mii::warning("Unable to write cache file '{$filename}': {$error['message']}", 'mii');
         return false;
@@ -86,9 +86,9 @@ class Opcache extends File
     public function delete($id)
     {
         $filename = $this->cacheFile($id);
-        unlink($filename);
+        \unlink($filename);
 
-        return opcache_invalidate($filename, true);
+        return \opcache_invalidate($filename, true);
     }
 
     /**

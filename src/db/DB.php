@@ -33,10 +33,10 @@ class DB
 
         if (!empty($params)) {
             // Quote all of the values
-            $values = array_map([$db, 'quote'], $params);
+            $values = \array_map([$db, 'quote'], $params);
 
             // Replace the values in the SQL
-            $q = strtr($q, $values);
+            $q = \strtr($q, $values);
         }
 
         $result = $db->query($type, $q);

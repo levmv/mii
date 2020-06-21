@@ -181,7 +181,7 @@ class Validation
         $this->_errors = [];
 
         // Get a list of the expected fields
-        $expected = Arr::merge(array_keys($this->_data), array_keys($this->_labels));
+        $expected = Arr::merge(\array_keys($this->_data), \array_keys($this->_labels));
 
         // Import the rules locally
         $rules = $this->_rules;
@@ -203,7 +203,7 @@ class Validation
 
 
             foreach ($set as [$rule, $params]) {
-                array_unshift($params, $value);
+                \array_unshift($params, $value);
 
                 // Default the error name to be the rule (except array and lambda rules)
                 $error_name = $rule;
@@ -221,17 +221,17 @@ class Validation
                 } elseif (!\is_string($rule)) {
                     // This is a lambda function, there is no error name (errors must be added manually)
                     $error_name = false;
-                    array_unshift($params, $field);
-                    array_unshift($params, $this);
+                    \array_unshift($params, $field);
+                    \array_unshift($params, $this);
                     $passed = \call_user_func_array($rule, $params);
-                } elseif (method_exists('mii\valid\Rules', $rule)) {
+                } elseif (\method_exists('mii\valid\Rules', $rule)) {
                     // Use a method in this object
                     $method = new \ReflectionMethod('mii\valid\Rules', $rule);
 
                     // Call static::$rule($this[$field], $param, ...) with Reflection
 
                     $passed = $method->invokeArgs(null, $params);
-                } elseif (strpos($rule, '::') === false) {
+                } elseif (\strpos($rule, '::') === false) {
 
                     // Use a function call
                     $function = new \ReflectionFunction($rule);
@@ -240,7 +240,7 @@ class Validation
                     $passed = $function->invokeArgs($params);
                 } else {
                     // Split the class and method of the rule
-                    list($class, $method) = explode('::', $rule, 2);
+                    [$class, $method] = \explode('::', $rule, 2);
 
                     // Use a static method call
                     $method = new \ReflectionMethod($class, $method);
@@ -334,7 +334,7 @@ class Validation
 
         foreach ($this->_errors as $field => $set) {
             if (\is_array($set)) {
-                list($error, $params) = $set;
+                [$error, $params] = $set;
             } else {
                 $error = $set;
                 $params = [];
@@ -356,14 +356,14 @@ class Validation
 
             if (\is_array($values[':value'])) {
                 // All values must be strings
-                $values[':value'] = implode(', ', Arr::flatten($values[':value']));
+                $values[':value'] = \implode(', ', Arr::flatten($values[':value']));
             }
 
             if ($params) {
                 foreach ($params as $key => $value) {
                     if (\is_array($value)) {
                         // All values must be strings
-                        $value = implode(', ', Arr::flatten($value));
+                        $value = \implode(', ', Arr::flatten($value));
                     } elseif (\is_object($value)) {
                         // Objects cannot be used in message files
                         continue;
@@ -406,7 +406,7 @@ class Validation
                 $message = __($message, $values);
             } else {
                 // Do not translate, just replace the values
-                $message = strtr($message, $values);
+                $message = \strtr($message, $values);
             }
 
             // Set the message for this field

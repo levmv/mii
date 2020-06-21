@@ -60,10 +60,10 @@ class ACL
      */
     public function addRule($access, $role, $action): void
     {
-        $roles = (array)$role;
+        $roles = (array) $role;
 
         foreach ($roles as $r) {
-            $action = (array)$action;
+            $action = (array) $action;
             foreach ($action as $a) {
                 $this->_rules[$r][$a] = $access;
             }

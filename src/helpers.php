@@ -154,18 +154,18 @@ if (!\function_exists('dd')) {
     function dd(...$params)
     {
         if (Mii::$app instanceof \mii\web\App && Mii::$app->response->format === \mii\web\Response::FORMAT_HTML) {
-            echo "<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }";
-            echo "pre small { font-size: 1em; color: #000080;font-weight:bold}";
+            echo '<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }';
+            echo 'pre small { font-size: 1em; color: #000080;font-weight:bold}';
             echo "</style><pre>\n";
 
-            array_map(static function ($a) {
+            \array_map(static function ($a) {
                 echo \mii\util\Debug::dump($a, 400);
             }, $params);
 
             echo "</pre>\n";
         } else {
-            array_map(static function ($a) {
-                var_dump($a);
+            \array_map(static function ($a) {
+                \var_dump($a);
             }, $params);
         }
         die;
@@ -191,7 +191,7 @@ if (!\function_exists('config')) {
                     return $array[$key];
                 }
 
-                if (!is_array($array[$key]) && !\is_iterable($array[$key])) {
+                if (!\is_array($array[$key]) && !\is_iterable($array[$key])) {
                     // Unable to dig deeper
                     break;
                 }

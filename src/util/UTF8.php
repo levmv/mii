@@ -15,7 +15,7 @@ class UTF8
      */
     public static function strip4b(string $str, string $replace = ''): string
     {
-        return preg_replace('/[\xF0-\xF7].../s', $replace, $str);
+        return \preg_replace('/[\xF0-\xF7].../s', $replace, $str);
     }
 
     /**
@@ -29,7 +29,7 @@ class UTF8
      */
     public static function isAscii(string $str): bool
     {
-        return !preg_match('/[^\x00-\x7F]/S', $str);
+        return !\preg_match('/[^\x00-\x7F]/S', $str);
     }
 
     /**
@@ -42,7 +42,7 @@ class UTF8
      */
     public static function stripAsciiCtrl(string $str)
     {
-        return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $str);
+        return \preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $str);
     }
 
     /**
@@ -55,7 +55,7 @@ class UTF8
      */
     public static function stripNonAscii(string $str)
     {
-        return preg_replace('/[^\x00-\x7F]+/S', '', $str);
+        return \preg_replace('/[^\x00-\x7F]+/S', '', $str);
     }
 
     /**
@@ -75,7 +75,7 @@ class UTF8
 
         if ($case <= 0) {
             if ($utf8_lower_accents === null) {
-                $utf8_lower_accents = array(
+                $utf8_lower_accents = [
                     'à' => 'a', 'ô' => 'o', 'ď' => 'd', 'ḟ' => 'f', 'ë' => 'e', 'š' => 's', 'ơ' => 'o',
                     'ß' => 'ss', 'ă' => 'a', 'ř' => 'r', 'ț' => 't', 'ň' => 'n', 'ā' => 'a', 'ķ' => 'k',
                     'ŝ' => 's', 'ỳ' => 'y', 'ņ' => 'n', 'ĺ' => 'l', 'ħ' => 'h', 'ṗ' => 'p', 'ó' => 'o',
@@ -91,19 +91,19 @@ class UTF8
                     'â' => 'a', 'ľ' => 'l', 'ẅ' => 'w', 'ż' => 'z', 'ī' => 'i', 'ã' => 'a', 'ġ' => 'g',
                     'ṁ' => 'm', 'ō' => 'o', 'ĩ' => 'i', 'ù' => 'u', 'į' => 'i', 'ź' => 'z', 'á' => 'a',
                     'û' => 'u', 'þ' => 'th', 'ð' => 'dh', 'æ' => 'ae', 'µ' => 'u', 'ĕ' => 'e', 'ı' => 'i',
-                );
+                ];
             }
 
-            $str = str_replace(
-                array_keys($utf8_lower_accents),
-                array_values($utf8_lower_accents),
+            $str = \str_replace(
+                \array_keys($utf8_lower_accents),
+                \array_values($utf8_lower_accents),
                 $str
             );
         }
 
         if ($case >= 0) {
             if ($utf8_upper_accents === null) {
-                $utf8_upper_accents = array(
+                $utf8_upper_accents = [
                     'À' => 'A', 'Ô' => 'O', 'Ď' => 'D', 'Ḟ' => 'F', 'Ë' => 'E', 'Š' => 'S', 'Ơ' => 'O',
                     'Ă' => 'A', 'Ř' => 'R', 'Ț' => 'T', 'Ň' => 'N', 'Ā' => 'A', 'Ķ' => 'K', 'Ĕ' => 'E',
                     'Ŝ' => 'S', 'Ỳ' => 'Y', 'Ņ' => 'N', 'Ĺ' => 'L', 'Ħ' => 'H', 'Ṗ' => 'P', 'Ó' => 'O',
@@ -119,12 +119,12 @@ class UTF8
                     'Â' => 'A', 'Ľ' => 'L', 'Ẅ' => 'W', 'Ż' => 'Z', 'Ī' => 'I', 'Ã' => 'A', 'Ġ' => 'G',
                     'Ṁ' => 'M', 'Ō' => 'O', 'Ĩ' => 'I', 'Ù' => 'U', 'Į' => 'I', 'Ź' => 'Z', 'Á' => 'A',
                     'Û' => 'U', 'Þ' => 'Th', 'Ð' => 'Dh', 'Æ' => 'Ae', 'İ' => 'I',
-                );
+                ];
             }
 
-            $str = str_replace(
-                array_keys($utf8_upper_accents),
-                array_values($utf8_upper_accents),
+            $str = \str_replace(
+                \array_keys($utf8_upper_accents),
+                \array_values($utf8_upper_accents),
                 $str
             );
         }
@@ -146,11 +146,11 @@ class UTF8
     public static function ucfirst($str)
     {
         if (self::isAscii($str)) {
-            return ucfirst($str);
+            return \ucfirst($str);
         }
 
-        preg_match('/^(.?)(.*)$/us', $str, $matches);
-        return mb_strtoupper($matches[1]) . $matches[2];
+        \preg_match('/^(.?)(.*)$/us', $str, $matches);
+        return \mb_strtoupper($matches[1]) . $matches[2];
     }
 
 
@@ -168,7 +168,7 @@ class UTF8
     public static function trim($str, $charlist = null)
     {
         if ($charlist === null) {
-            return trim($str);
+            return \trim($str);
         }
 
         return self::ltrim(self::rtrim($str, $charlist), $charlist);
@@ -188,16 +188,16 @@ class UTF8
     public static function ltrim($str, $charlist = null)
     {
         if ($charlist === null) {
-            return ltrim($str);
+            return \ltrim($str);
         }
 
         if (self::isAscii($charlist)) {
-            return ltrim($str, $charlist);
+            return \ltrim($str, $charlist);
         }
 
-        $charlist = preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
+        $charlist = \preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
 
-        return preg_replace('/^[' . $charlist . ']+/u', '', $str);
+        return \preg_replace('/^[' . $charlist . ']+/u', '', $str);
     }
 
     /**
@@ -214,16 +214,16 @@ class UTF8
     public static function rtrim($str, $charlist = null)
     {
         if ($charlist === null) {
-            return rtrim($str);
+            return \rtrim($str);
         }
 
         if (self::isAscii($charlist)) {
-            return rtrim($str, $charlist);
+            return \rtrim($str, $charlist);
         }
 
-        $charlist = preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
+        $charlist = \preg_replace('#[-\[\]:\\\\^/]#', '\\\\$0', $charlist);
 
-        return preg_replace('/[' . $charlist . ']++$/uD', '', $str);
+        return \preg_replace('/[' . $charlist . ']++$/uD', '', $str);
     }
 
 
@@ -259,9 +259,9 @@ class UTF8
             ];
         }
 
-        $str = str_replace(
-            array_keys($trans_table),
-            array_values($trans_table),
+        $str = \str_replace(
+            \array_keys($trans_table),
+            \array_values($trans_table),
             $str
         );
 

@@ -65,9 +65,9 @@ class Query extends SelectQuery
      */
     public function values(...$values): self
     {
-        assert(\is_array($this->_values), 'INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
+        \assert(\is_array($this->_values), 'INSERT INTO ... SELECT statements cannot be combined with INSERT INTO ... VALUES');
 
-        $this->_values = array_merge($this->_values, $values);
+        $this->_values = \array_merge($this->_values, $values);
 
         return $this;
     }
@@ -96,7 +96,7 @@ class Query extends SelectQuery
      */
     public function subselect(SelectQuery $query) : self
     {
-        assert($query->_type === Database::SELECT, 'Only SELECT queries can be combined with INSERT queries');
+        \assert($query->_type === Database::SELECT, 'Only SELECT queries can be combined with INSERT queries');
 
         $this->_values = $query;
 
@@ -115,7 +115,7 @@ class Query extends SelectQuery
         $query = 'INSERT INTO ' . $this->getTable();
 
         // Add the column names
-        $query .= ' (' . implode(', ', array_map([$this->db, 'quoteColumn'], $this->_columns)) . ') ';
+        $query .= ' (' . \implode(', ', \array_map([$this->db, 'quoteColumn'], $this->_columns)) . ') ';
 
         if (\is_array($this->_values)) {
             $groups = [];
@@ -125,14 +125,14 @@ class Query extends SelectQuery
                     $group[$offset] = $this->db->quote($value);
                 }
 
-                $groups[] = '(' . implode(', ', $group) . ')';
+                $groups[] = '(' . \implode(', ', $group) . ')';
             }
 
             // Add the values
-            $query .= 'VALUES ' . implode(', ', $groups);
+            $query .= 'VALUES ' . \implode(', ', $groups);
         } else {
             // Add the sub-query
-            $query .= (string)$this->_values;
+            $query .= (string) $this->_values;
         }
 
         return $query;
@@ -164,7 +164,7 @@ class Query extends SelectQuery
             $set[$column] = $column . ' = ' . $value;
         }
 
-        $query .= ' SET ' . implode(', ', $set);
+        $query .= ' SET ' . \implode(', ', $set);
 
 
         if (!empty($this->_where)) {

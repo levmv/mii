@@ -22,7 +22,7 @@ class Log
 
     private static function log(int $level, array $args): void
     {
-        if (count($args) === 1 && $args[0] instanceof \Throwable) {
+        if (\count($args) === 1 && $args[0] instanceof \Throwable) {
             \Mii::log($level, $args[0], 'app');
             return;
         }
@@ -31,7 +31,7 @@ class Log
         $exceptions = [];
 
         $trace = \debug_backtrace(\DEBUG_BACKTRACE_IGNORE_ARGS, 3);
-        $message[] = ($trace[2]['class'] ? $trace[2]['class'] . "->" : '') . $trace[2]['function'];
+        $message[] = ($trace[2]['class'] ? $trace[2]['class'] . '->' : '') . $trace[2]['function'];
 
         foreach ($args as $arg) {
             if (\is_string($arg) || \is_int($arg)) {

@@ -34,14 +34,14 @@ trait SoftDelete
     public function delete(): void
     {
         if (!$this->loaded()) {
-            throw new \Exception('Cannot delete a non-loaded model ' . get_class($this) . '!', [], []);
+            throw new \Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!', [], []);
         }
 
         $this->__loaded = false;
 
         static::query()
             ->update()
-            ->set(['deleted' => time()])
+            ->set(['deleted' => \time()])
             ->where('id', '=', $this->id)
             ->execute();
     }

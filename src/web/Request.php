@@ -94,13 +94,13 @@ class Request extends Component
             $this->$key = $value;
         }
 
-        $uri = \parse_url('http://domain.com' . $_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $uri = \parse_url('http://domain.com' . $_SERVER['REQUEST_URI'], \PHP_URL_PATH);
 
         if (\is_null(\Mii::$app->base_url)) {
-            $uri = ltrim($uri, '/');
-        } elseif (strpos($uri, \Mii::$app->base_url) === 0) {
+            $uri = \ltrim($uri, '/');
+        } elseif (\strpos($uri, \Mii::$app->base_url) === 0) {
             // Remove the base URL from the URI
-            $uri = (string)\substr($uri, \strlen(\Mii::$app->base_url));
+            $uri = (string) \substr($uri, \strlen(\Mii::$app->base_url));
         }
 
         $this->uri($uri);
@@ -377,12 +377,12 @@ class Request extends Component
 
         if ($expiration !== 0) {
             // The expiration is expected to be a UNIX timestamp
-            $expiration += time();
+            $expiration += \time();
         }
 
         if ($this->cookie_validation) {
             // Add the salt to the cookie value
-            $value = $this->salt($name, (string)$value) . $value;
+            $value = $this->salt($name, (string) $value) . $value;
         }
 
         return \setcookie(

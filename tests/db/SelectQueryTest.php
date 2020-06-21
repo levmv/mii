@@ -44,19 +44,32 @@ class SelectQueryTest extends DatabaseTestCase
     }
 
 
-    /*  public function testEscape() {
-          $this->assertEquals(
-              "SELECT `name\"'` FROM `table\"\\"``` WHERE `field``'` = '\\",`'",
+    public function testSelectAny()
+    {
+        $this->assertEquals(
+            'SELECT `t`.* FROM `t`',
+            (new SelectQuery())
+                ->from('t')
+                ->compile()
+        );
 
-              (new Query())
-                  ->select(['name"\''])
-                  ->from('table"\"`')
-                  ->where('field`\'', '=', '",`')
-                  ->compile(),
+        $this->assertEquals(
+            'SELECT `t`.*, COUNT(t.id) AS cc FROM `t`',
+            (new SelectQuery())
+                ->selectAlso(new Expression('COUNT(t.id) AS cc'))
+                ->from('t')
+                ->compile()
+        );
 
-              'SELECT `name"\'` FROM `table"\"``` WHERE `field``\'` = \'\",`\''
-          );
-      }*/
+        $this->assertEquals(
+            'SELECT `t`.`a`, COUNT(t.id) AS cc FROM `t`',
+            (new SelectQuery())
+                ->select(['a'])
+                ->selectAlso(new Expression('COUNT(t.id) AS cc'))
+                ->from('t')
+                ->compile()
+        );
+    }
 
 
     public function testWhere()

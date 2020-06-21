@@ -41,7 +41,7 @@ class Database extends Component
     public function connect(): void
     {
         try {
-            $this->conn = mysqli_connect(
+            $this->conn = \mysqli_connect(
                 $this->hostname,
                 $this->username,
                 $this->password,
@@ -127,18 +127,18 @@ class Database extends Component
         // Make sure the database is connected
         !\is_null($this->conn) || $this->connect();
 
-        assert((config('debug') && ($benchmark = \mii\util\Profiler::start("Database", $sql))) || 1);
+        \assert((config('debug') && ($benchmark = \mii\util\Profiler::start('Database', $sql))) || 1);
 
         // Execute the query
         $result = $this->conn->query($sql);
 
         if ($result === false || $this->conn->errno) {
-            assert((isset($benchmark) && \mii\util\Profiler::delete($benchmark)) || 1);
+            \assert((isset($benchmark) && \mii\util\Profiler::delete($benchmark)) || 1);
 
             throw new DatabaseException("{$this->conn->error} [ $sql ]", $this->conn->errno);
         }
 
-        assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
+        \assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
 
         if ($type === self::SELECT) {
             // Return an iterator of results
@@ -152,7 +152,7 @@ class Database extends Component
     public function multiQuery(string $sql): ?Result
     {
         $this->conn or $this->connect();
-        assert((config('debug') && ($benchmark = \mii\util\Profiler::start("Database", $sql))) || 1);
+        \assert((config('debug') && ($benchmark = \mii\util\Profiler::start('Database', $sql))) || 1);
 
         // Execute the query
         $result = $this->conn->multi_query($sql);
@@ -161,7 +161,7 @@ class Database extends Component
             $affected_rows += $this->conn->affected_rows;
         } while ($this->conn->more_results() && $this->conn->next_result());
 
-        assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
+        \assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
 
         if ($result === false || $this->conn->errno) {
             throw new DatabaseException("{$this->conn->error} [ $sql ]", $this->conn->errno);
@@ -205,16 +205,16 @@ class Database extends Component
         if (\is_null($value)) {
             return 'NULL';
         } elseif (\is_int($value)) {
-            return (string)$value;
+            return (string) $value;
         } elseif ($value === true) {
             return "'1'";
         } elseif ($value === false) {
             return "'0'";
         } elseif (\is_float($value)) {
             // Convert to non-locale aware float to prevent possible commas
-            return sprintf('%F', $value);
+            return \sprintf('%F', $value);
         } elseif (\is_array($value)) {
-            return '(' . implode(', ', array_map([$this, __FUNCTION__], $value)) . ')';
+            return '(' . \implode(', ', \array_map([$this, __FUNCTION__], $value)) . ')';
         } elseif (\is_object($value)) {
             if ($value instanceof SelectQuery) {
                 // Create a sub-query
@@ -227,7 +227,7 @@ class Database extends Component
             }
 
             // Convert the object to a string
-            return $this->quote((string)$value);
+            return $this->quote((string) $value);
         }
 
         return $this->escape($value);
@@ -248,7 +248,7 @@ class Database extends Component
         // Make sure the database is connected
         !\is_null($this->conn) or $this->connect();
 
-        if (($value = $this->conn->real_escape_string((string)$value)) === false) {
+        if (($value = $this->conn->real_escape_string((string) $value)) === false) {
             throw new DatabaseException($this->conn->error, $this->conn->errno);
         }
 
@@ -287,7 +287,7 @@ class Database extends Component
             throw new DatabaseException($this->conn->error, $this->conn->errno);
         }
 
-        return (bool)$this->conn->query('START TRANSACTION');
+        return (bool) $this->conn->query('START TRANSACTION');
     }
 
     /**
@@ -304,7 +304,7 @@ class Database extends Component
         // Make sure the database is connected
         $this->conn or $this->connect();
 
-        return (bool)$this->conn->query('COMMIT');
+        return (bool) $this->conn->query('COMMIT');
     }
 
     /**
@@ -321,17 +321,17 @@ class Database extends Component
         // Make sure the database is connected
         $this->conn or $this->connect();
 
-        return (bool)$this->conn->query('ROLLBACK');
+        return (bool) $this->conn->query('ROLLBACK');
     }
 
 
     public function getLock($name, $timeout = 0): bool
     {
-        return (bool)$this->query(
+        return (bool) $this->query(
             static::SELECT,
-            strtr('SELECT GET_LOCK(:name, :timeout)', [
+            \strtr('SELECT GET_LOCK(:name, :timeout)', [
                 ':name' => $this->quote($name),
-                ':timeout' => (int)$timeout
+                ':timeout' => (int) $timeout,
             ])
         )->scalar();
     }
@@ -339,10 +339,10 @@ class Database extends Component
 
     public function releaseLock($name): bool
     {
-        return (bool)$this->query(
+        return (bool) $this->query(
             static::SELECT,
-            strtr('SELECT RELEASE_LOCK(:name)', [
-                ':name' => $this->quote($name)
+            \strtr('SELECT RELEASE_LOCK(:name)', [
+                ':name' => $this->quote($name),
             ])
         )->scalar();
     }
@@ -382,7 +382,7 @@ class Database extends Component
             $column = $column->compile($this);
         } else {
             // Convert to a string
-            $column = (string)$column;
+            $column = (string) $column;
 
             $column = \str_replace('`', '``', $column);
 
@@ -393,7 +393,7 @@ class Database extends Component
             if (\strpos($column, '.') !== false) {
                 $parts = \explode('.', $column);
 
-                foreach ($parts as & $part) {
+                foreach ($parts as &$part) {
                     if ($part !== '*') {
                         // Quote each of the parts
                         $part = "`$part`";
@@ -445,14 +445,14 @@ class Database extends Component
             $table = $table->compile($this);
         } else {
             // Convert to a string
-            $table = (string)$table;
+            $table = (string) $table;
 
             $table = \str_replace('`', '``', $table);
 
             if (\strpos($table, '.') !== false) {
                 $parts = \explode('.', $table);
 
-                foreach ($parts as & $part) {
+                foreach ($parts as &$part) {
                     // Quote each of the parts
                     $part = "`$part`";
                 }
@@ -492,14 +492,14 @@ class Database extends Component
             $value = $value->compile($this);
         } else {
             // Convert to a string
-            $value = (string)$value;
+            $value = (string) $value;
 
             $value = \str_replace('`', '``', $value);
 
             if (\strpos($value, '.') !== false) {
                 $parts = \explode('.', $value);
 
-                foreach ($parts as & $part) {
+                foreach ($parts as &$part) {
                     // Quote each of the parts
                     $part = "`$part`";
                 }

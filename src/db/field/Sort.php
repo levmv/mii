@@ -27,7 +27,7 @@ class Sort
         if ($parent_field) {
             $value = (new SelectQuery)
                 ->select([
-                    [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
+                    [DB::expr('MAX(' . $this->_field . ')'), $this->_field],
                 ])
                 ->from($this->_model::table())
                 ->where($parent_field, '=', $this->_model->get($parent_field))
@@ -39,7 +39,7 @@ class Sort
         } else {
             $value = (new SelectQuery)
                 ->select([
-                    [DB::expr('MAX(' . $this->_field . ')'), $this->_field]
+                    [DB::expr('MAX(' . $this->_field . ')'), $this->_field],
                 ])
                 ->from($this->_model::table())
                 ->one();

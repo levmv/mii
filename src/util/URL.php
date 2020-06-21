@@ -75,12 +75,13 @@ class URL
      */
     public static function base($protocol = null): string
     {
+        $base = \Mii::$app->base_url ?? '/';
         if ($protocol === null) {
-            return \Mii::$app->base_url ?? '/';
+            return $base;
         }
 
         if ($protocol === true) {
-            return \Mii::$app->request->getHostname() . \Mii::$app->base_url;
+            return \Mii::$app->request->getHostname() . $base;
         }
 
         if ($protocol !== '//') {
@@ -89,7 +90,7 @@ class URL
 
         $domain = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'];
 
-        return $protocol . $domain . \Mii::$app->base_url;
+        return $protocol . $domain . $base;
     }
 
     /**
@@ -104,7 +105,7 @@ class URL
     public static function site(string $uri = '', $protocol = null): string
     {
         // Chop off possible scheme, host, port, user and pass parts
-        $path = \preg_replace('~^[-a-z0-9+.]++://[^/]++/?~', '', trim($uri, '/'));
+        $path = \preg_replace('~^[-a-z0-9+.]++://[^/]++/?~', '', \trim($uri, '/'));
 
         if (\preg_match('/[^\x00-\x7F]/S', $path)) {
             // Encode all non-ASCII characters, as per RFC 1738

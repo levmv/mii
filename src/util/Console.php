@@ -52,9 +52,9 @@ class Console
      */
     public static function ansiFormat(string $string, array $format = []): string
     {
-        $code = implode(';', $format);
+        $code = \implode(';', $format);
 
-        return "\033[0m" . ($code !== '' ? "\033[" . $code . "m" : '') . $string . "\033[0m";
+        return "\033[0m" . ($code !== '' ? "\033[" . $code . 'm' : '') . $string . "\033[0m";
     }
 
     /**
@@ -65,7 +65,7 @@ class Console
      */
     public static function stripAnsiFormat(string $string): string
     {
-        return preg_replace('/\033\[[\d;?]*\w/', '', $string);
+        return \preg_replace('/\033\[[\d;?]*\w/', '', $string);
     }
 
 
@@ -80,7 +80,7 @@ class Console
      */
     public static function escape(string $string): string
     {
-        return str_replace('%', '%%', $string);
+        return \str_replace('%', '%%', $string);
     }
 
     /**
@@ -94,9 +94,9 @@ class Console
      */
     public static function streamSupportsAnsiColors($stream)
     {
-        return DIRECTORY_SEPARATOR === '\\'
-            ? getenv('ANSICON') !== false || getenv('ConEmuANSI') === 'ON'
-            : \function_exists('posix_isatty') && @posix_isatty($stream);
+        return \DIRECTORY_SEPARATOR === '\\'
+            ? \getenv('ANSICON') !== false || \getenv('ConEmuANSI') === 'ON'
+            : \function_exists('posix_isatty') && @\posix_isatty($stream);
     }
 
 
@@ -108,7 +108,7 @@ class Console
      */
     public static function stdin(bool $raw = false): string
     {
-        return $raw ? fgets(\STDIN) : rtrim(fgets(\STDIN), PHP_EOL);
+        return $raw ? \fgets(\STDIN) : \rtrim(\fgets(\STDIN), \PHP_EOL);
     }
 
     /**
@@ -139,7 +139,7 @@ class Console
         if (!empty($args) && static::streamSupportsAnsiColors($stream)) {
             $string = static::ansiFormat($string, $args);
         }
-        return fwrite($stream, $string);
+        return \fwrite($stream, $string);
     }
 
 
@@ -167,7 +167,7 @@ class Console
      */
     public static function output($string = null)
     {
-        return static::stdout($string . PHP_EOL);
+        return static::stdout($string . \PHP_EOL);
     }
 
     /**
@@ -178,7 +178,7 @@ class Console
      */
     public static function error($string = null)
     {
-        return static::stderr($string . PHP_EOL);
+        return static::stderr($string . \PHP_EOL);
     }
 
     /**
@@ -192,17 +192,17 @@ class Console
     {
         while (true) {
             static::stdout($message . ' (yes|no) [' . ($default ? 'yes' : 'no') . ']:');
-            $input = trim(static::stdin());
+            $input = \trim(static::stdin());
 
             if (empty($input)) {
                 return $default;
             }
 
-            if (!strcasecmp($input, 'y') || !strcasecmp($input, 'yes')) {
+            if (!\strcasecmp($input, 'y') || !\strcasecmp($input, 'yes')) {
                 return true;
             }
 
-            if (!strcasecmp($input, 'n') || !strcasecmp($input, 'no')) {
+            if (!\strcasecmp($input, 'n') || !\strcasecmp($input, 'no')) {
                 return false;
             }
         }
@@ -220,13 +220,13 @@ class Console
     public static function select($prompt, $options = [])
     {
         top:
-        static::stdout("$prompt [" . implode(',', array_keys($options)) . ",?]: ");
+        static::stdout("$prompt [" . \implode(',', \array_keys($options)) . ',?]: ');
         $input = static::stdin();
         if ($input === '?') {
             foreach ($options as $key => $value) {
                 static::output(" $key - $value");
             }
-            static::output(" ? - Show help");
+            static::output(' ? - Show help');
             goto top;
         } elseif (!\array_key_exists($input, $options)) {
             goto top;

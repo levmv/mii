@@ -46,7 +46,7 @@ class Response extends Component
     public function setHeader($name, $value = '')
     {
         $name = \strtolower($name);
-        $this->_headers[$name] = (array)$value;
+        $this->_headers[$name] = (array) $value;
         return $this;
     }
 
@@ -78,7 +78,7 @@ class Response extends Component
 
     public function sendHeaders()
     {
-        assert(headers_sent() === false, "Headers were already sent");
+        \assert(\headers_sent() === false, 'Headers were already sent');
 
         if (!isset($this->_headers['content-type'])) {
             $this->setHeader('content-type', 'text/html; charset=UTF-8');
@@ -96,7 +96,7 @@ class Response extends Component
 
         if ($this->_headers) {
             foreach ($this->_headers as $name => $values) {
-                $name = \str_replace(' ', '-', ucwords(\str_replace('-', ' ', $name)));
+                $name = \str_replace(' ', '-', \ucwords(\str_replace('-', ' ', $name)));
                 // set replace for first occurrence of header but false afterwards to allow multiple
                 $replace = true;
                 foreach ($values as $value) {
@@ -161,7 +161,7 @@ class Response extends Component
                 break;
             case self::FORMAT_JSON:
                 $this->setHeader('content-type', 'application/json; charset=UTF-8');
-                $this->_content = \json_encode($this->_content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                $this->_content = \json_encode($this->_content, \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
                 break;
             case self::FORMAT_XML:
                 $this->setHeader('content-type', 'application/xml; charset=UTF-8');

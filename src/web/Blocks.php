@@ -27,7 +27,7 @@ class Blocks extends BaseBlocks
         }
         $this->base_path = Mii::resolve($this->base_path);
 
-        if (!is_dir($this->base_path)) {
+        if (!\is_dir($this->base_path)) {
             FS::mkdir($this->base_path, 0777);
         }
 
@@ -48,7 +48,7 @@ class Blocks extends BaseBlocks
                 if (isset($block['remote'])) {
                     if ($type === 'js') {
                         foreach ($block['remote'] as $position => $remote) {
-                            $this->_js[$position][] = implode("\n", $remote);
+                            $this->_js[$position][] = \implode("\n", $remote);
                         }
                     } else {
                         foreach ($block['remote'] as $css_remote) {
@@ -59,10 +59,10 @@ class Blocks extends BaseBlocks
                 if (isset($block['inline'])) {
                     if ($type === 'js') {
                         foreach ($block['inline'] as $position => $inline) {
-                            $this->_js[$position][] = '<script>' . implode("\n", $inline) . '</script>';
+                            $this->_js[$position][] = '<script>' . \implode("\n", $inline) . '</script>';
                         }
                     } else {
-                        $content = implode("\n", $block['inline']);
+                        $content = \implode("\n", $block['inline']);
                         $this->_css[] = '<style>' . $content . '</style>';
                     }
                 }
@@ -88,7 +88,7 @@ class Blocks extends BaseBlocks
         $block_path = $this->getBlockPath($block_name);
 
         foreach ($this->libraries as $base_path) {
-            if (is_dir($base_path . $block_path . 'assets')) {
+            if (\is_dir($base_path . $block_path . 'assets')) {
                 $this->_buildAssetsDir($block_name, $base_path . $block_path . 'assets');
                 break;
             }
@@ -107,7 +107,7 @@ class Blocks extends BaseBlocks
 
         foreach ($types as $type) {
             foreach ($this->libraries as $base_path) {
-                if (is_file($base_path . $block_path . $block_name . '.' . $type)) {
+                if (\is_file($base_path . $block_path . $block_name . '.' . $type)) {
                     $this->_files[$type][$parent_block]['files'][$block_name . '.' . $type] = $base_path . $block_path . $block_name . '.' . $type;
                     break;
                 }
@@ -150,24 +150,24 @@ class Blocks extends BaseBlocks
             if (!isset($this->_files['css'][$parent_block]['inline'])) {
                 $this->_files['css'][$parent_block]['inline'] = $this->_blocks[$block_name]->__inline_css;
             } else {
-                $this->_files['css'][$parent_block]['inline'] = array_merge($this->_files['.css'][$parent_block]['inline'], $this->_blocks[$block_name]->__inline_css);
+                $this->_files['css'][$parent_block]['inline'] = \array_merge($this->_files['.css'][$parent_block]['inline'], $this->_blocks[$block_name]->__inline_css);
             }
         }
     }
 
     private function _buildBlock(string $block_name, string $type, array $files): void
     {
-        $result_file_name = $block_name . '.' . substr(md5(implode('', array_values($files))), 0, 10);
+        $result_file_name = $block_name . '.' . \substr(\md5(\implode('', \array_values($files))), 0, 10);
 
         $web_output = $this->base_url . '/' . $result_file_name . '.' . $type;
         $output = $this->base_path . '/' . $result_file_name . '.' . $type;
 
-        $need_recompile = !is_file($output);
+        $need_recompile = !\is_file($output);
 
         if (!$need_recompile) {
-            $mtime_output = filemtime($output);
+            $mtime_output = \filemtime($output);
             foreach ($files as $file) {
-                if ($mtime_output < filemtime($file)) {
+                if ($mtime_output < \filemtime($file)) {
                     $need_recompile = true;
                     break;
                 }
@@ -177,16 +177,16 @@ class Blocks extends BaseBlocks
         if ($need_recompile) {
             $tmp = '';
             foreach ($files as $file) {
-                $tmp .= file_get_contents($file) . "\n";
+                $tmp .= \file_get_contents($file) . "\n";
             }
 
-            file_put_contents($output, $tmp);
+            \file_put_contents($output, $tmp);
         }
 
         if ($type === 'css') {
-            $this->_css[] = '<link type="text/css" href="' . $web_output . '?' . filemtime($output) . '" rel="stylesheet">';
+            $this->_css[] = '<link type="text/css" href="' . $web_output . '?' . \filemtime($output) . '" rel="stylesheet">';
         } else {
-            $this->_js[self::END][] = '<script src="' . $web_output . '?' . filemtime($output) . '"></script>';
+            $this->_js[self::END][] = '<script src="' . $web_output . '?' . \filemtime($output) . '"></script>';
         }
     }
 
@@ -195,8 +195,8 @@ class Blocks extends BaseBlocks
     {
         $output = $this->base_path . '/' . $blockname;
 
-        if (!is_link($output)) {
-            symlink($path, $output);
+        if (!\is_link($output)) {
+            \symlink($path, $output);
         }
     }
 

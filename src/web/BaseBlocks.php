@@ -36,9 +36,9 @@ abstract class BaseBlocks extends Component
         if (empty($this->sets)) {
             $this->sets['default'] = [
                 'libraries' => [
-                    '@app/blocks'
+                    '@app/blocks',
                 ],
-                'base_url' => '/assets'
+                'base_url' => '/assets',
             ];
         }
 
@@ -48,14 +48,14 @@ abstract class BaseBlocks extends Component
 
     public function loadSet(string $setname): void
     {
-        assert(isset($this->sets[$setname]), "Unknown blocks set name: $setname");
+        \assert(isset($this->sets[$setname]), "Unknown blocks set name: $setname");
 
         $this->current_set = $setname;
 
         $set = \array_replace([
             'libraries' => [],
             'base_url' => $this->base_url,
-            'base_path' => null
+            'base_path' => null,
         ], $this->sets[$setname]);
 
         foreach ($set as $key => $value) {
@@ -103,7 +103,7 @@ abstract class BaseBlocks extends Component
             $this->render();
         }
 
-        return implode("\n", $this->_css);
+        return \implode("\n", $this->_css);
     }
 
 

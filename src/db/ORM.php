@@ -94,7 +94,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return static::find()->all();
         }
 
-        assert(!is_array($value[0]), "This method accepts only array of int/string's");
+        \assert(!\is_array($value[0]), "This method accepts only array of int/string's");
 
         return static::find()
             ->where('id', 'IN', $value)
@@ -108,7 +108,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public static function where(array $conditions): SelectQuery
     {
-        if (count($conditions) === 3 && \is_string($conditions[1])) {
+        if (\count($conditions) === 3 && \is_string($conditions[1])) {
             $conditions = [$conditions];
         }
 
@@ -236,7 +236,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     {
         return [
             'attributes',
-            '__loaded'
+            '__loaded',
         ];
     }
 
@@ -285,7 +285,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         }
 
         if (\is_array($field_name)) {
-            return (bool)\count(\array_intersect($field_name, \array_keys($this->_changed)));
+            return (bool) \count(\array_intersect($field_name, \array_keys($this->_changed)));
         }
 
         return isset($this->_changed[$field_name]);
@@ -306,7 +306,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         }
 
         if (\is_array($field_name)) {
-            return (bool)\count(\array_intersect($field_name, \array_keys($this->_was_changed)));
+            return (bool) \count(\array_intersect($field_name, \array_keys($this->_was_changed)));
         }
 
         return isset($this->_was_changed[$field_name]);
@@ -320,7 +320,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public function loaded(): bool
     {
-        return (bool)$this->__loaded;
+        return (bool) $this->__loaded;
     }
 
 
@@ -430,7 +430,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
             static::query()
                 ->delete()
-                ->where('id', '=', (int)$this->id)
+                ->where('id', '=', (int) $this->id)
                 ->execute();
 
             return;

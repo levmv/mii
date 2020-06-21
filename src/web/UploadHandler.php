@@ -32,7 +32,7 @@ class UploadHandler extends Component
         }
         $results = [];
         foreach ($this->_files as $key => $file) {
-            if (strpos($key, "{$name}[") === 0) {
+            if (\strpos($key, "{$name}[") === 0) {
                 $results[] = $file;
             }
         }
@@ -69,7 +69,7 @@ class UploadHandler extends Component
             foreach ($names as $i => $name) {
                 static::loadFilesRecursive($key . '[' . $i . ']', $name, $tmp_names[$i], $types[$i], $sizes[$i], $errors[$i]);
             }
-        } elseif ((int)$errors !== UPLOAD_ERR_NO_FILE) {
+        } elseif ((int) $errors !== \UPLOAD_ERR_NO_FILE) {
             $this->_files[$key] = new UploadedFile([
                 'name' => $names,
                 'tmp_name' => $tmp_names,

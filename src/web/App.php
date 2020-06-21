@@ -27,7 +27,7 @@ class App extends \mii\core\App
             $params = $this->router->match($uri);
 
             if ($params === false) {
-                throw new InvalidRouteException("No routes found");
+                throw new InvalidRouteException('No routes found');
             }
 
             $this->request->controller = $controller_name = $params['controller'];
@@ -69,7 +69,7 @@ class App extends \mii\core\App
             'request' => 'mii\web\Request',
             'response' => 'mii\web\Response',
             'upload' => 'mii\web\UploadHandler',
-            'error' => 'mii\web\ErrorHandler'
+            'error' => 'mii\web\ErrorHandler',
         ];
     }
 }

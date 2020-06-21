@@ -38,11 +38,11 @@ class Profiler
         static $counter = 0;
 
         // Create a unique token based on the counter
-        $token = 'kp/' . base_convert($counter++, 10, 32);
+        $token = 'kp/' . \base_convert($counter++, 10, 32);
 
-        Profiler::$_marks[$token] = array(
-            'group' => strtolower($group),
-            'name' => (string)$name,
+        Profiler::$_marks[$token] = [
+            'group' => \strtolower($group),
+            'name' => (string) $name,
 
             // Start the benchmark
             'start_time' => \hrtime(true) / 1e9,
@@ -51,7 +51,7 @@ class Profiler
             // Set the stop keys without values
             'stop_time' => false,
             'stop_memory' => false,
-        );
+        ];
 
         return $token;
     }
@@ -122,13 +122,13 @@ class Profiler
         // Min and max are unknown by default
         $min = $max = [
             'time' => null,
-            'memory' => null
+            'memory' => null,
         ];
 
         // Total values are always integers
         $total = [
             'time' => 0,
-            'memory' => 0
+            'memory' => 0,
         ];
 
         foreach ($tokens as $token) {
@@ -168,14 +168,14 @@ class Profiler
         // Determine the averages
         $average = [
             'time' => $total['time'] / $count,
-            'memory' => $total['memory'] / $count
+            'memory' => $total['memory'] / $count,
         ];
 
         return [
             'min' => $min,
             'max' => $max,
             'total' => $total,
-            'average' => $average];
+            'average' => $average, ];
     }
 
     /**
@@ -191,7 +191,7 @@ class Profiler
         // Which groups do we need to calculate stats for?
         $groups = ($groups === null)
             ? self::groups()
-            : array_intersect_key(self::groups(), array_flip((array)$groups));
+            : \array_intersect_key(self::groups(), \array_flip((array) $groups));
 
         // All statistics
         $stats = [];
@@ -210,14 +210,14 @@ class Profiler
 
         foreach ($stats as $group => $names) {
             // Min and max are unknown by default
-            $groups[$group]['min'] = $groups[$group]['max'] = array(
+            $groups[$group]['min'] = $groups[$group]['max'] = [
                 'time' => null,
-                'memory' => null);
+                'memory' => null, ];
 
             // Total values are always integers
-            $groups[$group]['total'] = array(
+            $groups[$group]['total'] = [
                 'time' => 0,
-                'memory' => 0);
+                'memory' => 0, ];
 
             foreach ($names as $total) {
                 if (!isset($groups[$group]['min']['time']) or $groups[$group]['min']['time'] > $total['time']) {
@@ -303,21 +303,21 @@ class Profiler
             $stats = [
                 'min' => [
                     'time' => null,
-                    'memory' => null
+                    'memory' => null,
                 ],
                 'max' => [
                     'time' => null,
-                    'memory' => null
+                    'memory' => null,
                 ],
                 'total' => [
                     'time' => null,
-                    'memory' => null
+                    'memory' => null,
                 ],
-                'count' => 0
+                'count' => 0,
             ];
         }
-        if (!defined('MII_START_TIME')) {
-            throw new Exception("Probably you disabled asserts. Please set \"zend.assertions = 1\" in php.ini");
+        if (!\defined('MII_START_TIME')) {
+            throw new Exception('Probably you disabled asserts. Please set "zend.assertions = 1" in php.ini');
         }
 
         // Get the application run time
@@ -356,9 +356,9 @@ class Profiler
         $stats['count']++;
 
         // Determine the averages
-        $stats['average'] = array(
+        $stats['average'] = [
             'time' => $stats['total']['time'] / $stats['count'],
-            'memory' => $stats['total']['memory'] / $stats['count']);
+            'memory' => $stats['total']['memory'] / $stats['count'], ];
 
         // Cache the new stats
         if (Mii::$app->has('cache')) {
@@ -377,6 +377,6 @@ class Profiler
 
     public static function show()
     {
-        include dirname(__DIR__) . '/util/Profiler/view.php';
+        include \dirname(__DIR__) . '/util/Profiler/view.php';
     }
 }
