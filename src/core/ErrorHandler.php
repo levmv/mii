@@ -4,7 +4,7 @@ namespace mii\core;
 
 class ErrorHandler extends Component
 {
-    public $current_exception;
+    public ?\Throwable $exception = null;
 
     /**
      * @var integer the size of the reserved memory. A portion of memory is pre-allocated so that
@@ -54,10 +54,8 @@ class ErrorHandler extends Component
         // disable error capturing to avoid recursive errors while handling exceptions
         $this->unregister();
 
-        $this->current_exception = $e;
-
         try {
-            $e = $this->prepareException($e);
+            $this->exception = $e = $this->prepareException($e);
             $this->report($e);
             $this->clearOutput();
             $this->render($e);
