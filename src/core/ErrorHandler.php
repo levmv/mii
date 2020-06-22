@@ -91,7 +91,7 @@ class ErrorHandler extends Component
         unset($this->_memory_reserve);
 
         // is it fatal ?
-        if ($error = \error_get_last() && \in_array($error['type'], [\E_ERROR, \E_PARSE, \E_CORE_ERROR, \E_CORE_WARNING, \E_COMPILE_ERROR, \E_COMPILE_WARNING])) {
+        if (($error = \error_get_last()) && \in_array($error['type'], [\E_ERROR, \E_PARSE, \E_CORE_ERROR, \E_CORE_WARNING, \E_COMPILE_ERROR, \E_COMPILE_WARNING], true)) {
             $this->clearOutput();
             $exception = new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']);
 

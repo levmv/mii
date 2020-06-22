@@ -2,7 +2,7 @@
 
 namespace mii\core;
 
-use mii\util\URL;
+use mii\util\Url;
 use mii\web\Response;
 
 class Router extends Component
@@ -246,7 +246,7 @@ class Router extends Component
 
         if (empty($route[static::R_COMPILED])) {
             // This is a static route, no need to replace anything
-            return URL::site($route[static::R_PATTERN]);
+            return Url::site($route[static::R_PATTERN]);
         }
 
         // Keep track of whether an optional param was replaced
@@ -314,6 +314,6 @@ class Router extends Component
         $uri = \preg_replace('#//+#', '/', \rtrim($uri, '/'));
 
 
-        return URL::site($uri);
+        return Url::site($uri);
     }
 }

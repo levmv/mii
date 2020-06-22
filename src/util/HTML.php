@@ -114,8 +114,8 @@ class HTML
      * @param mixed   $protocol protocol to pass to URL::base()
      * @param boolean $index include the index page
      * @return  string
-     * @uses    URL::base
-     * @uses    URL::site
+     * @uses    Url::base
+     * @uses    Url::site
      * @uses    HTML::attributes
      */
     public static function anchor($uri, $title = null, array $attributes = null, $protocol = null)
@@ -127,7 +127,7 @@ class HTML
 
         if ($uri === '') {
             // Only use the base URL
-            $uri = URL::base($protocol);
+            $uri = Url::base($protocol);
         } else {
             if (\strpos($uri, '://') !== false) {
                 if (self::$windowed_urls === true && empty($attributes['target'])) {
@@ -136,7 +136,7 @@ class HTML
                 }
             } elseif ($uri[0] !== '#') {
                 // Make the URI absolute for non-id anchors
-                $uri = URL::site($uri, $protocol);
+                $uri = Url::site($uri, $protocol);
             }
         }
 
@@ -157,14 +157,14 @@ class HTML
      * @param mixed   $protocol protocol to pass to URL::base()
      * @param boolean $index include the index page
      * @return  string
-     * @uses    URL::base
+     * @uses    Url::base
      * @uses    HTML::attributes
      */
     public static function style($file, array $attributes = null, $protocol = null)
     {
         if (\strpos($file, '://') === false) {
             // Add the base URL
-            $file = URL::site($file, $protocol);
+            $file = Url::site($file, $protocol);
         }
 
         // Set the stylesheet link
@@ -189,14 +189,14 @@ class HTML
      * @param mixed   $protocol protocol to pass to URL::base()
      * @param boolean $index include the index page
      * @return  string
-     * @uses    URL::base
+     * @uses    Url::base
      * @uses    HTML::attributes
      */
     public static function script($file, array $attributes = null, $protocol = null)
     {
         if (\strpos($file, '://') === false && \strpos($file, '//') !== 0) {
             // Add the base URL
-            $file = URL::site($file, $protocol);
+            $file = Url::site($file, $protocol);
         }
 
         // Set the script link
@@ -214,14 +214,14 @@ class HTML
      * @param array  $attributes default attributes
      * @param mixed  $protocol protocol to pass to URL::base()
      * @return  string
-     * @uses    URL::base
+     * @uses    Url::base
      * @uses    HTML::attributes
      */
     public static function image($file, array $attributes = null, $protocol = null)
     {
         if (\strpos($file, '://') === false) {
             // Add the base URL
-            $file = URL::site($file, $protocol);
+            $file = Url::site($file, $protocol);
         }
 
         // Add the image link
@@ -297,7 +297,7 @@ class HTML
      * @param array $attributes html attributes
      * @return  string
      * @uses    Request::instance
-     * @uses    URL::site
+     * @uses    Url::site
      * @uses    HTML::attributes
      */
     public static function open($action = null, array $attributes = null)
@@ -312,7 +312,7 @@ class HTML
             $action = '';
         } elseif (\strpos($action, '://') === false) {
             // Make the URI absolute
-            $action = URL::site($action);
+            $action = Url::site($action);
         }
 
         // Add the form action to the attributes

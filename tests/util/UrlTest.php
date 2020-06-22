@@ -4,7 +4,7 @@ namespace miit\db;
 
 use mii\core\ACL;
 use mii\db\Query;
-use mii\util\URL;
+use mii\util\Url;
 use mii\web\Request;
 use miit\TestCase;
 
@@ -31,37 +31,37 @@ class UrlTest extends TestCase
 
     public function testSite() {
 
-        $this->assertEquals('/foo/bar', URL::site('foo/bar'));
-        $this->assertEquals('/foo/bar', URL::site('/foo/bar'));
-        $this->assertEquals('http://test.com/foo/bar', URL::site('foo/bar', true));
-        $this->assertEquals('//test.com/foo/bar', URL::site('foo/bar', '//'));
-        $this->assertEquals('https://test.com/foo/bar', URL::site('foo/bar', 'https'));
+        $this->assertEquals('/foo/bar', Url::site('foo/bar'));
+        $this->assertEquals('/foo/bar', Url::site('/foo/bar'));
+        $this->assertEquals('http://test.com/foo/bar', Url::site('foo/bar', true));
+        $this->assertEquals('//test.com/foo/bar', Url::site('foo/bar', '//'));
+        $this->assertEquals('https://test.com/foo/bar', Url::site('foo/bar', 'https'));
     }
 
     public function testBase() {
 
-        $this->assertEquals('/', URL::base());
-        $this->assertEquals('http://test.com/', URL::base(true));
-        $this->assertEquals('https://test.com/', URL::base('https'));
-        $this->assertEquals('//test.com/', URL::base('//'));
+        $this->assertEquals('', Url::base());
+        $this->assertEquals('http://test.com', Url::base(true));
+        $this->assertEquals('https://test.com', Url::base('https'));
+        $this->assertEquals('//test.com', Url::base('//'));
 
         \Mii::$app->base_url = '/base';
 
-        $this->assertEquals('/base', URL::base());
-        $this->assertEquals('http://test.com/base', URL::base(true));
-        $this->assertEquals('https://test.com/base', URL::base('https'));
-        $this->assertEquals('//test.com/base', URL::base('//'));
+        $this->assertEquals('/base', Url::base());
+        $this->assertEquals('http://test.com/base', Url::base(true));
+        $this->assertEquals('https://test.com/base', Url::base('https'));
+        $this->assertEquals('//test.com/base', Url::base('//'));
     }
 
     public function testCurrent() {
         \Mii::$app->request->uri("");
-        $this->assertEquals('/', URL::current());
+        $this->assertEquals('/', Url::current());
 
         \Mii::$app->request->uri("/");
-        $this->assertEquals('/', URL::current());
+        $this->assertEquals('/', Url::current());
 
         \Mii::$app->request->uri("/test");
-        $this->assertEquals('/test', URL::current());
+        $this->assertEquals('/test', Url::current());
     }
 
 }

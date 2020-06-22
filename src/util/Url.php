@@ -2,7 +2,7 @@
 
 namespace mii\util;
 
-class URL
+class Url
 {
     public const CURRENT = 1;
     public const ACTIVE = 2;
@@ -75,7 +75,7 @@ class URL
      */
     public static function base($protocol = null): string
     {
-        $base = \Mii::$app->base_url ?? '/';
+        $base = \Mii::$app->base_url ?? '';
         if ($protocol === null) {
             return $base;
         }
@@ -109,11 +109,11 @@ class URL
 
         if (\preg_match('/[^\x00-\x7F]/S', $path)) {
             // Encode all non-ASCII characters, as per RFC 1738
-            $path = \preg_replace_callback('~([^/]+)~', '\mii\util\URL::_rawurlencode_callback', $path);
+            $path = \preg_replace_callback('~([^/]+)~', '\mii\util\Url::_rawurlencode_callback', $path);
         }
 
         // Concat the URL
-        return self::base($protocol) . $path;
+        return self::base($protocol) . '/' . $path;
     }
 
     /**
@@ -171,11 +171,11 @@ class URL
 
     public static function current(array $params = null): string
     {
-        return static::site(\Mii::$app->request->uri()) . static::query($params, true);
+        return self::base(). \Mii::$app->request->uri() . static::query($params, true);
     }
 
 
-    public static function back_url(string $default = null): string
+    public static function back(string $default = null): string
     {
         if (isset($_GET['back_url'])) {
             return \urldecode($_GET['back_url']);

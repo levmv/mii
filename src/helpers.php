@@ -25,7 +25,7 @@ if (!\function_exists('redirect')) {
     function redirect($url, $use_back_url = false)
     {
         if ($use_back_url) {
-            $url = \mii\util\URL::back_url($url);
+            $url = \mii\util\Url::back($url);
         }
         throw new \mii\web\RedirectHttpException($url);
     }
