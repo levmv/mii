@@ -11,31 +11,28 @@ use mii\db\DB;
  */
 class Migrate extends Controller
 {
-    protected $migrate_table = 'migrations';
+    protected string $migrate_table = 'migrations';
 
-    protected $migrations_list = [];
+    protected array $migrations_list = [];
 
-    protected $applied_migrations;
+    protected array $applied_migrations;
 
-    protected $migrations_paths = [];
+    protected array $migrations_paths = [];
 
     protected function before()
     {
         $config = config('migrate', []);
 
-        foreach ($config as $name => $value) {
+        foreach ($config as $name => $value)
             $this->$name = $value;
-        }
 
-        if (empty($this->migrations_paths)) {
+        if (empty($this->migrations_paths))
             $this->migrations_paths = [path('app') . '/migrations'];
-        }
-
 
         try {
             $this->applied_migrations = DB::select('SELECT `name`, `date` FROM `' . $this->migrate_table . '`')->indexBy('name')->all();
         } catch (\Exception $e) {
-            $this->info('Trying to create table :table', [':table' => $this->migrate_table]);
+            $this->info("Trying to create table $this->migrate_table");
 
             DB::update('CREATE TABLE `' . $this->migrate_table . '` (
               `name` varchar(180) NOT NULL,
@@ -46,32 +43,32 @@ class Migrate extends Controller
             $this->applied_migrations = [];
         }
 
-        for ($i = 0; $i < \count($this->migrations_paths); $i++) {
+        for ($i = 0; $i < \count($this->migrations_paths); $i++)
             $this->migrations_paths[$i] = \Mii::resolve($this->migrations_paths[$i]);
-        }
 
         foreach ($this->migrations_paths as $migrations_path) {
             if (!\is_dir($migrations_path)) {
-                $this->warning('Directory :dir does not exist', [':dir' => $migrations_path]);
+                $this->warning("Directory $migrations_path does not exist");
                 \mkdir($migrations_path, 0775);
             }
 
             $scan = \scandir($migrations_path);
+
             foreach ($scan as $file) {
-                if ($file[0] == '.') {
+
+                if ($file[0] == '.')
                     continue;
-                }
 
                 $info = \pathinfo($file);
 
-                if ($info['extension'] !== 'php') {
+                if (!\in_array($info['extension'], ['sql', 'php']))
                     continue;
-                }
 
                 $name = $info['filename'];
 
                 $this->migrations_list[$name] = [
                     'name' => $name,
+                    'type' => $info['extension'],
                     'file' => $migrations_path . '/' . $file,
                     'applied' => isset($this->applied_migrations[$name]),
                     'date' => 0,
@@ -82,61 +79,67 @@ class Migrate extends Controller
         \uksort($this->migrations_list, 'strnatcmp');
     }
 
-
     /**
      * Create new migration file
+     * @param string|null $name
+     * @param bool        $php
+     * @throws \Throwable
      */
-    public function create(string $name = null)
+    public function create(string $name = null, bool $php = false)
     {
         $custom_name = false;
 
-        if (\count($this->request->params) && $name === null) {
+        if (\count($this->request->params) && $name === null)
             $name = $this->request->params[0];
-        }
 
-        if ($name) {
+        if ($name)
             $custom_name = \mb_strtolower($name, 'utf-8');
-        }
 
-        DB::begin();
+        $extension = $php ? 'php' : 'sql';
+
         try {
-            $name = 'm' . \gmdate('ymd_His');
-            if ($custom_name) {
-                $name .= '_' . $custom_name;
-            }
 
-            $file = '<?php
+            $name = 'm' . \gmdate('ymd_His');
+            if ($custom_name)
+                $name .= '_' . $custom_name;
+
+            $file = $extension === 'php'
+                ? '<?php
 // ' . \strftime('%F %T') . '
 
 use mii\db\DB;
 
-class ' . $name . ' {
-
-    public function up() {
+class ' . $name . '
+{
+    public function up()
+    {
 
     }
 
-    public function down() {
+    public function down()
+    {
         return false;
     }
     
-    public function safe_up() {
+    public function safe_up()
+    {
 
     }
 
-    public function safe_down() {
+    public function safe_down()
+    {
         return false;
     }
-
 }
-';
+'
+                : '';
+
             \reset($this->migrations_paths);
-            \file_put_contents(\current($this->migrations_paths) . '/' . $name . '.php', $file);
+            \file_put_contents(\current($this->migrations_paths) . '/' . $name . '.' . $extension, $file);
 
-            DB::commit();
+            $this->info("migration $name created");
 
-            $this->info('migration :name created', [':name' => $name]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollback();
             throw $e;
         }
@@ -144,6 +147,9 @@ class ' . $name . ' {
 
     /**
      * Apply new migrations
+     * @param int $limit
+     * @throws \mii\db\DatabaseException
+     * @throws \Throwable
      */
     public function up($limit = null)
     {
@@ -151,55 +157,65 @@ class ' . $name . ' {
 
         $migrations = $this->migrations_list;
 
-        $limit = (int) $limit;
+        $limit = (int)$limit;
 
-        if ($limit > 0) {
+        if ($limit > 0)
             $migrations = \array_slice($migrations, 0, $limit);
-        }
 
         foreach ($migrations as $migration) {
-            if ($migration['applied']) {
+
+            if ($migration['applied'])
                 continue;
-            }
 
             $name = $migration['name'];
 
-            $this->info('Loading migration #:name', [':name' => $name]);
+            $this->info("Loading migration #$name");
 
-            $obj = $this->loadMigration($migration);
-            if ($obj->up() === false) {
-                $this->error('Migration #:name failed. Stop.', [':name' => $name]);
-                return;
-            }
+            if ($migration['type'] === 'sql') {
 
-            DB::begin();
-            try {
-                $obj->safe_up();
-                DB::commit();
-            } catch (\Throwable $e) {
-                DB::rollback();
+                DB::begin();
+
+                try {
+                    \Mii::$app->db->multiQuery(file_get_contents($migration['file']));
+                } catch (\Throwable $e) {
+                    DB::rollback();
+                    $this->error("Migration #$name failed. Stop.");
+                    throw $e;
+                }
+
+            } elseif ($migration['type'] === 'php') {
+
+                require_once $migration['file'];
+                $obj = new $migration['name'];
+
+                if ($obj->up() === false) {
+                    $this->error("Migration #$name failed. Stop.");
+                    return;
+                }
+
+                DB::begin();
+
+                try {
+                    $obj->safe_up();
+                    DB::commit();
+                } catch (\Throwable $e) {
+                    DB::rollback();
+                }
             }
 
             DB::insert(
-                'INSERT INTO`' . $this->migrate_table . '`(`name`, `date`) VALUES(:name, :date)',
+                'INSERT INTO `' . $this->migrate_table . '` (`name`, `date`) VALUES (:name, :date);',
                 [
                     ':name' => $name,
                     ':date' => \time(),
                 ]
             );
 
-            $this->info('Migration up successfully', [':name' => $name]);
+            $this->info('Migration up successfully');
             $applied++;
         }
-        if (!$applied) {
+
+        if (!$applied)
             $this->warning('No new migration found');
-        }
-    }
-
-
-    protected function loadMigration($migration)
-    {
-        require_once $migration['file'];
-        return new $migration['name'];
     }
 }
