@@ -8,6 +8,7 @@
   "prefer-stable": true,
   "require": {
     "php": ">=7.4",
+    "ext-mbstring": "*",
     "ext-mysqli": "*"
   },
   "require-dev": {
