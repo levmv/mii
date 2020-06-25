@@ -78,9 +78,9 @@ class SelectQuery
     /**
      * Creates a new SQL query of the specified type.
      *
-     * @param integer $type query type: Database::SELECT, Database::INSERT, etc
+     * @param string|null $classname
      */
-    public function __construct($classname = null)
+    public function __construct(string $classname = null)
     {
         if ($classname) {
             $this->asModel($classname);
@@ -109,7 +109,6 @@ class SelectQuery
     /**
      * Returns results as objects
      * @param string $class classname
-     * @param array  $params
      * @return  $this
      */
     public function asModel(string $class): self
@@ -132,10 +131,10 @@ class SelectQuery
      * @param array     $columns column list
      * @return  Query
      */
-    public function select(array $columns = null): self
+    public function select(...$columns): self
     {
         $this->_type = Database::SELECT;
-        if ($columns !== null) {
+        if (\count($columns)) {
             $this->_select = $columns;
             $this->_select_any = false;
         }
