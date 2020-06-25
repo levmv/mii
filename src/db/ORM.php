@@ -3,6 +3,7 @@
 namespace mii\db;
 
 use mii\core\Exception;
+use mii\log\Log;
 
 class ORM implements \JsonSerializable, \IteratorAggregate
 {
@@ -426,18 +427,37 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     public function delete(): void
     {
         if ($this->__loaded && isset($this->id)) {
-            $this->__loaded = false;
 
             static::query()
                 ->delete()
                 ->where('id', '=', (int) $this->id)
                 ->execute();
 
+            $this->__loaded = false;
+
             return;
         }
 
         throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . ' or model without id pk!');
     }
+
+
+    public function deleteWith(callable $callback): bool
+    {
+        DB::begin();
+        try {
+            $callback($this);
+            $this->delete();
+            DB::commit();
+        } catch (\Throwable $t) {
+            DB::rollback();
+            Log::error($t);
+            return false;
+        }
+
+        return true;
+    }
+
 
     /**
      * Specify data which should be serialized to JSON
