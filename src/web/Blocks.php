@@ -145,21 +145,13 @@ class Blocks extends BaseBlocks
                 $this->_files['js'][$parent_block]['inline'][$position][] = $inline[0];
             }
         }
-
-        if (!empty($this->_blocks[$block_name]->__inline_css)) {
-            if (!isset($this->_files['css'][$parent_block]['inline'])) {
-                $this->_files['css'][$parent_block]['inline'] = $this->_blocks[$block_name]->__inline_css;
-            } else {
-                $this->_files['css'][$parent_block]['inline'] = \array_merge($this->_files['.css'][$parent_block]['inline'], $this->_blocks[$block_name]->__inline_css);
-            }
-        }
     }
 
     private function _buildBlock(string $block_name, string $type, array $files): void
     {
         $result_file_name = $block_name . '.' . \substr(\md5(\implode('', \array_values($files))), 0, 10);
 
-        $web_output = $this->base_url . '/' . $result_file_name . '.' . $type;
+        $web_output = "{$this->base_url}/{$result_file_name}.{$type}?";
         $output = $this->base_path . '/' . $result_file_name . '.' . $type;
 
         $need_recompile = !\is_file($output);
@@ -184,7 +176,7 @@ class Blocks extends BaseBlocks
         }
 
         if ($type === 'css') {
-            $this->_css[] = '<link type="text/css" href="' . $web_output . '?' . \filemtime($output) . '" rel="stylesheet">';
+            $this->_css .= '<link type="text/css" href="' . $web_output  . \filemtime($output) . "\" rel=\"stylesheet\">\n";
         } else {
             $this->_js[self::END][] = '<script src="' . $web_output . '?' . \filemtime($output) . '"></script>';
         }

@@ -7,30 +7,29 @@ use Mii;
 class Block
 {
     // Block name
-    public $__name;
+    public string $__name;
 
-    public $__has_parent;
+    public bool $__has_parent = false;
 
     // Full path to php template
-    protected $_file;
+    protected ?string $_file = null;
 
     // Array of local variables
-    protected $_data = [];
+    protected array $_data = [];
 
     // List of remote assets
     public $__remote_css;
     public $__remote_js;
 
     // List of inline codes
-    public $__inline_css;
     public $__inline_js;
 
     public $_depends = [];
 
     // Is assigned any values to block ?
-    protected $_loaded = false;
+    protected bool $_loaded = false;
 
-    protected static $_global_data = [];
+    protected static array $_global_data = [];
 
     /**
      * Sets the block name and local data. Blocks should almost
@@ -41,10 +40,9 @@ class Block
      * @param string $file path to block php file
      * @return  void
      */
-    public function __construct(string $name, ?string $file = null)
+    public function __construct(string $name)
     {
         $this->__name = $name;
-        $this->_file = $file;
     }
 
 
@@ -148,12 +146,6 @@ class Block
     public function js(string $link, array $options = []): self
     {
         $this->__remote_js[$link] = $options;
-        return $this;
-    }
-
-    public function inlineCss(string $code, array $options = []): self
-    {
-        $this->__inline_css[] = [$code, $options];
         return $this;
     }
 

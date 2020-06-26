@@ -8,7 +8,8 @@ use mii\util\HTML;
 class StaticBlocks extends BaseBlocks
 {
     protected string $assets_map_path = '@tmp';
-    protected array $_used_files = [];
+    protected array $_used_css = [];
+    protected array $_used_js = [];
     protected array $assets;
 
     public function render(): void
@@ -33,7 +34,7 @@ class StaticBlocks extends BaseBlocks
      * @param string $parent_block
      * @param array  $depends
      */
-    public function processAssets($block_name, $parent_block, $depends): void
+    public function processAssets(string $block_name, string $parent_block, array $depends): void
     {
         if (isset($this->_used_blocks[$block_name])) {
             return;
@@ -48,17 +49,17 @@ class StaticBlocks extends BaseBlocks
 
         if (isset($this->assets['css'][$block_name])) {
             $filename = $this->assets['css'][$block_name];
-            if (!isset($this->_used_files['css'][$filename])) {
-                $this->_css[] = "<link type=\"text/css\" href=\"{$this->base_url}/$filename.css\" rel=\"stylesheet\">";
-                $this->_used_files['css'][$filename] = true;
+            if (!isset($this->_used_css[$filename])) {
+                $this->_css .= "<link type=\"text/css\" href=\"{$this->base_url}/$filename.css\" rel=\"stylesheet\">\n";
+                $this->_used_css[$filename] = true;
             }
         }
 
         if (isset($this->assets['js'][$block_name])) {
             $filename = $this->assets['js'][$block_name];
-            if (!isset($this->_used_files['js'][$filename])) {
+            if (!isset($this->_used_js[$filename])) {
                 $this->_js[Blocks::END][] = "<script src=\"{$this->base_url}/$filename.js\"></script>";
-                $this->_used_files['js'][$filename] = true;
+                $this->_used_js[$filename] = true;
             }
         }
 
@@ -76,7 +77,7 @@ class StaticBlocks extends BaseBlocks
 
         if ($this->_blocks[$block_name]->__remote_css !== null) {
             foreach ($this->_blocks[$block_name]->__remote_css as $link) {
-                $this->_css[] = '<link type="text/css" href="' . $link . '" rel="stylesheet" />';
+                $this->_css .= '<link type="text/css" href="' . $link . '" rel="stylesheet" />';
             }
         }
 
@@ -84,12 +85,6 @@ class StaticBlocks extends BaseBlocks
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
                 $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
                 $this->_js[$position][] = "<script>{$inline[0]}</script>";
-            }
-        }
-
-        if (!empty($this->_blocks[$block_name]->__inline_css)) {
-            foreach ($this->_blocks[$block_name]->__inline_css as $style) {
-                $this->_css[] = HTML::tag('style', $style[0], $style[1]);
             }
         }
     }

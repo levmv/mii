@@ -42,10 +42,6 @@ abstract class App
             \setlocale(\LC_TIME, $this->locale);
         }
 
-        if ($this->timezone !== null) {
-            \date_default_timezone_set($this->timezone);
-        }
-
         $default_components = $this->defaultComponents();
 
         if (!isset($this->_config['components'])) {

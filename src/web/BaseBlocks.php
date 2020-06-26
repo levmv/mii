@@ -23,7 +23,7 @@ abstract class BaseBlocks extends Component
 
     protected bool $_rendered = false;
 
-    protected array $_css = [];
+    protected string $_css = '';
 
     protected array $_js = [[], [], []];
 
@@ -103,7 +103,7 @@ abstract class BaseBlocks extends Component
             $this->render();
         }
 
-        return \implode("\n", $this->_css);
+        return $this->_css;
     }
 
 
