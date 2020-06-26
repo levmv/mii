@@ -852,13 +852,13 @@ class SelectQuery
 
         if ($this->_distinct) {
             $dt_column = $db->quoteColumn($this->_select[0]);
-            $this->select([
+            $this->select(
                 new Expression("COUNT(DISTINCT $dt_column)"),
-            ]);
+            );
         } else {
-            $this->select([
+            $this->select(
                 new Expression('COUNT(*)'),
-            ]);
+            );
         }
         $as_array = $this->_as_array;
         $this->_as_array = true;
