@@ -109,6 +109,16 @@ class OrmTest extends DatabaseTestCase
         $this->assertSame(1, $a->update());
     }
 
+    public function testJsonSerializable()
+    {
+        $json = ['id' => 1, 'data' =>  ["new" => "list"], 'deleted' => 0];
+
+        $a = Article::one(1);
+
+        $this->assertSame(json_encode($json), json_encode($a));
+    }
+
+
     public function testDelete()
     {
         $item = Item::one(2);

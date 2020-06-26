@@ -106,7 +106,7 @@ class ResultTest extends DatabaseTestCase
 
     public function testScalar()
     {
-        $result = Item::find()->select([new Expression('COUNT(*)')])->limit(1)->get();
+        $result = Item::find()->select(new Expression('COUNT(*)'))->limit(1)->get();
 
         $this->assertSame(100, $result->scalar());
     }

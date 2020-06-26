@@ -20,7 +20,7 @@ class SelectQueryTest extends DatabaseTestCase
             (new SelectQuery())
                 ->forUpdate()
                 ->distinct(true)
-                ->select(['col1', ['col2', 'al1'], new Expression('COUNT(id)')])
+                ->select('col1', ['col2', 'al1'], new Expression('COUNT(id)'))
                 ->selectAlso('col3', 'col4')
                 ->join('jt', 'LEFT')
                 ->on('jt.id', '=', 't2.id')
@@ -64,7 +64,7 @@ class SelectQueryTest extends DatabaseTestCase
         $this->assertEquals(
             'SELECT `t`.`a`, COUNT(t.id) AS cc FROM `t`',
             (new SelectQuery())
-                ->select(['a'])
+                ->select('a')
                 ->selectAlso(new Expression('COUNT(t.id) AS cc'))
                 ->from('t')
                 ->compile()
@@ -131,7 +131,7 @@ class SelectQueryTest extends DatabaseTestCase
         $this->assertEquals(
 
             (new Query())
-                ->select(['col1', 'col2', 'col3'])
+                ->select('col1', 'col2', 'col3')
                 ->from(['table', 't'])
                 ->where()
                 ->where('col1', '=', 1)
