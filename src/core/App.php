@@ -118,22 +118,22 @@ abstract class App
             }
         } elseif (\is_string($this->_config['components'][$id])) {
             $class = $this->_config['components'][$id];
-            $this->_config['components'][$id] = null;
+         //   $this->_config['components'][$id] = null;
         } elseif (\is_object($this->_config['components'][$id]) && $this->_config['components'][$id] instanceof \Closure) {
             return \call_user_func($this->_config['components'][$id], []);
         } else {
             throw new \Exception("Unexpected configuration type for the $id component: " . \gettype($this->_config['components'][$id]));
         }
 
-        unset($this->_config['components'][$id]);
+        //unset($this->_config['components'][$id]);
 
         if (\is_string($class)) {
             return new $class($params);
         }
 
-        if (\is_object($class) && $class instanceof \Closure) {
-            return $class($params);
-        }
+      //  if (\is_object($class) && $class instanceof \Closure) {
+        //    return $class($params);
+        //}
 
         throw new \Exception("Cant load component \"$id\" because of wrong type: " . \gettype($class));
     }
