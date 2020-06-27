@@ -97,7 +97,7 @@ class Request extends Component
         $uri = \parse_url('http://domain.com' . $_SERVER['REQUEST_URI'], \PHP_URL_PATH);
 
         if (\is_null(\Mii::$app->base_url)) {
-            $uri = \ltrim($uri, '/');
+            //   $uri = \ltrim($uri, '/');
         } elseif (\strpos($uri, \Mii::$app->base_url) === 0) {
             // Remove the base URL from the URI
             $uri = (string) \substr($uri, \strlen(\Mii::$app->base_url));

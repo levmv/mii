@@ -23,11 +23,13 @@ class Migrate extends Controller
     {
         $config = config('migrate', []);
 
-        foreach ($config as $name => $value)
+        foreach ($config as $name => $value) {
             $this->$name = $value;
+        }
 
-        if (empty($this->migrations_paths))
+        if (empty($this->migrations_paths)) {
             $this->migrations_paths = [path('app') . '/migrations'];
+        }
 
         try {
             $this->applied_migrations = DB::select('SELECT `name`, `date` FROM `' . $this->migrate_table . '`')->indexBy('name')->all();
@@ -43,8 +45,9 @@ class Migrate extends Controller
             $this->applied_migrations = [];
         }
 
-        for ($i = 0; $i < \count($this->migrations_paths); $i++)
+        for ($i = 0; $i < \count($this->migrations_paths); $i++) {
             $this->migrations_paths[$i] = \Mii::resolve($this->migrations_paths[$i]);
+        }
 
         foreach ($this->migrations_paths as $migrations_path) {
             if (!\is_dir($migrations_path)) {
@@ -55,14 +58,15 @@ class Migrate extends Controller
             $scan = \scandir($migrations_path);
 
             foreach ($scan as $file) {
-
-                if ($file[0] == '.')
+                if ($file[0] == '.') {
                     continue;
+                }
 
                 $info = \pathinfo($file);
 
-                if (!\in_array($info['extension'], ['sql', 'php']))
+                if (!\in_array($info['extension'], ['sql', 'php'])) {
                     continue;
+                }
 
                 $name = $info['filename'];
 
@@ -89,19 +93,21 @@ class Migrate extends Controller
     {
         $custom_name = false;
 
-        if (\count($this->request->params) && $name === null)
+        if (\count($this->request->params) && $name === null) {
             $name = $this->request->params[0];
+        }
 
-        if ($name)
+        if ($name) {
             $custom_name = \mb_strtolower($name, 'utf-8');
+        }
 
         $extension = $php ? 'php' : 'sql';
 
         try {
-
             $name = 'm' . \gmdate('ymd_His');
-            if ($custom_name)
+            if ($custom_name) {
                 $name .= '_' . $custom_name;
+            }
 
             $file = $extension === 'php'
                 ? '<?php
@@ -138,7 +144,6 @@ class ' . $name . '
             \file_put_contents(\current($this->migrations_paths) . '/' . $name . '.' . $extension, $file);
 
             $this->info("migration $name created");
-
         } catch (\Throwable $e) {
             DB::rollback();
             throw $e;
@@ -159,20 +164,20 @@ class ' . $name . '
 
         $limit = (int)$limit;
 
-        if ($limit > 0)
+        if ($limit > 0) {
             $migrations = \array_slice($migrations, 0, $limit);
+        }
 
         foreach ($migrations as $migration) {
-
-            if ($migration['applied'])
+            if ($migration['applied']) {
                 continue;
+            }
 
             $name = $migration['name'];
 
             $this->info("Loading migration #$name");
 
             if ($migration['type'] === 'sql') {
-
                 DB::begin();
 
                 try {
@@ -182,9 +187,7 @@ class ' . $name . '
                     $this->error("Migration #$name failed. Stop.");
                     throw $e;
                 }
-
             } elseif ($migration['type'] === 'php') {
-
                 require_once $migration['file'];
                 $obj = new $migration['name'];
 
@@ -215,7 +218,8 @@ class ' . $name . '
             $applied++;
         }
 
-        if (!$applied)
+        if (!$applied) {
             $this->warning('No new migration found');
+        }
     }
 }

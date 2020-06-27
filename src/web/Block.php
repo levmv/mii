@@ -279,7 +279,7 @@ class Block
      *
      * @param string $block_filename filename
      * @return  string
-     * @throws \Exception
+     * @throws \Throwable
      */
     protected function capture(string $block_filename): string
     {

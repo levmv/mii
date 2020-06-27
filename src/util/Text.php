@@ -50,8 +50,9 @@ class Text
      */
     public static function limitChars($str, $limit = 100, $end_char = null, $preserve_words = false): string
     {
-        if(!$str)
+        if (!$str) {
             return '';
+        }
 
         $end_char = $end_char ?? '…';
 

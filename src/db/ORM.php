@@ -427,7 +427,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     public function delete(): void
     {
         if ($this->__loaded && isset($this->id)) {
-
             static::query()
                 ->delete()
                 ->where('id', '=', (int) $this->id)

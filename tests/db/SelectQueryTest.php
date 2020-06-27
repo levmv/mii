@@ -125,6 +125,30 @@ class SelectQueryTest extends DatabaseTestCase
     }
 
 
+    public function testCount()
+    {
+        $this->assertSame(100,
+            (new SelectQuery())
+                ->select()
+                ->from('items')
+                ->count()
+        );
+
+        $query = (new SelectQuery())
+            ->select('name')
+            ->from('items')
+            ->where('id', '>', 50)
+            ->orderBy('id', 'asc');
+
+        $this->assertSame(50, $query->count());
+
+        $this->assertSame(
+            "SELECT `items`.`name` FROM `items` WHERE `id` > 50 ORDER BY `id` asc",
+            $query->compile()
+        );
+    }
+
+
     public function testExtSelect()
     {
 

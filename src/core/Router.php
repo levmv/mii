@@ -17,13 +17,14 @@ class Router extends Component
     // What must be escaped in the route regex
     protected const REGEX_ESCAPE = '[.\\+*?[^\\]$<>=!|]';
 
-    private const R_COMPILED = 0;
-    private const R_PATTERN = 1;
-    private const R_PATH = 2;
-    private const R_NAMESPACE = 3;
-    private const R_VALUES = 4;
+    public const R_COMPILED = 0;
+    public const R_PATTERN = 1;
+    public const R_PATH = 2;
+    public const R_METHOD = 3;
+    public const R_NAMESPACE = 4;
+    public const R_VALUES = 5;
 
-    protected string $namespace = 'app\\controllers';
+    public string $namespace = 'app\\controllers';
 
     protected array $default_parameters = [
         'id' => '[0-9]+',
@@ -36,6 +37,8 @@ class Router extends Component
     protected $cache_id = 'mii_core_router_routes';
 
     protected $cache_lifetime = 86400;
+
+    protected bool $rest_mode = false;
 
     protected array $routes;
 
@@ -73,13 +76,25 @@ class Router extends Component
 
         foreach ($this->routes as $pattern => $value) {
 
-//            $pattern = \mb_strtolower($pattern);
+            $method = false;
+
+            if ($this->rest_mode) {
+                \preg_match('/^(get|post|put|delete):/', $pattern, $matches);
+                if (\count($matches)) {
+                    $method = $matches[1];
+                    $pattern = \preg_replace('/^(get|post|put|delete):/', '', $pattern);
+                }
+            }
 
             $result = [
                 static::R_COMPILED => '',
                 static::R_PATTERN => $pattern,
                 static::R_PATH => '',
             ];
+
+            if ($this->rest_mode) {
+                $result[static::R_METHOD] = $method;
+            }
 
             $params = null;
             $name = false;
@@ -100,6 +115,9 @@ class Router extends Component
                 }
                 if (isset($value['values'])) {
                     $result[static::R_VALUES] = $value['values'];
+                }
+                if (isset($value['method'])) {
+                    $result[static::R_METHOD] = $value['method'];
                 }
             } elseif (\is_string($value)) {
                 $result[static::R_PATH] = $value;
@@ -182,6 +200,11 @@ class Router extends Component
             if (!\preg_match($route[static::R_COMPILED], $uri, $matches)) {
                 return false;
             }
+        }
+
+        if ($this->rest_mode && isset($route[static::R_METHOD]) && $route[static::R_METHOD] !== false) {
+            if (\strtolower(\Mii::$app->request->method()) !== $route[static::R_METHOD])
+                return false;
         }
 
         $params = $route[static::R_VALUES] ?? [];
@@ -315,5 +338,11 @@ class Router extends Component
 
 
         return Url::site($uri);
+    }
+
+
+    public function getCompiledData() : array
+    {
+        return [$this->_routes_list, $this->_named_routes];
     }
 }

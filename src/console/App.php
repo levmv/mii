@@ -24,13 +24,13 @@ class App extends \mii\core\App
     protected function defaultComponents(): array
     {
         return [
-            'log' => 'mii\log\Logger',
-            'blocks' => 'mii\web\Blocks',
-            'router' => 'mii\core\Router',
-            'db' => 'mii\db\Database',
-            'cache' => 'mii\cache\Apcu',
-            'request' => 'mii\console\Request',
-            'error' => 'mii\console\ErrorHandler',
+            'log' => \mii\log\Logger::class,
+            'blocks' => \mii\web\Blocks::class,
+            'router' => \mii\core\Router::class,
+            'db' => \mii\db\Database::class,
+            'cache' => \mii\cache\Apcu::class,
+            'request' => \mii\console\Request::class,
+            'error' => \mii\console\ErrorHandler::class,
         ];
     }
 }
