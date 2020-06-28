@@ -129,6 +129,17 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             ->one();
     }
 
+    /**
+     * @param int $value
+     * @return $this|null
+     */
+    public static function oneWhere(array $conditions): ?self
+    {
+        return static::where($conditions)
+            ->one();
+    }
+
+
     /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param int $id
@@ -331,6 +342,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         $this->attributes = $model->attributes;
     }
 
+    protected function innerBeforeChange()
+    {
+
+    }
 
     protected function onCreate()
     {
@@ -360,6 +375,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public function create(): int
     {
+        $this->innerBeforeChange();
+
         if ($this->onCreate() === false) {
             return 0;
         }
@@ -396,6 +413,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             $this->_was_changed = [];
             return 0;
         }
+
+        $this->innerBeforeChange();
 
         if ($this->onUpdate() === false) {
             return 0;

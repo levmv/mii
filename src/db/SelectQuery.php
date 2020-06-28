@@ -508,6 +508,15 @@ class SelectQuery
     }
 
 
+    public function when($condition, callable $callback): self
+    {
+        if($condition) {
+            return $callback($this, $condition);
+        }
+        return $this;
+    }
+
+
     /**
      * Compile the SQL query and return it.
      *
