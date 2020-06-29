@@ -8,11 +8,6 @@ use mii\core\ACL;
 class PageController extends Controller
 {
     /**
-     * @var \mii\core\ACL Access Control List object
-     */
-    public ?ACL $acl = null;
-
-    /**
      * @var Block
      */
     public $index_block;
@@ -50,9 +45,6 @@ class PageController extends Controller
 
     public bool $render_layout = true;
 
-    protected function access_rules()
-    {
-    }
 
     protected function before()
     {
@@ -114,30 +106,5 @@ class PageController extends Controller
 
         $this->layout = \block($block_name)
             ->depends($depends);
-    }
-
-    protected function onAccessDenied(): void
-    {
-        throw new ForbiddenHttpException('User has no rights to access ' . $this->request->uri());
-    }
-
-    public function execute(string $action, $params): void
-    {
-        $this->access_rules();
-
-        if ($this->acl !== null) {
-            $roles = Mii::$app->auth->getUser() ? Mii::$app->auth->getUser()->getRoles() : '*';
-
-            if (empty($roles)) {
-                $roles = '*';
-            }
-
-            if (!$this->acl->check($roles, $action)) {
-                $this->onAccessDenied();
-                return;
-            }
-        }
-
-        parent::execute($action, $params);
     }
 }

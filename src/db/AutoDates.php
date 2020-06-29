@@ -13,10 +13,10 @@ trait AutoDates
 {
     protected function innerBeforeChange()
     {
-        if($this->loaded()) {
-            $this->updated = time();
+        if ($this->loaded()) {
+            $this->updated = \time();
         } else {
-            $this->created = time();
+            $this->created = \time();
         }
     }
 }

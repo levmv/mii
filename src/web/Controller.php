@@ -45,7 +45,7 @@ class Controller
     }
 
 
-    protected function executeAction($method, $action, $params)
+    protected function executeAction(\ReflectionMethod $method, string $action, $params)
     {
         $args = [];
         $missing = [];

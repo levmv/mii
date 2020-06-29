@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace miit\db;
 
@@ -8,18 +8,15 @@ use mii\util\Url;
 use mii\web\Request;
 use miit\TestCase;
 
-
 class UrlTest extends TestCase
 {
-
-
     protected function setUp() : void
     {
         parent::setUp();
 
         $_SERVER['HTTP_HOST'] = 'test.com';
         $_SERVER['SERVER_NAME'] = '';
-        $_SERVER['REQUEST_URI'] = "/";
+        $_SERVER['REQUEST_URI'] = '/';
 
         $this->mockWebApplication(
             [
@@ -29,8 +26,8 @@ class UrlTest extends TestCase
     }
 
 
-    public function testSite() {
-
+    public function testSite()
+    {
         $this->assertEquals('/foo/bar', Url::site('foo/bar'));
         $this->assertEquals('/foo/bar', Url::site('/foo/bar'));
         $this->assertEquals('http://test.com/foo/bar', Url::site('foo/bar', true));
@@ -38,8 +35,8 @@ class UrlTest extends TestCase
         $this->assertEquals('https://test.com/foo/bar', Url::site('foo/bar', 'https'));
     }
 
-    public function testBase() {
-
+    public function testBase()
+    {
         $this->assertEquals('', Url::base());
         $this->assertEquals('http://test.com', Url::base(true));
         $this->assertEquals('https://test.com', Url::base('https'));
@@ -53,15 +50,15 @@ class UrlTest extends TestCase
         $this->assertEquals('//test.com/base', Url::base('//'));
     }
 
-    public function testCurrent() {
-        \Mii::$app->request->uri("");
+    public function testCurrent()
+    {
+        \Mii::$app->request->uri('');
         $this->assertEquals('/', Url::current());
 
-        \Mii::$app->request->uri("/");
+        \Mii::$app->request->uri('/');
         $this->assertEquals('/', Url::current());
 
-        \Mii::$app->request->uri("/test");
+        \Mii::$app->request->uri('/test');
         $this->assertEquals('/test', Url::current());
     }
-
 }

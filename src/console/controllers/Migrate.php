@@ -162,7 +162,7 @@ class ' . $name . '
 
         $migrations = $this->migrations_list;
 
-        $limit = (int)$limit;
+        $limit = (int) $limit;
 
         if ($limit > 0) {
             $migrations = \array_slice($migrations, 0, $limit);
@@ -181,7 +181,7 @@ class ' . $name . '
                 DB::begin();
 
                 try {
-                    \Mii::$app->db->multiQuery(file_get_contents($migration['file']));
+                    \Mii::$app->db->multiQuery(\file_get_contents($migration['file']));
                 } catch (\Throwable $e) {
                     DB::rollback();
                     $this->error("Migration #$name failed. Stop.");

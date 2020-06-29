@@ -107,13 +107,21 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param array|null $conditions
      * @return Query
      */
-    public static function where(array $conditions): SelectQuery
+    public static function where(...$args): SelectQuery
     {
-        if (\count($conditions) === 3 && \is_string($conditions[1])) {
-            $conditions = [$conditions];
+        if (\count($args) === 1) {
+            $conditions = $args[0];
+
+            if (\count($conditions) === 3 && \is_string($conditions[1])) {
+                $conditions = [$conditions];
+            }
+
+            return static::find()->where($conditions);
         }
 
-        return static::find()->where($conditions);
+        \assert(\count($args) === 3, 'Wrong count of arguments');
+
+        return static::find()->where($args[0], $args[1], $args[2]);
     }
 
 
@@ -344,7 +352,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     protected function innerBeforeChange()
     {
-
     }
 
     protected function onCreate()

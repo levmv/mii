@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace miit\db;
 
@@ -10,14 +10,13 @@ use miit\data\models\Item;
 
 class ResultTest extends DatabaseTestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
 
         DB::alter('TRUNCATE TABLE items');
 
-        for($i=0;$i<100;$i++) {
+        for ($i=0;$i<100;$i++) {
             $item = new Item;
             $item->name = "str $i";
             $item->create();
@@ -39,7 +38,7 @@ class ResultTest extends DatabaseTestCase
     {
         $result = Item::find()->limit(3)->get();
 
-        foreach($result as $item) {
+        foreach ($result as $item) {
             $this->assertInstanceOf(Item::class, $item);
         }
 
@@ -51,7 +50,7 @@ class ResultTest extends DatabaseTestCase
     {
         $result = Item::find()->asArray()->limit(3)->get();
 
-        foreach($result as $item) {
+        foreach ($result as $item) {
             $this->assertIsArray($item);
             $this->assertIsInt($item['id']);
         }
@@ -61,7 +60,7 @@ class ResultTest extends DatabaseTestCase
     {
         $result = Item::find()->limit(3)->get();
 
-        $result->each(function($item) {
+        $result->each(function ($item) {
             $this->assertInstanceOf(Item::class, $item);
         });
     }
@@ -110,5 +109,4 @@ class ResultTest extends DatabaseTestCase
 
         $this->assertSame(100, $result->scalar());
     }
-
 }

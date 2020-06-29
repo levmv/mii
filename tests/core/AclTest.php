@@ -1,21 +1,21 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace miit\core;
 
 use mii\core\ACL;
 use miit\TestCase;
 
-
 class AclTest extends TestCase
 {
-
-    public function testDefault() {
+    public function testDefault()
+    {
         $acl = new ACL();
         $this->assertFalse($acl->check('*'));
     }
 
 
-    public function testRules() {
+    public function testRules()
+    {
         $acl = new ACL();
         $acl->allow('admin', '*');
         $acl->allow('guest', 'testRules');
@@ -26,9 +26,8 @@ class AclTest extends TestCase
         $this->assertTrue($acl->check('guest', 'testRules'));
         $this->assertFalse($acl->check('guest', 'bar'));
         $this->assertTrue($acl->check('foo', 'bar'));
-        $this->assertFalse($acl->check('foo',  'bar2'));
+        $this->assertFalse($acl->check('foo', 'bar2'));
 
         $this->assertTrue($acl->check(['admin', 'foo'], 'bar'));
     }
-
 }

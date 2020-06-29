@@ -75,7 +75,6 @@ class Router extends Component
         $route_index = 0;
 
         foreach ($this->routes as $pattern => $value) {
-
             $method = false;
 
             if ($this->rest_mode) {
@@ -203,8 +202,9 @@ class Router extends Component
         }
 
         if ($this->rest_mode && isset($route[static::R_METHOD]) && $route[static::R_METHOD] !== false) {
-            if (\strtolower(\Mii::$app->request->method()) !== $route[static::R_METHOD])
+            if (\strtolower(\Mii::$app->request->method()) !== $route[static::R_METHOD]) {
                 return false;
+            }
         }
 
         $params = $route[static::R_VALUES] ?? [];
