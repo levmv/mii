@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace miit\db;
 
@@ -8,12 +8,10 @@ use mii\db\SelectQuery;
 
 class QueryTest extends DatabaseTestCase
 {
-
     public function testInsert()
     {
         $this->assertEquals(
             "INSERT INTO `t` (`a`, `b`, `c`) VALUES (1, '2', 3)",
-
             (new Query())
                 ->insert('t')
                 ->columns(['a', 'b', 'c'])
@@ -25,12 +23,11 @@ class QueryTest extends DatabaseTestCase
     public function testInsertData()
     {
         $this->assertEquals(
-            "INSERT INTO `t` (`a`, `b`) VALUES (1, 2)",
-
+            'INSERT INTO `t` (`a`, `b`) VALUES (1, 2)',
             (new Query())
                 ->insert('t', [
                     'a' => 1,
-                    'b' => 2
+                    'b' => 2,
                 ])
                 ->compile()
         );
@@ -39,14 +36,13 @@ class QueryTest extends DatabaseTestCase
     public function testUpdate()
     {
         $this->assertEquals(
-            "UPDATE `t` SET `a` = 1, `b` = 2, `c` = 3 WHERE `id` = 123",
-
+            'UPDATE `t` SET `a` = 1, `b` = 2, `c` = 3 WHERE `id` = 123',
             (new Query())
                 ->update('t')
                 ->set([
                     'a' => 1,
                     'b' => 2,
-                    'c' => 3
+                    'c' => 3,
                 ])
                 ->where('id', '=', 123)
                 ->compile()
@@ -56,14 +52,11 @@ class QueryTest extends DatabaseTestCase
     public function testDelete()
     {
         $this->assertEquals(
-            "DELETE FROM `t` WHERE `id` = 123",
-
+            'DELETE FROM `t` WHERE `id` = 123',
             (new Query())
                 ->delete('t')
                 ->where('id', '=', 123)
                 ->compile()
         );
     }
-
-
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace miit\db;
 
@@ -8,15 +8,13 @@ use mii\db\SelectQuery;
 
 class SelectQueryTest extends DatabaseTestCase
 {
-
     public function testCompleteSelect()
     {
         $this->assertEquals(
-            "SELECT DISTINCT `table`.`col1`, `table`.`col2` AS `al1`, COUNT(id), `table`.`col3`, `table`.`col4` " .
-            "FROM `table` LEFT JOIN `jt` ON (`jt`.`id` = `t2`.`id`) " .
+            'SELECT DISTINCT `table`.`col1`, `table`.`col2` AS `al1`, COUNT(id), `table`.`col3`, `table`.`col4` ' .
+            'FROM `table` LEFT JOIN `jt` ON (`jt`.`id` = `t2`.`id`) ' .
             "WHERE `col1` = 1 AND (`col2` < 'sadf' OR `col2` IS NULL) " .
-            "HAVING `count` > 0 ORDER BY `id` desc, `col1` asc, `col2` asc LIMIT 5 OFFSET 10 FOR UPDATE",
-
+            'HAVING `count` > 0 ORDER BY `id` desc, `col1` asc, `col2` asc LIMIT 5 OFFSET 10 FOR UPDATE',
             (new SelectQuery())
                 ->forUpdate()
                 ->distinct(true)
@@ -34,7 +32,7 @@ class SelectQueryTest extends DatabaseTestCase
                 ->having('count', '>', 0)
                 ->orderBy([
                     ['id', 'desc'],
-                    ['col1', 'asc']
+                    ['col1', 'asc'],
                 ])
                 ->orderBy('col2', 'asc')
                 ->limit(5)
@@ -74,18 +72,18 @@ class SelectQueryTest extends DatabaseTestCase
 
     public function testWhere()
     {
-        $q = fn() => (new SelectQuery())->select()->from('t');
+        $q = static fn () => (new SelectQuery())->select()->from('t');
 
 
         $eq = 'SELECT `t`.* FROM `t` WHERE ';
 
         $tests = [
 
-            ["`col` = 1",
-                $q()->where('col', '=', 1)],
+            ['`col` = 1',
+                $q()->where('col', '=', 1), ],
 
             ["`col` = 'str'",
-                $q()->where('col', '=', "str")],
+                $q()->where('col', '=', 'str'), ],
 
             ["`c` = 'str' AND `c` IS NULL AND `c` != 'str' AND `c` IN (1,2,3) AND `c` NOT IN ('a','b',3) AND `c` LIKE 'str'",
                 $q()->where([
@@ -95,8 +93,8 @@ class SelectQueryTest extends DatabaseTestCase
                     ['c', 'IN', [1, 2, 3]],
                     ['c', 'NOT IN', ['a', 'b', 3]],
                     ['c', 'LIKE', 'str'],
-                ])],
-            ["`a` = 1 OR `b` = 1 AND `c` = 1 OR (`x` = 3 AND (`d` = 1 AND `e` = 1))",
+                ]), ],
+            ['`a` = 1 OR `b` = 1 AND `c` = 1 OR (`x` = 3 AND (`d` = 1 AND `e` = 1))',
                 $q()
                     ->where('a', '=', 1)
                     ->orWhere('b', '=', 1)
@@ -107,12 +105,12 @@ class SelectQueryTest extends DatabaseTestCase
                     ->where('d', '=', 1)
                     ->where('e', '=', 1)
                     ->end()
-                    ->end()
+                    ->end(),
             ],
             [
-                "`a` BETWEEN 1 AND 2",
-                $q()->where('a', 'BETWEEN', [1, 2])
-            ]
+                '`a` BETWEEN 1 AND 2',
+                $q()->where('a', 'BETWEEN', [1, 2]),
+            ],
 
         ];
 
@@ -127,7 +125,8 @@ class SelectQueryTest extends DatabaseTestCase
 
     public function testCount()
     {
-        $this->assertSame(100,
+        $this->assertSame(
+            100,
             (new SelectQuery())
                 ->select()
                 ->from('items')
@@ -143,17 +142,26 @@ class SelectQueryTest extends DatabaseTestCase
         $this->assertSame(50, $query->count());
 
         $this->assertSame(
-            "SELECT `items`.`name` FROM `items` WHERE `id` > 50 ORDER BY `id` asc",
+            'SELECT `items`.`name` FROM `items` WHERE `id` > 50 ORDER BY `id` asc',
             $query->compile()
+        );
+    }
+
+
+    public function testExists()
+    {
+        $this->assertTrue(
+            (new SelectQuery())
+                ->from('articles')
+                ->where('id', '=', 1)
+                ->exists()
         );
     }
 
 
     public function testExtSelect()
     {
-
         $this->assertEquals(
-
             (new Query())
                 ->select('col1', 'col2', 'col3')
                 ->from(['table', 't'])
@@ -166,7 +174,7 @@ class SelectQueryTest extends DatabaseTestCase
                 ->end()
                 ->orWhere()
                 ->where('col2', '=', 5)
-                ->orWhere('col3', '=', "six")
+                ->orWhere('col3', '=', 'six')
                 ->end()
                 ->where()
                 ->where('col3', '=', 7)
@@ -178,9 +186,7 @@ class SelectQueryTest extends DatabaseTestCase
                 ->end()
                 ->orderBy('col3', 'desc')
                 ->compile(),
-
-            "SELECT `t`.`col1`, `t`.`col2`, `t`.`col3` FROM `table` AS `t` WHERE (`col1` = 1 AND (`col2` = 2 OR `col3` = 4)) OR (`col2` = 5 OR `col3` = 'six') AND (`col3` = 7) HAVING `col1` < 5 AND (`col2` = 'col3' OR `col3` = 5) ORDER BY `col3` desc");
+            "SELECT `t`.`col1`, `t`.`col2`, `t`.`col3` FROM `table` AS `t` WHERE (`col1` = 1 AND (`col2` = 2 OR `col3` = 4)) OR (`col2` = 5 OR `col3` = 'six') AND (`col3` = 7) HAVING `col1` < 5 AND (`col2` = 'col3' OR `col3` = 5) ORDER BY `col3` desc"
+        );
     }
-
-
 }

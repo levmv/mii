@@ -1,15 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace miit\data\models;
 
 use mii\db\ORM;
 
-class Item extends ORM {
-
-
+class Item extends ORM
+{
     public function onCreate()
     {
-        $this->created = time();
+        $this->created = \time();
     }
-
 }

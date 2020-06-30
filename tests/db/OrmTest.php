@@ -1,7 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace miit\db;
-
 
 use mii\db\ModelNotFoundException;
 use mii\db\Result;
@@ -12,7 +11,6 @@ use miit\data\models\Item;
 
 class OrmTest extends DatabaseTestCase
 {
-
     public function testCreateUpdate()
     {
         $item = new Item;
@@ -24,11 +22,12 @@ class OrmTest extends DatabaseTestCase
         $this->assertSame(1, $item->create());
         $this->assertTrue($item->loaded());
         $this->assertSame(1, $item->id);
-        $this->assertSame(time(), $item->created);
+        $this->assertSame(\time(), $item->created);
 
-        $this->assertEquals(2,
+        $this->assertEquals(
+            2,
             (new Item([
-                'name' => 'test2'
+                'name' => 'test2',
             ]))->create()
         );
 
@@ -64,7 +63,7 @@ class OrmTest extends DatabaseTestCase
     }
 
 
-    public function testWHere()
+    public function testWhere()
     {
         $item = Item::where(['id', '=', 1])->one();
 
@@ -73,9 +72,27 @@ class OrmTest extends DatabaseTestCase
 
         $item = Item::where([
             ['id', '=', 1],
-            ['created', '<=', time()],
+            ['created', '<=', \time()],
         ])->one();
         $this->assertSame(1, $item->id);
+
+        $this->assertSame(
+            'SELECT `items`.* FROM `items` WHERE `id` = 1',
+            Item::where('id', '=', 1)->compile()
+        );
+
+        $this->assertSame(
+            'SELECT `items`.* FROM `items` WHERE `id` = 1',
+            Item::where(['id', '=', 1])->compile()
+        );
+
+        $this->assertSame(
+            "SELECT `items`.* FROM `items` WHERE `id` = 1 AND `data` = ''",
+            Item::where([
+                ['id', '=', 1],
+                ['data', '=', ''],
+            ])->compile()
+        );
     }
 
     public function testAll()
@@ -89,8 +106,8 @@ class OrmTest extends DatabaseTestCase
 
     public function testJson()
     {
-        $arr = [1, "foo" => "bar"];
-        $arr2 = ["new" => "list"];
+        $arr = [1, 'foo' => 'bar'];
+        $arr2 = ['new' => 'list'];
 
         $a = new Article();
         $a->data = $arr;
@@ -111,11 +128,11 @@ class OrmTest extends DatabaseTestCase
 
     public function testJsonSerializable()
     {
-        $json = ['id' => 1, 'data' =>  ["new" => "list"], 'deleted' => 0];
+        $json = ['id' => 1, 'data' =>  ['new' => 'list'], 'deleted' => 0];
 
         $a = Article::one(1);
 
-        $this->assertSame(json_encode($json), json_encode($a));
+        $this->assertSame(\json_encode($json), \json_encode($a));
     }
 
 
@@ -136,23 +153,21 @@ class OrmTest extends DatabaseTestCase
     {
         $item = new Item([
             'id' => 3,
-            'name' => 'foo'
+            'name' => 'foo',
         ]);
         $this->assertSame([
             'id' => 3,
-            'name' => 'foo'
+            'name' => 'foo',
         ], $item->toArray());
 
         $item = new Article([
             'id' => 3,
-            'data' => [1]
+            'data' => [1],
         ]);
 
         $this->assertSame([
             'id' => 3,
-            'data' => [1]
+            'data' => [1],
         ], $item->toArray());
-
     }
-
 }

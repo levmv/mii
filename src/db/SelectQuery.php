@@ -510,7 +510,7 @@ class SelectQuery
 
     public function when($condition, callable $callback): self
     {
-        if($condition) {
+        if ($condition) {
             return $callback($this, $condition);
         }
         return $this;
@@ -733,7 +733,7 @@ class SelectQuery
                         $value = \is_int($value) ? $value : $this->db->quote($value);
                     }
 
-                    $column = $this->db->quoteColumn($column);
+                    $column = $this->db->quoteIdentifier($column);
 
                     // Append the statement to the query
                     $sql .= "$column $op $value";
@@ -750,7 +750,7 @@ class SelectQuery
     {
         [$column, $op, $value] = \current($conditions[0]);
 
-        $column = $this->db->quoteColumn($column);
+        $column = $this->db->quoteIdentifier($column);
 
         if ($value === null) {
             if ($op === '=') {
@@ -923,5 +923,11 @@ class SelectQuery
     public function all(): array
     {
         return $this->execute()->all();
+    }
+
+
+    public function exists() : bool
+    {
+        return (bool) $this->select(new Expression('1'))->execute()->scalar();
     }
 }

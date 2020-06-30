@@ -1,7 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace miit;
-
 
 /**
  * This is the base class for all yii framework unit tests.
@@ -16,11 +15,12 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * @param  mixed $default default value to use when param is not set.
      * @return mixed  the value of the configuration param
      */
-    public static function getParam($name, $default = null) {
+    public static function getParam($name, $default = null)
+    {
         if (static::$params === null) {
-            static::$params = require(__DIR__ . '/data/config.php');
+            static::$params = require __DIR__ . '/data/config.php';
         }
-        return isset(static::$params[$name]) ? static::$params[$name] : $default;
+        return static::$params[$name] ?? $default;
     }
 
     /**
@@ -29,9 +29,10 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * @param string $expected
      * @param string $actual
      */
-    public function assertEqualsWithoutLE($expected, $actual) {
-        $expected = str_replace("\r\n", "\n", $expected);
-        $actual = str_replace("\r\n", "\n", $actual);
+    public function assertEqualsWithoutLE($expected, $actual)
+    {
+        $expected = \str_replace("\r\n", "\n", $expected);
+        $actual = \str_replace("\r\n", "\n", $actual);
         $this->assertEquals($expected, $actual);
     }
 
@@ -39,7 +40,8 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * Clean up after test.
      * By default the application created with [[mockApplication]] will be destroyed.
      */
-    protected function tearDown() : void {
+    protected function tearDown() : void
+    {
         parent::tearDown();
         $this->destroyApplication();
     }
@@ -47,7 +49,8 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * Destroys application in Yii::$app by setting it to null.
      */
-    protected function destroyApplication() {
+    protected function destroyApplication()
+    {
         if (\Mii::$app && \Mii::$app->has('session', true)) {
             \Mii::$app->session->close();
         }
@@ -60,19 +63,22 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $config The application configuration, if needed
      * @param string $appClass name of the application class to create
      */
-    protected function mockApplication($config = [], $appClass = '\mii\console\App') {
+    protected function mockApplication($config = [], $appClass = '\mii\console\App')
+    {
         new $appClass($config);
     }
 
-    protected function getVendorPath() {
-        $vendor = dirname(dirname(__DIR__)) . '/vendor';
-        if (!is_dir($vendor)) {
-            $vendor = dirname(dirname(dirname(dirname(__DIR__))));
+    protected function getVendorPath()
+    {
+        $vendor = \dirname(\dirname(__DIR__)) . '/vendor';
+        if (!\is_dir($vendor)) {
+            $vendor = \dirname(\dirname(\dirname(\dirname(__DIR__))));
         }
         return $vendor;
     }
 
-    protected function mockWebApplication($config = [], $appClass = '\mii\web\App') {
+    protected function mockWebApplication($config = [], $appClass = '\mii\web\App')
+    {
         new $appClass($config);
     }
 

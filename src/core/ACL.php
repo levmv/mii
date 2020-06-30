@@ -4,6 +4,15 @@ namespace mii\core;
 
 class ACL
 {
+    public function __construct(array $allowRules = null)
+    {
+        if ($allowRules) {
+            foreach ($allowRules as [$role, $action]) {
+                $this->addRule(true, $role, $action);
+            }
+        }
+    }
+
 
     /**
      * @var array ACL rules
