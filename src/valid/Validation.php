@@ -15,7 +15,7 @@ class Validation
     protected $_labels = [];
 
     // Rules that are executed even when the value is empty
-    protected $_empty_rules = ['not_empty', 'matches'];
+    protected $_empty_rules = ['notEmpty', 'matches'];
 
     // Error list, field => rule
     protected $_errors = [];
@@ -386,15 +386,15 @@ class Validation
             }
 
 
-            if ($message = Arr::path($this->_error_messages, "{$field}.{$error}") && \is_string($message)) {
-            } elseif ($message = Mii::message($file, "{$field}.{$error}") && \is_string($message)) {
+            if (($message = Arr::path($this->_error_messages, "{$field}.{$error}")) && \is_string($message)) {
+            } elseif (($message = Mii::message($file, "{$field}.{$error}")) && \is_string($message)) {
 
                 // Found a message for this field and error
-            } elseif ($message = Mii::message($file, "{$field}.default") && \is_string($message)) {
+            } elseif (($message = Mii::message($file, "{$field}.default")) && \is_string($message)) {
                 // Found a default message for this field
-            } elseif ($message = Mii::message($file, $error) && \is_string($message)) {
+            } elseif (($message = Mii::message($file, $error)) && \is_string($message)) {
                 // Found a default message for this error
-            } elseif ($message = Mii::message('validation', $error) && \is_string($message)) {
+            } elseif (($message = Mii::message('validation', $error)) && \is_string($message)) {
                 // Found a default message for this error
             } else {
                 // No message exists, display the path expected
