@@ -138,13 +138,12 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
     /**
-     * @param int $value
+     * @param array $conditions
      * @return $this|null
      */
-    public static function oneWhere(array $conditions): ?self
+    public static function oneWhere(...$conditions): ?self
     {
-        return static::where($conditions)
-            ->one();
+        return static::where(...$conditions)->one();
     }
 
 
