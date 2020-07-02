@@ -7,11 +7,6 @@ use mii\web\UploadedFile;
 
 class Rules
 {
-    public static function validCaptcha($value)
-    {
-        return \Mii::$app->captcha->valid($value);
-    }
-
     /**
      * Checks if a value is unique in database.
      *
@@ -21,13 +16,13 @@ class Rules
      * @param $id
      * @return bool
      */
-    public static function unique($value, $key, $model, $id = null)
+    public static function unique($value, string $key, string $model, $id = null) : bool
     {
         if ($id) {
-            $res = (new $model)->select_query()->where($key, '=', $value)->one();
-            return (null === $res) or ($res->id == $id);
+            $res = $model::find()->where($key, '=', $value)->one();
+            return (null === $res) || ($res->id === $id);
         }
-        return null === (new $model)->select_query()->where($key, '=', $value)->one();
+        return null === $model::find()->where($key, '=', $value)->one();
     }
 
     /**
@@ -36,7 +31,18 @@ class Rules
      * @param $value
      * @return  boolean
      */
-    public static function notEmpty($value)
+    public static function required($value) : bool
+    {
+        return static::notEmpty($value);
+    }
+
+    /**
+     * Checks if a field is not empty.
+     *
+     * @param $value
+     * @return  boolean
+     */
+    public static function notEmpty($value) : bool
     {
         if (\is_object($value) && $value instanceof \ArrayObject) {
             // Get the array from the ArrayObject
@@ -54,7 +60,7 @@ class Rules
      * @param string $expression regular expression to match (including delimiters)
      * @return  boolean
      */
-    public static function regex($value, $expression)
+    public static function regex($value, $expression) : bool
     {
         return (bool) \preg_match($expression, (string) $value);
     }
@@ -66,7 +72,7 @@ class Rules
      * @param integer $length minimum length required
      * @return  boolean
      */
-    public static function min($value, $length)
+    public static function min($value, $length) : bool
     {
         return static::_checkSize($value, $length, 1);
     }
@@ -78,13 +84,13 @@ class Rules
      * @param integer $length maximum length required
      * @return  boolean
      */
-    public static function max($value, $length)
+    public static function max($value, $length) : bool
     {
         return static::_checkSize($value, $length, -1);
     }
 
 
-    public static function _checkSize($value, $length, $dir)
+    public static function _checkSize($value, $length, $dir) : bool
     {
         if (\is_object($value) && $value instanceof UploadedFile) {
             return static::fileSize($value, $length, $dir);
@@ -105,7 +111,7 @@ class Rules
      * @param integer|array $length exact length required, or array of valid lengths
      * @return  boolean
      */
-    public static function exactLength($value, $length)
+    public static function exactLength($value, $length) : bool
     {
         if (\is_array($length)) {
             foreach ($length as $strlen) {
@@ -126,7 +132,7 @@ class Rules
      * @param string $required required value
      * @return  boolean
      */
-    public static function equals($value, $required)
+    public static function equals($value, $required) : bool
     {
         return ($value === $required);
     }
@@ -141,7 +147,7 @@ class Rules
      * @param boolean $strict strict RFC compatibility
      * @return  boolean
      */
-    public static function email($email, $strict = false)
+    public static function email($email, $strict = false) : bool
     {
         if (\mb_strlen($email) > 254) {
             return false;
@@ -177,9 +183,9 @@ class Rules
      * @param string $email email address
      * @return  boolean
      */
-    public static function emailDomain($email)
+    public static function emailDomain($email) : bool
     {
-        if (!Rules::notEmpty($email)) {
+        if (!self::notEmpty($email)) {
             return false;
         } // Empty fields cause issues with checkdnsrr()
 
@@ -193,7 +199,7 @@ class Rules
      * @param string $url URL
      * @return  boolean
      */
-    public static function url($url)
+    public static function url($url) : bool
     {
         // Based on http://www.apps.ietf.org/rfc/rfc1738.html#sec-5
         if (!\preg_match(
@@ -259,7 +265,7 @@ class Rules
      * @param boolean $allow_private allow private IP networks
      * @return  boolean
      */
-    public static function ip($ip, $allow_private = true)
+    public static function ip($ip, $allow_private = true) : bool
     {
         // Do not allow reserved addresses
         $flags = \FILTER_FLAG_NO_RES_RANGE;
@@ -279,7 +285,7 @@ class Rules
      * @param array  $lengths
      * @return  boolean
      */
-    public static function phone($number, $lengths = null)
+    public static function phone($number, $lengths = null) : bool
     {
         if (!\is_array($lengths)) {
             $lengths = [7, 10, 11];
@@ -298,7 +304,7 @@ class Rules
      * @param string $str date to check
      * @return  boolean
      */
-    public static function date($str)
+    public static function date($str) : bool
     {
         return (\strtotime($str) !== false);
     }
@@ -310,7 +316,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alpha($str, $utf8 = false)
+    public static function alpha($str, $utf8 = false) : bool
     {
         $str = (string) $str;
 
@@ -328,7 +334,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alphaNumeric($str, $utf8 = false)
+    public static function alphaNumeric($str, $utf8 = false) : bool
     {
         if ($utf8 === true) {
             return (bool) \preg_match('/^[\pL\pN]++$/uD', $str);
@@ -344,7 +350,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alphaDash($str, $utf8 = false)
+    public static function alphaDash($str, $utf8 = false) : bool
     {
         if ($utf8 === true) {
             $regex = '/^[-\pL\pN_]++$/uD';
@@ -362,13 +368,13 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function digit($str, $utf8 = false)
+    public static function digit($str, $utf8 = false) : bool
     {
         if ($utf8 === true) {
             return (bool) \preg_match('/^\pN++$/uD', $str);
         }
 
-        return (\is_int($str) and $str >= 0) or \ctype_digit($str);
+        return (\is_int($str) and $str >= 0) || \ctype_digit($str);
     }
 
     /**
@@ -380,7 +386,7 @@ class Rules
      * @param string $str input string
      * @return  boolean
      */
-    public static function numeric($str)
+    public static function numeric($str) : bool
     {
         // Get the decimal point for the current locale
         [$decimal] = \array_values(\localeconv());
@@ -398,7 +404,7 @@ class Rules
      * @param integer $step increment size
      * @return  boolean
      */
-    public static function range($number, $min, $max, $step = null)
+    public static function range($number, $min, $max, $step = null) : bool
     {
         if ($number <= $min || $number >= $max) {
             // Number is outside of range
@@ -423,7 +429,7 @@ class Rules
      * @param integer $digits number of digits
      * @return  boolean
      */
-    public static function decimal($str, $places = 2, $digits = null)
+    public static function decimal($str, $places = 2, $digits = null) : bool
     {
         if ($digits > 0) {
             // Specific number of digits
@@ -447,7 +453,7 @@ class Rules
      * @param string $str input string
      * @return  boolean
      */
-    public static function color($str)
+    public static function color($str) : bool
     {
         return (bool) \preg_match('/^#?+[0-9a-f]{3}(?:[0-9a-f]{3})?$/iD', $str);
     }
@@ -460,7 +466,7 @@ class Rules
      * @param string $match field name to match
      * @return  boolean
      */
-    public static function matches($array, $field, $match)
+    public static function matches($array, $field, $match) : bool
     {
         return ($array[$field] === $array[$match]);
     }
@@ -514,7 +520,7 @@ class Rules
      * @return  bool
      * @throws \mii\core\Exception
      */
-    public static function fileSize(UploadedFile $file, $size, $dir = -1)
+    public static function fileSize(UploadedFile $file, $size, $dir = -1) : bool
     {
         if ($file->error === \UPLOAD_ERR_INI_SIZE) {
             // Upload is larger than PHP allowed size (upload_max_filesize)
@@ -533,7 +539,7 @@ class Rules
         return ($file->size <=> $size) === $dir;
     }
 
-    public static function recaptcha()
+    public static function recaptcha() : bool
     {
         $recaptcha = new \ReCaptcha\ReCaptcha(config('google.recaptcha.secret'));
         $response = $recaptcha->verify($_POST['g-recaptcha-response'], $_SERVER['REMOTE_ADDR']);

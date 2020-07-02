@@ -15,16 +15,16 @@ class Validation
     protected $_labels = [];
 
     // Rules that are executed even when the value is empty
-    protected $_empty_rules = ['notEmpty', 'matches'];
+    protected array $_empty_rules = ['notEmpty', 'required', 'matches'];
 
     // Error list, field => rule
-    protected $_errors = [];
+    protected array $_errors = [];
 
     // Error messages list field => rule => message
     protected $_error_messages = [];
 
     // Array to validate
-    protected $_data = [];
+    protected array $_data = [];
 
     /**
      * Sets the unique "any field" key and creates an ArrayObject from the
@@ -38,13 +38,13 @@ class Validation
         $this->_data = $array;
     }
 
-
     /**
      * Returns the array of data to be validated.
      *
+     * @param array|null $data
      * @return mixed
      */
-    public function data($data = null)
+    public function data(array $data = null) : array
     {
         if ($data === null) {
             return $this->_data;
@@ -54,11 +54,7 @@ class Validation
 
     public function field($name)
     {
-        if (isset($this->_data[$name])) {
-            return $this->_data[$name];
-        }
-
-        return null;
+        return $this->_data[$name] ?? null;
     }
 
     /**
@@ -68,9 +64,8 @@ class Validation
      * @param string $label label
      * @return  $this
      */
-    public function label($field, $label)
+    public function label($field, $label) : self
     {
-        // Set the label for this field
         $this->_labels[$field] = $label;
 
         return $this;
@@ -82,7 +77,7 @@ class Validation
      * @param array $labels list of field => label names
      * @return  $this
      */
-    public function labels(array $labels)
+    public function labels(array $labels) : self
     {
         $this->_labels = $labels + $this->_labels;
 
@@ -120,7 +115,7 @@ class Validation
      * @param array    $params extra parameters for the rule
      * @return  $this
      */
-    public function rule($field, $rule, array $params = [])
+    public function rule($field, $rule, array $params = []) : self
     {
         if ($field !== true && !isset($this->_labels[$field])) {
             // Set the field label to the field name
@@ -139,7 +134,7 @@ class Validation
      * @param array $rules list of rules
      * @return  $this
      */
-    public function rules(array $rules)
+    public function rules(array $rules) : self
     {
         foreach ($rules as $row) {
             $field = $row[0];
@@ -158,7 +153,6 @@ class Validation
         return $this;
     }
 
-
     /**
      * Executes all validation rules. This should
      * typically be called within an if/else block.
@@ -170,13 +164,9 @@ class Validation
      *
      * @return  boolean
      */
-    public function check()
+    public function check() : bool
     {
-        $benchmark = false;
-        if (config('debug')) {
-            // Start a new benchmark
-            $benchmark = \mii\util\Profiler::start('Validation', __FUNCTION__);
-        }
+        \assert((config('debug') && ($benchmark = \mii\util\Profiler::start('Validation', __FUNCTION__))) || 1);
 
         $this->_errors = [];
 
@@ -251,7 +241,7 @@ class Validation
                 }
 
                 // Ignore return values from rules when the field is empty
-                if (!\in_array($rule, $this->_empty_rules) && !Rules::notEmpty($value)) {
+                if (!\in_array($rule, $this->_empty_rules, true) && !Rules::notEmpty($value)) {
                     continue;
                 }
 
@@ -261,18 +251,15 @@ class Validation
 
                     // This field has an error, stop executing rules
                     break;
-                } elseif (isset($this->_errors[$field])) {
+                }
+
+                if (isset($this->_errors[$field])) {
                     // The callback added the error manually, stop checking rules
                     break;
                 }
             }
         }
-
-
-        if ($benchmark) {
-            // Stop benchmarking
-            \mii\util\Profiler::stop($benchmark);
-        }
+        \assert((isset($benchmark) && \mii\util\Profiler::stop($benchmark)) || 1);
 
         return empty($this->_errors);
     }
@@ -285,7 +272,7 @@ class Validation
      * @param array  $params
      * @return  $this
      */
-    public function error($field, $error, array $params = null)
+    public function error($field, $error, array $params = null) : self
     {
         $this->_errors[$field] = $error;
 
@@ -297,10 +284,9 @@ class Validation
         $this->_error_messages[$field][$error] = $message;
     }
 
-
-    public function hasErrors()
+    public function hasErrors() : bool
     {
-        return \count($this->_errors);
+        return !empty($this->_errors);
     }
 
     /**
@@ -322,7 +308,7 @@ class Validation
      * @return  array
      * @throws \Exception
      */
-    public function errors($file = null, $translate = false)
+    public function errors($file = null, bool $translate = false) : array
     {
         if ($file === null) {
             // Return the error list
@@ -421,7 +407,7 @@ class Validation
      *
      * @return  array
      */
-    public function errorsValues()
+    public function errorsValues() : array
     {
         return $this->_errors;
     }
