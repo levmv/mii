@@ -64,6 +64,11 @@ class PageController extends Controller
             if (!$this->layout) {
                 $this->setupLayout();
             }
+
+            if(!isset($this->og['title']) && $this->title) {
+                $this->og['title'] = $this->title;
+            }
+
             $this->index_block->set(
                 'layout',
                 $this->layout

@@ -44,7 +44,7 @@ class Validation
      * @param array|null $data
      * @return mixed
      */
-    public function data(array $data = null) : array
+    public function data(array $data = null)
     {
         if ($data === null) {
             return $this->_data;
