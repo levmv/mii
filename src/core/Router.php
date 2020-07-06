@@ -77,6 +77,8 @@ class Router extends Component
         foreach ($this->routes as $pattern => $value) {
             $method = false;
 
+            $pattern = mb_strtolower($pattern);
+
             if ($this->rest_mode) {
                 \preg_match('/^(get|post|put|delete):/', $pattern, $matches);
                 if (\count($matches)) {
