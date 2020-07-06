@@ -36,12 +36,13 @@ class Util extends Controller
 
         $result = [];
 
-        \exec("REQUEST_METHOD=GET SCRIPT_FILENAME=$tmp cgi-fcgi -bind -connect $fcgi $tmp", $result, $code);
+        \exec("REQUEST_METHOD=GET SCRIPT_FILENAME=$tmp cgi-fcgi -bind -connect $fcgi $tmp 2>&1", $result, $code);
 
         \unlink($tmp);
 
         if ($code !== 0) {
-            $this->error($result);
+            $this->error($result[0]);
+            $this->info('May be you need to install libfcgi0ldbl ?');
             return;
         }
         // Strip headers
@@ -116,8 +117,13 @@ class Util extends Controller
         }
 
         $this->info('Blocks:');
-        foreach ($blocks as $path => $hits) {
-            $this->info(\str_pad((string)$hits, 5) . ' ' . $path);
+        foreach ($blocks as $path => [$hits, $mem]) {
+            $mem = \number_format($mem / 1024, 2);
+            $this->info(
+                \str_pad((string)$hits, 7) . ' ' .
+                \str_pad($mem, 6, ' ', \STR_PAD_LEFT) . '  ' .
+                Debug::path($path)
+            );
         }
 
         if ($save) {
@@ -142,6 +148,11 @@ class Util extends Controller
 
     private function detectFcgiListen()
     {
+        $default_link = '/var/run/php/php-fpm.sock';
+        if(file_exists($default_link)) {
+            return realpath($default_link);
+        }
+
         $output = [];
         \exec("ps aux | grep \"php-fpm\" | awk '{print $11}'", $output, $code);
 
