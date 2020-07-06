@@ -109,7 +109,7 @@ class Util extends Controller
             $mem = \number_format($mem / 1024, 2);
 
             $this->info(
-                \str_pad($hits, 7) . ' ' .
+                \str_pad((string)$hits, 7) . ' ' .
                 \str_pad($mem, 6, ' ', \STR_PAD_LEFT) . '  ' .
                 Debug::path($path)
             );
@@ -117,7 +117,7 @@ class Util extends Controller
 
         $this->info('Blocks:');
         foreach ($blocks as $path => $hits) {
-            $this->info(\str_pad($hits, 5) . ' ' . $path);
+            $this->info(\str_pad((string)$hits, 5) . ' ' . $path);
         }
 
         if ($save) {
