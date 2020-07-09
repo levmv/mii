@@ -60,7 +60,13 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         $short = static::class;
         $short = (\substr($short, \strrpos($short, '\\') + 1));
         $short = \mb_strtolower(\trim(\preg_replace('/(?<!\p{Lu})\p{Lu}/u', '_\0', $short), '_'));
-        $short .= ($short[-1] === 's') ? 'es' : 's';
+        if($short[-1] === 's') {
+            $short .= 'es';
+        } else if($short[-1] === 'y') {
+            $short = \substr($short, 0, -1) . 'ies';
+        } else {
+            $short .= 's';
+        }
 
         return $short;
     }
