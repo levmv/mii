@@ -218,12 +218,14 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     {
         if (\is_object($values) && $values instanceof \mii\web\Form) {
             $values = $values->changedFields();
-        } elseif (!\is_array($values)) {
-            $this->$values = $value;
-        } else {
+        }
+
+        if (\is_array($values)) {
             foreach ($values as $key => $val) {
                 $this->$key = $val;
             }
+        } else {
+            $this->$values = $value;
         }
 
         return $this;
