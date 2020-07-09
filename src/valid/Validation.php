@@ -141,6 +141,10 @@ class Validation
             $rule = $row[1];
             $params = $row[2] ?? [];
 
+            if(\is_int($params)) {
+                $params = [$params];
+            }
+
             if (\is_array($field)) {
                 foreach ($field as $field_name) {
                     $this->rule($field_name, $rule, $params);
