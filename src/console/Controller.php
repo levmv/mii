@@ -189,22 +189,24 @@ class Controller
 
     protected function info($msg, $options = [])
     {
-        $msg = \strtr($msg, $options);
+        if(!empty($options)) {
+            $msg = \strtr((string) $msg, $options);
+        }
         Console::stdout($msg . "\n", Console::FG_GREEN);
         \Mii::info($msg, 'console');
     }
 
     protected function warning($msg, $options = [])
     {
-        $msg = \strtr($msg, $options);
+        $msg = \strtr((string) $msg, $options);
         Console::stdout($msg . "\n", Console::FG_PURPLE);
-        \Mii::warning(\strtr($msg, $options), 'console');
+        \Mii::warning($msg, 'console');
     }
 
     protected function error($msg, $options = [])
     {
-        $msg = \strtr($msg, $options);
+        $msg = \strtr((string) $msg, $options);
         Console::stderr($msg . "\n", Console::FG_RED);
-        \Mii::error(\strtr($msg, $options), 'console');
+        \Mii::error($msg, 'console');
     }
 }
