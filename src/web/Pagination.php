@@ -3,7 +3,7 @@
 namespace mii\web;
 
 use mii\db\Query;
-use mii\util\URL;
+use mii\util\Url;
 
 /**
  * Pagination links generator.
@@ -157,12 +157,12 @@ class Pagination
             case 'query_string':
             case 'mixed':
 
-                return URL::site($this->request->uri() .
+                return Url::site($this->request->uri() .
                     $this->query([$this->current_page_source_key => $page]));
 
             case 'route':
 
-                return URL::site($this->route->url(\array_merge(
+                return Url::site($this->route->url(\array_merge(
                     $this->route_params,
                     [$this->current_page_source_key => $page]
                 )) . $this->query());
