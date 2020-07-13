@@ -227,7 +227,7 @@ class Block extends Controller
         }
 
         foreach ($from as $f) {
-            $filename = \basename($f, \PATHINFO_FILENAME);
+            $filename = \basename($f);
 
             if ($callback) {
                 $file = \file_get_contents($this->input_path . '/' . $f);
