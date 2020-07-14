@@ -135,7 +135,7 @@ class Request extends Component
         $list = [];
         foreach ($namespaces as $namespace) {
             if (!isset($paths[$namespace])) {
-                $this->error("Dont know path for $namespace. Skip");
+                Console::stderr("Dont know path for $namespace. Skip");
                 continue;
             }
 
