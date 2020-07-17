@@ -355,6 +355,10 @@ class Text
         return $data;
     }
 
+    public static function genUUID(): string
+    {
+        return self::b64Encode(self::UUIDv4());
+    }
 
     public static function firstLetters(array $words): string
     {
