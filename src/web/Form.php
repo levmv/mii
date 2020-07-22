@@ -45,6 +45,10 @@ class Form
 
         if (\is_array($data)) {
             foreach (\array_intersect_key($data, $this->_fields) as $key => $value) {
+                $initier = 'init'.ucfirst($key);
+                if(\method_exists($this, $initier)) {
+                    $value = $this->$initier($value);
+                }
                 $this->set($key, $value);
             }
         }
