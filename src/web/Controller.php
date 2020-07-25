@@ -95,4 +95,10 @@ class Controller
 
         return \call_user_func_array([$this, $action], $args);
     }
+
+
+    protected function input(string $name, $default = null)
+    {
+        return $_POST[$name] ?? $_GET[$name] ?? $default;
+    }
 }
