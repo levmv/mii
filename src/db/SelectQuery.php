@@ -851,13 +851,14 @@ class SelectQuery
 
     public function count(): int
     {
-        $this->_type = Database::SELECT;
-
         $db = \Mii::$app->db;
 
+        $old_type = $this->_type;
         $old_select = $this->_select;
         $old_any = $this->_select_any;
         $old_order = $this->_order_by;
+        $old_limit = $this->_limit;
+        $old_offset = $this->_offset;
 
         if ($this->_distinct) {
             $dt_column = $db->quoteColumn($this->_select[0]);
@@ -869,19 +870,26 @@ class SelectQuery
                 new Expression('COUNT(*)'),
             );
         }
+
+        $this->_type = Database::SELECT;
         $as_array = $this->_as_array;
         $this->_as_array = true;
+        $this->_limit = null;
+        $this->_offset = null;
 
         $this->_order_by = [];
 
         $count = $this->execute()->scalar(0);
 
+        $this->_type = $old_type;
         $this->_select = $old_select;
         $this->_select_any = $old_any;
         $this->_order_by = $old_order;
         $this->_as_array = $as_array;
+        $this->_limit = $old_limit;
+        $this->_offset = $old_offset;
 
-        return (int) $count;
+        return (int)$count;
     }
 
     /**
