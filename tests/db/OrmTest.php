@@ -97,7 +97,17 @@ class OrmTest extends DatabaseTestCase
 
     public function testAll()
     {
-        $items = Item::all([1,2]);
+        $items = Item::all();
+        $this->assertIsArray($items);
+        $this->assertCount(2, $items);
+        $this->assertInstanceOf(Item::class, $items[0]);
+
+        $items = Item::all(['id', '=', 1]);
+        $this->assertIsArray($items);
+        $this->assertCount(1, $items);
+        $this->assertInstanceOf(Item::class, $items[0]);
+
+        $items = Item::all('id', 'in', [1,2]);
 
         $this->assertIsArray($items);
         $this->assertCount(2, $items);

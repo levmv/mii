@@ -92,25 +92,21 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
     /**
-     * @param array $value
-     * @return array
+     * @param array $args
+     * @return static[]
      */
-    public static function all(array $value = null): array
+    public static function all(...$args): array
     {
-        if (\is_null($value)) {
+        if (empty($args)) {
             return static::find()->all();
         }
 
-        \assert(!\is_array($value[0]), "This method accepts only array of int/string's");
-
-        return static::find()
-            ->where('id', 'IN', $value)
-            ->all();
+        return static::where(...$args)->all();
     }
 
 
     /**
-     * @param array|null $conditions
+     * @param array $args
      * @return Query
      */
     public static function where(...$args): SelectQuery
@@ -133,7 +129,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * @param int $value
-     * @return $this|null
+     * @return static|null
      */
     public static function one(int $value): ?self
     {
@@ -145,7 +141,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * @param array $conditions
-     * @return $this|null
+     * @return static|null
      */
     public static function oneWhere(...$conditions): ?self
     {
