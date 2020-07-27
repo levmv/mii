@@ -219,6 +219,10 @@ class Request extends Component
         return $this->params[$key] ?? $default;
     }
 
+    protected function input(string $name, $default = null)
+    {
+        return $_POST[$name] ?? $_GET[$name] ?? $default;
+    }
 
     public function csrfToken($new = false)
     {
