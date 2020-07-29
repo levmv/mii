@@ -69,6 +69,10 @@ class PageController extends Controller
                 $this->og['title'] = $this->title;
             }
 
+            if(!isset($this->og['description']) && $this->description) {
+                $this->og['description'] = $this->description;
+            }
+
             $this->index_block->set(
                 'layout',
                 $this->layout
