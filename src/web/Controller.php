@@ -66,6 +66,9 @@ class Controller
                     $type_name = $type->getName();
                     switch ($type_name) {
                         case 'int':
+                            if(\strlen($params[$name]) > 1 && $params[$name][0] === '0') {
+                                $params[$name] = \substr($params[$name], 1);
+                            }
                             $params[$name] = \filter_var($params[$name], \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE);
                             break;
                         case 'float':
