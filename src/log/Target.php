@@ -67,7 +67,7 @@ abstract class Target extends Component
         }
     }
 
-    abstract public function process(array $messages);
+    abstract public function process(array $messages): void;
 
     public function formatMessage(array $message): string
     {

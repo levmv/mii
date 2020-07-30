@@ -52,7 +52,7 @@ class Blocks extends BaseBlocks
                         }
                     } else {
                         foreach ($block['remote'] as $css_remote) {
-                            $this->_css[] = '<link type="text/css" href="' . $css_remote . '" rel="stylesheet" />';
+                            $this->_css .= '<link type="text/css" href="' . $css_remote . '" rel="stylesheet" />';
                         }
                     }
                 }
@@ -63,7 +63,7 @@ class Blocks extends BaseBlocks
                         }
                     } else {
                         $content = \implode("\n", $block['inline']);
-                        $this->_css[] = '<style>' . $content . '</style>';
+                        $this->_css .= '<style>' . $content . '</style>';
                     }
                 }
             }

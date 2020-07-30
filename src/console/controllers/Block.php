@@ -60,7 +60,7 @@ class Block extends Controller
         }
 
 
-        $this->input_path = Mii::resolve(config('console.block.input_path', '@root/node_modules/'));
+        $this->input_path = Mii::resolve((string) config('console.block.input_path', '@root/node_modules/'));
     }
 
 

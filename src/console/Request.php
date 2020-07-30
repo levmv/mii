@@ -242,7 +242,7 @@ class Request extends Component
     {
         $dir = \dir($path);
         while (false !== $entry = $dir->read()) {
-            if ($entry == '.' || $entry == '..' || $entry == '.git' || \is_dir($dir->path . '/' . $entry)) {
+            if ($entry === '.' || $entry === '..' || $entry === '.git' || \is_dir($dir->path . '/' . $entry)) {
                 continue;
             }
 

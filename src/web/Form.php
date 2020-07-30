@@ -137,7 +137,7 @@ class Form
         return [];
     }
 
-    public function setFields($fields)
+    public function setFields($fields) : void
     {
         $this->_fields = $fields;
     }
@@ -202,7 +202,7 @@ class Form
         return $this->_fields[$name];
     }
 
-    public function set($name, $value = null)
+    public function set($name, $value = null) : void
     {
         if (!\is_array($name)) {
             $name = [$name => $value];
@@ -230,7 +230,7 @@ class Form
         return $passed;
     }
 
-    public function error($field, $error, array $params = null)
+    public function error($field, $error, array $params = null) : self
     {
         $this->validation->error($field, $error, $params);
 

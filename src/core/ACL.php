@@ -53,7 +53,7 @@ class ACL
      *
      * @return $this
      */
-    public function clear()
+    public function clear() : self
     {
         $this->_rules = [];
 

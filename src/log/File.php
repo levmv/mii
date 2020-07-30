@@ -15,7 +15,7 @@ class File extends Target
     }
 
 
-    public function process(array $messages)
+    public function process(array $messages): void
     {
         $this->file = Mii::resolve($this->file);
         $log_dir = \dirname($this->file);

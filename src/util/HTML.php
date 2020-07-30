@@ -509,7 +509,7 @@ class HTML
      * @return  string
      * @uses    HTML::attributes
      */
-    public static function select($name, array $options = null, $selected = null, array $attributes = null)
+    public static function select($name, array $options = null, $selected = null, array $attributes = null): string
     {
         // Set the input name
         $attributes['name'] = $name;
@@ -532,8 +532,9 @@ class HTML
 
         if (empty($options)) {
             // There are no options
-            $options = '';
+            $s_options = '';
         } else {
+            $r_options = [];
             foreach ($options as $value => $name) {
                 if (\is_array($name)) {
                     // Create a new optgroup
@@ -577,11 +578,11 @@ class HTML
             }
 
             // Compile the options into a single string
-            $options = "\n" . \implode("\n", $r_options) . "\n";
+            $s_options = "\n" . \implode("\n", $r_options) . "\n";
         }
 
 
-        return '<select' . self::attributes($attributes) . '>' . $options . '</select>';
+        return '<select' . self::attributes($attributes) . '>' . $s_options . '</select>';
     }
 
     /**

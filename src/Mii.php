@@ -53,17 +53,17 @@ class Mii
     }
 
 
-    public static function error($msg, $category = 'app')
+    public static function error($msg, $category = 'app') : void
     {
         static::log(Logger::ERROR, $msg, $category);
     }
 
-    public static function warning($msg, $category = 'app')
+    public static function warning($msg, $category = 'app') : void
     {
         static::log(Logger::WARNING, $msg, $category);
     }
 
-    public static function info($msg, $category = 'app')
+    public static function info($msg, $category = 'app') : void
     {
         static::log(Logger::INFO, $msg, $category);
     }

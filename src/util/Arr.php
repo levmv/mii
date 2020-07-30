@@ -16,7 +16,7 @@ class Arr
      * @param array $array array to check
      * @return  boolean
      */
-    public static function isAssoc(array $array)
+    public static function isAssoc(array $array) : bool
     {
         // Keys of the array
         $keys = \array_keys($array);
@@ -100,15 +100,10 @@ class Arr
      * @param string $delimiter Path delimiter
      * @see Arr::path()
      */
-    public static function setPath(&$array, $path, $value, $delimiter = '.'): void
+    public static function setPath(&$array, string $path, $value, string $delimiter = '.'): void
     {
-
-        // The path has already been separated into keys
-        $keys = $path;
-        if (!\is_array($path)) {
-            // Split the keys by delimiter
-            $keys = \explode($delimiter, $path);
-        }
+        // Split the keys by delimiter
+        $keys = \explode($delimiter, $path);
 
         // Set current $array to inner-most array path
         while (\count($keys) > 1) {
@@ -220,7 +215,7 @@ class Arr
      * @param array $array2,... array to merge
      * @return  array
      */
-    public static function merge($array1, $array2)
+    public static function merge($array1, $array2) : array
     {
         if (static::isAssoc($array2)) {
             foreach ($array2 as $key => $value) {
@@ -284,7 +279,7 @@ class Arr
      * @param array $array2 input arrays that will overwrite existing values
      * @return  array
      */
-    public static function overwrite($array1, $array2)
+    public static function overwrite($array1, $array2) : array
     {
         foreach (\array_intersect_key($array2, $array1) as $key => $value) {
             $array1[$key] = $value;

@@ -92,7 +92,7 @@ trait JsonAttributes
 
     protected function _serializeValue($value)
     {
-        return \json_encode($value, \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
+        return \json_encode($value, JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
     }
 
     protected function _unserialize_value($key)
@@ -103,7 +103,7 @@ trait JsonAttributes
 
             $this->_serialize_cache[$key] = \is_null($this->attributes[$key])
                 ? null
-                : \json_decode($this->attributes[$key], true);
+                : \json_decode($this->attributes[$key], true, 512, JSON_THROW_ON_ERROR);
         }
         return $this->_serialize_cache[$key];
     }

@@ -374,7 +374,7 @@ class Rules
             return (bool) \preg_match('/^\pN++$/uD', $str);
         }
 
-        return (\is_int($str) and $str >= 0) || \ctype_digit($str);
+        return (\is_int($str) && $str >= 0) || \ctype_digit($str);
     }
 
     /**

@@ -260,7 +260,7 @@ class Session extends Component
             foreach ($counters as $key => $count) {
                 if ($count > 0) {
                     unset($counters[$key], $_SESSION[$key]);
-                } elseif ($count == 0) {
+                } elseif ($count === 0) {
                     $counters[$key]++;
                 }
             }
