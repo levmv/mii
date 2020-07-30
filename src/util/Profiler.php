@@ -12,6 +12,12 @@ use mii\core\Exception;
  */
 class Profiler
 {
+    private const GROUP = 0;
+    private const NAME = 1;
+    private const START_TIME = 2;
+    private const START_MEMORY = 3;
+    private const STOP_TIME = 4;
+    private const STOP_MEMORY = 5;
 
     /**
      * @var  integer   maximium number of application stats to keep
@@ -41,16 +47,16 @@ class Profiler
         $token = 'kp/' . \base_convert($counter++, 10, 32);
 
         Profiler::$_marks[$token] = [
-            'group' => \strtolower($group),
-            'name' => (string) $name,
+            self::GROUP => \strtolower($group),
+            self::NAME => (string) $name,
 
             // Start the benchmark
-            'start_time' => \hrtime(true) / 1e9,
-            'start_memory' => \memory_get_usage(),
+            self::START_TIME => \hrtime(true) / 1e9,
+            self::START_MEMORY => \memory_get_usage(),
 
             // Set the stop keys without values
-            'stop_time' => false,
-            'stop_memory' => false,
+            self::STOP_TIME => false,
+            self::STOP_MEMORY => false,
         ];
 
         return $token;
@@ -67,8 +73,8 @@ class Profiler
     public static function stop($token): bool
     {
         // Stop the benchmark
-        self::$_marks[$token]['stop_time'] = \hrtime(true) / 1e9;
-        self::$_marks[$token]['stop_memory'] = \memory_get_usage();
+        self::$_marks[$token][self::STOP_TIME] = \hrtime(true) / 1e9;
+        self::$_marks[$token][self::STOP_MEMORY] = \memory_get_usage();
         return true;
     }
 
@@ -102,7 +108,7 @@ class Profiler
 
         foreach (self::$_marks as $token => $mark) {
             // Sort the tokens by the group and name
-            $groups[$mark['group']][$mark['name']][] = $token;
+            $groups[$mark[self::GROUP]][$mark[self::NAME]][] = $token;
         }
 
         return $groups;
@@ -267,18 +273,18 @@ class Profiler
         // Import the benchmark data
         $mark = Profiler::$_marks[$token];
 
-        if ($mark['stop_time'] === false) {
+        if ($mark[self::STOP_TIME] === false) {
             // The benchmark has not been stopped yet
-            $mark['stop_time'] = \hrtime(true) / 1e9;
-            $mark['stop_memory'] = \memory_get_usage();
+            $mark[self::STOP_TIME] = \hrtime(true) / 1e9;
+            $mark[self::STOP_MEMORY] = \memory_get_usage();
         }
 
         return [
             // Total time in seconds
-            $mark['stop_time'] - $mark['start_time'],
+            $mark[self::STOP_TIME] - $mark[self::START_TIME],
 
             // Amount of memory in bytes
-            $mark['stop_memory'] - $mark['start_memory'],
+            $mark[self::STOP_MEMORY] - $mark[self::START_MEMORY],
         ];
     }
 
