@@ -107,7 +107,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * @param array $args
-     * @return Query
+     * @return SelectQuery
      */
     public static function where(...$args): SelectQuery
     {
