@@ -302,10 +302,10 @@ class Request extends Component
 
     private ?array $_json_items = null;
 
-    public function json($key, $default = null)
+    public function json($key = null, $default = null)
     {
-        if (!$this->_json_items && \strtolower($this->getContentType()) === 'application/json') {
-            $this->_json_items = \json_decode(\file_get_contents('php://input'), true);
+        if (!$this->_json_items && stripos($this->getContentType(), 'application/json') !== false) {
+            $this->_json_items = \json_decode(\file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
         } else {
             $this->_json_items = [];
         }
