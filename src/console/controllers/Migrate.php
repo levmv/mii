@@ -182,6 +182,7 @@ class ' . $name . '
 
                 try {
                     \Mii::$app->db->multiQuery(\file_get_contents($migration['file']));
+                    DB::commit();
                 } catch (\Throwable $e) {
                     DB::rollback();
                     $this->error("Migration #$name failed. Stop.");
