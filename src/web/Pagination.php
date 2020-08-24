@@ -68,6 +68,7 @@ class Pagination
     // Request object
     protected $request;
 
+    protected $base_uri;
 
     /**
      * Creates a new Pagination object.
@@ -82,6 +83,10 @@ class Pagination
 
         if (!$this->request) {
             $this->request = \Mii::$app->request;
+        }
+
+        if (!$this->base_uri) {
+            $this->base_uri = $this->request->uri();
         }
 
         // Pagination setup
@@ -157,15 +162,15 @@ class Pagination
             case 'query_string':
             case 'mixed':
 
-                return Url::site($this->request->uri() .
+                return Url::site($this->base_uri .
                     $this->query([$this->current_page_source_key => $page]));
 
             case 'route':
 
                 return Url::site($this->route->url(\array_merge(
-                    $this->route_params,
-                    [$this->current_page_source_key => $page]
-                )) . $this->query());
+                        $this->route_params,
+                        [$this->current_page_source_key => $page]
+                    )) . $this->query());
         }
 
         return '#';
