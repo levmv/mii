@@ -72,7 +72,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
     {
         $__params['handler'] = $this;
         \ob_start();
-        \ob_implicit_flush(0);
+        //\ob_implicit_flush(false);
         \extract($__params, \EXTR_OVERWRITE);
         require $__file;
         return \ob_get_clean();

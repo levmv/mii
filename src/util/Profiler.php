@@ -44,7 +44,7 @@ class Profiler
         static $counter = 0;
 
         // Create a unique token based on the counter
-        $token = 'kp/' . \base_convert($counter++, 10, 32);
+        $token = 'kp/' . \base_convert((string)$counter++, 10, 32);
 
         Profiler::$_marks[$token] = [
             self::GROUP => \strtolower($group),

@@ -54,13 +54,14 @@ class Controller
             if (\array_key_exists($name, $params)) {
                 $is_valid = true;
 
-                if ($param->isArray()) {
+                $type = $param->getType();
+
+                if ($type && $type->getName() === 'array') {
                     $params[$name] = (array) $params[$name];
                 } elseif (\is_array($params[$name])) {
                     $is_valid = false;
                 } elseif (
-                    ($type = $param->getType()) !== null &&
-                    $type->isBuiltin() &&
+                    $type && $type->isBuiltin() &&
                     ($params[$name] !== null || !$type->allowsNull())
                 ) {
                     $type_name = $type->getName();
