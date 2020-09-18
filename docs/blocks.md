@@ -1,5 +1,7 @@
 # Blocks
 
+_документация устарела_
+
 * /mii/web/Blocks
 * /mii/web/Block
 
