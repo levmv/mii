@@ -172,7 +172,7 @@ class Debug
             return '<small>object</small> <span>' . \get_class($var) . '(' . \count($array) . ')</span> ' . \implode("\n", $output);
         }
 
-        return '<small>' . \gettype($var) . '</small> ' . \htmlspecialchars(\print_r($var, true), \ENT_NOQUOTES, 'utf-8');
+        return '<small>' . \get_debug_type($var) . '</small> ' . \htmlspecialchars(\print_r($var, true), \ENT_NOQUOTES, 'utf-8');
     }
 
     /**

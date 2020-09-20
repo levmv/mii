@@ -227,3 +227,9 @@ if (!function_exists('str_contains')) {
         return '' === $needle || false !== strpos($haystack, $needle);
     }
 }
+
+if (!function_exists('get_debug_type')) {
+    function get_debug_type($value): string {
+        return gettype($value);
+    }
+}
