@@ -33,7 +33,7 @@ abstract class Target extends Component
             if (!$pass) {
                 foreach ($this->categories as $category) {
                     if ($msg[2] === $category ||
-                        (\substr_compare($category, '*', -1, 1) === 0 && \strpos($msg[2], \rtrim($category, '*')) === 0)) {
+                        (\substr_compare($category, '*', -1, 1) === 0 && \str_starts_with($msg[2], \rtrim($category, '*')))) {
                         $pass = true;
                         break;
                     }
@@ -43,7 +43,7 @@ abstract class Target extends Component
             if ($pass && !empty($this->except)) {
                 foreach ($this->except as $category) {
                     $prefix = \rtrim($category, '*');
-                    if (($msg[2] === $category || $prefix !== $category) && \strpos($msg[2], $prefix) === 0) {
+                    if (($msg[2] === $category || $prefix !== $category) && \str_starts_with($msg[2], $prefix)) {
                         $pass = false;
                         break;
                     }

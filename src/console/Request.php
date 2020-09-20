@@ -223,7 +223,7 @@ class Request extends Component
 
             foreach ($namespaces as $ns) {
                 foreach ($data as $prefix => $path) {
-                    if (\strpos($ns, $prefix) === 0) {
+                    if (\str_starts_with($ns, $prefix)) {
                         $path[0] .= \str_replace('\\', '/', \substr($ns, \strlen($prefix) - 1));
                         $paths[$ns] = $path[0];
                         break;
@@ -328,7 +328,7 @@ class Request extends Component
         $full = '';
 
         for ($i = 1; $i < \count($lines); $i++) {
-            if (\mb_strpos(\trim($lines[$i]), '@') === 0) {
+            if (\str_starts_with(\trim($lines[$i]), '@')) {
                 break;
             }
             $full .= $lines[$i] . "\n";

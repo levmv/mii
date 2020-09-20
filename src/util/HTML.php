@@ -194,7 +194,7 @@ class HTML
      */
     public static function script($file, array $attributes = null, $protocol = null)
     {
-        if (!\str_contains($file, '://') && \strpos($file, '//') !== 0) {
+        if (!\str_contains($file, '://') && !\str_starts_with($file, '//')) {
             // Add the base URL
             $file = Url::site($file, $protocol);
         }

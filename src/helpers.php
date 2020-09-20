@@ -228,6 +228,13 @@ if (!function_exists('str_contains')) {
     }
 }
 
+if (!function_exists('str_starts_with')) {
+    function str_starts_with(string $haystack, string $needle): bool
+    {
+        return \strncmp($haystack, $needle, \strlen($needle)) === 0;
+    }
+}
+
 if (!function_exists('get_debug_type')) {
     function get_debug_type($value): string {
         return gettype($value);

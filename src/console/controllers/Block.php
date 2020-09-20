@@ -44,7 +44,7 @@ class Block extends Controller
                     $index = $value;
 
                     // Drop 'i_' prefix.
-                    if (\strpos($value, 'i_') === 0) {
+                    if (\str_starts_with($value, 'i_')) {
                         $name = \substr($index, 2);
                     } else {
                         $name = $index;

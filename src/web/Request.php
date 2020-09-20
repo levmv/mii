@@ -98,7 +98,7 @@ class Request extends Component
 
         if (\is_null(\Mii::$app->base_url)) {
             //   $uri = \ltrim($uri, '/');
-        } elseif (\strpos($uri, \Mii::$app->base_url) === 0) {
+        } elseif (\str_starts_with($uri, \Mii::$app->base_url)) {
             // Remove the base URL from the URI
             $uri = (string) \substr($uri, \strlen(\Mii::$app->base_url));
         }

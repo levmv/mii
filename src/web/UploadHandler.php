@@ -32,7 +32,7 @@ class UploadHandler extends Component
         }
         $results = [];
         foreach ($this->_files as $key => $file) {
-            if (\strpos($key, "{$name}[") === 0) {
+            if (\str_starts_with($key, "{$name}[")) {
                 $results[] = $file;
             }
         }

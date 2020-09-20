@@ -196,7 +196,7 @@ class Debug
             });
         }
         foreach (\Mii::$paths as $name => $path) {
-            if (\strpos($file, $path) === 0) {
+            if (\str_starts_with($file, $path)) {
                 $file = '{' . $name . '}' . \substr($file, \strlen($path));
             }
         }
