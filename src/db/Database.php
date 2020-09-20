@@ -390,7 +390,7 @@ class Database extends Component
                 return $table ? "$table.$column" : $column;
             }
 
-            if (\strpos($column, '.') !== false) {
+            if (\str_contains($column, '.')) {
                 $parts = \explode('.', $column);
 
                 foreach ($parts as &$part) {
@@ -449,7 +449,7 @@ class Database extends Component
 
             $table = \str_replace('`', '``', $table);
 
-            if (\strpos($table, '.') !== false) {
+            if (\str_contains($table, '.')) {
                 $parts = \explode('.', $table);
 
                 foreach ($parts as &$part) {
@@ -496,7 +496,7 @@ class Database extends Component
 
             $value = \str_replace('`', '``', $value);
 
-            if (\strpos($value, '.') !== false) {
+            if (\str_contains($value, '.')) {
                 $parts = \explode('.', $value);
 
                 foreach ($parts as &$part) {

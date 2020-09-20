@@ -87,14 +87,14 @@ class Util extends Controller
                 continue;
             }
 
-            if (\strpos($path, 'composer') !== false) {
+            if (\str_contains($path, 'composer')) {
                 continue;
             }
-            if (\strpos($path, 'preload.php') !== false) {
+            if (\str_contains($path, 'preload.php')) {
                 continue;
             }
 
-            if (\strpos($path, 'blocks') !== false) {
+            if (\str_contains($path, 'blocks')) {
                 $blocks[$path] = [$hits, $mem];
             } else {
                 $scripts[$path] = [$hits, $mem];

@@ -100,7 +100,7 @@ class Router extends Component
             $params = null;
             $name = false;
 
-            $is_static = ((\strpos($pattern, '{') === false and \strpos($pattern, '(') === false));
+            $is_static = (!\str_contains($pattern, '{') && !\str_contains($pattern, '('));
 
             if (\is_array($value)) {
                 $result[static::R_PATH] = $value['path'];
@@ -150,7 +150,7 @@ class Router extends Component
         // Escape everything preg_quote would escape except for : ( ) { }
         $expression = \preg_replace('#' . static::REGEX_ESCAPE . '#', '\\\\$0', $pattern);
 
-        if (\strpos($expression, '(') !== false) {
+        if (\str_contains($expression, '(')) {
             // Make optional parts of the URI non-capturing and optional
             $expression = \str_replace(['(', ')'], ['(?:', ')?'], $expression);
         }
@@ -231,7 +231,7 @@ class Router extends Component
             }
         }
 
-        if (\strpos($path, ':') !== false) {
+        if (\str_contains($path, ':')) {
             [$path, $params['action']] = \explode(':', $path);
         }
 

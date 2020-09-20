@@ -225,7 +225,7 @@ class Validation
                     // Call static::$rule($this[$field], $param, ...) with Reflection
 
                     $passed = $method->invokeArgs(null, $params);
-                } elseif (\strpos($rule, '::') === false) {
+                } elseif (!\str_contains($rule, '::')) {
 
                     // Use a function call
                     $function = new \ReflectionFunction($rule);

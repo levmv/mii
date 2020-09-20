@@ -221,3 +221,9 @@ if (!\function_exists('configSet')) {
         \mii\util\Arr::setPath(Mii::$app->_config, $key, $value, '.');
     }
 }
+
+if (!function_exists('str_contains')) {
+    function str_contains(string $haystack, string $needle): bool {
+        return '' === $needle || false !== strpos($haystack, $needle);
+    }
+}

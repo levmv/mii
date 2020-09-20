@@ -319,7 +319,7 @@ class Debug
                     $args = [$step['args'][0]];
                 }
             } elseif (isset($step['args'])) {
-                if (!\function_exists($step['function']) or \strpos($step['function'], '{closure}') !== false) {
+                if (!\function_exists($step['function']) || \str_contains($step['function'], '{closure}')) {
                     // Introspection on closures or language constructs in a stack trace is impossible
                     $params = null;
                 } else {

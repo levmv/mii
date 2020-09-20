@@ -129,7 +129,7 @@ class HTML
             // Only use the base URL
             $uri = Url::base($protocol);
         } else {
-            if (\strpos($uri, '://') !== false) {
+            if (\str_contains($uri, '://')) {
                 if (self::$windowed_urls === true && empty($attributes['target'])) {
                     // Make the link open in a new window
                     $attributes['target'] = '_blank';
@@ -162,7 +162,7 @@ class HTML
      */
     public static function style($file, array $attributes = null, $protocol = null)
     {
-        if (\strpos($file, '://') === false) {
+        if (!\str_contains($file, '://')) {
             // Add the base URL
             $file = Url::site($file, $protocol);
         }
@@ -194,7 +194,7 @@ class HTML
      */
     public static function script($file, array $attributes = null, $protocol = null)
     {
-        if (\strpos($file, '://') === false && \strpos($file, '//') !== 0) {
+        if (!\str_contains($file, '://') && \strpos($file, '//') !== 0) {
             // Add the base URL
             $file = Url::site($file, $protocol);
         }
@@ -219,7 +219,7 @@ class HTML
      */
     public static function image($file, array $attributes = null, $protocol = null)
     {
-        if (\strpos($file, '://') === false) {
+        if (!\str_contains($file, '://')) {
             // Add the base URL
             $file = Url::site($file, $protocol);
         }
@@ -310,7 +310,7 @@ class HTML
         if (!$action) {
             // Allow empty form actions (submits back to the current url).
             $action = '';
-        } elseif (\strpos($action, '://') === false) {
+        } elseif (!\str_contains($action, '://')) {
             // Make the URI absolute
             $action = Url::site($action);
         }
