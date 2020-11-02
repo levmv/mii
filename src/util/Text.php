@@ -6,6 +6,8 @@ use mii\core\Exception;
 
 class Text
 {
+    public const JSON_FLAGS = JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+    | JSON_PRESERVE_ZERO_FRACTION | JSON_INVALID_UTF8_SUBSTITUTE;
 
     /**
      * Limits a phrase to a given number of words.
