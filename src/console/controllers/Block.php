@@ -90,6 +90,17 @@ class Block extends Controller
         $this->info("Changed files: {$this->changed_files}");
     }
 
+    protected function doCore($block)
+    {
+        $this->toBlock('core.default/dist/core.full.min.js', $block, 'js');
+        $this->toBlock([
+            'core.default/dist/core.css',
+            'core.default/dist/modal.css',
+            'core.default/dist/dropdown.css',
+            'core.default/dist/dots.css',
+        ], $block, 'css');
+    }
+
 
     protected function doFetch($block)
     {
@@ -103,8 +114,8 @@ class Block extends Controller
 
     protected function doM1k($block)
     {
-        $this->to_block('m1k/dist/m1k.js', $block, 'js');
-        $this->to_block('m1k/dist/m1k.css', $block, 'css');
+        $this->toBlock('m1k/dist/m1k.js', $block, 'js');
+        $this->toBlock('m1k/dist/m1k.css', $block, 'css');
     }
 
     protected function doJquery($block)
@@ -142,14 +153,6 @@ class Block extends Controller
         $this->toAssets('plupload/js/Moxie.xap', $block);
     }
 
-
-    /**
-     * @deprecated
-     */
-    protected function to_block($from, $block_name, $ext, $callback = null)
-    {
-        $this->toBlock($from, $block_name, $ext, $callback);
-    }
 
     /**
      * @param      $from
@@ -206,14 +209,6 @@ class Block extends Controller
     }
 
 
-    /**
-     * @deprecated
-     */
-    protected function to_assets($from, $block_name, $callback = null)
-    {
-        $this->toAssets($from, $block_name, $callback);
-    }
-
     protected function toAssets($from, $block_name, $callback = null)
     {
         if (!\is_array($from)) {
@@ -236,15 +231,6 @@ class Block extends Controller
                 \copy($this->input_path . '/' . $f, $dir . '/' . $filename);
             }
         }
-    }
-
-
-    /**
-     * @deprecated
-     */
-    protected function iterate_dir($from, $callback)
-    {
-        $this->iterateDir($from, $callback);
     }
 
 
