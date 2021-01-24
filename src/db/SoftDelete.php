@@ -11,15 +11,14 @@ trait SoftDelete
 {
     protected static function prepareQuery(SelectQuery $query): SelectQuery
     {
-        return parent::prepareQuery($query->where('deleted', 'is', null));
+        return parent::prepareQuery($query->where(static::table().'.deleted', 'is', null));
     }
 
     public static function findDeleted(): SelectQuery
     {
-        // TODO:: order_by
-        return (new SelectQuery(static::class))
-            ->where('deleted', 'is not', null);
+        return parent::prepareQuery((new SelectQuery(static::class))->where(static::table().'.deleted', 'is not', null));
     }
+
 
     public function restore()
     {
@@ -33,6 +32,10 @@ trait SoftDelete
 
     public function delete(): void
     {
+        $this->innerDelete();
+    }
+
+    protected function innerDelete() : void {
         if (!$this->loaded()) {
             throw new \Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!', [], []);
         }

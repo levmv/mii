@@ -455,6 +455,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public function delete(): void
     {
+       $this->innerDelete();
+    }
+
+    protected function innerDelete() : void {
         if ($this->__loaded && isset($this->id)) {
             static::query()
                 ->delete()
