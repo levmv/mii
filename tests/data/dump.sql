@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS articles;
 CREATE TABLE `items` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
+  `some` VARCHAR(255) NULL,
   `created` INT(11) NOT NULL,
   `updated` INT(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (id)

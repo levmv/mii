@@ -199,11 +199,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return;
         }
 
-        if (!isset($this->attributes[$key]) || $value !== $this->attributes[$key]) {
+        if (!\array_key_exists($key, $this->attributes) || $value !== $this->attributes[$key]) {
             $this->_changed[$key] = true;
+            $this->attributes[$key] = $value;
         }
-
-        $this->attributes[$key] = $value;
     }
 
     public function __get($key)

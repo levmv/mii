@@ -2,6 +2,7 @@
 
 namespace miit\db;
 
+use mii\db\DatabaseException;
 use mii\db\ModelNotFoundException;
 use mii\db\Result;
 use mii\db\SelectQuery;
@@ -46,9 +47,15 @@ class OrmTest extends DatabaseTestCase
         $this->assertTrue($item->wasChanged('name'));
 
         $item = Item::one(1);
-        $item->name = 'bar';
-        $this->assertFalse($item->changed('name'));
-        $this->assertSame(0, $item->update());
+        $this->assertFalse($item->changed('some'));
+        $item->some = null;
+        $this->assertFalse($item->changed('some'));
+
+        $item = Item::one(1);
+        $item->name = null;
+        $this->assertTrue($item->changed('name'));
+        $this->expectException(DatabaseException::class);
+        $item->update();
         $this->assertFalse($item->wasChanged('name'));
     }
 
