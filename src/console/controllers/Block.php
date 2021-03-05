@@ -5,6 +5,7 @@ namespace mii\console\controllers;
 use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
+use mii\util\Console;
 use mii\util\FS;
 
 /**
@@ -14,15 +15,15 @@ use mii\util\FS;
  */
 class Block extends Controller
 {
-    protected $input_path;
+    protected string $input_path;
 
-    protected $output_path;
+    protected string $output_path;
 
-    protected $blocks = [];
+    protected array $blocks = [];
 
-    protected $force = false;
+    protected bool $force = false;
 
-    private $changed_files = 0;
+    private int $changedFiles = 0;
 
     protected function before()
     {
@@ -59,17 +60,17 @@ class Block extends Controller
             }
         }
 
-
-        $this->input_path = Mii::resolve((string) config('console.block.input_path', '@root/node_modules/'));
+        $this->input_path = Mii::resolve((string)config('console.block.input_path', '@root/node_modules/'));
     }
 
 
     public function index($argv)
     {
         $this->force = $this->request->param('force', false);
+        $totalChanged = 0;
 
         foreach ($this->blocks as $output_path => $blocks) {
-            $this->info("\n# Processing $output_path");
+            $this->info("\n# $output_path");
 
             foreach ($blocks as $block => $func) {
                 $this->output_path = Mii::resolve($output_path);
@@ -79,7 +80,16 @@ class Block extends Controller
                 } else {
                     try {
                         $this->{$func}($block);
-                        $this->info($block);
+
+                        if ($this->changedFiles > 0) {
+                            $this->info("$block updated ($this->changedFiles)");
+                        } else {
+                            Console::stdout($block . "\n", Console::FG_GREY);
+                        }
+
+                        $totalChanged += $this->changedFiles;
+
+                        $this->changedFiles = 0;
                     } catch (\Throwable $e) {
                         $this->error($e->getMessage());
                     }
@@ -87,7 +97,7 @@ class Block extends Controller
             }
         }
 
-        $this->info("Changed files: {$this->changed_files}");
+        $this->info("Changed files: $totalChanged");
     }
 
     protected function doCore($block)
@@ -161,7 +171,7 @@ class Block extends Controller
      * @param null $callback
      * @throws Exception
      */
-    protected function toBlock($from, $block_name, $ext, $callback = null): void
+    protected function toBlock($from, string $block_name, string $ext, \Closure $callback = null): void
     {
         if (!\is_array($from)) {
             $from = [$from];
@@ -205,11 +215,11 @@ class Block extends Controller
 
         \file_put_contents($to, $out);
 
-        $this->changed_files++;
+        $this->changedFiles++;
     }
 
 
-    protected function toAssets($from, $block_name, $callback = null)
+    protected function toAssets($from, $block_name, \Closure $callback = null)
     {
         if (!\is_array($from)) {
             $from = [$from];
