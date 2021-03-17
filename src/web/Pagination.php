@@ -2,47 +2,28 @@
 
 namespace mii\web;
 
-use mii\db\Query;
 use mii\util\Url;
 
 /**
  * Pagination links generator.
- *
- * @package    Kohana/Pagination
- * @category   Base
- * @author     Kohana Team
- * @copyright  (c) 2008-2009 Kohana Team
- * @license    http://kohanaphp.com/license.html
  */
 class Pagination
 {
-    protected $current_page_source = 'query_string';
-
-    protected $current_page_source_key = 'page';
+    protected string $page_param = 'page';
 
     // Current page number
-    protected $current_page;
+    protected ?int $current_page = null;
 
     // Total item count
-    protected $total_items = 0;
+    protected int $total_items = 0;
 
     // How many items to show per page
-    protected $items_per_page = 50;
+    protected int $items_per_page = 50;
 
     // Total page count
-    protected $total_pages;
+    protected int $total_pages;
 
     protected $block = 'pagination';
-
-    protected $auto_hide = true;
-
-    protected $first_page_in_url = false;
-
-    // Item offset for the first item displayed on the current page
-    protected $current_first_item;
-
-    // Item offset for the last item displayed on the current page
-    protected $current_last_item;
 
     // Previous page number; FALSE if the current page is the first one
     protected $previous_page;
@@ -57,23 +38,22 @@ class Pagination
     protected $last_page;
 
     // Query offset
-    protected $offset;
+    protected int $offset;
 
-    // Route to use for URIs
-    protected $route;
+    // Name of route to use for URIs
+    protected ?string $route = null;
 
     // Parameters to use with Route to create URIs
-    protected $route_params = [];
+    protected array $route_params = [];
 
     // Request object
-    protected $request;
+    protected ?Request $request = null;
 
-    protected $base_uri;
+    protected ?string $base_uri = null;
 
     /**
-     * Creates a new Pagination object.
      *
-     * @return  void
+     * @param array $config
      */
     public function __construct(array $config = [])
     {
@@ -81,99 +61,60 @@ class Pagination
             $this->$key = $val;
         }
 
-        if (!$this->request) {
+        if ($this->request === null) {
             $this->request = \Mii::$app->request;
         }
 
-        if (!$this->base_uri) {
+        if ($this->base_uri === null) {
             $this->base_uri = $this->request->uri();
         }
 
-        // Pagination setup
-        $this->calculate();
-    }
-
-    /**
-     * Loads configuration settings into the object and (re)calculates pagination if needed.
-     * Allows you to update config settings after a Pagination object has been constructed.
-     *
-     * @param array $config configuration
-     * @return  object  Pagination
-     */
-    public function calculate(array $config = [])
-    {
-        foreach ($config as $key => $val) {
-            $this->$key = $val;
-        }
-
         if ($this->current_page === null) {
-            $query_key = $this->current_page_source_key;
-
-            switch ($this->current_page_source) {
-                case 'query_string':
-                case 'mixed':
-
-                    $this->current_page = (int) $this->request->get($query_key, 1);
-                    break;
-
-                case 'route':
-
-                    $this->current_page = (int) $this->request->param($query_key, 1);
-
-                    break;
+            if ($this->route !== null) {
+                $this->current_page = (int)$this->request->param($this->page_param, 1);
+            } else {
+                $this->current_page = (int)$this->request->get($this->page_param, 1);
             }
         }
 
         // Calculate and clean all pagination variables
-        $this->total_items = (int) \max(0, $this->total_items);
-        $this->items_per_page = (int) \max(1, $this->items_per_page);
-        $this->total_pages = (int) \ceil($this->total_items / $this->items_per_page);
-        $this->current_page = (int) \min(\max(1, $this->current_page), \max(1, $this->total_pages));
-        $this->current_first_item = (int) \min((($this->current_page - 1) * $this->items_per_page) + 1, $this->total_items);
-        $this->current_last_item = (int) \min($this->current_first_item + $this->items_per_page - 1, $this->total_items);
+        $this->total_items = \max(0, $this->total_items);
+        $this->items_per_page = (int)\max(1, $this->items_per_page);
+        $this->total_pages = (int)\ceil($this->total_items / $this->items_per_page);
+        $this->current_page = (int)\min(\max(1, $this->current_page), \max(1, $this->total_pages));
         $this->previous_page = ($this->current_page > 1) ? $this->current_page - 1 : false;
         $this->next_page = ($this->current_page < $this->total_pages) ? $this->current_page + 1 : false;
         $this->first_page = ($this->current_page === 1) ? false : 1;
         $this->last_page = ($this->current_page >= $this->total_pages) ? false : $this->total_pages;
-        $this->offset = (int) (($this->current_page - 1) * $this->items_per_page);
-
-
-        // Chainable method
-        return $this;
+        $this->offset = ($this->current_page - 1) * $this->items_per_page;
     }
+
 
     /**
      * Generates the full URL for a certain page.
      *
      * @param integer  page number
      * @return  string   page URL
+     * @throws \mii\core\InvalidRouteException
      */
-    public function url($page = 1)
+    public function url(?int $page = 1): string
     {
         // Clean the page number
-        $page = \max(1, (int) $page);
+        $page = \max(1, $page);
 
         // No page number in URLs to first page
-        if ($page === 1 && !$this->first_page_in_url) {
+        if ($page === 1) {
             $page = null;
         }
 
-        switch ($this->current_page_source) {
-            case 'query_string':
-            case 'mixed':
-
-                return Url::site($this->base_uri .
-                    $this->query([$this->current_page_source_key => $page]));
-
-            case 'route':
-
-                return Url::site($this->route->url(\array_merge(
-                        $this->route_params,
-                        [$this->current_page_source_key => $page]
-                    )) . $this->query());
+        if ($this->route !== null) {
+            return \Mii::$app->router->url($this->route, \array_merge(
+                    $this->route_params,
+                    [$this->page_param => $page]
+                )) . $this->query();
         }
 
-        return '#';
+        return Url::site($this->base_uri . $this->query([$this->page_param => $page]));
     }
 
     /**
@@ -192,11 +133,12 @@ class Pagination
      *
      * @param mixed   string of the block name to use, or a block object
      * @return  string  pagination output (HTML)
+     * @throws Exception
      */
-    public function render($block = null)
+    public function render($block = null): string
     {
         // Automatically hide pagination whenever it is superfluous
-        if ($this->auto_hide === true && $this->total_pages <= 1) {
+        if ($this->total_pages <= 1) {
             return '';
         }
 
@@ -214,12 +156,12 @@ class Pagination
         return $block->set(\get_object_vars($this))->set('page', $this)->render();
     }
 
-    public function getOffset()
+    public function getOffset(): int
     {
         return $this->offset;
     }
 
-    public function getLimit()
+    public function getLimit(): int
     {
         return $this->items_per_page;
     }
@@ -233,6 +175,17 @@ class Pagination
     {
         return $this->previous_page;
     }
+
+    /* public function firstItem() : int
+     {
+         return (int) \min((($this->current_page - 1) * $this->items_per_page) + 1, $this->total_items);
+     }
+
+     public function lastItem() : int
+     {
+         return (int) \min($this->firstItem() + $this->items_per_page - 1, $this->total_items);
+     }*/
+
 
     public function links(): array
     {
@@ -260,7 +213,7 @@ class Pagination
      * @param array    Parameters to override
      * @return    string
      */
-    public function query(array $params = null)
+    public function query(array $params = null): string
     {
         if ($params === null) {
             // Use only the current parameters
@@ -286,6 +239,7 @@ class Pagination
      * Renders the pagination links.
      *
      * @return  string  pagination output (HTML)
+     * @throws Exception
      */
     public function __toString()
     {
