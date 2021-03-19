@@ -20,7 +20,7 @@ class Date
     public static function nice(int $timestamp, bool $with_time = true): string
     {
         static::$today ??= \mktime(0, 0, 0);
-        static::$year ??= \mktime(0, 0, 0, 0, 0);
+        static::$year ??= \mktime(0, 0, 0, 1, 1);
 
         if ($timestamp > static::$today) {
             $pattern = 'сегодня';
