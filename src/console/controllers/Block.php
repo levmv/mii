@@ -112,6 +112,13 @@ class Block extends Controller
     }
 
 
+    protected function doMiitable($block)
+    {
+        $this->toBlock('mii-table/assets/table.js', $block, 'js');
+        $this->toBlock('mii-table/assets/table.css', $block, 'css');
+    }
+
+
     protected function doFetch($block)
     {
         $this->toBlock('unfetch/polyfill/index.js', $block, 'js');
