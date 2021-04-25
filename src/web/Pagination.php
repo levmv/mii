@@ -2,6 +2,7 @@
 
 namespace mii\web;
 
+use mii\util\HTML;
 use mii\util\Url;
 
 /**
@@ -50,6 +51,8 @@ class Pagination
     protected ?Request $request = null;
 
     protected ?string $base_uri = null;
+
+    protected string $base_class = 'pagination';
 
     /**
      *
@@ -142,9 +145,10 @@ class Pagination
             return '';
         }
 
-        if ($block === null) {
-            // Use the view from config
-            $block = $this->block;
+        $block = $block ?? $this->block;
+
+        if($block === null) {
+            return $this->renderHtml();
         }
 
         if (!$block instanceof Block) {
@@ -155,6 +159,31 @@ class Pagination
         // Pass on the whole Pagination object
         return $block->set(\get_object_vars($this))->set('page', $this)->render();
     }
+
+    public function renderHtml() : string
+    {
+        $MAX_OFFSET = 5;
+
+        $result = "<div class='{$this->base_class}'>";
+
+        $start = $this->current_page > $MAX_OFFSET
+            ? $this->current_page - $MAX_OFFSET
+            : 1;
+
+        $right = $this->current_page + $MAX_OFFSET;
+        for ($i = $start; $i <= $right && $i <= $this->total_pages; $i++) {
+            if ($i === $this->current_page) {
+                $result .= "<span class='{$this->base_class}__current'>$i</span>";
+            } else {
+                $result .= "<a class='{$this->base_class}__link' href='".HTML::chars($this->url($i)) ."'>$i</a>";
+            }
+        }
+
+        $result .= '</div>';
+
+        return $result;
+    }
+
 
     public function getOffset(): int
     {
