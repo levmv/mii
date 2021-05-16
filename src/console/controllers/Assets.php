@@ -40,12 +40,15 @@ class Assets extends Controller
 
     protected $assets_group = 'static';
 
-    private $results = [];
+    private array $results = [];
 
-    private $processed = [
+    private array $processed = [
         'css' => [],
         'js' => [],
     ];
+
+    private float $_time;
+    private int $_memory;
 
     protected function before()
     {
@@ -63,7 +66,7 @@ class Assets extends Controller
 
         $this->assets_map_path = config('components.blocks.assets_map_path', '@tmp');
 
-        $this->config_file = $this->request->params['config'] ?? '@app/config/assets.php';
+        $this->config_file = $this->request->params['config'] ?? config('console.assets.config_file', '@app/config/assets.php');
         $this->json_output = $this->request->params['json'] ?? false;
         $this->force_mode = $this->request->params['force'] ?? false;
         $this->filtered_sets = (array) ($this->request->params['set'] ?? \array_keys($this->sets));

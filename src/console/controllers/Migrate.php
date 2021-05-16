@@ -22,6 +22,11 @@ class Migrate extends Controller
     protected function before()
     {
         $config = config('migrate', []);
+        if(!empty($config)) {
+            $this->warning("Please move 'migrate' config section to 'console.migrate'");
+        } else {
+            $config = config('console.migrate', []);
+        }
 
         foreach ($config as $name => $value) {
             $this->$name = $value;
