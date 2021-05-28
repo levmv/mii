@@ -31,7 +31,7 @@ class Log
         $exceptions = [];
 
         $trace = \debug_backtrace(\DEBUG_BACKTRACE_IGNORE_ARGS, 3);
-        $message[] = ($trace[2]['class'] ? $trace[2]['class'] . '->' : '') . $trace[2]['function'];
+        $message[] = (isset($trace[2]['class']) ? $trace[2]['class'] . '->' : '') . $trace[2]['function'];
 
         foreach ($args as $arg) {
             if (\is_string($arg) || \is_int($arg)) {
