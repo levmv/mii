@@ -330,7 +330,7 @@ class Router extends Component
                 }
             }
 
-            $uri = \str_replace($key, $params[$param], $uri);
+            $uri = \str_replace($key, (string) $params[$param], $uri);
         }
 
         // Trim all extra slashes from the URI
