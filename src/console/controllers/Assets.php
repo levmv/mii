@@ -302,8 +302,12 @@ class Assets extends Controller
 
                 $result_file_name = $this->buildFile($filename, $data[$type], $type);
 
-                foreach ($data[$type] as $block_name) {
-                    $this->results[$set_name][$type][$block_name] = $result_file_name;
+                if(isset($data['block_name'])) {
+                    $this->results[$set_name][$type][$data['block_name']] = $result_file_name;
+                } else {
+                    foreach ($data[$type] as $block_name) {
+                        $this->results[$set_name][$type][$block_name] = $result_file_name;
+                    }
                 }
             }
         }
