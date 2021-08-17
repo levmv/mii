@@ -202,23 +202,14 @@ class Util extends Controller
                 $type = \strtolower($matches[1]);
 
 
-                if (!empty($matches[2])) {
-                    if ($type === 'enum') {
-                    } else {
-                        $values = \explode(',', $matches[2]);
-                        $column['size'] = (int) $values[0];
-                        if (isset($values[1])) {
-                            $column['scale'] = (int) $values[1];
-                        }
-                        if ($column['size'] === 1 && $type === 'bit') {
-                            $column['type'] = 'boolean';
-                        } elseif ($type === 'bit') {
-                            if ($column['size'] > 32) {
-                                $column['type'] = 'bigint';
-                            } elseif ($column['size'] === 32) {
-                                $column['type'] = 'integer';
-                            }
-                        }
+                if (!empty($matches[2]) && $type !== 'enum') {
+                    $values = \explode(',', $matches[2]);
+                    $column['size'] = (int) $values[0];
+                    if (isset($values[1])) {
+                        $column['scale'] = (int) $values[1];
+                    }
+                    if($type === 'bit') {
+                        $column['type'] = ($column['size'] === 1) ? 'bool' : 'int';
                     }
                 }
             }
@@ -226,7 +217,8 @@ class Util extends Controller
         }
 
         foreach ($columns as $column_name => $column) {
-            $this->stdout('* @property ' . \str_pad($column['type'], 7) . '$' . $column_name . "\n");
+            $nullable = $column['allow_null'] ? '?' : '';
+            $this->stdout('* @property ' . \str_pad($nullable.$column['type'], 8) . '$' . $column_name . "\n");
         }
     }
 
