@@ -75,6 +75,7 @@ class Router extends Component
         $route_index = 0;
 
         foreach ($this->routes as $pattern => $value) {
+            $pattern = (string) $pattern;
             $method = false;
 
             if ($this->rest_mode) {
