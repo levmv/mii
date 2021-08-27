@@ -25,6 +25,8 @@ class Block extends Controller
 
     private int $changedFiles = 0;
 
+    private string $curBlock;
+
     protected function before()
     {
         $list = config('console.block.rules', []);
@@ -79,6 +81,7 @@ class Block extends Controller
                     $this->error("Method $func doesnt exist");
                 } else {
                     try {
+                        $this->curBlock = $block;
                         $this->{$func}($block);
 
                         if ($this->changedFiles > 0) {
@@ -168,6 +171,18 @@ class Block extends Controller
         $this->toBlock('plupload/js/plupload.full.min.js', $block, 'js');
         $this->toAssets('plupload/js/Moxie.swf', $block);
         $this->toAssets('plupload/js/Moxie.xap', $block);
+    }
+
+
+
+    protected function jsToBlock($from, \Closure $callback = null) : void
+    {
+        $this->toBlock($from, $this->curBlock, 'js', $callback);
+    }
+
+    protected function cssToBlock($from, \Closure $callback = null) : void
+    {
+        $this->toBlock($from, $this->curBlock, 'css', $callback);
     }
 
 
