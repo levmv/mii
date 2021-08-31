@@ -84,9 +84,9 @@ abstract class App
         return $this->_instances[$id];
     }
 
-    public function has(string $id): bool
+    public function has(string $id, bool $checkInstance = false): bool
     {
-        return isset($this->_instances[$id]) || isset($this->_config['components'][$id]);
+        return $checkInstance ? isset($this->_instances[$id]) : isset($this->_config['components'][$id]);
     }
 
 
