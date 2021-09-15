@@ -105,44 +105,21 @@ class Block extends Controller
 
     protected function doCore($block)
     {
-        $this->toBlock('core.default/dist/core.full.min.js', $block, 'js');
-        $this->toBlock([
+        $this->jsToBlock('core.default/dist/core.full.min.js');
+        $this->cssToBlock([
             'core.default/dist/core.css',
             'core.default/dist/modal.css',
             'core.default/dist/dropdown.css',
             'core.default/dist/dots.css',
-        ], $block, 'css');
+        ]);
     }
 
 
     protected function doMiitable($block)
     {
-        $this->toBlock('mii-table/assets/table.js', $block, 'js');
-        $this->toBlock('mii-table/assets/table.css', $block, 'css');
+        $this->jsToBlock('mii-table/assets/table.js');
+        $this->cssToBlock('mii-table/assets/table.css');
     }
-
-
-    protected function doFetch($block)
-    {
-        $this->toBlock('unfetch/polyfill/index.js', $block, 'js');
-    }
-
-    protected function doPromise($block)
-    {
-        $this->toBlock('promise-polyfill/dist/polyfill.js', $block, 'js');
-    }
-
-    protected function doM1k($block)
-    {
-        $this->toBlock('m1k/dist/m1k.js', $block, 'js');
-        $this->toBlock('m1k/dist/m1k.css', $block, 'css');
-    }
-
-    protected function doJquery($block)
-    {
-        $this->toBlock('jquery/dist/jquery.min.js', $block, 'js');
-    }
-
 
     protected function doJcrop($block)
     {
