@@ -351,7 +351,7 @@ class Assets extends Controller
             }
         }
 
-        $outname = $filename . '.' . $this->hash($hashes);
+        $outname = $filename . $this->hash($hashes);
 
         if (!empty($files)) {
             if (!\file_exists($out_path . $outname . '.' . $type) || $this->force_mode) {
@@ -365,7 +365,7 @@ class Assets extends Controller
 
     protected function hash(string $str): string
     {
-        return Text::b64Encode(
+        return '.'.Text::b64Encode(
             \substr(\md5($str, true), 0, 6) .
             \substr(\sha1($str, true), 0, 1)
         );
