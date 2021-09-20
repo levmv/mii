@@ -190,7 +190,7 @@ class Debug
                 \Mii::$paths['vendor'] = path('root') . '/vendor';
             }
 
-            \Mii::$paths['mii'] = path('vendor') . '/levmorozov/mii';
+            \Mii::$paths['mii'] = path('vendor') . '/levmorozov/mii/src';
             \uasort(\Mii::$paths, static function ($a, $b) {
                 return \strlen($b) - \strlen($a);
             });
@@ -198,6 +198,7 @@ class Debug
         foreach (\Mii::$paths as $name => $path) {
             if (\str_starts_with($file, $path)) {
                 $file = '{' . $name . '}' . \substr($file, \strlen($path));
+                break;
             }
         }
 
@@ -403,7 +404,7 @@ class Debug
 
             $count++;
 
-            return "#$count $file [$line]: " . $step['function'] . '(' . \implode(', ', $args) . ')';
+            return "$count {$file}[$line]: " . $step['function'] . '(' . \implode(', ', $args) . ')';
         }, $trace));
     }
 }

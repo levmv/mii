@@ -21,10 +21,10 @@ class Logger extends Component
 
     public static array $level_names = [
         1 => 'debug',
-        2 => 'info',
+        2 => 'inf',
         4 => 'notice',
         8 => 'warn',
-        16 => 'error',
+        16 => 'err',
         32 => 'crit',
         64 => 'alert',
     ];

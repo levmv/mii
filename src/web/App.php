@@ -27,7 +27,7 @@ class App extends \mii\core\App
             $params = $this->router->match($uri);
 
             if ($params === false) {
-                throw new InvalidRouteException('No routes found');
+                throw new InvalidRouteException();
             }
 
             $this->request->controller = $controller_name = $params['controller'];

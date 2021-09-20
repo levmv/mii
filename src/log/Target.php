@@ -133,7 +133,7 @@ abstract class Target extends Component
         $msg = $e->getMessage();
         $file = \mii\util\Debug::path($e->getFile());
 
-        if (\str_contains($file, '/src/web/App.php')) {
+        if (\str_contains($file, '{mii}')) {
             $file = '';
         } else {
             $file = ' ~' . $file . '[' . $e->getLine() . ']';
