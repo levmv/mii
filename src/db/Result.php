@@ -24,7 +24,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     protected int $_internal_row = 0;
 
-    protected $_index_by;
+    protected $_index_by = null;
 
     protected Pagination $_pagination;
 
@@ -77,6 +77,8 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     public function current()
     {
+        assert($this->_index_by === null, "You can iterate over Result if indexBy is used");
+
         if ($this->_current_row !== $this->_internal_row && !$this->seek($this->_current_row)) {
             return null;
         }
@@ -119,10 +121,14 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     protected function index($rows): array
     {
         $result = [];
+        // We set _index_by to null for assert() in current() to work
+        // Dont know another way to use assert() for disable foreach anywhere but here (and to not duplicate all iteration code).
+        $indexBy = $this->_index_by;
+        $this->_index_by = null;
 
-        if (!\is_string($this->_index_by)) {
+        if (!\is_string($indexBy)) {
             foreach ($rows as $row) {
-                $result[\call_user_func($this->_index_by, $row)] = $row;
+                $result[$indexBy($row)] = $row;
             }
 
             return $result;
@@ -130,7 +136,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
         if ($this->_as_object) {
             foreach ($rows as $row) {
-                $key = $row->{$this->_index_by};
+                $key = $row->$indexBy;
                 $result[$key] = $row;
             }
 
@@ -138,18 +144,20 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         }
 
         foreach ($rows as $row) {
-            $result[$row[$this->_index_by]] = $row;
+            $result[$row[$indexBy]] = $row;
         }
+
+        $this->_index_by = $indexBy;
 
         return $result;
     }
 
 
-    public function toList($key, $display, $first = null): array
+    public function toList(string $key, string $display, $first = null): array
     {
         $rows = [];
 
-        if ($first) {
+        if ($first !== null) {
             if (\is_array($first)) {
                 $rows = $first;
             } else {
