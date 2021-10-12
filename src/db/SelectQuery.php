@@ -922,7 +922,7 @@ class SelectQuery
         if ($result === null) {
             /** @noinspection PhpUnhandledExceptionInspection */
             throw (
-            (new ModelNotFoundException('Model not found'))->setModel((string) $this->_model_class)
+            (new ModelNotFoundException())->setModel((string) $this->_model_class)
             );
         }
         return $result;
