@@ -24,7 +24,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     protected int $_internal_row = 0;
 
-    protected $_index_by = null;
+    protected ?string $_index_by = null;
 
     protected Pagination $_pagination;
 
@@ -126,18 +126,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         $indexBy = $this->_index_by;
         $this->_index_by = null;
 
-        if (!\is_string($indexBy)) {
-            foreach ($rows as $row) {
-                $result[$indexBy($row)] = $row;
-            }
-
-            return $result;
-        }
-
         if ($this->_as_object) {
             foreach ($rows as $row) {
-                $key = $row->$indexBy;
-                $result[$key] = $row;
+                $result[$row->$indexBy] = $row;
             }
 
             return $result;
@@ -214,7 +205,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         return $results;
     }
 
-    public function indexBy(string $column)
+    public function indexBy(string $column): Result
     {
         $this->_index_by = $column;
         return $this;
