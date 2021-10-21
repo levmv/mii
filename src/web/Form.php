@@ -56,6 +56,11 @@ class Form
         $this->_changed = [];
     }
 
+    public function ok(): bool
+    {
+        return $this->load() && $this->validate();
+    }
+
     /**
      * Load form from _POST values or $data values
      * Return true if form is loaded

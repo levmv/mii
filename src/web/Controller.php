@@ -105,4 +105,16 @@ class Controller
     {
         return $_POST[$name] ?? $_GET[$name] ?? $default;
     }
+
+    protected function allowOnlyPost(): void
+    {
+        if (!$this->request->isPost()) {
+            throw new BadRequestHttpException;
+        }
+    }
+
+    protected function jsonResponseFormat(): void
+    {
+        $this->response->format = Response::FORMAT_JSON;
+    }
 }
