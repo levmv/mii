@@ -44,7 +44,7 @@ class Local extends Component implements StorageInterface
         }
     }
 
-    public function exist(string $path)
+    public function exist(string $path): bool
     {
         return \file_exists($this->resolve($path));
     }
@@ -54,22 +54,27 @@ class Local extends Component implements StorageInterface
         return \file_get_contents($this->resolve($path));
     }
 
-    public function put(string $path, $content)
+    /**
+     * @param string $path
+     * @param string|\Stringable|resource $content
+     * @return bool
+     */
+    public function put(string $path, $content): bool
     {
         if ($content instanceof UploadedFile) {
             return $content->saveAs($this->resolve($path));
         }
-        return \file_put_contents($this->resolve($path), $content);
+        return false !== \file_put_contents($this->resolve($path), $content);
     }
 
-    public function putFile(string $path, string $from)
+    public function putFile(string $path, string $from): bool
     {
-        $this->copy($from, $path);
+        return $this->copy($from, $path);
     }
 
-    public function delete(string $path)
+    public function delete(string $path): bool
     {
-        \unlink($this->resolve($path));
+        return \unlink($this->resolve($path));
     }
 
     public function size(string $path)
@@ -82,17 +87,17 @@ class Local extends Component implements StorageInterface
         return \filemtime($this->resolve($path));
     }
 
-    public function copy(string $from, string $to)
+    public function copy(string $from, string $to): bool
     {
-        \copy($this->resolve($from), $this->resolve($to));
+        return \copy($this->resolve($from), $this->resolve($to));
     }
 
-    public function move(string $from, string $to)
+    public function move(string $from, string $to): bool
     {
-        \rename($this->resolve($from), $this->resolve($to));
+        return \rename($this->resolve($from), $this->resolve($to));
     }
 
-    public function url(string $path)
+    public function url(string $path): string
     {
         return $this->url . '/' . $path;
     }
@@ -107,7 +112,7 @@ class Local extends Component implements StorageInterface
         \mkdir($this->resolve($path), $mode, true);
     }
 
-    public function path(string $path)
+    public function path(string $path): string
     {
         return $this->path . '/' . $path;
     }
