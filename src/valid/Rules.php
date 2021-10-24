@@ -33,18 +33,7 @@ class Rules
      */
     public static function required($value) : bool
     {
-        return static::notEmpty($value);
-    }
-
-    /**
-     * Checks if a field is not empty.
-     *
-     * @param $value
-     * @return  boolean
-     */
-    public static function notEmpty($value) : bool
-    {
-        if (\is_object($value) && $value instanceof \ArrayObject) {
+        if ($value instanceof \ArrayObject) {
             // Get the array from the ArrayObject
             $value = $value->getArrayCopy();
         }
@@ -54,13 +43,25 @@ class Rules
     }
 
     /**
+     * @deprecated
+     * Checks if a field is not empty.
+     *
+     * @param $value
+     * @return  boolean
+     */
+    public static function notEmpty($value) : bool
+    {
+        return static::required($value);
+    }
+
+    /**
      * Checks a field against a regular expression.
      *
      * @param string $value value
      * @param string $expression regular expression to match (including delimiters)
      * @return  boolean
      */
-    public static function regex($value, $expression) : bool
+    public static function regex($value, string $expression) : bool
     {
         return (bool) \preg_match($expression, (string) $value);
     }
@@ -68,39 +69,25 @@ class Rules
     /**
      * Checks that a field is long enough.
      *
-     * @param string  $value value
-     * @param integer $length minimum length required
+     * @param string $value value
+     * @param int $limit
      * @return  boolean
      */
-    public static function min($value, $length) : bool
+    public static function min($value, int $limit) : bool
     {
-        return static::_checkSize($value, $length, 1);
+        return \mb_strlen((string)$value) >= $limit;
     }
 
     /**
      * Checks that a field is short enough.
      *
-     * @param string  $value value
-     * @param integer $length maximum length required
+     * @param string $value value
+     * @param int $limit
      * @return  boolean
      */
-    public static function max($value, $length) : bool
+    public static function max($value, int $limit) : bool
     {
-        return static::_checkSize($value, $length, -1);
-    }
-
-
-    public static function _checkSize($value, $length, $dir) : bool
-    {
-        if (\is_object($value) && $value instanceof UploadedFile) {
-            return static::fileSize($value, $length, $dir);
-        }
-
-        if (\is_string($value)) {
-            return (\mb_strlen($value) <=> $length) === $dir;
-        }
-
-        return ($value <=> $length) === $dir;
+        return \mb_strlen((string)$value) <= $limit;
     }
 
 
@@ -111,7 +98,7 @@ class Rules
      * @param integer|array $length exact length required, or array of valid lengths
      * @return  boolean
      */
-    public static function exactLength($value, $length) : bool
+    public static function length($value, int $length) : bool
     {
         if (\is_array($length)) {
             foreach ($length as $strlen) {
@@ -122,7 +109,7 @@ class Rules
             return false;
         }
 
-        return static::_checkSize($value, $length, 0);
+        return \mb_strlen($value) === $length;
     }
 
     /**
@@ -185,7 +172,7 @@ class Rules
      */
     public static function emailDomain($email) : bool
     {
-        if (!self::notEmpty($email)) {
+        if (!self::required($email)) {
             return false;
         } // Empty fields cause issues with checkdnsrr()
 
@@ -265,7 +252,7 @@ class Rules
      * @param boolean $allow_private allow private IP networks
      * @return  boolean
      */
-    public static function ip($ip, $allow_private = true) : bool
+    public static function ip($ip, bool $allow_private = true) : bool
     {
         // Do not allow reserved addresses
         $flags = \FILTER_FLAG_NO_RES_RANGE;
@@ -285,9 +272,9 @@ class Rules
      * @param array  $lengths
      * @return  boolean
      */
-    public static function phone($number, $lengths = null) : bool
+    public static function phone($number, array $lengths = null) : bool
     {
-        if (!\is_array($lengths)) {
+        if (!$lengths) {
             $lengths = [7, 10, 11];
         }
 
@@ -304,7 +291,7 @@ class Rules
      * @param string $str date to check
      * @return  boolean
      */
-    public static function date($str) : bool
+    public static function date(string $str) : bool
     {
         return (\strtotime($str) !== false);
     }
@@ -312,11 +299,11 @@ class Rules
     /**
      * Checks whether a string consists of alphabetical characters only.
      *
-     * @param string  $str input string
+     * @param string $str input string
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alpha($str, $utf8 = false) : bool
+    public static function alpha($str, bool $utf8) : bool
     {
         $str = (string) $str;
 
@@ -334,7 +321,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alphaNumeric($str, $utf8 = false) : bool
+    public static function alphaNumeric($str, bool $utf8) : bool
     {
         if ($utf8 === true) {
             return (bool) \preg_match('/^[\pL\pN]++$/uD', $str);
@@ -350,7 +337,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alphaDash($str, $utf8 = false) : bool
+    public static function alphaDash($str, bool $utf8) : bool
     {
         if ($utf8 === true) {
             $regex = '/^[-\pL\pN_]++$/uD';
@@ -368,7 +355,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function digit($str, $utf8 = false) : bool
+    public static function digit($str, bool $utf8) : bool
     {
         if ($utf8 === true) {
             return (bool) \preg_match('/^\pN++$/uD', $str);
@@ -404,16 +391,13 @@ class Rules
      * @param integer $step increment size
      * @return  boolean
      */
-    public static function range($number, $min, $max, $step = null) : bool
+    public static function range($number, int $min, int $max, int $step = 1) : bool
     {
+        $number = (int) $number;
+
         if ($number <= $min || $number >= $max) {
             // Number is outside of range
             return false;
-        }
-
-        if (!$step) {
-            // Default to steps of 1
-            $step = 1;
         }
 
         // Check step requirements
@@ -426,10 +410,10 @@ class Rules
      *
      * @param string  $str number to check
      * @param integer $places number of decimal places
-     * @param integer $digits number of digits
+     * @param integer|null $digits number of digits
      * @return  boolean
      */
-    public static function decimal($str, $places = 2, $digits = null) : bool
+    public static function decimal($str, int $places = 2, int $digits = null) : bool
     {
         if ($digits > 0) {
             // Specific number of digits
@@ -453,7 +437,7 @@ class Rules
      * @param string $str input string
      * @return  boolean
      */
-    public static function color($str) : bool
+    public static function color(string $str) : bool
     {
         return (bool) \preg_match('/^#?+[0-9a-f]{3}(?:[0-9a-f]{3})?$/iD', $str);
     }
@@ -474,8 +458,7 @@ class Rules
 
     public static function uploaded($file): bool
     {
-        return \is_object($file) &&
-            $file instanceof UploadedFile &&
+        return $file instanceof UploadedFile &&
             !$file->hasError() &&
             $file->isUploadedFile();
     }
@@ -484,9 +467,7 @@ class Rules
     /**
      * Test if an uploaded file is an allowed file type, by extension.
      *
-     *     $array->rule('file', 'file_type', [':value', ['jpg', 'png', 'gif']]);
-     *
-     * @param array $file $_FILES item
+     * @param UploadedFile $file
      * @param array $allowed allowed file extensions
      * @return  bool
      */
@@ -500,28 +481,23 @@ class Rules
             return true;
         }
 
-        $ext = \strtolower(\pathinfo($file->name, \PATHINFO_EXTENSION));
-
-        return \in_array($ext, $allowed);
+        return \in_array($file->extension(), $allowed, true);
     }
 
     /**
      * Validation rule to test if an uploaded file is allowed by file size.
-     * File sizes are defined as: SB, where S is the size (1, 8.5, 300, etc.)
-     * and B is the byte unit (K, MiB, GB, etc.). All valid byte units are
-     * defined in Text::$byte_units
-     *
-     *     $array->rule('file', 'file_size', array(':value', '1M'))
-     *     $array->rule('file', 'file_size', array(':value', '2.5KiB'))
      *
      * @param UploadedFile $file $_FILES item
-     * @param string       $size maximum file size allowed
-     * @param int          $dir
+     * @param string|int $size maximum file size allowed
      * @return  bool
      * @throws \mii\core\Exception
      */
-    public static function fileSize(UploadedFile $file, $size, $dir = -1) : bool
+    public static function maxFileSize($file, $size) : bool
     {
+        if (!$file instanceof UploadedFile) {
+            return true;
+        }
+
         if ($file->error === \UPLOAD_ERR_INI_SIZE) {
             // Upload is larger than PHP allowed size (upload_max_filesize)
             return false;
@@ -533,10 +509,11 @@ class Rules
         }
 
         // Convert the provided size to bytes for comparison
-        $size = Text::bytes($size);
+        if(is_string($size)) {
+            $size = Text::bytes($size);
+        }
 
-
-        return ($file->size <=> $size) === $dir;
+        return $file->size < $size;
     }
 
     public static function recaptcha() : bool
