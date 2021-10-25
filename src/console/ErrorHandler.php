@@ -9,7 +9,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
 {
     public int $memory_reserve_size = 262144;
 
-    public function render($exception)
+    public function render($exception): void
     {
         if (config('debug')) {
             if ($exception instanceof ErrorException) {
@@ -37,11 +37,11 @@ class ErrorHandler extends \mii\core\ErrorHandler
     /**
      * Colorizes a message for console output.
      * @param string $message the message to colorize.
-     * @param array  $format the message format.
+     * @param array $format the message format.
      * @return string the colorized message.
      * @see Console::ansiFormat() for details on how to specify the message format.
      */
-    protected function formatMessage($message, $format = [Console::FG_RED, Console::BOLD])
+    protected function formatMessage($message, array $format = [Console::FG_RED, Console::BOLD]): string
     {
         $stream = (\PHP_SAPI === 'cli') ? \STDERR : \STDOUT;
 

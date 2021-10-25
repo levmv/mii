@@ -64,13 +64,13 @@ trait JsonAttributes
         return parent::update();
     }
 
-    public function changed($field_name = null): bool
+    public function changed(array|string $fieldName = null): bool
     {
         if ($this->_serialize_cache_dirty) {
             $this->_invalidateSerializeCache();
         }
 
-        return parent::changed($field_name);
+        return parent::changed($fieldName);
     }
 
 

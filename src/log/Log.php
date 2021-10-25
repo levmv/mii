@@ -47,7 +47,7 @@ class Log
                 }
 
                 if (($arg instanceof \mii\db\ORM) && isset($arg->id)) {
-                    $classname .= "({$arg->id})";
+                    $classname .= "($arg->id)";
                 }
                 $message[] = $classname;
             } else {

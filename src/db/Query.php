@@ -221,23 +221,12 @@ class Query extends SelectQuery
     {
         $this->db = $db ?? \Mii::$app->db;
 
-        // Compile the SQL query
-        switch ($this->_type) {
-            case Database::SELECT:
-                $sql = $this->compileSelect();
-                break;
-            case Database::INSERT:
-                $sql = $this->compileInsert();
-                break;
-            case Database::UPDATE:
-                $sql = $this->compileUpdate();
-                break;
-            case Database::DELETE:
-                $sql = $this->compileDelete();
-                break;
-        }
-
-        return $sql;
+        return match ($this->_type) {
+            Database::SELECT => $this->compileSelect(),
+            Database::INSERT => $this->compileInsert(),
+            Database::UPDATE => $this->compileUpdate(),
+            Database::DELETE => $this->compileDelete()
+        };
     }
 
 

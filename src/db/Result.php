@@ -31,17 +31,17 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     /**
      * Sets the total number of rows and stores the result locally.
      *
-     * @param mixed $result query result
-     * @param mixed $as_object
-     * @param array $params
+     * @param \mysqli_result $result query result
+     * @param mixed $asObject
+     * @param array|null $params
      */
-    public function __construct($result, $as_object = false, array $params = null)
+    public function __construct(\mysqli_result $result, bool|string $asObject = false, array $params = null)
     {
         // Store the result locally
         $this->_result = $result;
 
         // Results as objects or associative arrays
-        $this->_as_object = $as_object;
+        $this->_as_object = $asObject;
 
         if ($params !== null) {
             // Object constructor params
@@ -122,7 +122,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     {
         $result = [];
         // We set _index_by to null for assert() in current() to work
-        // Dont know another way to use assert() for disable foreach anywhere but here (and to not duplicate all iteration code).
+        // Don't know another way to use assert() for disable foreach anywhere but here (and to not duplicate all iteration code).
         $indexBy = $this->_index_by;
         $this->_index_by = null;
 
@@ -171,14 +171,14 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
 
     /**
-     * Return all of the rows in the result as an array.
+     * Return all the rows as an array.
      * @param array $properties
      * @return array
      */
     public function toArray(array $properties = []): array
     {
+        $results = [];
         if (empty($properties)) {
-            $results = [];
 
             foreach ($this as $row) {
                 $results[] = $row;
@@ -187,7 +187,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
             return $results;
         }
 
-        $results = [];
         foreach ($this as $object) {
             $result = [];
             foreach ($properties as $key => $name) {
@@ -214,14 +213,11 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     /**
      * Return the named column from the current row.
      *
-     *     // Get the "id" value
-     *     $id = $result->get('id');
-     *
      * @param string $name column to get
      * @param mixed  $default default value if the column does not exist
      * @return  mixed
      */
-    public function column($name, $default = null)
+    public function column(string $name, $default = null)
     {
         $row = $this->current();
 
@@ -236,7 +232,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
         return $default;
     }
 
-    public function columnValues($name): array
+    public function columnValues(string $name): array
     {
         $result = [];
 
@@ -263,8 +259,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     /**
      * Implements [Countable::count], returns the total number of rows.
      *
-     *     echo count($result);
-     *
      * @return  integer
      */
     public function count(): int
@@ -274,11 +268,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     /**
      * Implements [ArrayAccess::offsetExists], determines if row exists.
-     *
-     *     if (isset($result[10]))
-     *     {
-     *         // Row 10 exists
-     *     }
      *
      * @param int $offset
      * @return  boolean
@@ -290,8 +279,6 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
 
     /**
      * Implements [ArrayAccess::offsetGet], gets a given row.
-     *
-     *     $row = $result[10];
      *
      * @param int $offset
      * @return  mixed
@@ -310,9 +297,10 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * [!!] You cannot modify a database result.
      *
-     * @param int   $offset
+     * @param int $offset
      * @param mixed $value
      * @return  void
+     * @throws DatabaseException
      */
     final public function offsetSet($offset, $value)
     {
@@ -326,6 +314,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @param int $offset
      * @return  void
+     * @throws DatabaseException
      */
     final public function offsetUnset($offset)
     {
@@ -398,7 +387,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function setPagination($pagination)
+    public function setPagination(Pagination $pagination): void
     {
         $this->_pagination = $pagination;
     }

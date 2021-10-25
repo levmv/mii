@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpFullyQualifiedNameUsageInspection */
+declare(strict_types=1);
 
 namespace mii\web;
 
@@ -37,8 +38,6 @@ class Block
      *
      *
      * @param string $name block name
-     * @param string $file path to block php file
-     * @return  void
      */
     public function __construct(string $name)
     {
@@ -56,8 +55,9 @@ class Block
      *
      * @param string $key variable name
      * @return  mixed
+     * @throws Exception
      */
-    public function __get($key)
+    public function __get(string $key)
     {
         return $this->get($key);
     }
@@ -71,7 +71,7 @@ class Block
      * @param mixed  $value value
      * @return  void
      */
-    public function __set($key, $value)
+    public function __set(string $key, mixed $value)
     {
         $this->set($key, $value);
     }
@@ -172,23 +172,15 @@ class Block
      * Assigns a variable by name. Assigned values will be available as a
      * variable within the view file:
      *
-     *     // This value can be accessed as $foo within the view
-     *     $view->set('foo', 'my value');
-     *
-     * You can also use an array to set several values at once:
-     *
-     *     // Create the values $food and $beverage in the view
-     *     $view->set(array('food' => 'bread', 'beverage' => 'water'));
-     *
      * @param mixed $key variable name or an array of variables
-     * @param mixed $value value
+     * @param mixed|null $value value
      * @return  $this
      */
-    public function set($key, $value = null)
+    public function set(string|array $key, mixed $value = null): static
     {
         if (\is_array($key)) {
-            foreach ($key as $name => $value) {
-                $this->_data[$name] = $value;
+            foreach ($key as $name => $val) {
+                $this->_data[$name] = $val;
             }
         } else {
             $this->_data[$key] = $value;
@@ -205,14 +197,11 @@ class Block
      * before they have values. Assigned values will be available as a
      * variable within the view file:
      *
-     *     // This reference can be accessed as $ref within the view
-     *     $view->bind('ref', $bar);
-     *
      * @param string $key variable name
      * @param mixed  $value referenced variable
      * @return  $this
      */
-    public function bind(string $key, &$value)
+    public function bind(string $key, mixed &$value): static
     {
         $this->_data[$key] =&$value;
 
@@ -228,7 +217,7 @@ class Block
 
     public function loaded(): bool
     {
-        return (bool) $this->_loaded;
+        return $this->_loaded;
     }
 
 

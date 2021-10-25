@@ -8,12 +8,12 @@ class Request extends Component
 {
 
     // HTTP Methods
-    const GET = 'GET';
-    const POST = 'POST';
-    const PUT = 'PUT';
-    const DELETE = 'DELETE';
-    const HEAD = 'HEAD';
-    const OPTIONS = 'OPTIONS';
+    public const GET = 'GET';
+    public const POST = 'POST';
+    public const PUT = 'PUT';
+    public const DELETE = 'DELETE';
+    public const HEAD = 'HEAD';
+    public const OPTIONS = 'OPTIONS';
 
     /**
      * @var  string  method: GET, POST, PUT, DELETE, HEAD, etc
@@ -21,7 +21,6 @@ class Request extends Component
     protected string $_method = 'GET';
 
     public const SAME_SITE_LAX = 'Lax';
-
     public const SAME_SITE_STRICT = 'Strict';
 
     /**
@@ -31,11 +30,11 @@ class Request extends Component
 
     protected ?string $_hostname = null;
 
-    public $cookie_validation = false;
+    public bool $cookie_validation = false;
 
-    public $enable_csrf_cookie = true;
+    public bool $enable_csrf_cookie = true;
 
-    public $csrf_token_name = 'csrf_token';
+    public string $csrf_token_name = 'csrf_token';
 
     protected $_csrf_token;
 
@@ -96,11 +95,9 @@ class Request extends Component
 
         $uri = \parse_url('http://domain.com' . $_SERVER['REQUEST_URI'], \PHP_URL_PATH);
 
-        if (\is_null(\Mii::$app->base_url)) {
-            //   $uri = \ltrim($uri, '/');
-        } elseif (\str_starts_with($uri, \Mii::$app->base_url)) {
+        if (!\is_null(\Mii::$app->base_url) && \str_starts_with($uri, \Mii::$app->base_url)) {
             // Remove the base URL from the URI
-            $uri = (string) \substr($uri, \strlen(\Mii::$app->base_url));
+            $uri = \substr($uri, \strlen(\Mii::$app->base_url));
         }
 
         $this->uri($uri);
@@ -119,10 +116,10 @@ class Request extends Component
     /**
      * Sets and gets the uri from the request.
      *
-     * @param string $uri
+     * @param string|null $uri
      * @return  string
      */
-    public function uri($uri = null): string
+    public function uri(string $uri = null): string
     {
         if ($uri === null) {
             return empty($this->_uri) ? '/' : $this->_uri;
@@ -260,7 +257,7 @@ class Request extends Component
      * @param string $default Default value if parameter does not exist
      * @return  mixed
      */
-    public function post($key = null, $default = null)
+    public function post(string $key = null, $default = null)
     {
         if ($key === null) {
             return $_POST;
@@ -367,12 +364,12 @@ class Request extends Component
      * Sets a signed cookie. Note that all cookie values must be strings and no
      * automatic serialization will be performed!
      *
-     * @param string  $name name of cookie
-     * @param string  $value value of cookie
-     * @param integer $expiration lifetime in seconds
+     * @param string $name name of cookie
+     * @param string $value value of cookie
+     * @param int|null $expiration lifetime in seconds
      * @return  boolean
      */
-    public function setCookie(string $name, string $value, int $expiration = null)
+    public function setCookie(string $name, string $value, int $expiration = null): bool
     {
         if ($expiration === null) {
             // Use the default expiration
@@ -386,7 +383,7 @@ class Request extends Component
 
         if ($this->cookie_validation) {
             // Add the salt to the cookie value
-            $value = $this->salt($name, (string) $value) . $value;
+            $value = $this->salt($name, $value) . $value;
         }
 
         return \setcookie(
@@ -412,7 +409,7 @@ class Request extends Component
      * @param string $name cookie name
      * @return  boolean
      */
-    public function deleteCookie($name)
+    public function deleteCookie(string $name): bool
     {
         // Remove the cookie
         unset($_COOKIE[$name]);

@@ -14,16 +14,13 @@ class Text
      *
      *     $text = Text::limit_words($text);
      *
-     * @param string  $str phrase to limit words of
+     * @param string $str phrase to limit words of
      * @param integer $limit number of words to limit to
-     * @param string  $end_char end character or entity
+     * @param string $end_char end character or entity
      * @return  string
      */
-    public static function limitWords($str, $limit = 100, $end_char = null): string
+    public static function limitWords(string $str, int $limit = 100, string $end_char = '…'): string
     {
-        $limit = (int) $limit;
-        $end_char = $end_char ?? '…';
-
         if (\trim($str) === '') {
             return $str;
         }
@@ -44,21 +41,16 @@ class Text
      *
      *     $text = Text::limit_chars($text);
      *
-     * @param string  $str phrase to limit characters of
+     * @param string $str phrase to limit characters of
      * @param integer $limit number of characters to limit to
-     * @param string  $end_char end character or entity
+     * @param string $end_char end character or entity
      * @param boolean $preserve_words enable or disable the preservation of words while limiting
-     * @return  string
      */
-    public static function limitChars($str, $limit = 100, $end_char = null, $preserve_words = false): string
+    public static function limitChars(string $str, int $limit = 100, string $end_char = '…', bool $preserve_words = false): string
     {
         if (!$str) {
             return '';
         }
-
-        $end_char = $end_char ?? '…';
-
-        $limit = (int) $limit;
 
         if (\trim($str) === '' || \mb_strlen($str) <= $limit) {
             return $str;
@@ -85,41 +77,22 @@ class Text
     /**
      * Generates a random string of a given type and length.
      *
-     *     $str = Text::random(); // 8 character random string
-     *
-     * The following types are supported:
-     *
-     * alnum
-     * :  Upper and lower case a-z, 0-9 (default)
-     *
-     * hexdec
-     * :  Hexadecimal characters a-f, 0-9
-     *
-     * You can also create a custom type by providing the "pool" of characters
-     * as the type.
-     *
-     * @param string  $type a type of pool, or a string of characters to use as the pool
+     * @param string|null $type a type of pool, or a string of characters to use as the pool
      * @param integer $length length of string to return
      * @return  string
      */
-    public static function random($type = null, $length = 8): string
+    public static function random(string $type = null, int $length = 8): string
     {
         if ($type === null) {
             // Default is to generate an alphanumeric string
             $type = 'alnum';
         }
 
-        switch ($type) {
-            case 'alnum':
-                $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                break;
-            case 'hexdec':
-                $pool = '0123456789abcdef';
-                break;
-            default:
-                $pool = (string) $type;
-                break;
-        }
+        $pool = match ($type) {
+            'alnum' => '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            'hexdec' => '0123456789abcdef',
+            default => (string)$type,
+        };
 
         // Split the pool into an array of characters
         $pool = \str_split($pool, 1);
@@ -174,7 +147,7 @@ class Text
      * @param boolean $br convert single linebreaks to <br />
      * @return  string
      */
-    public static function autoP(string $str, $br = true): string
+    public static function autoP(string $str, bool $br = true): string
     {
         // Trim whitespace
         if (($str = \trim($str)) === '') {
@@ -243,13 +216,10 @@ class Text
      *
      *     echo Text::title('Мой блог пост'); // "moi-blog-post"
      *
-     * @param        $text
+     * @param string $text
      * @param string $separator Word separator (any single character)
-     * @return  string
-     * @uses    UTF8::ruTranslit
-     * @uses    UTF8::transliterateToAscii
+     * @return string
      */
-
     public static function toSlug(string $text, string $separator = '-'): string
     {
         $value = UTF8::ruTranslit($text);
@@ -287,11 +257,11 @@ class Text
 
     /**
      * Declination of number
-     * @param int   $number
+     * @param int $number
      * @param mixed $array
      * @return mixed
      */
-    public static function decl($number, array $array)
+    public static function decl(int $number, array $array)
     {
         $cases = [2, 0, 1, 1, 1, 2];
 
@@ -319,12 +289,7 @@ class Text
      * byte unit (K, Mb, GB, etc.). All valid byte units are defined in
      * Num::$byte_units
      *
-     *     echo Text::bytes('200K');  // 204800
-     *     echo Text::bytes('5MB');  // 5242880
-     *     echo Text::bytes('1000');  // 1000
-     *     echo Text::bytes('2.5GB'); // 2684354560
-     *
-     * @param string $bytes file size in SB format
+     * @param string $size file size in SB format
      * @return  float
      * @throws Exception
      */

@@ -11,7 +11,7 @@ class Apcu extends Cache
      * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    public function get($id, $default = null)
+    public function get(string $id, $default = null): mixed
     {
         $data = \apcu_fetch($this->sanitizeId($id), $success);
 
@@ -21,12 +21,12 @@ class Apcu extends Cache
     /**
      * Set a value to cache with id and lifetime
      *
-     * @param string  $id id of cache entry
+     * @param string $id id of cache entry
      * @param string  $data data to set to cache
-     * @param integer $lifetime lifetime in seconds
+     * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-    public function set($id, $data, $lifetime = null)
+    public function set(string $id, $data, int $lifetime = null): bool
     {
         if ($lifetime === null) {
             $lifetime = $this->default_expire;
@@ -41,7 +41,7 @@ class Apcu extends Cache
      * @param string $id id to remove from cache
      * @return  boolean
      */
-    public function delete($id)
+    public function delete(string $id): bool
     {
         return \apcu_delete($this->sanitizeId($id));
     }
@@ -65,11 +65,11 @@ class Apcu extends Cache
      * tracking.
      *
      * @param string $id of cache entry to increment
-     * @param int    $step value to increment by
+     * @param int $step value to increment by
      * @return  integer
      * @return  boolean
      */
-    public function increment($id, $step = 1)
+    public function increment(string $id, int $step = 1)
     {
         return \apcu_inc($id, $step);
     }
@@ -80,17 +80,17 @@ class Apcu extends Cache
      * tracking.
      *
      * @param string $id of cache entry to decrement
-     * @param int    $step value to decrement by
+     * @param int $step value to decrement by
      * @return  integer
      * @return  boolean
      */
-    public function decrement($id, $step = 1)
+    public function decrement(string $id, int $step = 1)
     {
         return \apcu_dec($id, $step);
     }
 
 
-    protected function sanitizeId($id): string
+    protected function sanitizeId(string $id): string
     {
         return $this->prefix . $id;
     }

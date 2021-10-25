@@ -21,9 +21,9 @@ class DB
     }
 
     /**
-     * @param int
+     * @param int|null $type
      * @param string $q
-     * @param array  $params
+     * @param array $params
      * @return Result|int|string
      * @throws DatabaseException
      */
@@ -41,22 +41,19 @@ class DB
 
         $result = $db->query($type, $q);
 
-        switch ($type) {
-            case Database::SELECT:
-                return $result;
-            case Database::INSERT:
-                return $db->insertedId();
-            default:
-                return $db->affectedRows();
-        }
+        return match ($type) {
+            Database::SELECT => $result,
+            Database::INSERT => $db->insertedId(),
+            default => $db->affectedRows(),
+        };
     }
 
-    public static function compile(string $q, array $params = [])
+    public static function compile(string $q, array $params = []): string
     {
         $db = \Mii::$app->db;
 
         if (!empty($params)) {
-            // Quote all of the values
+            // Quote all the values
             $values = \array_map([$db, 'quote'], $params);
 
             // Replace the values in the SQL
@@ -115,7 +112,7 @@ class DB
      * @param array  $params
      * @return Expression
      */
-    public static function expr($value, array $params = []): Expression
+    public static function expr(string $value, array $params = []): Expression
     {
         return new Expression($value, $params);
     }

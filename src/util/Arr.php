@@ -38,7 +38,7 @@ class Arr
      * @param string $delimiter key path delimiter
      * @return  mixed
      */
-    public static function path($array, $path, $default = null, $delimiter = '.')
+    public static function path($array, $path, $default = null, string $delimiter = '.')
     {
         if (!\is_array($array) && !\is_object($array) && !($array instanceof \Traversable)) {
             // This is not an array!
@@ -55,7 +55,7 @@ class Arr
             }
 
             // Remove  delimiters and spaces
-            $path = \trim($path, "{$delimiter} ");
+            $path = \trim($path, "$delimiter ");
 
             // Split the keys by delimiter
             $keys = \explode($delimiter, $path);
@@ -100,7 +100,7 @@ class Arr
      * @param string $delimiter Path delimiter
      * @see Arr::path()
      */
-    public static function setPath(&$array, string $path, $value, string $delimiter = '.'): void
+    public static function setPath(&$array, string $path, mixed $value, string $delimiter = '.'): void
     {
         // Split the keys by delimiter
         $keys = \explode($delimiter, $path);
@@ -130,19 +130,12 @@ class Arr
      * Retrieves multiple paths from an array. If the path does not exist in the
      * array, the default value will be added instead.
      *
-     *     // Get the values "username", "password" from $_POST
-     *     $auth = Arr::extract($_POST, array('username', 'password'));
-     *
-     *     // Get the value "level1.level2a" from $data
-     *     $data = array('level1' => array('level2a' => 'value 1', 'level2b' => 'value 2'));
-     *     Arr::extract($data, array('level1.level2a', 'password'));
-     *
      * @param array $array array to extract paths from
      * @param array $paths list of path
      * @param mixed $default default value
      * @return  array
      */
-    public static function extract($array, array $paths, $default = null)
+    public static function extract($array, array $paths, $default = null): array
     {
         $found = [];
         foreach ($paths as $path) {
@@ -152,48 +145,6 @@ class Arr
         return $found;
     }
 
-    /**
-     * Recursive version of [array_map](http://php.net/array_map), applies one or more
-     * callbacks to all elements in an array, including sub-arrays.
-     *
-     *     // Apply "strip_tags" to every element in the array
-     *     $array = Arr::map('strip_tags', $array);
-     *
-     *     // Apply $this->filter to every element in the array
-     *     $array = Arr::map(array(array($this,'filter')), $array);
-     *
-     *     // Apply strip_tags and $this->filter to every element
-     *     $array = Arr::map(array('strip_tags',array($this,'filter')), $array);
-     *
-     * [!!] Because you can pass an array of callbacks, if you wish to use an array-form callback
-     * you must nest it in an additional array as above. Calling Arr::map(array($this,'filter'), $array)
-     * will cause an error.
-     * [!!] Unlike `array_map`, this method requires a callback and will only map
-     * a single array.
-     *
-     * @param mixed $callbacks array of callbacks to apply to every element in the array
-     * @param array $array array to map
-     * @param array $keys array of keys to apply to
-     * @return  array
-     */
-    public static function map($callbacks, $array, $keys = null)
-    {
-        foreach ($array as $key => $val) {
-            if (\is_array($val)) {
-                $array[$key] = static::map($callbacks, $array[$key]);
-            } elseif (!\is_array($keys) || \in_array($key, $keys)) {
-                if (\is_array($callbacks)) {
-                    foreach ($callbacks as $cb) {
-                        $array[$key] = \call_user_func($cb, $array[$key]);
-                    }
-                } else {
-                    $array[$key] = \call_user_func($callbacks, $array[$key]);
-                }
-            }
-        }
-
-        return $array;
-    }
 
     /**
      * Recursively merge two or more arrays. Values in an associative array
@@ -337,7 +288,7 @@ class Arr
             if ($recursive) {
                 foreach ($object as $key => $value) {
                     if (\is_array($value) || \is_object($value)) {
-                        $object[$key] = static::toArray($value, $properties, true);
+                        $object[$key] = static::toArray($value, $properties);
                     }
                 }
             }
@@ -345,8 +296,8 @@ class Arr
         }
 
         if (\is_object($object)) {
+            $result = [];
             if (!empty($properties)) {
-                $result = [];
                 foreach ($properties as $key => $name) {
                     if (\is_int($key)) {
                         $result[$name] = $object->$name;
@@ -360,7 +311,6 @@ class Arr
                 return $recursive ? static::toArray($result, $properties) : $result;
             }
 
-            $result = [];
             foreach ($object as $key => $value) {
                 $result[$key] = $value;
             }

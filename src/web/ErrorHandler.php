@@ -29,7 +29,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         return $e;
     }
 
-    public function render($exception)
+    public function render($exception): void
     {
         if (\Mii::$app->has('response')) {
             $response = \Mii::$app->response;
@@ -50,7 +50,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
                 try {
                     \Mii::$app->run();
                     return;
-                } catch (\Throwable $t) {
+                } catch (\Throwable) {
                     $response->content(static::exceptionToText($exception));
                 }
             } elseif (config('debug')) {

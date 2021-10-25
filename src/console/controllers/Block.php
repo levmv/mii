@@ -103,7 +103,7 @@ class Block extends Controller
         $this->info("Changed files: $totalChanged");
     }
 
-    protected function doCore($block)
+    protected function doCore()
     {
         $this->jsToBlock('core.default/dist/core.full.min.js');
         $this->cssToBlock([
@@ -115,7 +115,7 @@ class Block extends Controller
     }
 
 
-    protected function doMiitable($block)
+    protected function doMiitable()
     {
         $this->jsToBlock('mii-table/assets/table.js');
         $this->cssToBlock('mii-table/assets/table.css');
@@ -165,9 +165,9 @@ class Block extends Controller
 
     /**
      * @param      $from
-     * @param      $block_name
-     * @param      $ext
-     * @param null $callback
+     * @param string $block_name
+     * @param string $ext
+     * @param \Closure|null $callback
      * @throws Exception
      */
     protected function toBlock($from, string $block_name, string $ext, \Closure $callback = null): void

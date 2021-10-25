@@ -6,11 +6,11 @@ use mii\util\FS;
 
 class File extends Cache
 {
-    public $path = '@tmp/cache';
+    public string $path = '@tmp/cache';
 
-    public $directory_level = 1;
+    public int $directory_level = 1;
 
-    public $chmode = 0775;
+    public int $chmode = 0775;
 
 
     public function init(array $config = []): void
@@ -30,7 +30,7 @@ class File extends Cache
      * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    public function get($id, $default = null)
+    public function get(string $id, $default = null): mixed
     {
         $filename = $this->cacheFile($id);
 
@@ -42,7 +42,7 @@ class File extends Cache
                 \flock($fp, \LOCK_UN);
                 \fclose($fp);
 
-                return $this->serialize ? \unserialize($value) : $value;
+                return $this->serialize ? \unserialize($value, ['allowed_classes' => true]) : $value;
             }
         }
 
@@ -52,12 +52,12 @@ class File extends Cache
     /**
      * Set a value to cache with id and lifetime
      *
-     * @param string  $id id of cache entry
-     * @param string  $data data to set to cache
-     * @param integer $lifetime lifetime in seconds
+     * @param string $id id of cache entry
+     * @param string $data data to set to cache
+     * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-    public function set($id, $data, $lifetime = null)
+    public function set(string $id, $data, int $lifetime = null): bool
     {
         if ($lifetime === null) {
             $lifetime = $this->default_expire;
@@ -79,7 +79,7 @@ class File extends Cache
         }
         $error = \error_get_last();
 
-        \Mii::warning("Unable to write cache file '{$filename}': {$error['message']}", 'mii');
+        \Mii::warning("Unable to write cache file '$filename': {$error['message']}", 'mii');
         return false;
     }
 
@@ -89,7 +89,7 @@ class File extends Cache
      * @param string $id id to remove from cache
      * @return  boolean
      */
-    public function delete($id)
+    public function delete(string $id): bool
     {
         return \unlink($this->cacheFile($id));
     }
@@ -127,35 +127,6 @@ class File extends Cache
 
 
     /**
-     * Increments a given value by the step value supplied.
-     * Useful for shared counters and other persistent integer based
-     * tracking.
-     *
-     * @param string $id of cache entry to increment
-     * @param int    $step value to increment by
-     * @return  integer
-     * @return  boolean
-     */
-    public function increment($id, $step = 1)
-    {
-    }
-
-    /**
-     * Decrements a given value by the step value supplied.
-     * Useful for shared counters and other persistent integer based
-     * tracking.
-     *
-     * @param string $id of cache entry to decrement
-     * @param int    $step value to decrement by
-     * @return  integer
-     * @return  boolean
-     */
-    public function decrement($id, $step = 1)
-    {
-    }
-
-
-    /**
      * Returns the cache file path given the cache key.
      * @param string $key cache key
      * @return string the cache file path
@@ -167,7 +138,7 @@ class File extends Cache
         if ($this->directory_level > 0) {
             $base = $this->path;
             for ($i = 0; $i < $this->directory_level; ++$i) {
-                if (($prefix = \substr($key, $i + $i, 2)) !== false) {
+                if (($prefix = \substr($key, $i + $i, 2)) !== "") {
                     $base .= \DIRECTORY_SEPARATOR . $prefix;
                 }
             }

@@ -96,7 +96,7 @@ class Pagination
     /**
      * Generates the full URL for a certain page.
      *
-     * @param integer  page number
+     * @param int|null $page
      * @return  string   page URL
      * @throws \mii\core\InvalidRouteException
      */
@@ -164,7 +164,7 @@ class Pagination
     {
         $MAX_OFFSET = 5;
 
-        $result = "<div class='{$this->base_class}'>";
+        $result = "<div class='$this->base_class'>";
 
         $start = $this->current_page > $MAX_OFFSET
             ? $this->current_page - $MAX_OFFSET
@@ -215,31 +215,10 @@ class Pagination
          return (int) \min($this->firstItem() + $this->items_per_page - 1, $this->total_items);
      }*/
 
-
-    public function links(): array
-    {
-        $links = [];
-        if ($this->nextPage()) {
-            $links[] = [
-                'rel' => 'next',
-                'href' => $this->url($this->nextPage()),
-            ];
-        }
-
-        if ($this->prevPage()) {
-            $links[] = [
-                'rel' => 'prev',
-                'href' => $this->url($this->prevPage()),
-            ];
-        }
-        return [];
-    }
-
-
     /**
      * URL::query() replacement for Pagination use only
      *
-     * @param array    Parameters to override
+     * @param array|null $params
      * @return    string
      */
     public function query(array $params = null): string

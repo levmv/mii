@@ -24,10 +24,10 @@ class Expression
      *     $expression = new Expression('COUNT(users.id)');
      *
      * @param string $value raw SQL expression string
-     * @param array  $parameters unquoted parameter values
+     * @param array $parameters unquoted parameter values
      * @return  void
      */
-    public function __construct($value, $parameters = [])
+    public function __construct(string $value, array $parameters = [])
     {
         // Set the expression string
         $this->value = $value;
@@ -41,7 +41,7 @@ class Expression
      * @param mixed  $var variable to use
      * @return  $this
      */
-    public function bind($param, &$var)
+    public function bind(string $param, &$var)
     {
         $this->params[$param] =&$var;
 
@@ -55,7 +55,7 @@ class Expression
      * @param mixed  $value value to use
      * @return  $this
      */
-    public function param($param, $value)
+    public function param(string $param, mixed $value)
     {
         $this->params[$param] = $value;
 
@@ -68,7 +68,7 @@ class Expression
      * @param array $params list of parameter values
      * @return  $this
      */
-    public function parameters(array $params)
+    public function parameters(array $params): self
     {
         $this->params = $params + $this->params;
 
@@ -84,7 +84,7 @@ class Expression
      */
     public function value(): string
     {
-        return (string) $this->value;
+        return $this->value;
     }
 
     /**
@@ -117,7 +117,7 @@ class Expression
         $value = $this->value();
 
         if (!empty($this->params)) {
-            // Quote all of the parameter values
+            // Quote all the parameter values
             $params = \array_map([$db, 'quote'], $this->params);
 
             // Replace the values in the expression

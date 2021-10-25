@@ -10,6 +10,6 @@ class RedirectHttpException extends Exception
     {
         $this->url = $url;
 
-        parent::__construct('');
+        parent::__construct();
     }
 }

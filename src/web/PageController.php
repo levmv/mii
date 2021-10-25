@@ -7,17 +7,11 @@ use mii\core\ACL;
 
 class PageController extends Controller
 {
-    /**
-     * @var Block
-     */
-    public $index_block;
+    public Block $index_block;
 
     public string $index_block_name = 'index';
 
-    /**
-     * @var Block
-     */
-    public $layout = false;
+    public ?Block $layout = null;
 
     public string $layout_block_name = 'layout';
 

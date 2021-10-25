@@ -30,10 +30,7 @@ class Database extends Component
     protected ?\mysqli $conn = null;
 
     /**
-     * Connect to the database. This is called automatically when the first
-     * query is executed.
-     *
-     *     $db->connect();
+     * Connect to the database. This is called automatically when the first query is executed.
      *
      * @return  void
      * @throws  DatabaseException
@@ -78,11 +75,11 @@ class Database extends Component
     }
 
     /**
-     * Disconnect from the database. This is called automatically by [Database::__destruct].
+     * Disconnect from the database. This is called automatically.
      *
      * @return  boolean
      */
-    public function disconnect()
+    public function disconnect(): bool
     {
         try {
             // Database is assumed disconnected
@@ -92,7 +89,7 @@ class Database extends Component
                 // Clear the connection
                 $this->conn = null;
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // Database is probably not disconnected
             $status = !\is_resource($this->conn);
         }
@@ -109,20 +106,15 @@ class Database extends Component
     /**
      * Perform an SQL query of the given type.
      *
-     *     // Make a SELECT query and use objects for results
-     *     $db->query(Database::SELECT, 'SELECT * FROM groups', TRUE);
-     *
-     *     // Make a SELECT query and use "Model_User" for the results
-     *     $db->query(Database::SELECT, 'SELECT * FROM users LIMIT 1', 'Model_User');
-     *
-     * @param integer $type Database::SELECT, Database::INSERT, etc
-     * @param string  $sql SQL query
-     * @param mixed   $as_object result object class string, TRUE for stdClass, FALSE for assoc array
-     * @param array   $params object construct parameters for result class
-     * @return  Result|null   Result for SELECT queries or null
+     * @param int|null $type Database::SELECT, Database::INSERT, etc
+     * @param string $sql SQL query
+     * @param mixed $asObject result object class string, TRUE for stdClass, FALSE for assoc array
+     * @param array|null $params object construct parameters for result class
+     * @return Result|null  Result for SELECT queries or null
      * @throws DatabaseException
+     * @noinspection PhpFullyQualifiedNameUsageInspection
      */
-    public function query(?int $type, string $sql, $as_object = false, array $params = null): ?Result
+    public function query(?int $type, string $sql, bool|string $asObject = false, array $params = null): ?Result
     {
         // Make sure the database is connected
         !\is_null($this->conn) || $this->connect();
@@ -142,7 +134,7 @@ class Database extends Component
 
         if ($type === self::SELECT) {
             // Return an iterator of results
-            return new Result($result, $as_object, $params);
+            return new Result($result, $asObject, $params);
         }
 
         return null;
@@ -171,7 +163,7 @@ class Database extends Component
     }
 
 
-    public function insertedId()
+    public function insertedId(): int|string
     {
         return $this->conn->insert_id;
     }
@@ -198,24 +190,35 @@ class Database extends Component
      * @param mixed $value any value to quote
      * @return  string
      * @throws DatabaseException
-     * @uses    Database::escape
      */
-    public function quote($value): string
+    public function quote(mixed $value): string
     {
         if (\is_null($value)) {
             return 'NULL';
-        } elseif (\is_int($value)) {
+        }
+
+        if (\is_int($value)) {
             return (string) $value;
-        } elseif ($value === true) {
+        }
+
+        if ($value === true) {
             return "'1'";
-        } elseif ($value === false) {
+        }
+
+        if ($value === false) {
             return "'0'";
-        } elseif (\is_float($value)) {
+        }
+
+        if (\is_float($value)) {
             // Convert to non-locale aware float to prevent possible commas
             return \sprintf('%F', $value);
-        } elseif (\is_array($value)) {
+        }
+
+        if (\is_array($value)) {
             return '(' . \implode(', ', \array_map([$this, __FUNCTION__], $value)) . ')';
-        } elseif (\is_object($value)) {
+        }
+
+        if (\is_object($value)) {
             if ($value instanceof SelectQuery) {
                 // Create a sub-query
                 return '(' . $value->compile($this) . ')';
@@ -234,23 +237,18 @@ class Database extends Component
     }
 
     /**
-     * Sanitize a string by escaping characters that could cause an SQL
-     * injection attack.
-     *
-     *     $value = $db->escape('any string');
+     * Sanitize a string by escaping characters that could cause an SQL injection attack.
      *
      * @param string $value value to quote
      * @return  string
      * @throws DatabaseException
      */
-    public function escape($value): string
+    public function escape(string $value): string
     {
         // Make sure the database is connected
         !\is_null($this->conn) or $this->connect();
 
-        if (($value = $this->conn->real_escape_string((string) $value)) === false) {
-            throw new DatabaseException($this->conn->error, $this->conn->errno);
-        }
+        $value = $this->conn->real_escape_string($value);
 
         // SQL standard is to use single-quotes for all values
         return "'$value'";
@@ -259,26 +257,11 @@ class Database extends Component
     /**
      * Start a SQL transaction
      *
-     *     // Start the transactions
-     *     $db->begin();
-     *
-     *     try {
-     *          DB::insert('users')->values($user1)...
-     *          DB::insert('users')->values($user2)...
-     *          // Insert successful commit the changes
-     *          $db->commit();
-     *     }
-     *     catch (Database_Exception $e)
-     *     {
-     *          // Insert failed. Rolling back changes...
-     *          $db->rollback();
-     *      }
-     *
-     * @param string $mode transaction mode
+     * @param string|null $mode transaction mode
      * @return  boolean
      * @throws DatabaseException
      */
-    public function begin($mode = null): bool
+    public function begin(string $mode = null): bool
     {
         // Make sure the database is connected
         $this->conn or $this->connect();
@@ -293,9 +276,6 @@ class Database extends Component
     /**
      * Commit the current transaction
      *
-     *     // Commit the database changes
-     *     $db->commit();
-     *
      * @return  boolean
      * @throws DatabaseException
      */
@@ -309,9 +289,6 @@ class Database extends Component
 
     /**
      * Abort the current transaction
-     *
-     *     // Undo the changes
-     *     $db->rollback();
      *
      * @return  boolean
      * @throws DatabaseException
@@ -351,23 +328,12 @@ class Database extends Component
     /**
      * Quote a database column name and add the table prefix if needed.
      *
-     *     $column = $db->quote_column($column);
-     *
-     * You can also use SQL methods within identifiers.
-     *
-     *     $column = $db->quote_column(DB::expr('COUNT(`column`)'));
-     *
-     * Objects passed to this function will be converted to strings.
-     * [Database_Expression] objects will be compiled.
-     * [Database_Query] objects will be compiled and converted to a sub-query.
-     * All other objects will be converted using the `__toString` method.
-     *
      * @param mixed $column column name or array(column, alias)
      * @param null  $table
      * @return  string
      * @uses    Database::quoteIdentifier
      */
-    public function quoteColumn($column, $table = null): string
+    public function quoteColumn(mixed $column, $table = null): string
     {
         if (\is_array($column)) {
             [$column, $alias] = $column;
@@ -419,18 +385,11 @@ class Database extends Component
     /**
      * Quote a database table name and adds the table prefix if needed.
      *
-     *     $table = $db->quote_table($table);
-     *
-     * Objects passed to this function will be converted to strings.
-     * [Database_Expression] objects will be compiled.
-     * [Database_Query] objects will be compiled and converted to a sub-query.
-     * All other objects will be converted using the `__toString` method.
-     *
      * @param mixed $table table name or array(table, alias)
      * @return  string
      * @uses    Database::quoteIdentifier
      */
-    public function quoteTable($table): string
+    public function quoteTable(mixed $table): string
     {
         if (\is_array($table)) {
             [$table, $alias] = $table;
@@ -474,15 +433,10 @@ class Database extends Component
     /**
      * Quote a database identifier
      *
-     * Objects passed to this function will be converted to strings.
-     * [Database_Expression] objects will be compiled.
-     * [Database_Query] objects will be compiled and converted to a sub-query.
-     * All other objects will be converted using the `__toString` method.
-     *
      * @param mixed $value any identifier
      * @return  string
      */
-    public function quoteIdentifier($value): string
+    public function quoteIdentifier(mixed $value): string
     {
         if (\is_object($value) && $value instanceof SelectQuery) {
             // Create a sub-query

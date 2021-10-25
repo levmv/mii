@@ -21,7 +21,7 @@ abstract class App
 
     public $controller;
 
-    public $_config;
+    public array $_config;
 
     public ?string $base_url = null;
 
@@ -59,7 +59,7 @@ abstract class App
         $this->error->register();
     }
 
-    abstract public function run();
+    abstract public function run(): void;
 
     abstract protected function defaultComponents(): array;
 
@@ -95,6 +95,9 @@ abstract class App
         return $this->has($name);
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function loadComponent($id)
     {
         $params = [];

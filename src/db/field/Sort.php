@@ -8,12 +8,8 @@ use mii\db\SelectQuery;
 
 class Sort
 {
-
-    /**
-     * @var \mii\db\ORM
-     */
-    protected $_model;
-    protected $_field;
+    protected ?ORM $_model;
+    protected ?string $_field;
 
     public function __construct(?ORM $model = null, ?string $field_name = null)
     {
@@ -31,18 +27,15 @@ class Sort
                 ->where($parent_field, '=', $this->_model->get($parent_field))
                 ->one();
 
-            if ($value) {
-                $value = $value[$this->_field] ?: 0;
-            }
         } else {
             $value = (new SelectQuery)
                 ->select([DB::expr('MAX(' . $this->_field . ')'), $this->_field])
                 ->from($this->_model::table())
                 ->one();
 
-            if ($value) {
-                $value = $value[$this->_field] ?: 0;
-            }
+        }
+        if ($value) {
+            $value = $value[$this->_field] ?: 0;
         }
 
         return $value + 1;

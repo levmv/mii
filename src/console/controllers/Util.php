@@ -50,7 +50,7 @@ class Util extends Controller
         $result = \substr($result, \strpos($result, "\n\n") + 2);
 
         try {
-            $result = \json_decode($result, true);
+            $result = \json_decode($result, true, 512, JSON_THROW_ON_ERROR);
         } catch (\Throwable $t) {
             $this->error($t);
             return;
@@ -180,7 +180,8 @@ class Util extends Controller
 
     /**
      * Print table columns as phpdoc properties
-     * @param $name
+     * @param string $name
+     * @throws \mii\db\DatabaseException
      */
     public function table(string $name)
     {

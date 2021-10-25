@@ -2,7 +2,7 @@
 
 namespace mii\console;
 
-\defined('STDIN') or \define('STDIN', \fopen('php://stdin', 'r'));
+\defined('STDIN') or \define('STDIN', \fopen('php://stdin', 'rb'));
 \defined('STDOUT') or \define('STDOUT', \fopen('php://stdout', 'w'));
 \defined('STDERR') or \define('STDERR', \fopen('php://stderr', 'w'));
 
@@ -12,13 +12,13 @@ namespace mii\console;
  */
 class App extends \mii\core\App
 {
-    public function run()
+    /**
+     * @throws \mii\core\Exception
+     * @throws \Throwable
+     */
+    public function run(): void
     {
-        try {
-            return $this->request->execute();
-        } catch (\Throwable $e) {
-            throw $e;
-        }
+        $this->request->execute();
     }
 
     protected function defaultComponents(): array

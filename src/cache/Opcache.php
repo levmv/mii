@@ -6,12 +6,7 @@ use mii\util\FS;
 
 class Opcache extends File
 {
-    public $path = '@tmp/ocache';
-
-    public $directory_level = 1;
-
-    public $chmode = 0775;
-
+    public string $path = '@tmp/ocache';
 
     public function init(array $config = []): void
     {
@@ -28,13 +23,13 @@ class Opcache extends File
      * @return  mixed
      * @noinspection IssetArgumentExistenceInspection
      */
-    public function get($id, $default = null)
+    public function get(string $id, $default = null): mixed
     {
         $filename = $this->cacheFile($id);
 
         @include $filename;
 
-        if (isset($ttl) and $ttl < \time()) {
+        if (isset($ttl) && $ttl < \time()) {
             return $default;
         }
 
@@ -44,13 +39,13 @@ class Opcache extends File
     /**
      * Set a value to cache with id and lifetime
      *
-     * @param string  $id id of cache entry
+     * @param string $id id of cache entry
      * @param string  $data data to set to cache
-     * @param integer $lifetime lifetime in seconds
+     * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      * @throws \mii\core\Exception
      */
-    public function set($id, $data, $lifetime = null)
+    public function set(string $id, $data, int $lifetime = null): bool
     {
         if ($lifetime === null) {
             $lifetime = $this->default_expire;
@@ -73,7 +68,7 @@ class Opcache extends File
 
         $error = \error_get_last();
 
-        \Mii::warning("Unable to write cache file '{$filename}': {$error['message']}", 'mii');
+        \Mii::warning("Unable to write cache file '$filename': {$error['message']}", 'mii');
         return false;
     }
 
@@ -83,20 +78,11 @@ class Opcache extends File
      * @param string $id id to remove from cache
      * @return  boolean
      */
-    public function delete($id)
+    public function delete(string $id): bool
     {
         $filename = $this->cacheFile($id);
         \unlink($filename);
 
         return \opcache_invalidate($filename, true);
-    }
-
-    /**
-     * Delete all cache entries.
-     *
-     */
-    public function deleteAll(): bool
-    {
-        return $this->recursiveRemove($this->path);
     }
 }

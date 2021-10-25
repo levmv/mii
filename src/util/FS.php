@@ -16,7 +16,7 @@ class FS
         $parent = \dirname($path);
 
         if ($recursive && !\is_dir($parent) && $parent !== $path) {
-            static::mkdir($parent, $mode, true);
+            static::mkdir($parent, $mode);
         }
         try {
             if (!\mkdir($path, $mode)) {

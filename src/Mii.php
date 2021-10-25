@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpIllegalPsrClassPathInspection */
+<?php /** @noinspection PhpIncludeInspection */
+/** @noinspection PhpIllegalPsrClassPathInspection */
 declare(strict_types=1);
 
 use mii\log\Logger;
@@ -13,7 +14,7 @@ class Mii
      */
     public static $app;
 
-    public static $log_component_name = 'log';
+    public static string $log_component_name = 'log';
 
     public static array $paths = [];
 

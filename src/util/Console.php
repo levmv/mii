@@ -118,9 +118,9 @@ class Console
      * @param array  $args
      * @return int|boolean Number of bytes printed or false on error
      */
-    public static function stdout($string, ...$args)
+    public static function stdout(mixed $string, ...$args)
     {
-        return static::writeToStream(\STDOUT, $string, ...$args);
+        return static::writeToStream(\STDOUT, (string) $string, ...$args);
     }
 
     /**
@@ -129,9 +129,9 @@ class Console
      * @param string $string the string to print
      * @return int|boolean Number of bytes printed or false on error
      */
-    public static function stderr($string, ...$args)
+    public static function stderr(mixed $string, ...$args)
     {
-        return static::writeToStream(\STDERR, $string, ...$args);
+        return static::writeToStream(\STDERR, (string) $string, ...$args);
     }
 
     public static function writeToStream($stream, $string, ...$args)
@@ -147,10 +147,10 @@ class Console
      * Asks the user for input. Ends when the user types a carriage return (PHP_EOL). Optionally, It also provides a
      * prompt.
      *
-     * @param string $prompt the prompt to display before waiting for input (optional)
+     * @param string|null $prompt the prompt to display before waiting for input (optional)
      * @return string the user's input
      */
-    public static function input($prompt = null)
+    public static function input(string $prompt = null): string
     {
         if (isset($prompt)) {
             static::stdout($prompt);
@@ -173,10 +173,10 @@ class Console
     /**
      * Prints text to STDERR appended with a carriage return (PHP_EOL).
      *
-     * @param string $string the text to print
+     * @param string|null $string the text to print
      * @return integer|boolean number of bytes printed or false on error.
      */
-    public static function error($string = null)
+    public static function error(string $string = null)
     {
         return static::stderr($string . \PHP_EOL);
     }
@@ -184,11 +184,11 @@ class Console
     /**
      * Asks user to confirm by typing y or n.
      *
-     * @param string  $message to print out before waiting for user input
+     * @param string $message to print out before waiting for user input
      * @param boolean $default this value is returned if no selection is made.
-     * @return boolean whether user confirmed
+     * @return bool|null whether user confirmed
      */
-    public static function confirm($message, $default = false): ?bool
+    public static function confirm(string $message, $default = false): ?bool
     {
         while (true) {
             static::stdout($message . ' (yes|no) [' . ($default ? 'yes' : 'no') . ']:');
@@ -213,11 +213,11 @@ class Console
      * a list of options to choose from and their explanations.
      *
      * @param string $prompt the prompt message
-     * @param array  $options Key-value array of options to choose from
+     * @param array $options Key-value array of options to choose from
      *
      * @return string An option character the user chose
      */
-    public static function select($prompt, $options = [])
+    public static function select(string $prompt, array $options = []): string
     {
         top:
         static::stdout("$prompt [" . \implode(',', \array_keys($options)) . ',?]: ');

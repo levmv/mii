@@ -6,7 +6,7 @@ use mii\core\Component;
 
 class UploadHandler extends Component
 {
-    private $_files;
+    private ?array $_files = null;
 
     public function init(array $config = []): void
     {
@@ -63,7 +63,7 @@ class UploadHandler extends Component
      * @param mixed  $sizes file sizes provided by PHP
      * @param mixed  $errors uploading issues provided by PHP
      */
-    private function loadFilesRecursive($key, $names, $tmp_names, $types, $sizes, $errors): void
+    private function loadFilesRecursive(string $key, $names, $tmp_names, $types, $sizes, $errors): void
     {
         if (\is_array($names)) {
             foreach ($names as $i => $name) {

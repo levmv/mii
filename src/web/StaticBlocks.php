@@ -15,7 +15,7 @@ class StaticBlocks extends BaseBlocks
     public function render(): void
     {
         $this->assets_map_path = Mii::resolve($this->assets_map_path);
-        $this->assets = require $this->assets_map_path . "/{$this->current_set}.assets";
+        $this->assets = require $this->assets_map_path . "/$this->current_set.assets";
 
         foreach ($this->_blocks as $block_name => $block) {
             if ($block->__has_parent) {
@@ -50,7 +50,7 @@ class StaticBlocks extends BaseBlocks
         if (isset($this->assets['css'][$block_name])) {
             $filename = $this->assets['css'][$block_name];
             if (!isset($this->_used_css[$filename])) {
-                $this->_css .= "<link type=\"text/css\" href=\"{$this->base_url}/$filename.css\" rel=\"stylesheet\">\n";
+                $this->_css .= "<link type=\"text/css\" href=\"$this->base_url/$filename.css\" rel=\"stylesheet\">\n";
                 $this->_used_css[$filename] = true;
             }
         }
@@ -58,7 +58,7 @@ class StaticBlocks extends BaseBlocks
         if (isset($this->assets['js'][$block_name])) {
             $filename = $this->assets['js'][$block_name];
             if (!isset($this->_used_js[$filename])) {
-                $this->_js[Blocks::END][] = "<script src=\"{$this->base_url}/$filename.js\"></script>";
+                $this->_js[BaseBlocks::END][] = "<script src=\"$this->base_url/$filename.js\"></script>";
                 $this->_used_js[$filename] = true;
             }
         }
@@ -69,7 +69,7 @@ class StaticBlocks extends BaseBlocks
                     $position = $settings['position'];
                     unset($settings['position']);
                 } else {
-                    $position = Blocks::END;
+                    $position = BaseBlocks::END;
                 }
                 $this->_js[$position][] = HTML::script($link, $settings);
             }
@@ -83,7 +83,7 @@ class StaticBlocks extends BaseBlocks
 
         if (!empty($this->_blocks[$block_name]->__inline_js)) {
             foreach ($this->_blocks[$block_name]->__inline_js as $inline) {
-                $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : Blocks::END;
+                $position = (!empty($inline[1]) and isset($inline[1]['position'])) ? $inline[1]['position'] : BaseBlocks::END;
                 $this->_js[$position][] = "<script>{$inline[0]}</script>";
             }
         }

@@ -63,7 +63,7 @@ class Blocks extends BaseBlocks
                         }
                     } else {
                         $content = \implode("\n", $block['inline']);
-                        $this->_css .= '<style>' . $content . '</style>';
+                        $this->_css .= "<style>$content</style>";
                     }
                 }
             }
@@ -77,9 +77,9 @@ class Blocks extends BaseBlocks
      *
      * @param string $block_name
      * @param string $parent_block
-     * @param array  $depends
+     * @param array $depends
      */
-    public function processBlockAssets($block_name, $parent_block, $depends): void
+    public function processBlockAssets(string $block_name, string $parent_block, array $depends): void
     {
         if (isset($this->_used_blocks[$block_name])) {
             return;
@@ -151,7 +151,7 @@ class Blocks extends BaseBlocks
     {
         $result_file_name = $block_name . '.' . \substr(\md5(\implode('', \array_values($files))), 0, 10);
 
-        $web_output = "{$this->base_url}/{$result_file_name}.{$type}?";
+        $web_output = "$this->base_url/$result_file_name.{$type}?";
         $output = $this->base_path . '/' . $result_file_name . '.' . $type;
 
         $need_recompile = !\is_file($output);

@@ -32,17 +32,15 @@ class Router extends Component
         'path' => '[a-zA-Z0-9-_./]+',
     ];
 
-    protected $cache = null;
+    protected ?string $cache = null;
 
-    protected $cache_id = 'mii_core_router_routes';
+    protected string $cache_id = 'mii_core_router_routes';
 
-    protected $cache_lifetime = 86400;
+    protected int $cache_lifetime = 86400;
 
     protected bool $rest_mode = false;
 
     protected array $routes;
-
-    protected $order;
 
     protected array $_routes_list;
 
@@ -75,7 +73,7 @@ class Router extends Component
         $route_index = 0;
 
         foreach ($this->routes as $pattern => $value) {
-            $pattern = (string) $pattern;
+            $pattern = (string)$pattern;
             $method = false;
 
             if ($this->rest_mode) {
@@ -202,10 +200,11 @@ class Router extends Component
             }
         }
 
-        if ($this->rest_mode && isset($route[static::R_METHOD]) && $route[static::R_METHOD] !== false) {
-            if (\strtolower(\Mii::$app->request->method()) !== $route[static::R_METHOD]) {
-                return false;
-            }
+        if ($this->rest_mode
+            && isset($route[static::R_METHOD])
+            && $route[static::R_METHOD] !== false
+            && \strtolower(\Mii::$app->request->method()) !== $route[static::R_METHOD]) {
+            return false;
         }
 
         $params = $route[static::R_VALUES] ?? [];
@@ -331,7 +330,7 @@ class Router extends Component
                 }
             }
 
-            $uri = \str_replace($key, (string) $params[$param], $uri);
+            $uri = \str_replace($key, (string)$params[$param], $uri);
         }
 
         // Trim all extra slashes from the URI
@@ -342,7 +341,7 @@ class Router extends Component
     }
 
 
-    public function getCompiledData() : array
+    public function getCompiledData(): array
     {
         return [$this->_routes_list, $this->_named_routes];
     }

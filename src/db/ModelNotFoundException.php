@@ -14,7 +14,7 @@ class ModelNotFoundException extends DatabaseException
         $this->model = $model;
         $this->id = $id;
 
-        $this->message = "No model {$model}($id)";
+        $this->message = "No model $model($id)";
 
         return $this;
     }

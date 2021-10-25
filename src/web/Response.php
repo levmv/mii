@@ -43,7 +43,7 @@ class Response extends Component
      * @param string $value the value of the header
      * @return static object itself
      */
-    public function setHeader($name, $value = '')
+    public function setHeader(string $name, $value = ''): static
     {
         $name = \strtolower($name);
         $this->_headers[$name] = (array) $value;
@@ -58,7 +58,7 @@ class Response extends Component
      * @param string $value the value of the header
      * @return static the collection object itself
      */
-    public function addHeader($name, $value)
+    public function addHeader(string $name, string $value): static
     {
         $name = \strtolower($name);
         $this->_headers[$name][] = $value;
@@ -89,7 +89,7 @@ class Response extends Component
             if (empty($this->status_message)) {
                 \http_response_code($this->status);
             } else {
-                \header("HTTP/1.1 {$this->status} {$this->status_message}");
+                \header("HTTP/1.1 $this->status $this->status_message");
             }
         }
 
@@ -113,7 +113,7 @@ class Response extends Component
     /**
      * Sets or gets the HTTP status from this response.
      *
-     * @param integer $status Status to set to this response
+     * @param int|null $status Status to set to this response
      * @return  mixed
      */
     public function status(int $status = null)
@@ -161,7 +161,7 @@ class Response extends Component
                 break;
             case self::FORMAT_JSON:
                 $this->setHeader('content-type', 'application/json; charset=UTF-8');
-                $this->_content = \json_encode($this->_content, \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
+                $this->_content = \json_encode($this->_content, JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
                 break;
             case self::FORMAT_XML:
                 $this->setHeader('content-type', 'application/xml; charset=UTF-8');

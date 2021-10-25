@@ -13,13 +13,13 @@ abstract class BaseBlocks extends Component
 
     protected string $base_url = '/assets';
 
-    protected $current_set;
+    protected string $current_set;
 
     protected array $sets = [];
 
     protected array $_blocks = [];
 
-    protected $libraries;
+    protected array $libraries;
 
     protected bool $_rendered = false;
 

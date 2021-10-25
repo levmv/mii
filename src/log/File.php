@@ -7,13 +7,7 @@ use mii\util\FS;
 
 class File extends Target
 {
-    protected $file = '';
-
-    public function init(array $config = []): void
-    {
-        parent::init($config);
-    }
-
+    protected string $file = '';
 
     public function process(array $messages): void
     {
@@ -26,7 +20,7 @@ class File extends Target
         $text = \implode("\n", \array_map([$this, 'formatMessage'], $messages)) . "\n";
 
         if (($fp = \fopen($this->file, 'a')) === false) {
-            \error_log("Unable to append to log file: {$this->file}");
+            \error_log("Unable to append to log file: $this->file");
             return;
         }
         \flock($fp, \LOCK_EX);

@@ -6,11 +6,11 @@ use mii\core\Component;
 
 abstract class Cache extends Component
 {
-    protected $default_expire = 3600;
+    protected int $default_expire = 3600;
 
-    protected $prefix = '';
+    protected string $prefix = '';
 
-    protected $serialize = true;
+    protected bool $serialize = true;
 
     /**
      * Retrieve a cached value entry by id.
@@ -19,17 +19,17 @@ abstract class Cache extends Component
      * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    abstract public function get($id, $default = null);
+    abstract public function get(string $id, $default = null): mixed;
 
     /**
      * Set a value to cache with id and lifetime
      *
-     * @param string  $id id of cache entry
+     * @param string $id id of cache entry
      * @param string  $data data to set to cache
-     * @param integer $lifetime lifetime in seconds
+     * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-    abstract public function set($id, $data, $lifetime = null);
+    abstract public function set(string $id, $data, int $lifetime = null): bool;
 
     /**
      * Delete a cache entry based on id
@@ -37,7 +37,7 @@ abstract class Cache extends Component
      * @param string $id id to remove from cache
      * @return  boolean
      */
-    abstract public function delete($id);
+    abstract public function delete(string $id): bool;
 
     /**
      * Delete all cache entries.
@@ -48,7 +48,7 @@ abstract class Cache extends Component
      *
      * @return  boolean
      */
-    abstract public function deleteAll();
+    abstract public function deleteAll(): bool;
 
     /**
      * Replaces troublesome characters with underscores.
@@ -56,7 +56,7 @@ abstract class Cache extends Component
      * @param string $id id of cache to sanitize
      * @return  string
      */
-    protected function sanitizeId($id): string
+    protected function sanitizeId(string $id): string
     {
         // Change slashes and spaces to underscores
         return $this->prefix . \str_replace(['/', '\\', ' '], '_', $id);

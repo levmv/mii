@@ -56,7 +56,7 @@ class Session extends Component
      * @param mixed  $default default value to return
      * @return  mixed
      */
-    public function get($key, $default = null)
+    public function get(string $key, $default = null)
     {
         $this->open();
 
@@ -132,7 +132,7 @@ class Session extends Component
      * @param mixed  $value value
      * @return  $this
      */
-    public function set($key, $value): self
+    public function set(string $key, $value): self
     {
         $this->open();
 
@@ -150,7 +150,7 @@ class Session extends Component
      * @param mixed  $value referenced value
      * @return  $this
      */
-    public function bind($key, &$value): self
+    public function bind(string $key, &$value): self
     {
         $this->open();
 
@@ -181,12 +181,10 @@ class Session extends Component
     /**
      * Generates a new session id and returns it.
      *
-     *     $id = $session->regenerate();
-     *
      * @param bool $delete_old
      * @return  string
      */
-    public function regenerate($delete_old = false): string
+    public function regenerate(bool $delete_old = false): string
     {
         if ($this->isActive()) {
             // Regenerate the session id

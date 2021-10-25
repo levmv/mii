@@ -63,11 +63,11 @@ class ACL
     /**
      * Add rule to array of ACL rules.
      *
-     * @param bool   $access
+     * @param bool $access
      * @param mixed  $role single role or array of roles
      * @param string $action
      */
-    public function addRule($access, $role, $action): void
+    public function addRule(bool $access, $role, $action): void
     {
         $roles = (array) $role;
 

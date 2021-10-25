@@ -106,7 +106,7 @@ class Validation
         }
 
         if ($message !== null && is_string($rule)) {
-            $this->_error_messages["{$field}.{$rule}"] = $message;
+            $this->addMessage($field, $rule, $message);
         }
 
         // Store the rule and params for this rule
@@ -223,7 +223,7 @@ class Validation
                 }
 
                 // Ignore return values from rules when the field is empty
-                if (!\in_array($rule, $this->_empty_rules, true) && !Rules::notEmpty($value)) {
+                if (!\in_array($rule, $this->_empty_rules, true) && !Rules::required($value)) {
                     continue;
                 }
 
@@ -341,6 +341,11 @@ class Validation
         }
 
         return $messages;
+    }
+
+    public function addMessage(string $field, string $rule, string $message): void
+    {
+        $this->_error_messages["{$field}.{$rule}"] = $message;
     }
 
     /**

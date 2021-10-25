@@ -21,8 +21,9 @@ if (!\function_exists('redirect')) {
     /**
      * @param      $url
      * @param bool $use_back_url
+     * @noinspection PhpUnhandledExceptionInspection
      */
-    function redirect($url, $use_back_url = false)
+    function redirect($url, bool $use_back_url = false)
     {
         if ($use_back_url) {
             $url = \mii\util\Url::back($url);
@@ -34,6 +35,7 @@ if (!\function_exists('redirect')) {
 if (!\function_exists('block')) {
     /**
      * @param $name string
+     * @param array|null $params
      * @return \mii\web\Block
      */
     function block(string $name, array $params = null): \mii\web\Block
@@ -70,17 +72,11 @@ if (!\function_exists('getCached')) {
     /**
      * Retrieve a cached value entry by id.
      *
-     *     // Retrieve cache entry with id foo
-     *     $data = get_cached('foo');
-     *
-     *     // Retrieve cache entry and return 'bar' if miss
-     *     $data = get_cached('foo', 'bar');
-     *
      * @param string $id id of cache to entry
      * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    function getCached($id, $default = null, $lifetime = null)
+    function getCached(string $id, $default = null, $lifetime = null)
     {
         if ($default instanceof \Closure) {
             $cached = Mii::$app->cache->get($id);
@@ -100,21 +96,12 @@ if (!\function_exists('cache')) {
     /**
      * Set a value to cache with id and lifetime
      *
-     *     $data = 'bar';
-     *
-     *     // Set 'bar' to 'foo', using default expiry
-     *     cache('foo', $data);
-     *
-     *     // Set 'bar' to 'foo' for 30 seconds
-     *     cache('foo', $data, 30);
-     *
-     * @param string  $id id of cache entry
+     * @param string $id id of cache entry
      * @param mixed   $data data to set to cache
-     * @param integer $lifetime lifetime in seconds
+     * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-
-    function cache($id, $data, $lifetime = null)
+    function cache(string $id, mixed $data, int $lifetime = null)
     {
         return Mii::$app->cache->set($id, $data, $lifetime);
     }
@@ -124,14 +111,11 @@ if (!\function_exists('clearCache')) {
     /**
      * Delete a cache entry based on id, or delete all cache entries.
      *
-     *     // Delete 'foo' entry from the apc group
-     *     Cache::instance('apc')->delete('foo');
-     *
-     * @param string $id id to remove from cache
+     * @param string|null $id id to remove from cache
      * @return  boolean
      */
 
-    function clearCache($id = null)
+    function clearCache(string $id = null): bool
     {
         if ($id === null) {
             return Mii::$app->cache->deleteAll();
@@ -162,8 +146,8 @@ if (!\function_exists('dd')) {
     function dd(...$params)
     {
         if (Mii::$app instanceof \mii\web\App && Mii::$app->response->format === \mii\web\Response::FORMAT_HTML) {
-            echo '<style>pre { padding: 5px; background-color: #f9feff; font-size: 14px; font-family: monospace; text-align: left; color: #111;overflow: auto; white-space: pre-wrap; }';
-            echo 'pre small { font-size: 1em; color: #000080;font-weight:bold}';
+            echo '<style>pre{font-size:14px;text-align:left;color:#111;overflow:auto;white-space:pre-wrap}';
+            echo 'pre small{font-size:1em;color:navy;font-weight:700}';
             echo "</style><pre>\n";
 
             \array_map(static function ($a) {
@@ -218,25 +202,6 @@ if (!\function_exists('config')) {
 if (!\function_exists('configSet')) {
     function configSet(string $key, $value)
     {
-        \mii\util\Arr::setPath(Mii::$app->_config, $key, $value, '.');
-    }
-}
-
-if (!function_exists('str_contains')) {
-    function str_contains(string $haystack, string $needle): bool {
-        return '' === $needle || false !== strpos($haystack, $needle);
-    }
-}
-
-if (!function_exists('str_starts_with')) {
-    function str_starts_with(string $haystack, string $needle): bool
-    {
-        return \strncmp($haystack, $needle, \strlen($needle)) === 0;
-    }
-}
-
-if (!function_exists('get_debug_type')) {
-    function get_debug_type($value): string {
-        return gettype($value);
+        \mii\util\Arr::setPath(Mii::$app->_config, $key, $value);
     }
 }

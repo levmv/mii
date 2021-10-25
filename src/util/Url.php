@@ -123,7 +123,7 @@ class Url
      * @param array $matches Array of matches from preg_replace_callback()
      * @return string          Encoded string
      */
-    protected static function _rawurlencode_callback($matches)
+    protected static function _rawurlencode_callback(array $matches)
     {
         return \rawurlencode($matches[0]);
     }
@@ -140,8 +140,8 @@ class Url
      *
      * [!!] Parameters with a NULL value are left out.
      *
-     * @param array   $params Array of GET parameters
-     * @param boolean $use_get Include current request GET parameters
+     * @param array|null $params Array of GET parameters
+     * @param null $use_get Include current request GET parameters
      * @return  string
      */
     public static function query(array $params = null, $use_get = null)

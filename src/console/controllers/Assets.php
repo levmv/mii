@@ -14,18 +14,18 @@ use mii\util\Text;
  *
  *  Global options:
  *
- *  --config=<path>  Path to configuration file. By default it's «@app/config/assets.php»
+ *  --config=<path>  Path to configuration file. By default, it's «@app/config/assets.php»
  *  --set=<setname> Name of set to process
- *  --force         Dont check if files changed
+ *  --force         Don't check if files changed
  *  --json          To print assets paths as json
  *
  * @package mii\console\controllers
  */
 class Assets extends Controller
 {
-    public $config_file;
-    private $json_output;
-    private $force_mode;
+    public string $config_file;
+    private bool $json_output;
+    private bool $force_mode;
     private $filtered_sets;
 
     private $assets;
@@ -72,7 +72,7 @@ class Assets extends Controller
         $this->filtered_sets = (array) ($this->request->params['set'] ?? \array_keys($this->sets));
 
         if (!\file_exists(Mii::resolve($this->config_file))) {
-            $this->error("Config {$this->config_file} does not exist.");
+            $this->error("Config $this->config_file does not exist.");
             exit(1);
         }
 
@@ -114,7 +114,7 @@ class Assets extends Controller
         }
 
         if ($this->json_output) {
-            $this->stdout(\json_encode($this->processed));
+            $this->stdout(\json_encode($this->processed, Text::JSON_FLAGS));
             return;
         }
 
@@ -135,7 +135,7 @@ class Assets extends Controller
     }
 
 
-    protected function testSet($set_name)
+    protected function testSet($set_name): void
     {
         $this->info('==========================');
         $this->info('Testing of set «:name»', [':name' => $set_name]);
@@ -234,7 +234,7 @@ class Assets extends Controller
     }
 
 
-    protected function initSet($set_name)
+    protected function initSet($set_name): void
     {
         $this->base_path = null;
         $this->libraries = [];
@@ -285,7 +285,7 @@ class Assets extends Controller
     }
 
 
-    protected function buildSet($set_name)
+    protected function buildSet($set_name): void
     {
         $this->initSet($set_name);
 

@@ -11,9 +11,9 @@ class Rules
      * Checks if a value is unique in database.
      *
      * @param $value
-     * @param $key
-     * @param $model
-     * @param $id
+     * @param string $key
+     * @param string $model
+     * @param null $id
      * @return bool
      */
     public static function unique($value, string $key, string $model, $id = null) : bool
@@ -98,7 +98,7 @@ class Rules
      * @param integer|array $length exact length required, or array of valid lengths
      * @return  boolean
      */
-    public static function length($value, int $length) : bool
+    public static function length($value, int|array $length) : bool
     {
         if (\is_array($length)) {
             foreach ($length as $strlen) {
@@ -177,7 +177,7 @@ class Rules
         } // Empty fields cause issues with checkdnsrr()
 
         // Check if the email domain has a valid MX record
-        return (bool) \checkdnsrr(\preg_replace('/^[^@]++@/', '', $email), 'MX');
+        return \checkdnsrr(\preg_replace('/^[^@]++@/', '', $email), 'MX');
     }
 
     /**
@@ -269,7 +269,7 @@ class Rules
      * Checks if a phone number is valid.
      *
      * @param string $number phone number to check
-     * @param array  $lengths
+     * @param array|null $lengths
      * @return  boolean
      */
     public static function phone($number, array $lengths = null) : bool
@@ -282,7 +282,7 @@ class Rules
         $number = \preg_replace('/\D+/', '', $number);
 
         // Check if the number is within range
-        return \in_array(\strlen($number), $lengths);
+        return \in_array(\strlen($number), $lengths, true);
     }
 
     /**
@@ -379,7 +379,7 @@ class Rules
         [$decimal] = \array_values(\localeconv());
 
         // A lookahead is used to make sure the string contains at least one digit (before or after the decimal point)
-        return (bool) \preg_match('/^-?+(?=.*[0-9])[0-9]*+' . \preg_quote($decimal) . '?+[0-9]*+$/D', (string) $str);
+        return (bool) \preg_match('/^-?+(?=.*[0-9])[0-9]*+' . \preg_quote($decimal, '/') . '?+[0-9]*+$/D', (string) $str);
     }
 
     /**
@@ -426,7 +426,7 @@ class Rules
         // Get the decimal point for the current locale
         [$decimal] = \array_values(\localeconv());
 
-        return (bool) \preg_match('/^[+-]?[0-9]' . $digits . \preg_quote($decimal) . '[0-9]{' . ((int) $places) . '}$/D', $str);
+        return (bool) \preg_match('/^[+-]?[0-9]' . $digits . \preg_quote($decimal, '/') . '[0-9]{' . ($places) . '}$/D', $str);
     }
 
     /**

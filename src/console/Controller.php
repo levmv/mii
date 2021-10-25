@@ -9,13 +9,13 @@ class Controller
 {
     public $color;
 
-    public $interactive = true;
+    public bool $interactive = true;
 
     public $auto_params = true;
 
     public $request;
 
-    public $response_code = 0;
+    public int $response_code = 0;
 
     public function __construct()
     {
@@ -61,12 +61,12 @@ class Controller
         foreach ($methods as ['name' => $method,
                  'summary' => $summary,
                  'desc' => $desc,
-                 'args' => $args, ]
+                 'args' => $args,]
         ) {
             $args = \implode(' ', $args);
             Console::stdout("\n$controller $method $args", Console::FG_YELLOW);
 
-            $this->stdout("\n$summary\n$desc", Console::FG_GREY);
+            $this->stdout("\n$summary\n$desc");
         }
 
         $this->stdout("\n\n");
@@ -90,7 +90,7 @@ class Controller
                 $type = $param->getType();
 
                 if ($type && $type->getName() === 'array') {
-                    $params[$name] = (array) $params[$name];
+                    $params[$name] = (array)$params[$name];
                 } elseif (\is_array($params[$name])) {
                     $is_valid = false;
                 } elseif (
@@ -100,7 +100,7 @@ class Controller
                     $type_name = $type->getName();
                     switch ($type_name) {
                         case 'int':
-                            if(\strlen($params[$name]) > 1 && $params[$name][0] === '0') {
+                            if (\strlen($params[$name]) > 1 && $params[$name][0] === '0') {
                                 $params[$name] = \substr($params[$name], 1);
                             }
                             $params[$name] = \filter_var($params[$name], \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE);
@@ -156,9 +156,9 @@ class Controller
         $this->before();
 
         if ($this->auto_params) {
-            $this->response_code = (int) $this->execute_action($this->request->action, $this->request->params);
+            $this->response_code = (int)$this->execute_action($this->request->action, $this->request->params);
         } else {
-            $this->response_code = (int) \call_user_func([$this, $this->request->action], $this->request->params);
+            $this->response_code = (int)$this->{$this->request->action}($this->request->params);
         }
 
         $this->after();
@@ -193,8 +193,8 @@ class Controller
 
     protected function info($msg, $options = [])
     {
-        if(!empty($options)) {
-            $msg = \strtr((string) $msg, $options);
+        if (!empty($options)) {
+            $msg = \strtr((string)$msg, $options);
         }
         Console::stdout($msg . "\n", Console::FG_GREEN);
         \Mii::info($msg, 'console');
@@ -202,14 +202,14 @@ class Controller
 
     protected function warning($msg, $options = [])
     {
-        $msg = \strtr((string) $msg, $options);
+        $msg = \strtr((string)$msg, $options);
         Console::stdout($msg . "\n", Console::FG_PURPLE);
         \Mii::warning($msg, 'console');
     }
 
     protected function error($msg, $options = [])
     {
-        $msg = \strtr((string) $msg, $options);
+        $msg = \strtr((string)$msg, $options);
         Console::stderr($msg . "\n", Console::FG_RED);
         \Mii::error($msg, 'console');
     }

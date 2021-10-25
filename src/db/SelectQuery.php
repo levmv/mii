@@ -26,12 +26,6 @@ class SelectQuery
 
     protected ?string $_model_class = null;
 
-    // Parameters for __construct when using object results
-    /**
-     * @var array
-     */
-    protected ?array $_object_params = null;
-
     // SELECT ...
     protected array $_select = [];
 
@@ -46,30 +40,30 @@ class SelectQuery
     protected array $_from = [];
 
     // JOIN ...
-    protected $_joins = [];
+    protected array $_joins = [];
 
     // GROUP BY ...
-    protected $_group_by = [];
+    protected array $_group_by = [];
 
     // HAVING ...
-    protected $_having = [];
+    protected array $_having = [];
 
     // OFFSET ...
     protected ?int $_offset = null;
 
     // The last JOIN statement created
-    protected $_last_join;
+    protected int $_last_join;
 
     // WHERE ...
     protected array $_where = [];
 
     // ORDER BY ...
-    protected $_order_by = [];
+    protected array $_order_by = [];
 
     // LIMIT ...
     protected ?int $_limit = null;
 
-    protected $_index_by;
+    protected ?string $_index_by = null;
 
     protected $_last_condition_where;
 
@@ -125,10 +119,6 @@ class SelectQuery
     /**
      * Sets the initial columns to select
      *
-     * Second argument used for optimization purpose. Most common use is call from ORM for
-     * select like 'table.*'
-     *
-     * @param array     $columns column list
      * @return  Query
      */
     public function select(...$columns): self
@@ -199,10 +189,10 @@ class SelectQuery
      * Adds addition tables to "JOIN ...".
      *
      * @param mixed  $table column name or array($column, $alias) or object
-     * @param string $type join type (LEFT, RIGHT, INNER, etc)
+     * @param string|null $type join type (LEFT, RIGHT, INNER, etc)
      * @return  $this
      */
-    public function join($table, $type = null): self
+    public function join($table, string $type = null): self
     {
         $this->_joins[] = [
             'table' => $table,
@@ -239,7 +229,7 @@ class SelectQuery
      */
     public function using(...$columns): self
     {
-        \call_user_func_array([$this->_last_join, 'using'], $columns);
+        $this->_joins[$this->_last_join]['using'] = $columns;
 
         return $this;
     }
@@ -322,7 +312,7 @@ class SelectQuery
     /**
      * Start returning results after "OFFSET ..."
      *
-     * @param integer $number starting result number or null to reset
+     * @param int|null $number starting result number or null to reset
      * @return  $this
      */
     public function offset(?int $number): self
@@ -332,7 +322,7 @@ class SelectQuery
         return $this;
     }
 
-    public function paginate($count = 100, string $block_name = 'pagination')
+    public function paginate($count = 100, string $block_name = 'pagination'): static
     {
         $this->_pagination = new Pagination([
             'block' => $block_name,
@@ -411,7 +401,7 @@ class SelectQuery
      */
     public function andFilter($column, $op, $value): self
     {
-        if ($value === null || $value === '' || !Rules::notEmpty((\is_string($value) ? \trim($value) : $value))) {
+        if ($value === null || $value === '' || !Rules::required((\is_string($value) ? \trim($value) : $value))) {
             return $this;
         }
 
@@ -565,7 +555,6 @@ class SelectQuery
                 ? ' FROM ' . $this->db->quoteTable($table)
                 : " FROM $table_q";
         } elseif (!empty($this->_from)) {
-            \assert(!empty($this->_from), 'From must not be empty');
             $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quoteTable'], $this->_from));
         }
 
@@ -678,7 +667,6 @@ class SelectQuery
     protected function _compileConditions(array $conditions): string
     {
         $last_condition = null;
-
 
         $sql = '';
         foreach ($conditions as $group) {
@@ -813,11 +801,8 @@ class SelectQuery
      * Execute the current query on the given database.
      *
      * @param mixed $db Database instance or name of instance
-     * @param mixed   result object classname or null for array
-     * @param array    result object constructor arguments
-     * @return  Result   Result for SELECT queries
-     * @return  mixed    the insert id for INSERT queries
-     * @return  integer  number of affected rows for all other queries
+     * @return Result|null Result for SELECT queries
+     * @throws DatabaseException
      */
     public function execute(Database $db = null): ?Result
     {
@@ -842,7 +827,7 @@ class SelectQuery
         return $result;
     }
 
-    public function indexBy($column): self
+    public function indexBy(?string $column): self
     {
         $this->_index_by = $column;
 
@@ -879,7 +864,7 @@ class SelectQuery
 
         $this->_order_by = [];
 
-        $count = $this->execute()->scalar(0);
+        $count = $this->execute()->scalar();
 
         $this->_type = $old_type;
         $this->_select = $old_select;

@@ -4,7 +4,7 @@ namespace mii\web;
 
 class HttpException extends Exception
 {
-    public $status_code = 500;
+    public mixed $status_code = 500;
 
     public function __construct($status = 500, $message = '', $code = 0, \Exception $previous = null)
     {

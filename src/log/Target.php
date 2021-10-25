@@ -124,7 +124,7 @@ abstract class Target extends Component
             $this->last_date = \date('y-m-d H:i:s', $timestamp);
         }
 
-        return "{$this->last_date}$prefix $level $msg$extended";
+        return "$this->last_date$prefix $level $msg$extended";
     }
 
     public static function shortExceptionText(\Throwable $e): string

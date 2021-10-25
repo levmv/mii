@@ -63,12 +63,12 @@ class UTF8
      *
      *     $ascii = UTF8::transliterate_to_ascii($utf8);
      *
-     * @param string  $str string to transliterate
+     * @param string $str string to transliterate
      * @param integer $case -1 lowercase only, +1 uppercase only, 0 both cases
      * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function transliterateToAscii($str, $case = 0)
+    public static function transliterateToAscii(string $str, int $case = 0)
     {
         static $utf8_lower_accents = null;
         static $utf8_upper_accents = null;
@@ -137,13 +137,11 @@ class UTF8
      * Makes a UTF-8 string's first character uppercase. This is a UTF8-aware
      * version of [ucfirst](http://php.net/ucfirst).
      *
-     *     $str = UTF8::ucfirst($str);
-     *
      * @param string $str mixed case string
      * @return  string
      * @author  Harry Fuecks <hfuecks@gmail.com>
      */
-    public static function ucfirst($str)
+    public static function ucfirst(string $str): string
     {
         if (self::isAscii($str)) {
             return \ucfirst($str);
@@ -158,14 +156,12 @@ class UTF8
      * Strips whitespace (or other UTF-8 characters) from the beginning and
      * end of a string. This is a UTF8-aware version of [trim](http://php.net/trim).
      *
-     *     $str = UTF8::trim($str);
-     *
      * @param string $str input string
-     * @param string $charlist string of characters to remove
+     * @param string|null $charlist string of characters to remove
      * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function trim($str, $charlist = null)
+    public static function trim(string $str, string $charlist = null): string
     {
         if ($charlist === null) {
             return \trim($str);
@@ -178,14 +174,12 @@ class UTF8
      * Strips whitespace (or other UTF-8 characters) from the beginning of
      * a string. This is a UTF8-aware version of [ltrim](http://php.net/ltrim).
      *
-     *     $str = UTF8::ltrim($str);
-     *
      * @param string $str input string
-     * @param string $charlist string of characters to remove
+     * @param string|null $charlist string of characters to remove
      * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function ltrim($str, $charlist = null)
+    public static function ltrim(string $str, string $charlist = null): string
     {
         if ($charlist === null) {
             return \ltrim($str);
@@ -204,14 +198,12 @@ class UTF8
      * Strips whitespace (or other UTF-8 characters) from the end of a string.
      * This is a UTF8-aware version of [rtrim](http://php.net/rtrim).
      *
-     *     $str = UTF8::rtrim($str);
-     *
      * @param string $str input string
-     * @param string $charlist string of characters to remove
+     * @param string|null $charlist string of characters to remove
      * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function rtrim($str, $charlist = null)
+    public static function rtrim(string $str, string $charlist = null): string
     {
         if ($charlist === null) {
             return \rtrim($str);
@@ -227,7 +219,7 @@ class UTF8
     }
 
 
-    public static function ruTranslit($str)
+    public static function ruTranslit(string $str): string
     {
         static $trans_table = null;
 
@@ -259,12 +251,10 @@ class UTF8
             ];
         }
 
-        $str = \str_replace(
+        return \str_replace(
             \array_keys($trans_table),
             \array_values($trans_table),
             $str
         );
-
-        return $str;
     }
 }

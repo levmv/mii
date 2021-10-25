@@ -34,7 +34,7 @@ class Exception extends \Exception
         return \sprintf(
             '%s%s: %s ~ %s[%d]',
             (new \ReflectionClass($e))->getShortName(),
-            $code != 0 ? "[$code]" : '',
+            $code !== 0 ? "[$code]" : '',
             \strip_tags($e->getMessage()),
             \mii\util\Debug::path($e->getFile()),
             $e->getLine()

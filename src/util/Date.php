@@ -14,7 +14,6 @@ class Date
 
 
     private static ?int $today = null;
-    private static ?int $tomorrow = null;
     private static ?int $year = null;
 
     public static function nice(int $timestamp, bool $with_time = true): string
@@ -53,7 +52,7 @@ class Date
         if ($offset < 61) {
             return 'только что';
         } elseif ($offset < 60 * 55) {
-            $minutes = \round($offset / 60);
+            $minutes = (int) \round($offset / 60);
             return $minutes . ' ' . Text::decl($minutes, ['минуту', 'минуты', 'минут']) . ' назад';
         } elseif ($offset < 3600 + 60 * 15) {
             return 'час назад';
@@ -71,7 +70,7 @@ class Date
         if ($offset < 60) {
             return 'через мгновение';
         } elseif ($offset < 60 * 55) {
-            $minutes = \round($offset / 60);
+            $minutes = (int) \round($offset / 60);
             return "через $minutes " . Text::decl($minutes, ['минуту', 'минуты', 'минут']);
         } elseif ($offset < 60 * 65) {
             return 'через час';
@@ -91,7 +90,7 @@ class Date
     /**
      * @deprecated
      */
-    public static function formated($timestamp, $local_timestamp = null)
+    public static function formated($timestamp, $local_timestamp = null): string
     {
         return static::fuzzy($timestamp, $local_timestamp);
     }

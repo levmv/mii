@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpPropertyOnlyWrittenInspection */
+declare(strict_types=1);
 
 namespace mii\core;
 
@@ -10,7 +11,6 @@ class ErrorHandler extends Component
      * @var integer the size of the reserved memory. A portion of memory is pre-allocated so that
      * when an out-of-memory issue occurs, the error handler is able to handle the error with
      * the help of this reserved memory. If you set this value to be 0, no memory will be reserved.
-     * Defaults to 0;
      */
     public int $memory_reserve_size = 0;
 
@@ -19,7 +19,7 @@ class ErrorHandler extends Component
      */
     private string $_memory_reserve;
 
-    public function register()
+    public function register(): void
     {
         \ini_set('display_errors', '0');
         \set_exception_handler([$this, 'handleException']);
@@ -31,25 +31,25 @@ class ErrorHandler extends Component
         \register_shutdown_function([$this, 'handleFatalError']);
     }
 
-    public function unregister()
+    public function unregister(): void
     {
         \restore_error_handler();
         \restore_exception_handler();
     }
 
 
-    public function report($exception)
+    public function report($exception): void
     {
         \Mii::error($exception, \get_class($exception));
     }
 
 
-    public function render($exception)
+    public function render($exception): void
     {
     }
 
 
-    public function handleException($e)
+    public function handleException($e): void
     {
         // disable error capturing to avoid recursive errors while handling exceptions
         $this->unregister();
@@ -72,7 +72,7 @@ class ErrorHandler extends Component
     }
 
 
-    public function handleError($code, $error, $file, $line)
+    public function handleError($code, $error, $file, $line): bool
     {
         if (\error_reporting() & $code) {
             unset($this->_memory_reserve);
@@ -112,7 +112,7 @@ class ErrorHandler extends Component
     /**
      * Removes all output echoed before calling this method.
      */
-    public function clearOutput()
+    public function clearOutput(): void
     {
         // the following manual level counting is to deal with zlib.output_compression set to On
         for ($level = \ob_get_level(); $level > 0; --$level) {
@@ -123,7 +123,7 @@ class ErrorHandler extends Component
     }
 
 
-    public static function exceptionToText($e)
+    public static function exceptionToText($e): string
     {
         if (\config('debug')) {
             return (string) $e;

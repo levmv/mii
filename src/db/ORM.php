@@ -36,9 +36,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     /**
      * Create a new ORM model instance
      *
-     * @param array $values
-     * @param mixed
-     * @return void
+     * @param array|null $values
+     * @param bool $loaded
      */
     public function __construct(?array $values = null, bool $loaded = false)
     {
@@ -60,9 +59,9 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         $short = static::class;
         $short = (\substr($short, \strrpos($short, '\\') + 1));
         $short = \mb_strtolower(\trim(\preg_replace('/(?<!\p{Lu})\p{Lu}/u', '_\0', $short), '_'));
-        if($short[-1] === 's') {
+        if ($short[-1] === 's') {
             $short .= 'es';
-        } else if($short[-1] === 'y') {
+        } else if ($short[-1] === 'y') {
             $short = \substr($short, 0, -1) . 'ies';
         } else {
             $short .= 's';
@@ -185,7 +184,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @return array
      * @deprecated
      */
-    public static function selectList($key, $display, $first = null): array
+    public static function selectList(string $key, string $display, $first = null): array
     {
         return static::find()->get()->toList($key, $display, $first);
     }
@@ -217,7 +216,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function set($values, $value = null): ORM
     {
-        if (\is_object($values) && $values instanceof \mii\web\Form) {
+        if ($values instanceof \mii\web\Form) {
             $values = $values->changedFields();
         }
 
@@ -236,7 +235,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param string $key the property to test
      * @return bool
      */
-    public function __isset($key)
+    public function __isset(string $key)
     {
         return \array_key_exists($key, $this->attributes);
     }
@@ -271,8 +270,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public function toArray(array $properties = []): array
     {
+        $result = [];
         if (!empty($properties)) {
-            $result = [];
             foreach ($properties as $key => $name) {
                 if (\is_int($key)) {
                     $result[$name] = $this->$name;
@@ -286,7 +285,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return $result;
         }
 
-        $result = [];
         foreach ($this as $key => $value) {
             $result[$key] = $value;
         }
@@ -296,42 +294,40 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     /**
      * Checks if the field (or any) was changed
      *
-     * @param string|array $field_name
+     * @param array|string|null $fieldName
      * @return bool
      */
-
-    public function changed($field_name = null): bool
+    public function changed(array|string $fieldName = null): bool
     {
-        if ($field_name === null) {
+        if ($fieldName === null) {
             return \count($this->_changed) > 0;
         }
 
-        if (\is_array($field_name)) {
-            return (bool) \count(\array_intersect($field_name, \array_keys($this->_changed)));
+        if (\is_array($fieldName)) {
+            return (bool)\count(\array_intersect($fieldName, \array_keys($this->_changed)));
         }
 
-        return isset($this->_changed[$field_name]);
+        return isset($this->_changed[$fieldName]);
     }
 
 
     /**
      * Checks if the field (or any) was changed during update/create
      *
-     * @param string|array $field_name
+     * @param array|string|null $fieldName
      * @return bool
      */
-
-    public function wasChanged($field_name = null): bool
+    public function wasChanged(array|string $fieldName = null): bool
     {
-        if ($field_name === null) {
+        if ($fieldName === null) {
             return \count($this->_was_changed) > 0;
         }
 
-        if (\is_array($field_name)) {
-            return (bool) \count(\array_intersect($field_name, \array_keys($this->_was_changed)));
+        if (\is_array($fieldName)) {
+            return (bool)\count(\array_intersect($fieldName, \array_keys($this->_was_changed)));
         }
 
-        return isset($this->_was_changed[$field_name]);
+        return isset($this->_was_changed[$fieldName]);
     }
 
 
@@ -342,13 +338,13 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public function loaded(): bool
     {
-        return (bool) $this->__loaded;
+        return (bool)$this->__loaded;
     }
 
 
-    public function refresh()
+    public function refresh(): void
     {
-        $model = self::one($this->id);
+        $model = self::one($this->get('id'));
         $this->attributes = $model->attributes;
     }
 
@@ -454,14 +450,15 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public function delete(): void
     {
-       $this->innerDelete();
+        $this->innerDelete();
     }
 
-    protected function innerDelete() : void {
+    protected function innerDelete(): void
+    {
         if ($this->__loaded && isset($this->id)) {
             static::query()
                 ->delete()
-                ->where('id', '=', (int) $this->id)
+                ->where('id', '=', (int)$this->id)
                 ->execute();
 
             $this->__loaded = false;

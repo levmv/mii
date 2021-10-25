@@ -22,12 +22,12 @@ class Profiler
     /**
      * @var  integer   maximium number of application stats to keep
      */
-    public static $rollover = 1000;
+    public static int $rollover = 1000;
 
     /**
      * @var  array  collected benchmarks
      */
-    protected static $_marks = [];
+    protected static array $_marks = [];
 
     /**
      * Starts a new benchmark and returns a unique token. The returned token
@@ -39,7 +39,7 @@ class Profiler
      * @param string $name benchmark name
      * @return  string
      */
-    public static function start($group, $name)
+    public static function start(string $group, string $name): string
     {
         static $counter = 0;
 
@@ -48,7 +48,7 @@ class Profiler
 
         Profiler::$_marks[$token] = [
             self::GROUP => \strtolower($group),
-            self::NAME => (string) $name,
+            self::NAME => $name,
 
             // Start the benchmark
             self::START_TIME => \hrtime(true) / 1e9,
@@ -70,7 +70,7 @@ class Profiler
      * @param string $token
      * @return bool
      */
-    public static function stop($token): bool
+    public static function stop(string $token): bool
     {
         // Stop the benchmark
         self::$_marks[$token][self::STOP_TIME] = \hrtime(true) / 1e9;
@@ -88,7 +88,7 @@ class Profiler
      * @param string $token
      * @return bool
      */
-    public static function delete($token): bool
+    public static function delete(string $token): bool
     {
         // Remove the benchmark
         unset(self::$_marks[$token]);
@@ -192,7 +192,7 @@ class Profiler
      * @param mixed $groups single group name string, or array with group names; all groups by default
      * @return  array   min, max, average, total
      */
-    public static function groupStats($groups = null): array
+    public static function groupStats(string|array $groups = null): array
     {
         // Which groups do we need to calculate stats for?
         $groups = ($groups === null)
@@ -268,7 +268,7 @@ class Profiler
      * @param string $token
      * @return  array   execution time, memory
      */
-    public static function total($token)
+    public static function total(string $token): array
     {
         // Import the benchmark data
         $mark = Profiler::$_marks[$token];
@@ -301,7 +301,7 @@ class Profiler
         // Load the stats from cache, which is valid for 12 hours
 
         $stats = Mii::$app->has('cache')
-            ? Mii::$app->cache->get('profiler_app_stats', null)
+            ? Mii::$app->cache->get('profiler_app_stats')
             : null;
 
         if (!\is_array($stats) or $stats['count'] > Profiler::$rollover) {

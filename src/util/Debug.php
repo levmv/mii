@@ -21,7 +21,7 @@ class Debug
      * @param integer $level_recursion recursion limit
      * @return  string
      */
-    public static function dump($value, $length = 128, $level_recursion = 10): string
+    public static function dump(mixed $value, int $length = 128, int $level_recursion = 10): string
     {
         return self::_dump($value, $length, $level_recursion);
     }
@@ -35,7 +35,7 @@ class Debug
      * @param integer $level current recursion level (internal usage only!)
      * @return  string
      */
-    protected static function _dump(&$var, $length = 128, $limit = 10, $level = 0): string
+    protected static function _dump(mixed &$var, int $length = 128, int $limit = 10, int $level = 0): string
     {
         if ($var === null) {
             return '<small>NULL</small>';
@@ -46,7 +46,7 @@ class Debug
         } elseif (\is_float($var)) {
             return "<small>float</small> $var";
         } elseif (\is_resource($var)) {
-            if (($type = \get_resource_type($var)) === 'stream' && $meta = \stream_get_meta_data($var)) {
+            if (($type = \get_resource_type($var)) === 'stream') {
                 $meta = \stream_get_meta_data($var);
 
                 if (isset($meta['uri'])) {
@@ -96,7 +96,7 @@ class Debug
 
             if ($marker === null) {
                 // Make a unique marker
-                $marker = \uniqid("\x00");
+                $marker = \uniqid("\x00", false);
             }
 
             if (empty($var)) {
@@ -183,7 +183,7 @@ class Debug
      * @param string $file path to debug
      * @return  string
      */
-    public static function path($file)
+    public static function path(string $file): string
     {
         if (!isset(\Mii::$paths['mii'])) {
             if (!isset(\Mii::$paths['vendor'])) {
@@ -212,13 +212,13 @@ class Debug
      *     // Highlights the current line of the current file
      *     echo Debug::source(__FILE__, __LINE__);
      *
-     * @param string  $file file to open
+     * @param string $file file to open
      * @param integer $line_number line number to highlight
      * @param integer $padding number of padding lines
      * @return  string   source of file
      * @return  FALSE    file is unreadable
      */
-    public static function source($file, $line_number, $padding = 5)
+    public static function source(string $file, int $line_number, int $padding = 5)
     {
         if (!$file || !\is_readable($file)) {
             // Continuing will cause errors
@@ -274,11 +274,11 @@ class Debug
      *     // Displays the entire current backtrace
      *     echo implode('<br/>', Debug::trace());
      *
-     * @param array $trace
+     * @param array|null $trace
      * @return  array
      * @throws \ReflectionException
      */
-    public static function trace(array $trace = null)
+    public static function trace(array $trace = null): array
     {
         if ($trace === null) {
             // Start a new trace
@@ -311,7 +311,7 @@ class Debug
             // function()
             $function = $step['function'];
 
-            if (\in_array($step['function'], $statements)) {
+            if (\in_array($step['function'], $statements, true)) {
                 if (empty($step['args'])) {
                     // No arguments
                     $args = [];

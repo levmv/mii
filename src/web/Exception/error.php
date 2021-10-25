@@ -1,10 +1,14 @@
 <?php declare(strict_types=1);
 
+/**
+ * @var Exception $exception
+ */
+
 // Unique error identifier
-$error_id = \uniqid('error');
+$error_id = \uniqid('error', false);
 
 ?>
-<style type="text/css">
+<style>
     #mii_error {
         background: #ddd;
         font-size: 1em;

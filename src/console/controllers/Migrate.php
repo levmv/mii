@@ -38,7 +38,7 @@ class Migrate extends Controller
 
         try {
             $this->applied_migrations = DB::select('SELECT `name`, `date` FROM `' . $this->migrate_table . '`')->indexBy('name')->all();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             $this->info("Trying to create table $this->migrate_table");
 
             DB::update('CREATE TABLE `' . $this->migrate_table . '` (
@@ -63,7 +63,7 @@ class Migrate extends Controller
             $scan = \scandir($migrations_path);
 
             foreach ($scan as $file) {
-                if ($file[0] == '.') {
+                if ($file[0] === '.') {
                     continue;
                 }
 
