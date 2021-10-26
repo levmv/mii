@@ -11,7 +11,7 @@ class Request extends Component
     /**
      * @var  array   parameters from the route
      */
-    public $params = [];
+    public array $params = [];
 
     /**
      * @var  string  controller to be executed
@@ -21,7 +21,7 @@ class Request extends Component
     /**
      * @var  string  action to be executed in the controller
      */
-    public $action;
+    public string $action;
 
 
     public function init(array $config = []): void
@@ -102,7 +102,7 @@ class Request extends Component
         }
 
         if (!$controller_class) {
-            throw new Exception("Unknown command {$this->controller}");
+            throw new Exception("Unknown command $this->controller");
         }
 
         // Create a new instance of the controller
@@ -192,6 +192,7 @@ class Request extends Component
         return \str_pad($string, $length + 5, ' ', \STR_PAD_RIGHT);
     }
 
+    /** @noinspection PhpIncludeInspection */
     private static function get_paths_from_composer($namespaces): ?array
     {
         $compdir = \realpath(__DIR__ . '/../../../../composer');
@@ -302,7 +303,7 @@ class Request extends Component
     }
 
     /**
-     * @param \ReflectionMethod|\ReflectionClass $ref
+     * @param \Reflector $ref
      * @return array
      */
     public static function getPhpdocSummary(\Reflector $ref): array
@@ -316,7 +317,7 @@ class Request extends Component
         $comment = \preg_replace('#[ \t]*(?:/\*\*|\*/|\*)?[ \t]?(.*)?#u', '$1', $comment);
         $comment = \trim($comment);
 
-        if (\substr($comment, -2) === '*/') {
+        if (str_ends_with($comment, '*/')) {
             $comment = \trim(\substr($comment, 0, -2));
         }
 

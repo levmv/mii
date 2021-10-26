@@ -49,8 +49,6 @@ class Block
      * Magic method, searches for the given variable and returns its value.
      * Local variables will be returned before global variables.
      *
-     *     $value = $view->foo;
-     *
      * [!!] If the variable has not yet been set, an exception will be thrown.
      *
      * @param string $key variable name
@@ -65,8 +63,6 @@ class Block
     /**
      * Magic method, calls [Block::set] with the same parameters.
      *
-     *     $view->foo = 'something';
-     *
      * @param string $key variable name
      * @param mixed  $value value
      * @return  void
@@ -79,10 +75,6 @@ class Block
     /**
      * Magic method, determines if a variable is set.
      *
-     *     isset($block->foo);
-     *
-     * [!!] `NULL` variables are not considered to be set by [isset](http://php.net/isset).
-     *
      * @param string $key variable name
      * @return  boolean
      */
@@ -93,8 +85,6 @@ class Block
 
     /**
      * Magic method, unset a given variable.
-     *
-     *     unset($view->foo);
      *
      * @param string $key variable name
      * @return  void
@@ -225,14 +215,11 @@ class Block
      * Renders the view object to a string. Global and local data are merged
      * and extracted to create local variables within the view file.
      *
-     *     $output = $block->render();
-     *
      * [!!] Global variables with the same key name as local variables will be
      * overwritten by the local variable.
      *
      * @param bool $force is force render needed
      * @return  string
-     * @uses    Block::capture
      */
     public function render(bool $force = false): string
     {
@@ -284,10 +271,7 @@ class Block
 
         // Capture the view output
         \ob_start();
-        //\ob_implicit_flush(0);
-
         try {
-
             // Load the view within the current scope
             require $block_filename;
         } catch (\Throwable $e) {

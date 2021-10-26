@@ -7,12 +7,6 @@ class Arr
     /**
      * Tests if an array is associative or not.
      *
-     *     // Returns true
-     *     Arr::isAssoc(array('username' => 'john.doe'));
-     *
-     *     // Returns false
-     *     Arr::isAssoc('foo', 'bar');
-     *
      * @param array $array array to check
      * @return  boolean
      */
@@ -28,9 +22,6 @@ class Arr
 
     /**
      * Gets a value from an array using a dot separated path.
-     *
-     *     // Get the value of $array['foo']['bar']
-     *     $value = Arr::path($array, 'foo.bar');
      *
      * @param mixed  $array array to search
      * @param mixed  $path key path string (delimiter separated) or array of keys

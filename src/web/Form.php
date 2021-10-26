@@ -6,28 +6,25 @@ use mii\db\ORM;
 use mii\util\HTML;
 use mii\valid\Validation;
 
-class Form
+abstract class Form
 {
-    /**
-     * @var Validation
-     */
-    public $validation;
+    public Validation $validation;
 
-    public $_fields = [];
+    public array $_fields = [];
 
-    public $labels = [];
+    public array $labels = [];
 
-    public $message_file;
+    public ?string $message_file = null;
 
-    protected $_changed = [];
+    protected array $_changed = [];
 
-    protected $_select_data = [];
+    protected array $_select_data = [];
 
-    protected $_model;
+    protected ?ORM $_model = null;
 
-    protected $is_prepared = false;
+    protected bool $isPrepared = false;
 
-    protected $_loaded = false;
+    protected bool $_loaded = false;
 
     /**
      * @param null $data Initial data for form. If null then request->post() will be used
@@ -36,9 +33,10 @@ class Form
     {
         $this->validation = new Validation();
 
+        $this->labels = $this->labels();
         $this->_fields = $this->fields();
 
-        if (\is_object($data) && $data instanceof ORM) {
+        if ($data instanceof ORM) {
             $this->_model = $data;
             $data = $data->toArray();
         }
@@ -52,8 +50,6 @@ class Form
                 $this->set($key, $value);
             }
         }
-
-        $this->_changed = [];
     }
 
     public function ok(): bool
@@ -64,16 +60,16 @@ class Form
     /**
      * Load form from _POST values or $data values
      * Return true if form is loaded
+     * @param null $data
      * @return bool
      */
-
     public function load($data = null): bool
     {
         if ($this->_loaded && $data === null) {
             return true;
         }
 
-        if (\is_object($data) && $data instanceof ORM) {
+        if ($data instanceof ORM) {
             $this->_model = $data;
             $data = $data->toArray();
         }
@@ -96,9 +92,9 @@ class Form
             }
         }
 
-        if (!$this->_loaded && !$this->is_prepared) {
+        if (!$this->_loaded && !$this->isPrepared) {
             $this->prepare();
-            $this->is_prepared = true;
+            $this->isPrepared = true;
         }
 
         return $this->_loaded;
@@ -118,10 +114,6 @@ class Form
     }
 
 
-    public function afterValidate($passed)
-    {
-    }
-
     public function prepare()
     {
     }
@@ -137,17 +129,14 @@ class Form
         return \Mii::$app->request->method() === Request::POST;
     }
 
-    public function rules(): array
+    abstract public function rules(): array;
+
+    public function fields(): array
     {
         return [];
     }
 
-    public function setFields($fields) : void
-    {
-        $this->_fields = $fields;
-    }
-
-    public function fields(): array
+    public function labels(): array
     {
         return [];
     }
@@ -165,11 +154,11 @@ class Form
     /**
      * Checks if the field (or any) was changed
      *
-     * @param string|array|null $field_name
+     * @param array|string|null $field_name
      * @return bool
      */
 
-    public function changed($field_name = null): bool
+    public function changed(array|string $field_name = null): bool
     {
         if ($field_name === null) {
             return \count($this->_changed) > 0;
@@ -196,7 +185,7 @@ class Form
      * @param string $key the property to test
      * @return bool
      */
-    public function __isset($key)
+    public function __isset(string $key)
     {
         return \array_key_exists($key, $this->_fields);
     }
@@ -213,9 +202,9 @@ class Form
             $name = [$name => $value];
         }
 
-        foreach ($name as $key => $value) {
+        foreach ($name as $key => $val) {
             $this->_changed[$key] = true;
-            $this->_fields[$key] = $value;
+            $this->_fields[$key] = $val;
         }
     }
 
@@ -225,19 +214,19 @@ class Form
         $this->beforeValidate();
 
         $this->validation->rules($this->rules());
+        if(!empty($this->labels)) {
+            $this->validation->labels($this->labels);
+
+        }
 
         $this->validation->data($this->_fields);
 
-        $passed = $this->validation->check();
-
-        $this->afterValidate($passed);
-
-        return $passed;
+        return $this->validation->check();
     }
 
-    public function error($field, $error, array $params = null) : self
+    public function error($field, $error) : self
     {
-        $this->validation->error($field, $error, $params);
+        $this->validation->error($field, $error);
 
         return $this;
     }
@@ -344,7 +333,7 @@ class Form
                     $hidden = HTML::hidden($name, $uncheck);
                 }
 
-                return $hidden . HTML::checkbox($name, 1, (bool) $this->_fields[$name], $attributes);
+                return $hidden . HTML::checkbox($name, 1, (bool)$this->_fields[$name], $attributes);
             case 'password':
                 return HTML::password($name, $this->_fields[$name], $attributes);
             case 'select':

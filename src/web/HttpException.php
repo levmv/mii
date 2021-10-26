@@ -6,6 +6,15 @@ class HttpException extends Exception
 {
     public mixed $status_code = 500;
 
+    public static array $messages = [
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        500 => 'Internal Server Error',
+        501 => 'Not Implemented',
+    ];
+
     public function __construct($status = 500, $message = '', $code = 0, \Exception $previous = null)
     {
         $this->status_code = $status;
@@ -18,6 +27,6 @@ class HttpException extends Exception
      */
     public function getName()
     {
-        return Response::$messages[$this->status_code] ?? 'Error';
+        return self::$messages[$this->status_code] ?? 'Error';
     }
 }

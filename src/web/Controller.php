@@ -18,11 +18,11 @@ class Controller
     public Response $response;
 
 
-    protected function before()
+    protected function before(): void
     {
     }
 
-    protected function after($content = null)
+    protected function after($content = null): void
     {
         $this->response->content($content);
     }

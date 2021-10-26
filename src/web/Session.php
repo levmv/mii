@@ -24,12 +24,10 @@ class Session extends Component
     protected string $_flash = '__flash';
 
     /**
-     *
      * Checks for session cookie without starting session itself
      *
      * @return bool
      */
-
     public function checkCookie(): bool
     {
         return isset($_COOKIE[$this->name]);
@@ -37,8 +35,6 @@ class Session extends Component
 
     /**
      * Get the current session cookie name.
-     *
-     *     $name = $session->name();
      *
      * @return  string
      */
@@ -49,8 +45,6 @@ class Session extends Component
 
     /**
      * Get a variable from the session array.
-     *
-     *     $foo = $session->get('foo');
      *
      * @param string $key variable name
      * @param mixed  $default default value to return
@@ -126,8 +120,6 @@ class Session extends Component
     /**
      * Set a variable in the session array.
      *
-     *     $session->set('foo', 'bar');
-     *
      * @param string $key variable name
      * @param mixed  $value value
      * @return  $this
@@ -144,8 +136,6 @@ class Session extends Component
     /**
      * Set a variable by reference.
      *
-     *     $session->bind('foo', $foo);
-     *
      * @param string $key variable name
      * @param mixed  $value referenced value
      * @return  $this
@@ -161,8 +151,6 @@ class Session extends Component
 
     /**
      * Removes a variable in the session array.
-     *
-     *     $session->delete('foo');
      *
      * @param array $args
      * @return  $this
@@ -220,7 +208,6 @@ class Session extends Component
 
     /**
      * Completely destroy the current session.
-     *
      */
     public function destroy(): void
     {

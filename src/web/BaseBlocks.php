@@ -42,21 +42,27 @@ abstract class BaseBlocks extends Component
             ];
         }
 
-        $this->loadSet(\key($this->sets));
+        if(!$this->current_set) {
+            $this->current_set = \key($this->sets);
+        }
+
+        $this->loadSet($this->current_set);
     }
 
 
-    public function loadSet(string $setname): void
+    public function loadSet(string $setname = null): void
     {
-        \assert(isset($this->sets[$setname]), "Unknown blocks set name: $setname");
+        if($setname) {
+            $this->current_set = $setname;
+        }
 
-        $this->current_set = $setname;
+        \assert(isset($this->sets[$this->current_set]), "Unknown blocks set name: $this->current_set");
 
         $set = \array_replace([
             'libraries' => [],
             'base_url' => $this->base_url,
             'base_path' => null,
-        ], $this->sets[$setname]);
+        ], $this->sets[$this->current_set]);
 
         foreach ($set as $key => $value) {
             $this->$key = $value;

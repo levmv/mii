@@ -205,16 +205,6 @@ class Pagination
         return $this->previous_page;
     }
 
-    /* public function firstItem() : int
-     {
-         return (int) \min((($this->current_page - 1) * $this->items_per_page) + 1, $this->total_items);
-     }
-
-     public function lastItem() : int
-     {
-         return (int) \min($this->firstItem() + $this->items_per_page - 1, $this->total_items);
-     }*/
-
     /**
      * URL::query() replacement for Pagination use only
      *

@@ -7,15 +7,7 @@ use mii\core\ACL;
 
 class PageController extends Controller
 {
-    public Block $index_block;
-
-    public string $index_block_name = 'index';
-
     public ?Block $layout = null;
-
-    public string $layout_block_name = 'layout';
-
-    public array $layout_depends = [];
 
     /**
      * @var string Site title
@@ -37,23 +29,20 @@ class PageController extends Controller
      */
     public array $links = [];
 
-    public bool $render_layout = true;
+    public bool $autoRender = true;
 
 
-    protected function before()
+    protected function before(): void
     {
-        if ($this->render_layout && !Mii::$app->request->isAjax()) {
+        if ($this->autoRender && !Mii::$app->request->isAjax()) {
             $this->setupLayout();
         }
-
-        return true;
     }
 
 
-    protected function after($content = null): Response
+    protected function after($content = null): void
     {
-        if ($this->render_layout && $this->response->format === Response::FORMAT_HTML) {
-            $this->setupIndex();
+        if ($this->autoRender && $this->response->format === Response::FORMAT_HTML) {
 
             if (!$this->layout) {
                 $this->setupLayout();
@@ -67,46 +56,30 @@ class PageController extends Controller
                 $this->og['description'] = $this->description;
             }
 
-            $this->index_block->set(
-                'layout',
-                $this->layout
-                    ->set('content', $content)
-                    ->render(true)
-            );
+            $this->layout->set('content', $content);
 
-            $this->response->content($this->index_block->render(true));
+            $this->response->content($this->renderIndex());
         } else {
-            if (\is_array($content) && $this->request->isAjax()) {
+            if (\is_array($content)) {
                 $this->response->format = Response::FORMAT_JSON;
             }
             $this->response->content($content);
         }
-
-        return $this->response;
     }
 
-    protected function setupIndex($block_name = false): void
+    protected function renderIndex(string $blockName = 'index'): string
     {
-        $name = ($block_name) ?: $this->index_block_name;
-
-        $this->index_block = \block($name)
-            ->bind('title', $this->title)
-            ->bind('description', $this->description)
-            ->bind('og', $this->og)
-            ->bind('links', $this->links);
+        return renderBlock($blockName, [
+            'title' => $this->title,
+            'description' => $this->description,
+            'og' => $this->og,
+            'links' => $this->links,
+            'layout' => $this->layout->render(true)
+        ]);
     }
 
-
-    protected function setupLayout($block_name = null, $depends = null): void
+    protected function setupLayout(string $block_name = 'layout', array $depends = []): void
     {
-        if ($block_name === null) {
-            $block_name = $this->layout_block_name;
-        }
-
-        if ($depends === null) {
-            $depends = $this->layout_depends;
-        }
-
         $this->layout = \block($block_name)
             ->depends($depends);
     }
