@@ -18,7 +18,7 @@ class App extends \mii\core\App
      */
     public function run(): void
     {
-        $this->request->execute();
+        exit($this->request->execute());
     }
 
     protected function defaultComponents(): array

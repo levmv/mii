@@ -102,7 +102,8 @@ class Request extends Component
         }
 
         if (!$controller_class) {
-            throw new Exception("Unknown command $this->controller");
+            Console::stderr("Unknown command $this->controller\n", Console::FG_RED);
+            return 1;
         }
 
         // Create a new instance of the controller

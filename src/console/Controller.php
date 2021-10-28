@@ -74,7 +74,12 @@ class Controller
 
     protected function execute_action($action, $params)
     {
-        $method = new \ReflectionMethod($this, $action);
+        try {
+            $method = new \ReflectionMethod($this, $action);
+        } catch (\ReflectionException $e) {
+            $this->error("Unknow command: $action");
+            return 1;
+        }
 
         if (!$method->isPublic()) {
             throw new Exception('Cannot access not public method');
