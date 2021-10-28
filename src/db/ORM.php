@@ -182,11 +182,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param string $first first value
      *
      * @return array
-     * @deprecated
      */
     public static function selectList(string $key, string $display, $first = null): array
     {
-        return static::find()->get()->toList($key, $display, $first);
+        return static::find()->select($key, $display)->get()->toList($key, $display, $first);
     }
 
 
