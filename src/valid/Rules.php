@@ -134,7 +134,7 @@ class Rules
      * @param boolean $strict strict RFC compatibility
      * @return  boolean
      */
-    public static function email($email, $strict = false) : bool
+    public static function email(string $email, bool $strict = false) : bool
     {
         if (\mb_strlen($email) > 254) {
             return false;
@@ -303,7 +303,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alpha($str, bool $utf8) : bool
+    public static function alpha($str, bool $utf8 = false) : bool
     {
         $str = (string) $str;
 
@@ -321,7 +321,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alphaNumeric($str, bool $utf8) : bool
+    public static function alphaNumeric($str, bool $utf8 = false) : bool
     {
         if ($utf8 === true) {
             return (bool) \preg_match('/^[\pL\pN]++$/uD', $str);
@@ -337,7 +337,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function alphaDash($str, bool $utf8) : bool
+    public static function alphaDash($str, bool $utf8 = false) : bool
     {
         if ($utf8 === true) {
             $regex = '/^[-\pL\pN_]++$/uD';
@@ -355,7 +355,7 @@ class Rules
      * @param boolean $utf8 trigger UTF-8 compatibility
      * @return  boolean
      */
-    public static function digit($str, bool $utf8) : bool
+    public static function digit($str, bool $utf8 = false) : bool
     {
         if ($utf8 === true) {
             return (bool) \preg_match('/^\pN++$/uD', $str);
