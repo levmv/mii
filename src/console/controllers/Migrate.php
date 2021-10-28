@@ -17,23 +17,19 @@ class Migrate extends Controller
 
     protected array $applied_migrations;
 
-    protected array $migrations_paths = [];
+    protected array $paths = [];
 
     protected function before()
     {
-        $config = config('migrate', []);
-        if(!empty($config)) {
-            $this->warning("Please move 'migrate' config section to 'console.migrate'");
-        } else {
-            $config = config('console.migrate', []);
-        }
+        $config = config('console.migrate', []);
 
         foreach ($config as $name => $value) {
             $this->$name = $value;
         }
 
-        if (empty($this->migrations_paths)) {
-            $this->migrations_paths = [path('app') . '/migrations'];
+        if (empty($this->paths)) {
+            $this->warning("Empty migrations path. Use @app/migration automatically");
+            $this->paths = [path('app') . '/migrations'];
         }
 
         try {
@@ -50,14 +46,18 @@ class Migrate extends Controller
             $this->applied_migrations = [];
         }
 
-        for ($i = 0; $i < \count($this->migrations_paths); $i++) {
-            $this->migrations_paths[$i] = \Mii::resolve($this->migrations_paths[$i]);
+        for ($i = 0; $i < \count($this->paths); $i++) {
+            $this->paths[$i] = \Mii::resolve($this->paths[$i]);
         }
 
-        foreach ($this->migrations_paths as $migrations_path) {
+        foreach ($this->paths as $migrations_path) {
             if (!\is_dir($migrations_path)) {
                 $this->warning("Directory $migrations_path does not exist");
-                \mkdir($migrations_path, 0775);
+                if (!mkdir($migrations_path, 0775) && !is_dir($migrations_path)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $migrations_path));
+                } else {
+                    $this->info("Created directory $migrations_path");
+                }
             }
 
             $scan = \scandir($migrations_path);
@@ -91,7 +91,7 @@ class Migrate extends Controller
     /**
      * Create new migration file
      * @param string|null $name
-     * @param bool        $php
+     * @param bool $php
      * @throws \Throwable
      */
     public function create(string $name = null, bool $php = false)
@@ -103,7 +103,7 @@ class Migrate extends Controller
         }
 
         if ($name) {
-            $custom_name = \mb_strtolower($name, 'utf-8');
+            $custom_name = \mb_strtolower($name);
         }
 
         $extension = $php ? 'php' : 'sql';
@@ -145,8 +145,8 @@ class ' . $name . '
 '
                 : '';
 
-            \reset($this->migrations_paths);
-            \file_put_contents(\current($this->migrations_paths) . '/' . $name . '.' . $extension, $file);
+            \reset($this->paths);
+            \file_put_contents(\current($this->paths) . '/' . $name . '.' . $extension, $file);
 
             $this->info("migration $name created");
         } catch (\Throwable $e) {
@@ -167,7 +167,7 @@ class ' . $name . '
 
         $migrations = $this->migrations_list;
 
-        $limit = (int) $limit;
+        $limit = (int)$limit;
 
         if ($limit > 0) {
             $migrations = \array_slice($migrations, 0, $limit);
