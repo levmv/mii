@@ -43,7 +43,13 @@ trait SoftDelete
         $this->innerDelete();
     }
 
-    protected function innerDelete() : void {
+    protected function innerDelete(bool $real = false) : void {
+
+        if($real) {
+            parent::innerDelete();
+            return;
+        }
+
         if (!$this->loaded()) {
             throw new \Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!', [], []);
         }
@@ -59,6 +65,6 @@ trait SoftDelete
 
     public function realDelete(): void
     {
-        parent::delete();
+        $this->innerDelete(true);
     }
 }
