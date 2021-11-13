@@ -19,6 +19,14 @@ trait SoftDelete
         return parent::prepareQuery((new SelectQuery(static::class))->where(static::table().'.deleted', 'is not', null));
     }
 
+    /**
+     * @return SelectQuery
+     */
+    public static function findAny(): SelectQuery
+    {
+        return parent::prepareQuery(new SelectQuery(static::class));
+    }
+
 
     public function restore()
     {
