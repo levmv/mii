@@ -124,7 +124,11 @@ class Database extends Component
         \assert((config('debug') && ($benchmark = \mii\util\Profiler::start('Database', $sql))) || 1);
 
         // Execute the query
-        $result = $this->conn->query($sql);
+        try {
+            $result = $this->conn->query($sql);
+        } catch (\Throwable $t) {
+            throw new DatabaseException("{$this->conn->error} [ $sql ]", $this->conn->errno);
+        }
 
         if ($result === false || $this->conn->errno) {
             \assert((isset($benchmark) && \mii\util\Profiler::delete($benchmark)) || 1);
