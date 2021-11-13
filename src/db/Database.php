@@ -152,8 +152,12 @@ class Database extends Component
         $this->conn or $this->connect();
         \assert((config('debug') && ($benchmark = \mii\util\Profiler::start('Database', $sql))) || 1);
 
-        // Execute the query
-        $result = $this->conn->multi_query($sql);
+        try {
+            $result = $this->conn->multi_query($sql);
+        } catch (\Throwable) {
+            throw new DatabaseException("{$this->conn->error} [ $sql ]", $this->conn->errno);
+        }
+
         $affected_rows = 0;
         do {
             $affected_rows += $this->conn->affected_rows;
