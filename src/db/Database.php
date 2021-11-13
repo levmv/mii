@@ -56,6 +56,8 @@ class Database extends Component
 
         $this->conn->options(\MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
 
+        \mysqli_report(\MYSQLI_REPORT_ERROR | \MYSQLI_REPORT_STRICT);
+
         if (!\is_null($this->charset)) {
             // Set the character set
             $this->conn->set_charset($this->charset);
