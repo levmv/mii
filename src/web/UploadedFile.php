@@ -92,4 +92,9 @@ class UploadedFile
     {
         return \strtolower(\pathinfo($this->name, \PATHINFO_EXTENSION));
     }
+
+    public function filename(): string
+    {
+        return \strtolower(\pathinfo($this->name, \PATHINFO_FILENAME));
+    }
 }
