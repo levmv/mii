@@ -11,7 +11,7 @@ use mii\log\Logger;
 
 class Mii
 {
-    public static \mii\core\App $app;
+    public static ?\mii\core\App $app = null;
 
     public static string $log_component_name = 'log';
 
