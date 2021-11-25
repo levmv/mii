@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
+declare(strict_types=1);
 
 namespace mii\util;
 
@@ -295,6 +296,7 @@ class Profiler
      *     list($time, $memory) = Profiler::application();
      *
      * @return  array  execution time, memory
+     * @throws Exception
      */
     public static function application(): array
     {

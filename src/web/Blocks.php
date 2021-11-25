@@ -5,7 +5,6 @@ namespace mii\web;
 use Mii;
 use mii\util\FS;
 use mii\util\HTML;
-use mii\util\Text;
 
 class Blocks extends BaseBlocks
 {
@@ -151,7 +150,7 @@ class Blocks extends BaseBlocks
     {
         $result_file_name = $block_name . '.' . \substr(\md5(\implode('', \array_values($files))), 0, 10);
 
-        $web_output = "$this->base_url/$result_file_name.{$type}?";
+        $web_output = "$this->base_url/$result_file_name.$type?";
         $output = $this->base_path . '/' . $result_file_name . '.' . $type;
 
         $need_recompile = !\is_file($output);

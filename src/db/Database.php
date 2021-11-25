@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpFullyQualifiedNameUsageInspection */
+declare(strict_types=1);
 
 namespace mii\db;
 
@@ -126,7 +127,7 @@ class Database extends Component
         // Execute the query
         try {
             $result = $this->conn->query($sql);
-        } catch (\Throwable $t) {
+        } catch (\Throwable) {
             throw new DatabaseException("{$this->conn->error} [ $sql ]", $this->conn->errno);
         }
 
@@ -192,7 +193,7 @@ class Database extends Component
      *     $db->quote(10);     // 10
      *     $db->quote('fred'); // 'fred'
      *
-     * Objects passed to this function will be converted to strings.
+     * Object passed to this function will be converted to string.
      * [Expression] objects will be compiled.
      * [SelectQuery] objects will be compiled and converted to a sub-query.
      * All other objects will be converted using the `__toString` method.
@@ -265,7 +266,7 @@ class Database extends Component
     }
 
     /**
-     * Start a SQL transaction
+     * Start an SQL transaction
      *
      * @param string|null $mode transaction mode
      * @return  boolean

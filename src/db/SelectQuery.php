@@ -189,7 +189,7 @@ class SelectQuery
      * Adds addition tables to "JOIN ...".
      *
      * @param mixed  $table column name or array($column, $alias) or object
-     * @param string|null $type join type (LEFT, RIGHT, INNER, etc)
+     * @param string|null $type join type (LEFT, RIGHT, INNER, etc.)
      * @return  $this
      */
     public function join($table, string $type = null): self
@@ -663,6 +663,7 @@ class SelectQuery
      *
      * @param array $conditions condition statements
      * @return  string
+     * @throws DatabaseException
      */
     protected function _compileConditions(array $conditions): string
     {
@@ -879,6 +880,7 @@ class SelectQuery
 
     /**
      * @return Result
+     * @throws DatabaseException
      */
     public function get(): Result
     {

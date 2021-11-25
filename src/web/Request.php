@@ -425,6 +425,7 @@ class Request extends Component
      * @param string $name name of cookie
      * @param string $value value of cookie
      * @return  string
+     * @noinspection PhpFullyQualifiedNameUsageInspection
      */
     public function salt(string $name, string $value): string
     {

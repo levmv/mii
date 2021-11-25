@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpFullyQualifiedNameUsageInspection */
+<?php /** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpFullyQualifiedNameUsageInspection */
 declare(strict_types=1);
 
 namespace mii\web;
@@ -98,6 +99,7 @@ class Block
      * Magic method, returns the output of [Block::render].
      *
      * @return  string
+     * @throws Exception
      */
     public function __toString(): string
     {

@@ -115,6 +115,7 @@ class Response extends Component
      *
      * @param int|null $status Status to set to this response
      * @return  mixed
+     * @noinspection PhpInconsistentReturnPointsInspection
      */
     public function status(int $status = null)
     {

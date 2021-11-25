@@ -26,6 +26,7 @@ class Exception extends \Exception
      *
      * @param \Throwable $e
      * @return  string
+     * @noinspection PhpFullyQualifiedNameUsageInspection
      */
     public static function text(\Throwable $e): string
     {

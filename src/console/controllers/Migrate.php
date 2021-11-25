@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection SqlResolve */
+declare(strict_types=1);
 
 namespace mii\console\controllers;
 
 use mii\console\Controller;
+use mii\db\DatabaseException;
 use mii\db\DB;
 
 /**
@@ -158,7 +160,7 @@ class ' . $name . '
     /**
      * Apply new migrations
      * @param int $limit
-     * @throws \mii\db\DatabaseException
+     * @throws DatabaseException
      * @throws \Throwable
      */
     public function up($limit = null)

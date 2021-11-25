@@ -76,7 +76,7 @@ class Controller
     {
         try {
             $method = new \ReflectionMethod($this, $action);
-        } catch (\ReflectionException $e) {
+        } catch (\ReflectionException) {
             $this->error("Unknow command: $action");
             return 1;
         }

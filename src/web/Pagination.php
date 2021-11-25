@@ -2,6 +2,7 @@
 
 namespace mii\web;
 
+use mii\core\InvalidRouteException;
 use mii\util\HTML;
 use mii\util\Url;
 
@@ -98,7 +99,7 @@ class Pagination
      *
      * @param int|null $page
      * @return  string   page URL
-     * @throws \mii\core\InvalidRouteException
+     * @throws InvalidRouteException
      */
     public function url(?int $page = 1): string
     {
@@ -227,7 +228,7 @@ class Pagination
         }
 
         // Note: http_build_query returns an empty string for a params array with only NULL values
-        $query = \http_build_query($params, '', '&');
+        $query = \http_build_query($params);
 
         // Don't prepend '?' to an empty string
         return ($query === '') ? '' : ('?' . $query);

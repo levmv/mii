@@ -1,8 +1,8 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
+declare(strict_types=1);
 
 namespace mii\web;
 
-use mii\core\ErrorException;
 use mii\core\InvalidRouteException;
 use mii\core\UserException;
 use mii\db\ModelNotFoundException;

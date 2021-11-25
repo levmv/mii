@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpFullyQualifiedNameUsageInspection */
+declare(strict_types=1);
 
 namespace mii\valid;
 
@@ -273,13 +274,14 @@ class Validation
      * exists, "field/default" will be used. If neither is set, the returned
      * message will be "file/field/rule".
      *
-     * By default all messages used as is. If second argument is true than "__" function
+     * By default, all messages used as is. If second argument is true then "__" function
      * will be used for translation.
      *
      * @param string|null $file file to load error messages from
      * @param mixed $translate translate the message
      * @return  array
      * @throws \Exception
+     * @noinspection PhpUndefinedFunctionInspection
      */
     public function errors(string $file = null, bool $translate = false): array
     {

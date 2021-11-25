@@ -1,11 +1,11 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpUnhandledExceptionInspection */
+declare(strict_types=1);
 
 namespace mii\console\controllers;
 
 use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
-use mii\util\Console;
 use mii\util\FS;
 use mii\util\Text;
 
@@ -26,19 +26,19 @@ class Assets extends Controller
     public string $config_file;
     private bool $json_output;
     private bool $force_mode;
-    private $filtered_sets;
+    private array $filtered_sets;
 
-    private $assets;
-    private $libraries;
+    private array $assets;
+    private array $libraries;
 
     private array $sets = [];
 
-    private $base_path;
-    private $base_url = '/assets';
+    private ?string $base_path;
+    private string $base_url = '/assets';
 
-    private $assets_map_path;
+    private string $assets_map_path;
 
-    protected $assets_group = 'static';
+    protected string $assets_group = 'static';
 
     private array $results = [];
 
@@ -152,7 +152,7 @@ class Assets extends Controller
             }
 
             $directory = new \RecursiveDirectoryIterator($library);
-            $filter = new \RecursiveCallbackFilterIterator($directory, static function ($current, $key, $iterator) {
+            $filter = new \RecursiveCallbackFilterIterator($directory, static function ($current) {
                 // Skip hidden files and directories.
                 if ($current->getFilename()[0] === '.') {
                     return false;

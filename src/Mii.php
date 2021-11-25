@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpIncludeInspection */
+<?php /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
+/** @noinspection PhpFullyQualifiedNameUsageInspection */
+/** @noinspection PhpIncludeInspection */
 /** @noinspection PhpIllegalPsrClassPathInspection */
 declare(strict_types=1);
 
@@ -9,10 +11,7 @@ use mii\log\Logger;
 
 class Mii
 {
-    /**
-     * @var \mii\web\App|\mii\console\App;
-     */
-    public static $app;
+    public static \mii\core\App $app;
 
     public static string $log_component_name = 'log';
 

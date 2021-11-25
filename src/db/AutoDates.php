@@ -1,4 +1,5 @@
-<?php /** @noinspection MagicMethodsValidityInspection */
+<?php /** @noinspection PhpUndefinedMethodInspection */
+/** @noinspection MagicMethodsValidityInspection */
 declare(strict_types=1);
 
 namespace mii\db;

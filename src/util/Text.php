@@ -95,7 +95,7 @@ class Text
         };
 
         // Split the pool into an array of characters
-        $pool = \str_split($pool, 1);
+        $pool = \str_split($pool);
 
         // Largest pool key
         $max = \count($pool) - 1;

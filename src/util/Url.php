@@ -135,7 +135,7 @@ class Url
      *     // Returns "?sort=title&limit=10" combined with any existing GET values
      *     $query = URL::query(array('sort' => 'title', 'limit' => 10));
      *
-     * Typically you would use this when you are sorting query results,
+     * Typically, you would use this when you are sorting query results,
      * or something similar.
      *
      * [!!] Parameters with a NULL value are left out.
@@ -162,7 +162,7 @@ class Url
         }
 
         // Note: http_build_query returns an empty string for a params array with only NULL values
-        $query = \http_build_query($params, '', '&');
+        $query = \http_build_query($params);
 
         // Don't prepend '?' to an empty string
         return ($query === '') ? '' : ('?' . $query);

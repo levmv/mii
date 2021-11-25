@@ -19,7 +19,7 @@ use mii\core\Router;
 class App extends \mii\core\App
 {
     /**
-     * @throws InvalidRouteException
+     * @throws InvalidRouteException|\JsonException
      */
     public function run(): void
     {

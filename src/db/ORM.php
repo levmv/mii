@@ -215,6 +215,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function set($values, $value = null): ORM
     {
+        /** @noinspection PhpFullyQualifiedNameUsageInspection */
         if ($values instanceof \mii\web\Form) {
             $values = $values->changedFields();
         }
@@ -376,6 +377,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * database INSERT and assign the inserted row id to $data['id'].
      *
      * @return int Inserted row id
+     * @throws DatabaseException
      */
     public function create(): int
     {
@@ -410,6 +412,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * Perform update request. Uses value of 'id' attribute as primary key
      *
      * @return int Affected rows
+     * @throws DatabaseException
      */
     public function update(): int
     {

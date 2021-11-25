@@ -5,7 +5,10 @@
  */
 
 // Unique error identifier
-$error_id = \uniqid('error', false);
+use mii\util\Debug;
+use mii\util\HTML;
+
+$error_id = uniqid('error');
 
 ?>
 <style>
@@ -132,7 +135,7 @@ $error_id = \uniqid('error', false);
     $ex = 0;
     do {
         $ex++;
-        $class = $exception instanceof \mii\core\ErrorException ? $exception->getName() : \get_class($exception);
+        $class = $exception instanceof \mii\core\ErrorException ? $exception->getName() : get_class($exception);
         $code = $exception->getCode();
         $message = $exception->getMessage();
         $file = $exception->getFile();
@@ -140,18 +143,18 @@ $error_id = \uniqid('error', false);
         $trace = $exception->getTrace(); ?>
 
         <h1><span class="type"><?php echo $class ?> [ <?php echo $code ?> ]:</span> <span
-                    class="message"><?php echo \mii\util\HTML::chars($message) ?></span></h1>
+                    class="message"><?php echo HTML::chars($message) ?></span></h1>
         <div id="<?php echo $error_id ?>" class="content">
-            <p><span class="file"><?php echo \mii\util\Debug::path($file) ?> [ <?php echo $line ?> ]</span></p>
-            <?php echo \mii\util\Debug::source($file, $line) ?>
+            <p><span class="file"><?php echo Debug::path($file) ?> [ <?php echo $line ?> ]</span></p>
+            <?php echo Debug::source($file, $line) ?>
             <ol class="trace">
-                <?php foreach (\mii\util\Debug::trace($trace) as $i => $step): ?>
+                <?php foreach (Debug::trace($trace) as $i => $step): ?>
                     <li>
                         <p>
 					<span class="file">
 						<?php if ($step['file']): $source_id = $error_id . 'source' . $ex . '_' . $i; ?>
                             <a href="#<?php echo $source_id ?>"
-                               onclick="return koggle('<?php echo $source_id ?>')"><?php echo \mii\util\Debug::path($step['file']) ?>
+                               onclick="return koggle('<?php echo $source_id ?>')"><?php echo Debug::path($step['file']) ?>
                                 [ <?php echo $step['line'] ?> ]</a>
                         <?php else: ?>
                             {<?php echo 'PHP internal call' ?>}
@@ -171,7 +174,7 @@ $error_id = \uniqid('error', false);
                                         <tr>
                                             <td><code><?php echo $name ?></code></td>
                                             <td>
-                                                <pre><?php echo \mii\util\Debug::dump($arg) ?></pre>
+                                                <pre><?php echo Debug::dump($arg) ?></pre>
                                             </td>
                                         </tr>
                                     <?php endforeach ?>
@@ -193,45 +196,45 @@ $error_id = \uniqid('error', false);
     <h2><a href="#<?php echo $env_id = $error_id . 'environment' ?>"
            onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Environment' ?></a></h2>
     <div id="<?php echo $env_id ?>" class="content collapsed">
-        <?php $included = \get_included_files() ?>
+        <?php $included = get_included_files() ?>
         <h3><a href="#<?php echo $env_id = $error_id . 'environment_included' ?>"
                onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Included files' ?></a>
-            (<?php echo \count($included) ?>)</h3>
+            (<?php echo count($included) ?>)</h3>
         <div id="<?php echo $env_id ?>" class="collapsed">
             <table>
                 <?php foreach ($included as $file): ?>
                     <tr>
-                        <td><code><?php echo \mii\util\Debug::path($file) ?></code></td>
+                        <td><code><?php echo Debug::path($file) ?></code></td>
                     </tr>
                 <?php endforeach ?>
             </table>
         </div>
-        <?php $included = \get_loaded_extensions() ?>
+        <?php $included = get_loaded_extensions() ?>
         <h3><a href="#<?php echo $env_id = $error_id . 'environment_loaded' ?>"
                onclick="return koggle('<?php echo $env_id ?>')"><?php echo 'Loaded extensions' ?></a>
-            (<?php echo \count($included) ?>)</h3>
+            (<?php echo count($included) ?>)</h3>
         <div id="<?php echo $env_id ?>" class="collapsed">
             <table>
                 <?php foreach ($included as $file): ?>
                     <tr>
-                        <td><code><?php echo \mii\util\Debug::path($file) ?></code></td>
+                        <td><code><?php echo Debug::path($file) ?></code></td>
                     </tr>
                 <?php endforeach ?>
             </table>
         </div>
         <?php foreach (['_SESSION', '_GET', '_POST', '_FILES', '_COOKIE', '_SERVER'] as $var): ?>
-            <?php if (empty($GLOBALS[$var]) or !\is_array($GLOBALS[$var])) {
+            <?php if (empty($GLOBALS[$var]) or !is_array($GLOBALS[$var])) {
         continue;
     } ?>
-            <h3><a href="#<?php echo $env_id = $error_id . 'environment' . \strtolower($var) ?>"
+            <h3><a href="#<?php echo $env_id = $error_id . 'environment' . strtolower($var) ?>"
                    onclick="return koggle('<?php echo $env_id ?>')">$<?php echo $var ?></a></h3>
             <div id="<?php echo $env_id ?>" class="collapsed">
                 <table>
                     <?php foreach ($GLOBALS[$var] as $key => $value): ?>
                         <tr>
-                            <td><code><?php echo \mii\util\HTML::chars($key) ?></code></td>
+                            <td><code><?php echo HTML::chars($key) ?></code></td>
                             <td>
-                                <pre><?php echo \mii\util\Debug::dump($value) ?></pre>
+                                <pre><?php echo Debug::dump($value) ?></pre>
                             </td>
                         </tr>
                     <?php endforeach ?>

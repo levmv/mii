@@ -103,7 +103,7 @@ class HTML
 
     /**
      * Create HTML link anchors. Note that the title is not escaped, to allow
-     * HTML elements within links (images, etc).
+     * HTML elements within links (images, etc.)
      *
      *     echo HTML::anchor('/user/profile', 'My Profile');
      *
@@ -193,7 +193,7 @@ class HTML
     }
 
     /**
-     * Creates a image link.
+     * Creates an image link.
      *
      * @param string $file file name
      * @param array|null $attributes default attributes
@@ -419,7 +419,7 @@ class HTML
      * Creates a radio form input.
      *
      *     echo Form::radio('like_cats', 1, $cats);
-     *     echo Form::radio('like_cats', 0, ! $cats);
+     *     echo Form::radio('like_cats', 0, !$cats);
      *
      * @param string $name input name
      * @param null $value input value
@@ -518,6 +518,7 @@ class HTML
                     // Compile the options into a string
                     $_options = "\n" . \implode("\n", $_options) . "\n";
 
+                    /** @noinspection RequiredAttributes */
                     $r_options[] = '<optgroup' . self::attributes($group) . '>' . $_options . '</optgroup>';
                 } else {
                     // Force value to be string
@@ -544,7 +545,7 @@ class HTML
     }
 
     /**
-     * Creates a submit form input.
+     * Creates a `submit` form input.
      *
      *     echo Form::submit(NULL, 'Login');
      *

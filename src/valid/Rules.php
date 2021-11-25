@@ -2,6 +2,7 @@
 
 namespace mii\valid;
 
+use mii\core\Exception;
 use mii\util\Text;
 use mii\web\UploadedFile;
 
@@ -158,7 +159,7 @@ class Rules
             $expression = '/^[-_a-z0-9\'+*$^&%=~!?{}]++(?:\.[-_a-z0-9\'+*$^&%=~!?{}]+)*+@(?:(?![-.])[-a-z0-9.]+(?<![-.])\.[a-z]{2,6}|\d{1,3}(?:\.\d{1,3}){3})$/iD';
         }
 
-        return (bool) \preg_match($expression, (string) $email);
+        return (bool) \preg_match($expression, $email);
     }
 
     /**
@@ -490,7 +491,7 @@ class Rules
      * @param UploadedFile $file $_FILES item
      * @param string|int $size maximum file size allowed
      * @return  bool
-     * @throws \mii\core\Exception
+     * @throws Exception
      */
     public static function maxFileSize($file, $size) : bool
     {
@@ -516,6 +517,10 @@ class Rules
         return $file->size < $size;
     }
 
+    /**
+     * @noinspection PhpFullyQualifiedNameUsageInspection
+     * @noinspection PhpUndefinedClassInspection
+     */
     public static function recaptcha() : bool
     {
         $recaptcha = new \ReCaptcha\ReCaptcha(config('google.recaptcha.secret'));

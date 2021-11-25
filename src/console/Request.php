@@ -91,7 +91,7 @@ class Request extends Component
         while (\count($namespaces)) {
             $controller_class = \array_shift($namespaces) . '\\' . $this->controller;
 
-            \class_exists($controller_class); // always return false, but autoload class if it exist
+            \class_exists($controller_class); // always return false, but autoload class if it exists
 
             // real check
             if (\class_exists($controller_class, false)) {
@@ -190,10 +190,12 @@ class Request extends Component
 
     private static function padded(string $string, int $length)
     {
-        return \str_pad($string, $length + 5, ' ', \STR_PAD_RIGHT);
+        return \str_pad($string, $length + 5);
     }
 
-    /** @noinspection PhpIncludeInspection */
+    /** @noinspection PhpIncludeInspection
+     * @noinspection PhpFullyQualifiedNameUsageInspection
+     */
     private static function get_paths_from_composer($namespaces): ?array
     {
         $compdir = \realpath(__DIR__ . '/../../../../composer');
@@ -285,7 +287,6 @@ class Request extends Component
             foreach ($method->getParameters() as $param) {
                 $name = $param->getName();
                 $optional = $param->isDefaultValueAvailable();
-                $type = $param->getType();
 
                 $args[] = $optional ? '[' . $name . ']' : "<$name>";
             }

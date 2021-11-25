@@ -46,6 +46,7 @@ class Log
                     $exceptions[] = $arg;
                 }
 
+                /** @noinspection PhpFullyQualifiedNameUsageInspection */
                 if (($arg instanceof \mii\db\ORM) && isset($arg->id)) {
                     $classname .= "($arg->id)";
                 }

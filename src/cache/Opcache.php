@@ -1,7 +1,9 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
+declare(strict_types=1);
 
 namespace mii\cache;
 
+use mii\core\Exception;
 use mii\util\FS;
 
 class Opcache extends File
@@ -22,6 +24,7 @@ class Opcache extends File
      * @param string $default default value to return if cache miss
      * @return  mixed
      * @noinspection IssetArgumentExistenceInspection
+     * @noinspection PhpMixedReturnTypeCanBeReducedInspection
      */
     public function get(string $id, $default = null): mixed
     {
@@ -43,7 +46,7 @@ class Opcache extends File
      * @param string  $data data to set to cache
      * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
-     * @throws \mii\core\Exception
+     * @throws Exception
      */
     public function set(string $id, $data, int $lifetime = null): bool
     {

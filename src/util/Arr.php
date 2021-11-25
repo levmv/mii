@@ -248,7 +248,7 @@ class Arr
      *     $array = Arr::flatten($array);
      *
      *     // The array will now be
-     *     array('one' => 'something', 'two' => 'other');
+     *     ['one' => 'something', 'two' => 'other'];
      *
      * [!!] The keys of array values will be discarded.
      *

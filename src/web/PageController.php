@@ -3,7 +3,6 @@
 namespace mii\web;
 
 use Mii;
-use mii\core\ACL;
 
 class PageController extends Controller
 {

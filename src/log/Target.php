@@ -69,6 +69,7 @@ abstract class Target extends Component
 
     abstract public function process(array $messages): void;
 
+    /** @noinspection PhpFullyQualifiedNameUsageInspection */
     public function formatMessage(array $message): string
     {
         [$msg, $level, $category, $timestamp] = $message;
@@ -127,6 +128,7 @@ abstract class Target extends Component
         return "$this->last_date$prefix $level $msg$extended";
     }
 
+    /** @noinspection PhpFullyQualifiedNameUsageInspection */
     public static function shortExceptionText(\Throwable $e): string
     {
         $name = \get_class($e);

@@ -3,7 +3,6 @@
 namespace mii\core;
 
 use mii\util\Url;
-use mii\web\Response;
 
 class Router extends Component
 {

@@ -8,7 +8,7 @@ class UTF8
     /**
      * Replaces all 4-bytes characters in utf8 string
      *
-     * Note: it's may be a good idea to use "\xEF\xBF\xBD" for $replace
+     * Note: it's maybe a good idea to use "\xEF\xBF\xBD" for $replace
      * @param string $str
      * @param string $replace
      * @return string

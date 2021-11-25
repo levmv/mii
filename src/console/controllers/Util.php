@@ -3,6 +3,7 @@
 namespace mii\console\controllers;
 
 use mii\console\Controller;
+use mii\db\DatabaseException;
 use mii\db\DB;
 use mii\util\Debug;
 
@@ -181,7 +182,7 @@ class Util extends Controller
     /**
      * Print table columns as phpdoc properties
      * @param string $name
-     * @throws \mii\db\DatabaseException
+     * @throws DatabaseException
      */
     public function table(string $name)
     {
