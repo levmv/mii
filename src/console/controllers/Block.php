@@ -6,7 +6,7 @@ use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
 use mii\util\Console;
-use mii\util\FS;
+use mii\util\Misc;
 
 /**
  * Blocks builder
@@ -179,7 +179,7 @@ class Block extends Controller
         $dir = $this->output_path . '/' . \implode('/', \explode('_', $block_name));
 
         if (!\is_dir($dir)) {
-            FS::mkdir($dir, 0777, true);
+            Misc::mkdir($dir, 0777, true);
         }
 
         $to = $dir . '/' . $block_name . '.' . $ext;
@@ -227,7 +227,7 @@ class Block extends Controller
         $dir = $this->output_path . '/' . \implode('/', \explode('_', $block_name)) . '/assets';
 
         if (!\is_dir($dir)) {
-            FS::mkdir($dir);
+            Misc::mkdir($dir);
         }
 
         foreach ($from as $f) {

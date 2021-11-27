@@ -3,7 +3,7 @@
 namespace mii\web;
 
 use Mii;
-use mii\util\FS;
+use mii\util\Misc;
 use mii\util\HTML;
 
 class Blocks extends BaseBlocks
@@ -27,7 +27,7 @@ class Blocks extends BaseBlocks
         $this->base_path = Mii::resolve($this->base_path);
 
         if (!\is_dir($this->base_path)) {
-            FS::mkdir($this->base_path, 0777);
+            Misc::mkdir($this->base_path, 0777);
         }
 
         foreach ($this->_blocks as $block_name => $block) {

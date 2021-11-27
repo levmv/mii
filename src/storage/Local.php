@@ -3,7 +3,7 @@
 namespace mii\storage;
 
 use mii\core\Component;
-use mii\util\FS;
+use mii\util\Misc;
 use mii\web\UploadedFile;
 
 class Local extends Component implements StorageInterface
@@ -27,7 +27,7 @@ class Local extends Component implements StorageInterface
             $path = \substr($path, $i);
 
             if (!\is_dir($this->path . $level)) {
-                FS::mkdir($this->path . $level);
+                Misc::mkdir($this->path . $level);
             }
 
             $path = $level . $path;

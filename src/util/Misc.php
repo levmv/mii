@@ -3,9 +3,36 @@
 namespace mii\util;
 
 use mii\core\Exception;
+use mii\db\DB;
+use mii\db\ORM;
+use mii\db\SelectQuery;
 
-class FS
+class Misc
 {
+
+    public static function sortValue(ORM $model, string $fieldName, string $parentField = null) {
+        if ($parentField) {
+            $value = (new SelectQuery)
+                ->select([DB::expr('MAX(' . $fieldName . ')'), $fieldName])
+                ->from($model::table())
+                ->where($parentField, '=', $model->get($parentField))
+                ->one();
+
+        } else {
+            $value = (new SelectQuery)
+                ->select([DB::expr('MAX(' . $fieldName . ')'), $fieldName])
+                ->from($model::table())
+                ->one();
+
+        }
+        if ($value) {
+            $value = $value[$fieldName] ?: 0;
+        }
+
+        return $value + 1;
+    }
+
+
     public static function mkdir($path, $mode = 0775, $recursive = true)
     {
         $path = \Mii::resolve($path);

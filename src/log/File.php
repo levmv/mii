@@ -3,7 +3,7 @@
 namespace mii\log;
 
 use Mii;
-use mii\util\FS;
+use mii\util\Misc;
 
 class File extends Target
 {
@@ -14,7 +14,7 @@ class File extends Target
         $this->file = Mii::resolve($this->file);
         $log_dir = \dirname($this->file);
         if (!\is_dir($log_dir)) {
-            FS::mkdir(\dirname($this->file));
+            Misc::mkdir(\dirname($this->file));
         }
 
         $text = \implode("\n", \array_map([$this, 'formatMessage'], $messages)) . "\n";

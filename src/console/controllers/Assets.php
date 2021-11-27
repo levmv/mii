@@ -6,7 +6,7 @@ namespace mii\console\controllers;
 use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
-use mii\util\FS;
+use mii\util\Misc;
 use mii\util\Text;
 
 /**
@@ -276,7 +276,7 @@ class Assets extends Controller
         $this->assets_map_path = Mii::resolve($this->assets_map_path);
 
         if (!\is_dir($this->base_path)) {
-            FS::mkdir($this->base_path, 0777);
+            Misc::mkdir($this->base_path, 0777);
         }
 
         if (!isset($this->assets[$this->assets_group])) {
@@ -381,7 +381,7 @@ class Assets extends Controller
         }
 
         if (!\is_dir($path)) {
-            FS::mkdir($path, 0777, true);
+            Misc::mkdir($path, 0777, true);
         }
 
         \file_put_contents($path . $filename, $tmp);

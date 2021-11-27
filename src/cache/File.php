@@ -2,7 +2,7 @@
 
 namespace mii\cache;
 
-use mii\util\FS;
+use mii\util\Misc;
 
 class File extends Cache
 {
@@ -19,7 +19,7 @@ class File extends Cache
 
         $this->path = \Mii::resolve($this->path);
         if (!\is_dir($this->path)) {
-            FS::mkdir($this->path, 0777);
+            Misc::mkdir($this->path, 0777);
         }
     }
 
@@ -66,7 +66,7 @@ class File extends Cache
         $filename = $this->cacheFile($id);
 
         if ($this->directory_level > 0) {
-            FS::mkdir(\dirname($filename), $this->chmode);
+            Misc::mkdir(\dirname($filename), $this->chmode);
         }
         if (\file_put_contents($filename, $this->serialize ? \serialize($data) : $data, \LOCK_EX) !== false) {
             if ($this->chmode !== null) {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace mii\cache;
 
 use mii\core\Exception;
-use mii\util\FS;
+use mii\util\Misc;
 
 class Opcache extends File
 {
@@ -57,7 +57,7 @@ class Opcache extends File
         $filename = $this->cacheFile($id);
 
         if ($this->directory_level > 0) {
-            FS::mkdir(\dirname($filename), $this->chmode, true);
+            Misc::mkdir(\dirname($filename), $this->chmode, true);
         }
 
         $val = \var_export($data, true);
