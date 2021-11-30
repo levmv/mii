@@ -117,7 +117,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
                 $conditions = [$conditions];
             }
 
-            return static::find()->where($conditions);
+            return static::find()->whereAll($conditions);
         }
 
         \assert(\count($args) === 3, 'Wrong count of arguments');

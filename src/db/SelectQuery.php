@@ -341,27 +341,26 @@ class SelectQuery
     /***** WHERE ****/
 
     /**
-     * Alias of and_where()
-     *
      * @param mixed  $column column name or array($column, $alias) or object
      * @param string $op logic operator
      * @param mixed  $value column value
      * @return  $this
      */
-    public function where($column = null, $op = null, $value = null): self
+    public function where(string $column, string $op, mixed $value): self
     {
-        return $this->andWhere($column, $op, $value);
+        $this->_where[] = ['AND' => [$column, $op, $value]];
+        return $this;
     }
 
     /**
-     * Alias of and_filter()
+     * Alias of andFilter()
      *
      * @param mixed  $column column name or array($column, $alias) or object
      * @param string $op logic operator
      * @param mixed  $value column value
      * @return  $this
      */
-    public function filter($column, $op, $value): self
+    public function filter(string $column, string $op, mixed$value): self
     {
         return $this->andFilter($column, $op, $value);
     }
@@ -369,24 +368,55 @@ class SelectQuery
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param mixed  $column column name or array($column, $alias) or object
-     * @param string $op logic operator
-     * @param mixed  $value column value
+     * @param mixed $column column name or array($column, $alias) or object
+     * @param string|null $op logic operator
+     * @param mixed $value column value
      * @return  $this
      */
-    public function andWhere($column, $op = null, $value = null): self
+    public function andWhere(?string $column = null, string $op = null, $value = null): self
     {
         if ($column === null) {
             $this->_where[] = ['AND' => '('];
             $this->_last_condition_where = true;
-        } elseif (\is_array($column)) {
-            foreach ($column as $row) {
-                $this->_where[] = ['AND' => $row];
-            }
         } else {
             $this->_where[] = ['AND' => [$column, $op, $value]];
         }
 
+        return $this;
+    }
+
+
+    public function whereAll(array $conditions): self
+    {
+        foreach($conditions as [$column, $op, $value]) {
+            $this->andWhere($column, $op, $value);
+        }
+        return $this;
+    }
+
+
+    public function whereGroup(callable $func = null): self
+    {
+        if($func === null) {
+            return $this->andWhere();
+        }
+
+        $this->andWhere();
+        $func($this);
+        $this->end();
+        return $this;
+    }
+
+
+    public function orWhereGroup(callable $func = null): self
+    {
+        if($func === null) {
+            return $this->orWhere();
+        }
+
+        $this->orWhere();
+        $func($this);
+        $this->end();
         return $this;
     }
 
@@ -422,10 +452,6 @@ class SelectQuery
         if ($column === null) {
             $this->_where[] = ['OR' => '('];
             $this->_last_condition_where = true;
-        } elseif (\is_array($column)) {
-            foreach ($column as $row) {
-                $this->_where[] = ['OR' => $row];
-            }
         } else {
             $this->_where[] = ['OR' => [$column, $op, $value]];
         }
@@ -722,7 +748,7 @@ class SelectQuery
                         $value = \is_int($value) ? $value : $this->db->quote($value);
                     }
 
-                    $column = $this->db->quoteIdentifier($column);
+                    $column = $this->quoteColumn($column);
 
                     // Append the statement to the query
                     $sql .= "$column $op $value";
@@ -739,7 +765,7 @@ class SelectQuery
     {
         [$column, $op, $value] = \current($conditions[0]);
 
-        $column = $this->db->quoteIdentifier($column);
+        $column = $this->quoteColumn($column);
 
         if ($value === null) {
             if ($op === '=') {
@@ -780,6 +806,26 @@ class SelectQuery
         }
 
         return ' ORDER BY ' . \implode(', ', $sort);
+    }
+
+
+    protected function quoteColumn(string $column): string
+    {
+        $value = \str_replace('`', '``', $column);
+
+        if (\str_contains($value, '.')) {
+            $parts = \explode('.', $value);
+
+            foreach ($parts as &$part) {
+                // Quote each of the parts
+                $part = "`$part`";
+            }
+
+            $value = \implode('.', $parts);
+        } else {
+            $value = "`$value`";
+        }
+        return $value;
     }
 
 

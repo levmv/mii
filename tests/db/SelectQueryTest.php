@@ -25,10 +25,10 @@ class SelectQueryTest extends DatabaseTestCase
                 ->from('table')
                 ->from(['table2', 't2]'])
                 ->where('col1', '=', 1)
-                ->where()
-                ->where('col2', '<', 'sadf')
-                ->orWhere('col2', '=', null)
-                ->end()
+                ->whereGroup(function(SelectQuery $q) {
+                    $q->where('col2', '<', 'sadf')
+                        ->orWhere('col2', '=', null);
+                })
                 ->having('count', '>', 0)
                 ->orderBy([
                     ['id', 'desc'],
@@ -86,7 +86,7 @@ class SelectQueryTest extends DatabaseTestCase
                 $q()->where('col', '=', 'str'), ],
 
             ["`c` = 'str' AND `c` IS NULL AND `c` != 'str' AND `c` IN (1,2,3) AND `c` NOT IN ('a','b',3) AND `c` LIKE 'str'",
-                $q()->where([
+                $q()->whereAll([
                     ['c', '=', 'str'],
                     ['c', '=', null],
                     ['c', '!=', 'str'],
@@ -99,12 +99,12 @@ class SelectQueryTest extends DatabaseTestCase
                     ->where('a', '=', 1)
                     ->orWhere('b', '=', 1)
                     ->where('c', '=', 1)
-                    ->orWhere()
-                    ->where('x', '=', 3)
-                    ->where()
-                    ->where('d', '=', 1)
-                    ->where('e', '=', 1)
-                    ->end()
+                    ->orWhereGroup()
+                        ->where('x', '=', 3)
+                        ->whereGroup()
+                            ->where('d', '=', 1)
+                            ->where('e', '=', 1)
+                        ->end()
                     ->end(),
             ],
             [
@@ -165,24 +165,24 @@ class SelectQueryTest extends DatabaseTestCase
             (new Query())
                 ->select('col1', 'col2', 'col3')
                 ->from(['table', 't'])
-                ->where()
-                ->where('col1', '=', 1)
-                ->where()
-                ->where('col2', '=', 2)
-                ->orWhere('col3', '=', 4)
+                ->whereGroup()
+                    ->where('col1', '=', 1)
+                    ->whereGroup()
+                        ->where('col2', '=', 2)
+                        ->orWhere('col3', '=', 4)
+                    ->end()
                 ->end()
-                ->end()
-                ->orWhere()
-                ->where('col2', '=', 5)
-                ->orWhere('col3', '=', 'six')
-                ->end()
-                ->where()
-                ->where('col3', '=', 7)
+                ->orWhereGroup(function(SelectQuery $q) {
+                    $q->where('col2', '=', 5)
+                      ->orWhere('col3', '=', 'six');
+                })
+                ->whereGroup()
+                    ->where('col3', '=', 7)
                 ->end()
                 ->having('col1', '<', 5)
                 ->having()
-                ->having('col2', '=', 'col3')
-                ->orHaving('col3', '=', 5)
+                    ->having('col2', '=', 'col3')
+                    ->orHaving('col3', '=', 5)
                 ->end()
                 ->orderBy('col3', 'desc')
                 ->compile(),
