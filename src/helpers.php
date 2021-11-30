@@ -23,7 +23,7 @@ if (!\function_exists('redirect')) {
     /**
      * @param      $url
      * @param bool $use_back_url
-     * @noinspection PhpUnhandledExceptionInspection
+     * @return never-return
      */
     function redirect($url, bool $use_back_url = false)
     {
@@ -50,7 +50,6 @@ if (!\function_exists('block')) {
 }
 
 if (!\function_exists('renderBlock')) {
-    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param string     $name
      * @param array|null $params
@@ -59,13 +58,11 @@ if (!\function_exists('renderBlock')) {
     function renderBlock(string $name, array $params = null): string
     {
         if (!\is_null($params)) {
-            /** @noinspection PhpUnhandledExceptionInspection */
             return Mii::$app->blocks
                 ->get($name)
                 ->set($params)
                 ->render(true);
         }
-        /** @noinspection PhpUnhandledExceptionInspection */
         return Mii::$app->blocks->get($name)->render(true);
     }
 }

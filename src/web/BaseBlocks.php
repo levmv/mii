@@ -75,7 +75,6 @@ abstract class BaseBlocks extends Component
 
     /**
      * Create a new block, or get an existing block
-     * @static
      * @param $name string Block name
      * @return Block
      */
