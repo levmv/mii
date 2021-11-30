@@ -97,6 +97,10 @@ class Controller
             throw new BadRequestHttpException('Missing required parameters: "' . \implode(', ', $missing) . '"');
         }
 
+        if($method->getReturnType()?->getName() === 'array') {
+            $this->response->format = Response::FORMAT_JSON;
+        }
+
         return \call_user_func_array([$this, $action], $args);
     }
 

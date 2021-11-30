@@ -33,7 +33,7 @@ class PageController extends Controller
 
     protected function before(): void
     {
-        if ($this->autoRender && !Mii::$app->request->isAjax()) {
+        if ($this->autoRender && $this->response->format === Response::FORMAT_HTML) {
             $this->setupLayout();
         }
     }
