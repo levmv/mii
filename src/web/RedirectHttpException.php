@@ -2,9 +2,9 @@
 
 namespace mii\web;
 
-class RedirectHttpException extends Exception
+class RedirectHttpException extends \RuntimeException
 {
-    public $url = '';
+    public string $url = '';
 
     public function __construct($url)
     {

@@ -26,7 +26,7 @@ class Block
     // List of inline codes
     public $__inline_js;
 
-    public $_depends = [];
+    public array $_depends = [];
 
     // Is assigned any values to block ?
     protected bool $_loaded = false;
@@ -54,7 +54,6 @@ class Block
      *
      * @param string $key variable name
      * @return  mixed
-     * @throws Exception
      */
     public function __get(string $key)
     {
@@ -99,7 +98,6 @@ class Block
      * Magic method, returns the output of [Block::render].
      *
      * @return  string
-     * @throws Exception
      */
     public function __toString(): string
     {
@@ -157,7 +155,7 @@ class Block
             return $default;
         }
 
-        throw new Exception("Block variable is not set: $key");
+        throw new \RuntimeException("Block variable is not set: $key");
     }
 
     /**
@@ -233,7 +231,7 @@ class Block
             $this->_file = Mii::$app->blocks->getBlockPhpFile($this->__name);
 
             if ($this->_file === null) {
-                throw new Exception('Block ' . $this->__name . ' does not have a php file');
+                throw new \RuntimeException('Block ' . $this->__name . ' does not have a php file');
             }
         }
 

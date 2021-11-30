@@ -126,7 +126,7 @@ class Response extends Component
     }
 
 
-    public function redirect($url, $code = 302)
+    public function redirect(string $url, int $code = 302): static
     {
         // todo: process url
 
