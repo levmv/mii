@@ -546,6 +546,7 @@ class SelectQuery
 
         if (empty($this->_from)) {
             \assert(!empty($this->_model_class), "You must specify 'from' table or set model class");
+            /** @noinspection PhpUndefinedMethodInspection */
             $table = $this->_model_class::table();
             $table_aliased = false;
             $table_q = $this->db->quoteTable($table);
@@ -859,7 +860,6 @@ class SelectQuery
 
         $sql = $this->compile();
 
-        /** @noinspection PhpUnhandledExceptionInspection */
         // Execute the query
         $result = $this->db->query($this->_type, $sql, $this->_as_array ? false : $this->_model_class);
 
@@ -953,10 +953,7 @@ class SelectQuery
         $result = $this->one();
 
         if ($result === null) {
-            /** @noinspection PhpUnhandledExceptionInspection */
-            throw (
-            (new ModelNotFoundException())->setModel((string) $this->_model_class)
-            );
+            throw ((new ModelNotFoundException())->setModel((string)$this->_model_class));
         }
         return $result;
     }

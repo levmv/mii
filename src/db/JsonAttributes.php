@@ -8,7 +8,7 @@ namespace mii\db;
  *  User must add property to his class:
  *  protected array $json_attributes = [];
  *
- *
+ * @property array $attributes
  * @property array $json_attributes Auto-serialize and unserialize columns on get/set
  */
 trait JsonAttributes

@@ -2,7 +2,6 @@
 
 namespace mii\db;
 
-use mii\core\Exception;
 use mii\log\Log;
 
 class ORM implements \JsonSerializable, \IteratorAggregate
@@ -148,14 +147,12 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
 
-    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param int $id
      * @return static
      */
     public static function oneOrFail(int $id): self
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
         return static::find()
             ->orderBy(null)
             ->where('id', '=', $id)
@@ -468,7 +465,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return;
         }
 
-        throw new Exception('Cannot delete a non-loaded model ' . \get_class($this) . ' or model without id pk!');
+        throw new \RuntimeException('Cannot delete a non-loaded model ' . \get_class($this) . ' or model without id pk!');
     }
 
 
