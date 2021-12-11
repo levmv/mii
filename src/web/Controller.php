@@ -39,7 +39,9 @@ class Controller
             throw new BadRequestHttpException('Cannot access not public method');
         }
 
-        if($method->getReturnType()?->getName() === 'array') {
+        $returnType = $method->getReturnType();
+
+        if($returnType instanceof \ReflectionNamedType && $returnType->getName() === 'array') {
             $this->response->format = Response::FORMAT_JSON;
         }
 
