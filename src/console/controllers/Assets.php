@@ -6,6 +6,7 @@ namespace mii\console\controllers;
 use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
+use mii\util\Debug;
 use mii\util\Misc;
 use mii\util\Text;
 
@@ -17,6 +18,8 @@ use mii\util\Text;
  *  --config=<path>  Path to configuration file. By default, it's «@app/config/assets.php»
  *  --set=<setname> Name of set to process
  *  --force         Don't check if files changed
+ *  --minify        Post-process files with minifiers (need mii-assets package)
+ *  --gzip          Make gzipped version of files
  *  --json          To print assets paths as json
  *
  * @package mii\console\controllers
@@ -50,6 +53,14 @@ class Assets extends Controller
     private float $_time;
     private int $_memory;
 
+    private bool $gzip = false;
+
+    private string|bool $browserTargets = false;
+    private bool $minify = false;
+    private string $binPackagePath;
+    private string $swcConfig;
+
+
     protected function before()
     {
         $this->_time = \microtime(true);
@@ -66,9 +77,14 @@ class Assets extends Controller
 
         $this->assets_map_path = config('components.blocks.assets_map_path', '@tmp');
 
-        $this->config_file = $this->request->params['config'] ?? config('console.assets.config_file', '@app/config/assets.php');
-        $this->json_output = $this->request->params['json'] ?? false;
-        $this->force_mode = $this->request->params['force'] ?? false;
+        $params = $this->request->params;
+        $this->config_file = $params['config'] ?? config('console.assets.config_file', '@app/config/assets.php');
+        $this->json_output = $params['json'] ?? false;
+        $this->force_mode = $params['force'] ?? false;
+        $this->minify = $params['minify'] ?? false;
+        $this->gzip = $params['gzip'] ?? false;
+        $this->browserTargets = $params['browsers'] ?? false;
+
         $this->filtered_sets = (array) ($this->request->params['set'] ?? \array_keys($this->sets));
 
         if (!\file_exists(Mii::resolve($this->config_file))) {
@@ -77,6 +93,17 @@ class Assets extends Controller
         }
 
         $this->assets = require Mii::resolve($this->config_file);
+
+        if($this->minify) {
+            if(!\Composer\InstalledVersions::isInstalled('levmorozov/mii-assets')) {
+                $this->error("mii-assets are not installed. Disable `minify` option");
+                $this->minify = false;
+            }
+            $this->binPackagePath = realpath(\Composer\InstalledVersions::getInstallPath('levmorozov/mii-assets'));
+            $this->swcConfig = file_exists(path('root')."/.swcrc")
+                ? path('root')."/.swcrc"
+                : $this->binPackagePath."/.swcrc";
+        }
     }
 
     /**
@@ -118,6 +145,17 @@ class Assets extends Controller
             return;
         }
 
+        if($this->minify) {
+            foreach($this->processed['css'] as $css) {
+                $this->cssProcess($css);
+                $this->gzipFile($css);
+            }
+            foreach($this->processed['js'] as $js) {
+                $this->jsProcess($js);
+                $this->gzipFile($js);
+            }
+        }
+
 
         if (\count($this->processed['css']) || \count($this->processed['js'])) {
             $this->info(':N css and :M js files compiled.', [
@@ -129,7 +167,7 @@ class Assets extends Controller
         }
 
         $this->info('All done. Spent :Ts and :MMb', [
-            ':T' => \number_format(\microtime(true) - $this->_time, 1),
+            ':T' => \number_format(\microtime(true) - $this->_time, 2),
             ':M' => \number_format((\memory_get_usage() - $this->_memory) / 1024 / 1024, 1),
         ]);
     }
@@ -366,9 +404,9 @@ class Assets extends Controller
     protected function hash(string $str): string
     {
         return '.'.Text::b64Encode(
-            \substr(\md5($str, true), 0, 6) .
-            \substr(\sha1($str, true), 0, 1)
-        );
+                \substr(\md5($str, true), 0, 6) .
+                \substr(\sha1($str, true), 0, 1)
+            );
     }
 
 
@@ -387,9 +425,55 @@ class Assets extends Controller
         \file_put_contents($path . $filename, $tmp);
 
         if (!$this->json_output) {
-            $this->info(':block compiled.', [':block' => $path . $filename]);
+            $this->info(':block compiled.', [':block' => Debug::path($path) . $filename]);
         }
 
         return $path . $filename;
+    }
+
+
+    protected function gzipFile(string $path): void
+    {
+        file_put_contents($path.".gz", gzencode(file_get_contents($path), 7));
+    }
+
+
+    protected function cssProcess($file): bool
+    {
+        $command = "lightningcss --minify";
+
+        if($this->browserTargets) {
+            $command .= " --targets '{$this->browserTargets}'";
+        }
+
+        $command .= " '$file' --output-file='$file'";
+
+        return $this->executeBinary($command);
+    }
+
+
+    protected function jsProcess($file): bool
+    {
+        $command = "swc compile '$file' --config-file={$this->swcConfig} --out-file='$file'";
+
+        if($this->browserTargets) {
+            $command .= " -C env.targets={$this->browserTargets}";
+        }
+
+        return $this->executeBinary($command);
+    }
+
+
+    protected function executeBinary(string $command): bool {
+        $output = '';
+        $status = 0;
+
+        exec($this->binPackagePath."/bin/$command", $status, $output);
+
+        if($output) {
+            echo $output;
+        }
+
+        return $status === 0;
     }
 }
