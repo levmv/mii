@@ -7,7 +7,7 @@ use mii\web\Pagination;
 /**
  * Database result wrapper.
  */
-class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
+class Result implements \Countable, \Iterator, \ArrayAccess
 {
     // Raw result resource
     protected \mysqli_result $_result;
@@ -75,7 +75,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
     }
 
 
-    public function current()
+    public function current(): mixed
     {
         assert($this->_index_by === null, "You can iterate over Result if indexBy is used");
 
@@ -272,9 +272,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param int $offset
      * @return  boolean
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
-        return ($offset >= 0 and $offset < $this->_total_rows);
+        return ($offset >= 0 && $offset < $this->_total_rows);
     }
 
     /**
@@ -283,7 +283,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @param int $offset
      * @return  mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         if (!$this->seek($offset)) {
             return null;
@@ -302,7 +302,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @return  void
      * @throws DatabaseException
      */
-    final public function offsetSet($offset, $value)
+    final public function offsetSet($offset, $value): void
     {
         throw new DatabaseException('Database results are read-only');
     }
@@ -316,7 +316,7 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      * @return  void
      * @throws DatabaseException
      */
-    final public function offsetUnset($offset)
+    final public function offsetUnset($offset): void
     {
         throw new DatabaseException('Database results are read-only');
     }
@@ -340,11 +340,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  $this
      */
-    public function next()
+    public function next(): void
     {
         ++$this->_current_row;
-
-        return $this;
     }
 
     /**
@@ -368,11 +366,9 @@ class Result implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess
      *
      * @return  $this
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->_current_row = 0;
-
-        return $this;
     }
 
     /**

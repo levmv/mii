@@ -109,7 +109,7 @@ trait JsonAttributes
     }
 
 
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         if ($this->_serialize_cache_dirty) {
             $this->_invalidateSerializeCache();
