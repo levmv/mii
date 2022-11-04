@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace mii\console\controllers;
 
+use Composer\InstalledVersions;
 use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
@@ -95,14 +96,15 @@ class Assets extends Controller
         $this->assets = require Mii::resolve($this->config_file);
 
         if($this->minify) {
-            if(!\Composer\InstalledVersions::isInstalled('levmorozov/mii-assets')) {
-                $this->error("mii-assets are not installed. Disable `minify` option");
+            if(!InstalledVersions::isInstalled('levmorozov/mii-assets')) {
+                $this->error("mii-assets are not installed. `minify` option disabled");
                 $this->minify = false;
+            } else {
+                $this->binPackagePath = realpath(InstalledVersions::getInstallPath('levmorozov/mii-assets'));
+                $this->swcConfig = file_exists(path('root')."/.swcrc")
+                    ? path('root')."/.swcrc"
+                    : $this->binPackagePath."/.swcrc";
             }
-            $this->binPackagePath = realpath(\Composer\InstalledVersions::getInstallPath('levmorozov/mii-assets'));
-            $this->swcConfig = file_exists(path('root')."/.swcrc")
-                ? path('root')."/.swcrc"
-                : $this->binPackagePath."/.swcrc";
         }
     }
 

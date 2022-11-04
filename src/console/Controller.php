@@ -215,7 +215,7 @@ class Controller
     protected function error($msg, $options = [])
     {
         $msg = \strtr((string)$msg, $options);
-        Console::stderr($msg . "\n", Console::FG_RED);
+        Console::stderr($msg . "\n", Console::FG_GREY, Console::BG_RED);
         \Mii::error($msg, 'console');
     }
 }
