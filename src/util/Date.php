@@ -16,27 +16,34 @@ class Date
     private static ?int $today = null;
     private static ?int $year = null;
 
-    public static function nice(int $timestamp, bool $with_time = true): string
+    public static function nice(int $timestamp, bool $withTime = true): string
     {
         static::$today ??= \mktime(0, 0, 0);
         static::$year ??= \mktime(0, 0, 0, 1, 1);
 
         if ($timestamp > static::$today) {
-            $pattern = 'сегодня';
-        } elseif ($timestamp > static::$year) {
-            $pattern = '%e %B';
-        } else {
-            $pattern = '%e %B %Y';
+            $result = 'сегодня';
+            if ($withTime) {
+                $result .= ' в ' . \date('H:i', $timestamp);
+            }
+            return $result;
         }
 
-        if ($with_time) {
-            $pattern .= ' в %k:%M';
+        $format = $timestamp > static::$year
+            ? 'd MMMM'
+            : 'd MMMM YYYY';
+
+        if($withTime) {
+            $format .= " 'в' H:mm";
         }
 
-        return \strftime($pattern, $timestamp);
+        return self::intl($format)->format($timestamp);
     }
 
 
+    /**
+     * @deprecated
+     */
     public static function fuzzy(int $timestamp, int $local_timestamp = null): string
     {
         $local_timestamp = $local_timestamp ?? \time();
@@ -125,5 +132,42 @@ class Date
         }
 
         return $table[$n];
+    }
+
+    /**
+     * Primitive temporary replacement for strftime.
+     * Support only simple patterns that have real usage in our projects
+     *
+     * Strongly not recommended to use in new code!
+     *
+     */
+    static function strftime(string $format, int $timestamp = null): string
+    {
+
+        $pattern = str_replace(
+            ['%a', '%d', '%e', '%B', '%m', '%G', '%Y', '%H', '%k', '%M', '%T', '%F'],
+            ['ccc', 'dd', 'd', 'MMMM', 'LL', 'yyyy', 'yyyy', 'H', 'H', 'mm', 'HH:mm:ss', 'yyyy-MM-dd'], $format);
+
+        $formatter = (new \IntlDateFormatter(\Mii::$app->locale, 0, 0, null, null, $pattern));
+
+        $result = $formatter->format($timestamp ?? new \DateTime());
+
+        if ($result === false) {
+            throw new \InvalidArgumentException($formatter->getErrorMessage());
+        }
+
+        return $result;
+    }
+
+
+    private static array $formatters = [];
+
+    public static function intl(string $pattern = ''): \IntlDateFormatter {
+
+        if(!isset(static::$formatters[$pattern])) {
+            static::$formatters[$pattern] = new \IntlDateFormatter(\Mii::$app->locale, 0, 0, null, null, $pattern);
+        }
+
+        return static::$formatters[$pattern];
     }
 }
