@@ -1,8 +1,8 @@
 {
-  "name": "levmorozov/mii",
+  "name": "levmv/mii",
   "type": "library",
   "description": "Tiny php framework",
-  "homepage": "https://github.com/levmorozov/mii",
+  "homepage": "https://github.com/levmv/mii",
   "license": "MIT",
   "minimum-stability": "dev",
   "prefer-stable": true,
