@@ -96,11 +96,11 @@ class Assets extends Controller
         $this->assets = require Mii::resolve($this->config_file);
 
         if($this->minify) {
-            if(!InstalledVersions::isInstalled('levmorozov/mii-assets')) {
+            if(!InstalledVersions::isInstalled('levmv/mii-assets')) {
                 $this->error("mii-assets are not installed. `minify` option disabled");
                 $this->minify = false;
             } else {
-                $this->binPackagePath = realpath(InstalledVersions::getInstallPath('levmorozov/mii-assets'));
+                $this->binPackagePath = realpath(InstalledVersions::getInstallPath('levmv/mii-assets'));
                 $this->swcConfig = file_exists(path('root')."/.swcrc")
                     ? path('root')."/.swcrc"
                     : $this->binPackagePath."/.swcrc";

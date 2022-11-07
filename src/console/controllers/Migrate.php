@@ -118,7 +118,7 @@ class Migrate extends Controller
 
             $file = $extension === 'php'
                 ? '<?php
-// ' . \strftime('%F %T') . '
+// ' . \date('r') . '
 
 use mii\db\DB;
 
