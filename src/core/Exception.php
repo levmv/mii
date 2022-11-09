@@ -2,6 +2,8 @@
 
 namespace mii\core;
 
+use ReturnTypeWillChange;
+
 class Exception extends \Exception
 {
 
@@ -13,7 +15,7 @@ class Exception extends \Exception
      * @return  string
      * @uses    Exception::text
      */
-    public function __toString()
+    #[ReturnTypeWillChange] public function __toString()
     {
         return static::text($this);
     }

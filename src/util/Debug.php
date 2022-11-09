@@ -12,6 +12,22 @@ namespace mii\util;
 class Debug
 {
 
+
+    public static function exceptionToText(\Throwable $e): string
+    {
+        $code = $e->getCode();
+
+        return \sprintf(
+            '%s%s: %s ~ %s[%d]',
+            (new \ReflectionClass($e))->getShortName(),
+            $code !== 0 ? "[$code]" : '',
+            \strip_tags($e->getMessage()),
+            self::path($e->getFile()),
+            $e->getLine()
+        );
+    }
+
+
     /**
      * Returns an HTML string of information about a single variable.
      *

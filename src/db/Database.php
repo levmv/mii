@@ -117,7 +117,7 @@ class Database extends Component
      * @throws DatabaseException
      * @noinspection PhpFullyQualifiedNameUsageInspection
      */
-    public function query(?int $type, string $sql, bool|string $asObject = false, array $params = null): ?Result
+    public function query(?int $type, string $sql, ?string $asObject = null, array $params = null): ?Result
     {
         // Make sure the database is connected
         !\is_null($this->conn) || $this->connect();

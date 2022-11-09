@@ -52,7 +52,7 @@ trait SoftDelete
         }
 
         if (!$this->loaded()) {
-            throw new \Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!', [], []);
+            throw new \Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!');
         }
 
         $this->__loaded = false;

@@ -6,7 +6,6 @@ use mii\core\Component;
 
 class Request extends Component
 {
-
     // HTTP Methods
     public const GET = 'GET';
     public const POST = 'POST';
@@ -15,10 +14,7 @@ class Request extends Component
     public const HEAD = 'HEAD';
     public const OPTIONS = 'OPTIONS';
 
-    /**
-     * @var  string  method: GET, POST, PUT, DELETE, HEAD, etc
-     */
-    protected string $_method = 'GET';
+    protected ?string $_method = null;
 
     public const SAME_SITE_LAX = 'Lax';
     public const SAME_SITE_STRICT = 'Strict';
@@ -36,12 +32,12 @@ class Request extends Component
 
     public string $csrf_token_name = 'csrf_token';
 
-    protected $_csrf_token;
+    protected ?string $_csrf_token = null;
 
     /**
      * @var  string  Magic salt to add to the cookie
      */
-    protected $cookie_salt;
+    protected string $cookie_salt;
 
     /**
      * @var  integer  Number of seconds before the cookie expires
@@ -61,30 +57,19 @@ class Request extends Component
     /**
      * @var  boolean  Only transmit cookies over secure connections
      */
-    public bool $cookie_secure = false;
+    public bool $cookie_secure = false; // todo: true by default?
 
     /**
      * @var  boolean  Only transmit cookies over HTTP, disabling Javascript access
      */
     public bool $cookie_httponly = true;
 
-
     public string $cookie_samesite = self::SAME_SITE_LAX;
 
     /**
-     * @var  array   parameters from the route
+     * @var  array parameters from the route
      */
-    public $params = [];
-
-    /**
-     * @var  string  controller to be executed
-     */
-    public string $controller;
-
-    /**
-     * @var  string  action to be executed in the controller
-     */
-    public string $action;
+    public array $params = [];
 
 
     public function init(array $config = []): void
@@ -93,39 +78,41 @@ class Request extends Component
             $this->$key = $value;
         }
 
-        $uri = \parse_url('http://domain.com' . $_SERVER['REQUEST_URI'], \PHP_URL_PATH);
-
-        if (!\is_null(\Mii::$app->base_url) && \str_starts_with($uri, \Mii::$app->base_url)) {
-            // Remove the base URL from the URI
-            $uri = \substr($uri, \strlen(\Mii::$app->base_url));
-        }
-
-        $this->uri($uri);
-
-        if (isset($_SERVER['REQUEST_METHOD'])) {
-            // Use the server request method
-            $this->method($_SERVER['REQUEST_METHOD']);
-        }
-
-        if ($this->_method === 'PUT') {
+      /*  if ($this->_method === 'PUT') {
             \parse_str($this->rawBody(), $_POST);
+        }*/
+    }
+
+
+    public function setUri(string $uri, ?string $baseUrl = null): bool
+    {
+        $uri = \parse_url($uri, \PHP_URL_PATH);
+
+        if($uri === null || $uri === false) {
+            return false;
         }
+
+        if(empty($uri)) {
+            $uri = '/';
+        }
+
+        if (!\is_null($baseUrl) && \str_starts_with($uri, $baseUrl)) {
+            // Remove the base URL from the URI
+            $uri = \substr($uri, \strlen($baseUrl));
+        }
+
+        $this->_uri = $uri;
+
+        return true;
     }
 
 
     /**
-     * Sets and gets the uri from the request.
-     *
-     * @param string|null $uri
      * @return  string
      */
-    public function uri(string $uri = null): string
+    public function uri(): string
     {
-        if ($uri === null) {
-            return empty($this->_uri) ? '/' : $this->_uri;
-        }
-
-        return $this->_uri = $uri;
+        return $this->_uri;
     }
 
     public function getHostname(): string
@@ -164,31 +151,32 @@ class Request extends Component
     }
 
 
+    public function setMethod(string $method): void
+    {
+        $this->_method = \strtoupper($method);
+    }
+
+
     /**
      * Gets or sets the HTTP method. Usually GET, POST, PUT or DELETE in
      * traditional CRUD applications.
      *
-     * @param string $method Method to use for this request
      * @return  mixed
      */
-    public function method($method = null)
+    public function method(): string
     {
-        if ($method === null) {
-            // Act as a getter
-            return $this->_method;
+        if ($this->_method === null) {
+            $this->setMethod($_SERVER['REQUEST_METHOD'] ?? 'GET');
         }
 
-        // Act as a setter
-        $this->_method = \strtoupper($method);
-
-        return $this;
+        return $this->_method;
     }
 
     /**
      * Return if the request is sent via secure channel (https).
      * @return boolean if the request is sent via secure channel (https)
      */
-    public function isSecure()
+    public function isSecure(): bool
     {
         return (isset($_SERVER['HTTPS']) && (\strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1))
             || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && \strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0);
@@ -202,7 +190,7 @@ class Request extends Component
      * @param null $default
      * @return  mixed
      */
-    public function get($key = null, $default = null)
+    public function get($key = null, $default = null): mixed
     {
         if ($key) {
             return $_GET[$key] ?? $default;
@@ -211,17 +199,17 @@ class Request extends Component
         return $_GET;
     }
 
-    public function param($key, $default = null)
+    public function param(string $key, $default = null): mixed
     {
         return $this->params[$key] ?? $default;
     }
 
-    public function input(string $name, $default = null)
+    public function input(string $name, $default = null): mixed
     {
         return $_POST[$name] ?? $_GET[$name] ?? $default;
     }
 
-    public function csrfToken($new = false)
+    public function csrfToken(bool $new = false): string
     {
         if ($this->_csrf_token === null || $new) {
             if ($new || ($this->_csrf_token = $this->loadCsrfToken()) === null) {
@@ -240,7 +228,7 @@ class Request extends Component
         return $this->_csrf_token;
     }
 
-    public function loadCsrfToken()
+    public function loadCsrfToken(): string
     {
         if ($this->enable_csrf_cookie) {
             return $this->getCookie($this->csrf_token_name);
@@ -254,10 +242,10 @@ class Request extends Component
      * Gets HTTP POST parameters of the request.
      *
      * @param mixed  $key Parameter name
-     * @param string $default Default value if parameter does not exist
+     * @param string|null $default Default value if parameter does not exist
      * @return  mixed
      */
-    public function post(string $key = null, $default = null)
+    public function post(string $key = null, string $default = null): mixed
     {
         if ($key === null) {
             return $_POST;
@@ -268,6 +256,7 @@ class Request extends Component
 
     /**
      * Returns whether this is an AJAX (XMLHttpRequest) request.
+     * TODO: do we still need this?
      * @return boolean whether this is an AJAX (XMLHttpRequest) request.
      */
     public function isAjax(): bool
@@ -282,7 +271,7 @@ class Request extends Component
     }
 
 
-    private $_raw_body;
+    private ?string $_raw_body = null;
 
     /**
      * Returns the raw HTTP request body.
@@ -322,11 +311,8 @@ class Request extends Component
      * be returned. If the cookie signature is present, but invalid, the cookie
      * will be deleted.
      *
-     * @param string $key cookie name
-     * @param mixed  $default default value to return
-     * @return  string
      */
-    public function getCookie(string $key, $default = null)
+    public function getCookie(string $key, mixed $default = null): mixed
     {
         if (!isset($_COOKIE[$key])) {
             // The cookie does not exist
@@ -369,7 +355,7 @@ class Request extends Component
      * @param int|null $expiration lifetime in seconds
      * @return  boolean
      */
-    public function setCookie(string $name, string $value, int $expiration = null): bool
+    public function setCookie(string $name, string $value, ?int $expiration = null): bool
     {
         if ($expiration === null) {
             // Use the default expiration
@@ -403,11 +389,6 @@ class Request extends Component
 
     /**
      * Deletes a cookie by making the value null and expiring it.
-     *
-     *     Cookie::delete('theme');
-     *
-     * @param string $name cookie name
-     * @return  boolean
      */
     public function deleteCookie(string $name): bool
     {
@@ -432,10 +413,9 @@ class Request extends Component
         // Require a valid salt
         if (!$this->cookie_salt) {
             throw new \InvalidArgumentException(
-                'A valid cookie salt is required. Please set Request::$cookie_salt.'
+                'A valid cookie salt is required. Please set components.request.cookie_salt.'
             );
         }
-
         return \substr(\mii\util\Text::b64Encode(\md5($name . $value . $this->cookie_salt, true)), 0, 20);
     }
 }

@@ -12,7 +12,7 @@ namespace mii\db;
  */
 trait AutoDates
 {
-    protected function innerBeforeChange()
+    protected function innerBeforeChange(): void
     {
         $this->updated = $time = \time();
 

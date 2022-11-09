@@ -2,9 +2,9 @@
 
 namespace mii\web;
 
-class HttpException extends Exception
+class HttpException extends \RuntimeException
 {
-    public mixed $status_code = 500;
+    private int $statusCode;
 
     public static array $messages = [
         400 => 'Bad Request',
@@ -15,11 +15,14 @@ class HttpException extends Exception
         501 => 'Not Implemented',
     ];
 
-    public function __construct($status = 500, $message = '', $code = 0, \Exception $previous = null)
+    public function __construct($status = 500, $message = '', $code = 0, \Throwable $previous = null)
     {
-        $this->status_code = $status;
-
+        $this->statusCode = $status;
         parent::__construct($message, $code, $previous);
+    }
+
+    public function getStatusCode(): int {
+        return $this->statusCode;
     }
 
     /**
@@ -27,6 +30,6 @@ class HttpException extends Exception
      */
     public function getName(): string
     {
-        return self::$messages[$this->status_code] ?? 'Error';
+        return self::$messages[$this->statusCode] ?? 'Error';
     }
 }

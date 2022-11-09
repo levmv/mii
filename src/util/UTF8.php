@@ -21,11 +21,6 @@ class UTF8
     /**
      * Tests whether a string contains only 7-bit ASCII bytes. This is used to
      * determine when to use native functions or UTF-8 functions.
-     *
-     *     $ascii = UTF8::is_ascii($str);
-     *
-     * @param mixed $str string or array of strings to check
-     * @return  boolean
      */
     public static function isAscii(string $str): bool
     {
@@ -34,26 +29,16 @@ class UTF8
 
     /**
      * Strips out device control codes in the ASCII range.
-     *
-     *     $str = UTF8::strip_ascii_ctrl($str);
-     *
-     * @param string $str string to clean
-     * @return  string
      */
-    public static function stripAsciiCtrl(string $str)
+    public static function stripAsciiCtrl(string $str): string
     {
         return \preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $str);
     }
 
     /**
      * Strips out all non-7bit ASCII bytes.
-     *
-     *     $str = UTF8::strip_non_ascii($str);
-     *
-     * @param string $str string to clean
-     * @return  string
      */
-    public static function stripNonAscii(string $str)
+    public static function stripNonAscii(string $str): string
     {
         return \preg_replace('/[^\x00-\x7F]+/S', '', $str);
     }

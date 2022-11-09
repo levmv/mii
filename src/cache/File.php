@@ -10,7 +10,7 @@ class File extends Cache
 
     public int $directory_level = 1;
 
-    public int $chmode = 0775;
+    public ?int $chmode = 0775;
 
 
     public function init(array $config = []): void
@@ -30,7 +30,7 @@ class File extends Cache
      * @param string $default default value to return if cache miss
      * @return  mixed
      */
-    public function get(string $id, $default = null): mixed
+    public function get(string $id, mixed $default = null): mixed
     {
         $filename = $this->cacheFile($id);
 
@@ -57,7 +57,7 @@ class File extends Cache
      * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-    public function set(string $id, $data, int $lifetime = null): bool
+    public function set(string $id, string $data, int $lifetime = null): bool
     {
         if ($lifetime === null) {
             $lifetime = $this->default_expire;

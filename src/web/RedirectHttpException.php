@@ -2,7 +2,7 @@
 
 namespace mii\web;
 
-class RedirectHttpException extends \RuntimeException
+class RedirectHttpException extends HttpException
 {
     public string $url = '';
 
@@ -10,6 +10,6 @@ class RedirectHttpException extends \RuntimeException
     {
         $this->url = $url;
 
-        parent::__construct();
+        parent::__construct(302);
     }
 }

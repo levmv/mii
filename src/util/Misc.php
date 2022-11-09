@@ -33,7 +33,7 @@ class Misc
     }
 
 
-    public static function mkdir($path, $mode = 0775, $recursive = true)
+    public static function mkdir($path, $mode = 0775, $recursive = true): bool
     {
         $path = \Mii::resolve($path);
 
@@ -51,13 +51,13 @@ class Misc
             }
         } catch (\Exception $e) {
             if (!\is_dir($path)) {
-                throw new Exception("Failed to create directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
+                throw new \RuntimeException("Failed to create directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
             }
         }
         try {
             return \chmod($path, $mode);
         } catch (\Exception $e) {
-            throw new Exception("Failed to change permissions for directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
+            throw new \RuntimeException("Failed to change permissions for directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
         }
     }
 }

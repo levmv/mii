@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace mii\core;
 
+use mii\util\Debug;
+
 class ErrorHandler extends Component
 {
     public ?\Throwable $exception = null;
@@ -10,14 +12,14 @@ class ErrorHandler extends Component
     /**
      * @var integer the size of the reserved memory. A portion of memory is pre-allocated so that
      * when an out-of-memory issue occurs, the error handler is able to handle the error with
-     * the help of this reserved memory. If you set this value to be 0, no memory will be reserved.
+     * the help of this reserved memory. By default, no memory will be reserved.
      */
-    public int $memory_reserve_size = 0;
+    public int $memoryReserveSize = 0;
 
     /**
      * @var string Used to reserve memory for fatal error handler.
      */
-    private string $_memory_reserve;
+    private string $memoryReserve;
 
     public function register(): void
     {
@@ -25,8 +27,8 @@ class ErrorHandler extends Component
         \set_exception_handler([$this, 'handleException']);
         \set_error_handler([$this, 'handleError']);
 
-        if ($this->memory_reserve_size > 0) {
-            $this->_memory_reserve = \str_repeat('x', $this->memory_reserve_size);
+        if ($this->memoryReserveSize > 0) {
+            $this->memoryReserve = \str_repeat('x', $this->memoryReserveSize);
         }
         \register_shutdown_function([$this, 'handleFatalError']);
     }
@@ -75,7 +77,7 @@ class ErrorHandler extends Component
     public function handleError($code, $error, $file, $line): bool
     {
         if (\error_reporting() & $code) {
-            unset($this->_memory_reserve);
+            unset($this->memoryReserve);
 
             // This error is not suppressed by current error reporting settings
             // Convert the error into an ErrorException
@@ -88,7 +90,7 @@ class ErrorHandler extends Component
 
     public function handleFatalError()
     {
-        unset($this->_memory_reserve);
+        unset($this->memoryReserve);
 
         // is it fatal ?
         if (null !== ($error = \error_get_last()) && \in_array($error['type'], [\E_ERROR, \E_PARSE, \E_CORE_ERROR, \E_CORE_WARNING, \E_COMPILE_ERROR, \E_COMPILE_WARNING], true)) {
@@ -123,10 +125,10 @@ class ErrorHandler extends Component
     }
 
 
-    public static function exceptionToText($e): string
+    public static function exceptionToText(\Throwable $e): string
     {
         if (\config('debug')) {
-            return (string) $e;
+            return Debug::exceptionToText($e);
         }
 
         if ($e instanceof UserException) {

@@ -18,8 +18,6 @@ abstract class App
 
     public string $language = 'ru';
 
-    public ?string $timezone = null;
-
     public $controller;
 
     public array $_config;

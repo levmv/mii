@@ -19,7 +19,6 @@ class ACL
      */
     private array $_rules = [];
 
-
     /**
      * Add "allow" access to a role or roles.
      *
@@ -67,7 +66,7 @@ class ACL
      * @param mixed  $role single role or array of roles
      * @param string $action
      */
-    public function addRule(bool $access, $role, $action): void
+    public function addRule(bool $access, mixed $role, mixed $action): void
     {
         $roles = (array) $role;
 
@@ -86,7 +85,7 @@ class ACL
      * @param string $action
      * @return bool
      */
-    public function check($role, $action = '*'): bool
+    public function check(mixed $role, string $action = '*'): bool
     {
         if (\is_array($role)) {
             foreach ($role as $r) {

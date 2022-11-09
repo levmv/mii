@@ -35,7 +35,7 @@ class Controller
         $this->_autogenHelp();
     }
 
-    protected function _autogenHelp()
+    protected function _autogenHelp(): void
     {
         $ref = new \ReflectionClass($this);
 
@@ -72,7 +72,7 @@ class Controller
         $this->stdout("\n\n");
     }
 
-    protected function execute_action($action, $params)
+    protected function executeAction($action, $params)
     {
         try {
             $method = new \ReflectionMethod($this, $action);
@@ -156,12 +156,12 @@ class Controller
      * @return  int
      * @throws  Exception
      */
-    public function _execute()
+    public function _execute(): int
     {
         $this->before();
 
         if ($this->auto_params) {
-            $this->response_code = (int)$this->execute_action($this->request->action, $this->request->params);
+            $this->response_code = (int)$this->executeAction($this->request->action, $this->request->params);
         } else {
             $this->response_code = (int)$this->{$this->request->action}($this->request->params);
         }
@@ -187,7 +187,7 @@ class Controller
         return Console::stdin();
     }
 
-    protected function confirm($message, $default = false)
+    protected function confirm($message, $default = false): bool
     {
         if ($this->interactive) {
             return Console::confirm($message, $default);
@@ -196,7 +196,7 @@ class Controller
         return true;
     }
 
-    protected function info($msg, $options = [])
+    protected function info($msg, $options = []): void
     {
         if (!empty($options)) {
             $msg = \strtr((string)$msg, $options);
@@ -205,14 +205,14 @@ class Controller
         \Mii::info($msg, 'console');
     }
 
-    protected function warning($msg, $options = [])
+    protected function warning($msg, $options = []): void
     {
         $msg = \strtr((string)$msg, $options);
         Console::stdout($msg . "\n", Console::FG_PURPLE);
         \Mii::warning($msg, 'console');
     }
 
-    protected function error($msg, $options = [])
+    protected function error($msg, $options = []): void
     {
         $msg = \strtr((string)$msg, $options);
         Console::stderr($msg . "\n", Console::FG_GREY, Console::BG_RED);

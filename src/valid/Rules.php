@@ -102,10 +102,8 @@ class Rules
     public static function length($value, int|array $length) : bool
     {
         if (\is_array($length)) {
-            foreach ($length as $strlen) {
-                if (\mb_strlen($value) === $strlen) {
-                    return true;
-                }
+            if (in_array(\mb_strlen($value), $length, true)) {
+                return true;
             }
             return false;
         }

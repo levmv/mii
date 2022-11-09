@@ -1,11 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace miit\db;
+namespace miit\util;
 
-use mii\core\ACL;
-use mii\db\Query;
 use mii\util\Url;
-use mii\web\Request;
 use miit\TestCase;
 
 class UrlTest extends TestCase
@@ -52,13 +49,13 @@ class UrlTest extends TestCase
 
     public function testCurrent()
     {
-        \Mii::$app->request->uri('');
+        \Mii::$app->request->setUri('');
         $this->assertEquals('/', Url::current());
 
-        \Mii::$app->request->uri('/');
+        \Mii::$app->request->setUri('/');
         $this->assertEquals('/', Url::current());
 
-        \Mii::$app->request->uri('/test');
+        \Mii::$app->request->setUri('/test');
         $this->assertEquals('/test', Url::current());
     }
 }

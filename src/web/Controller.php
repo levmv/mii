@@ -27,6 +27,10 @@ class Controller
         $this->response->content($content);
     }
 
+    /**
+     * @throws InvalidRouteException
+     * @throws BadRequestHttpException
+     */
     public function execute(string $action, $params): void
     {
         if (!\method_exists($this, $action)) {

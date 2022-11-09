@@ -5,6 +5,7 @@ namespace mii\console;
 use mii\core\Component;
 use mii\core\Exception;
 use mii\util\Console;
+use mii\util\Debug;
 
 class Request extends Component
 {
@@ -107,6 +108,9 @@ class Request extends Component
         }
 
         // Create a new instance of the controller
+        /**
+         * @var Controller $controller
+         */
         $controller = new $controller_class;
         $controller->request = $this;
 
@@ -162,10 +166,9 @@ class Request extends Component
             $result = [
                 'command' => $command,
                 'desc' => $doc,
-                'actions' => [],
+                'actions' => static::getControllerActions($reflection)
             ];
 
-            $result['actions'] = static::getControllerActions($reflection);
             foreach ($result['actions'] as ['name' => $name]) {
                 $max = \max($max, \mb_strlen($name));
             }
@@ -237,7 +240,7 @@ class Request extends Component
 
             return $paths;
         } catch (\Throwable $t) {
-            Console::stderr(Exception::text($t));
+            Console::stderr(Debug::exceptionToText($t));
             return [];
         }
     }

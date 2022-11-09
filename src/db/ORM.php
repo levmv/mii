@@ -345,7 +345,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         $this->attributes = $model->attributes;
     }
 
-    protected function innerBeforeChange()
+    protected function innerBeforeChange(): void
     {
     }
 

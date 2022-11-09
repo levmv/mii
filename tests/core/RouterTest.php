@@ -36,6 +36,7 @@ class RouterTest extends TestCase
                 ],
                 [
                     '/test' => ['controller' => 'app\\test\\Test', 'action' => 'index'],
+                    '/test/' => ['controller' => 'app\\test\\Test', 'action' => 'index'],
                     '/' => ['controller' => 'app\\test\\Test', 'action' => 'index'],
                     'test' => ['controller' => 'app\\test\\Test', 'action' => 'index'],
                     'test/index' => null,//['controller' => 'app\\test\\Test', 'action' => 'index'],

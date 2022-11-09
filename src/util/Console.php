@@ -92,7 +92,7 @@ class Console
      * @param mixed $stream
      * @return boolean true if the stream supports ANSI colors, otherwise false.
      */
-    public static function streamSupportsAnsiColors($stream)
+    public static function streamSupportsAnsiColors($stream): bool
     {
         return \DIRECTORY_SEPARATOR === '\\'
             ? \getenv('ANSICON') !== false || \getenv('ConEmuANSI') === 'ON'
@@ -186,9 +186,9 @@ class Console
      *
      * @param string $message to print out before waiting for user input
      * @param boolean $default this value is returned if no selection is made.
-     * @return bool|null whether user confirmed
+     * @return bool whether user confirmed
      */
-    public static function confirm(string $message, $default = false): ?bool
+    public static function confirm(string $message, bool $default = false): bool
     {
         while (true) {
             static::stdout($message . ' (yes|no) [' . ($default ? 'yes' : 'no') . ']:');

@@ -14,7 +14,7 @@ class Router extends Component
     protected const REGEX_SEGMENT = '[^/.,;?\n]++';
 
     // What must be escaped in the route regex
-    protected const REGEX_ESCAPE = '[.\\+*?[^\\]$<>=!|]';
+    protected const REGEX_ESCAPE = '[.+*?[^\\]$<>=!|]';
 
     public const R_COMPILED = 0;
     public const R_PATTERN = 1;
@@ -45,7 +45,7 @@ class Router extends Component
 
     protected array $_named_routes;
 
-    protected $_current_route;
+    protected int $_current_route;
 
 
     public function init(array $config = []): void
@@ -170,7 +170,7 @@ class Router extends Component
     public function match(string $uri)
     {
         if ($uri !== '/') {
-            $uri = \trim($uri, '//');
+            $uri = \trim($uri, '/');
         }
 
         foreach ($this->_routes_list as $index => $route) {
@@ -252,16 +252,10 @@ class Router extends Component
     }
 
 
-    public function current_route()
-    {
-        return $this->_routes_list[$this->_current_route];
-    }
-
-
     public function url(string $name, array $params = []): string
     {
         if (!isset($this->_named_routes[$name])) {
-            throw new InvalidRouteException('Route :name doesnt exist', [':name' => $name]);
+            throw new InvalidRouteException("Route $name doesnt exist");
         }
 
         $route = $this->_routes_list[$this->_named_routes[$name]];
@@ -339,9 +333,4 @@ class Router extends Component
         return Url::site($uri);
     }
 
-
-    public function getCompiledData(): array
-    {
-        return [$this->_routes_list, $this->_named_routes];
-    }
 }

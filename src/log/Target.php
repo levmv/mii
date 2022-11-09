@@ -3,7 +3,7 @@
 namespace mii\log;
 
 use mii\core\Component;
-use mii\core\Exception;
+use mii\util\Debug;
 use mii\web\App;
 use mii\web\Request;
 
@@ -90,13 +90,13 @@ abstract class Target extends Component
                         );
                     }
 
-                    $extended .= "\n" . \mii\util\Debug::shortTextTrace($msg->getTrace());
+                    $extended .= "\n" . Debug::shortTextTrace($msg->getTrace());
                 }
 
                 if ($msg instanceof \mii\web\NotFoundHttpException) {
                     $msg = static::shortExceptionText($msg);
                 } else {
-                    $msg = Exception::text($msg);
+                    $msg = Debug::exceptionToText($msg);
                 }
             } else {
                 $msg = \var_export($msg, true);

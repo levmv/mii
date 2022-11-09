@@ -6,7 +6,7 @@ use Mii;
 
 class NotFoundHttpException extends HttpException
 {
-    public function __construct($message = '', \Exception $previous = null)
+    public function __construct(string $message = '', \Throwable $previous = null)
     {
         $uri = Mii::$app->request->uri();
         $message = $message ? "$uri [$message]" : $uri;

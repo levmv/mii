@@ -2,6 +2,6 @@
 
 namespace mii\core;
 
-class InvalidRouteException extends Exception
+class InvalidRouteException extends \RuntimeException
 {
 }

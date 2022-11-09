@@ -21,10 +21,7 @@ class SelectQuery
     // Query type
     protected int $_type = Database::SELECT;
 
-    // Return results as associative arrays or objects
-    protected bool $_as_array = true;
-
-    protected ?string $_model_class = null;
+    protected ?string $modelClass = null;
 
     // SELECT ...
     protected array $_select = [];
@@ -76,9 +73,7 @@ class SelectQuery
      */
     public function __construct(string $classname = null)
     {
-        if ($classname) {
-            $this->asModel($classname);
-        }
+        $this->asModel($classname);
     }
 
     /**
@@ -94,7 +89,10 @@ class SelectQuery
 
     public function asArray(): self
     {
-        $this->_as_array = true;
+        if($this->modelClass) {
+            $this->_from[] = $this->modelClass::table();
+            $this->modelClass = null;
+        }
 
         return $this;
     }
@@ -102,14 +100,12 @@ class SelectQuery
 
     /**
      * Returns results as objects
-     * @param string $class classname
+     * @param string|null $class classname
      * @return  $this
      */
-    public function asModel(string $class): self
+    public function asModel(?string $class): self
     {
-        $this->_model_class = $class;
-        $this->_as_array = false;
-
+        $this->modelClass = $class;
         return $this;
     }
 
@@ -545,9 +541,9 @@ class SelectQuery
             : 'SELECT ';
 
         if (empty($this->_from)) {
-            \assert(!empty($this->_model_class), "You must specify 'from' table or set model class");
+            \assert(!empty($this->modelClass), "You must specify 'from' table or set model class");
             /** @noinspection PhpUndefinedMethodInspection */
-            $table = $this->_model_class::table();
+            $table = $this->modelClass::table();
             $table_aliased = false;
             $table_q = $this->db->quoteTable($table);
         } else {
@@ -861,7 +857,7 @@ class SelectQuery
         $sql = $this->compile();
 
         // Execute the query
-        $result = $this->db->query($this->_type, $sql, $this->_as_array ? false : $this->_model_class);
+        $result = $this->db->query($this->_type, $sql, $this->modelClass);
 
         if (!\is_null($this->_index_by)) {
             $result->indexBy($this->_index_by);
@@ -904,8 +900,8 @@ class SelectQuery
         }
 
         $this->_type = Database::SELECT;
-        $as_array = $this->_as_array;
-        $this->_as_array = true;
+        $_model_class = $this->modelClass;
+        $this->modelClass = null;
         $this->_limit = null;
         $this->_offset = null;
 
@@ -917,7 +913,7 @@ class SelectQuery
         $this->_select = $old_select;
         $this->_select_any = $old_any;
         $this->_order_by = $old_order;
-        $this->_as_array = $as_array;
+        $this->modelClass = $_model_class;
         $this->_limit = $old_limit;
         $this->_offset = $old_offset;
 
@@ -953,7 +949,7 @@ class SelectQuery
         $result = $this->one();
 
         if ($result === null) {
-            throw ((new ModelNotFoundException())->setModel((string)$this->_model_class));
+            throw ((new ModelNotFoundException())->setModel((string)$this->modelClass));
         }
         return $result;
     }

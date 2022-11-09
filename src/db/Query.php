@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace mii\db;
 
 use mii\valid\Rules;
-use mii\web\Exception;
 use mii\web\Pagination;
 
 /**
@@ -289,6 +288,6 @@ class Query extends SelectQuery
 
     private function getTable(): string
     {
-        return $this->db->quoteTable($this->_table ?? $this->_model_class::table());
+        return $this->db->quoteTable($this->_table ?? $this->modelClass::table());
     }
 }

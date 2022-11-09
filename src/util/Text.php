@@ -76,6 +76,7 @@ class Text
 
     /**
      * Generates a random string of a given type and length.
+     * Obviously, not recommended for serious tasks!
      *
      * @param string|null $type a type of pool, or a string of characters to use as the pool
      * @param integer $length length of string to return
@@ -261,7 +262,7 @@ class Text
      * @param mixed $array
      * @return mixed
      */
-    public static function decl(int $number, array $array)
+    public static function decl(int $number, array $array): mixed
     {
         $cases = [2, 0, 1, 1, 1, 2];
 

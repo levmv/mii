@@ -14,12 +14,8 @@ abstract class Cache extends Component
 
     /**
      * Retrieve a cached value entry by id.
-     *
-     * @param string $id id of cache to entry
-     * @param string $default default value to return if cache miss
-     * @return  mixed
      */
-    abstract public function get(string $id, $default = null): mixed;
+    abstract public function get(string $id, mixed $default = null): mixed;
 
     /**
      * Set a value to cache with id and lifetime
@@ -29,13 +25,10 @@ abstract class Cache extends Component
      * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-    abstract public function set(string $id, $data, int $lifetime = null): bool;
+    abstract public function set(string $id, string $data, int $lifetime = null): bool;
 
     /**
      * Delete a cache entry based on id
-     *
-     * @param string $id id to remove from cache
-     * @return  boolean
      */
     abstract public function delete(string $id): bool;
 
@@ -45,16 +38,11 @@ abstract class Cache extends Component
      * Beware of using this method when
      * using shared memory cache systems, as it will wipe every
      * entry within the system for all clients.
-     *
-     * @return  boolean
      */
     abstract public function deleteAll(): bool;
 
     /**
      * Replaces troublesome characters with underscores.
-     *
-     * @param string $id id of cache to sanitize
-     * @return  string
      */
     protected function sanitizeId(string $id): string
     {

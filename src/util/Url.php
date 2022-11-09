@@ -9,21 +9,20 @@ class Url
 
     private static bool $inited = false;
     private static string $uri = '';
-    private static array $uri_pieces = [];
-    private static int $uri_size;
+    private static array $uriPieces = [];
+    private static int $uriSize;
 
     public static function status(string $link): int
     {
         if (!self::$inited) {
             self::$uri = \trim(\Mii::$app->request->uri(), '/');
-            self::$uri_pieces = \explode('/', self::$uri);
-            self::$uri_size = \strlen(self::$uri);
+            self::$uriPieces = \explode('/', self::$uri);
+            self::$uriSize = \strlen(self::$uri);
         }
 
         $link = \trim($link, '/');
-        $link_size = \strlen($link);
 
-        if ($link_size > self::$uri_size) {
+        if (\strlen($link) > self::$uriSize) {
             return 0;
         }
 
@@ -33,11 +32,10 @@ class Url
         }
 
         // Checks if it is part of active path
-        $link_pieces = \explode('/', $link);
+        $parts = \explode('/', $link);
 
-        for ($i = 0, $iMax = \count($link_pieces); $i < $iMax; $i++) {
-            if ((isset(self::$uri_pieces[$i]) && self::$uri_pieces[$i] !== $link_pieces[$i])
-                || empty(self::$uri_pieces[$i])) {
+        for ($i = 0, $iMax = \count($parts); $i < $iMax; $i++) {
+            if ((isset(self::$uriPieces[$i]) && self::$uriPieces[$i] !== $parts[$i]) || empty(self::$uriPieces[$i])) {
                 return 0;
             }
         }
@@ -73,7 +71,7 @@ class Url
      * @param mixed $protocol Protocol string or boolean
      * @return  string
      */
-    public static function base($protocol = null): string
+    public static function base(mixed $protocol = null): string
     {
         $base = \Mii::$app->base_url ?? '';
         if ($protocol === null) {
@@ -123,7 +121,7 @@ class Url
      * @param array $matches Array of matches from preg_replace_callback()
      * @return string          Encoded string
      */
-    protected static function _rawurlencode_callback(array $matches)
+    protected static function _rawurlencode_callback(array $matches): string
     {
         return \rawurlencode($matches[0]);
     }
@@ -141,12 +139,12 @@ class Url
      * [!!] Parameters with a NULL value are left out.
      *
      * @param array|null $params Array of GET parameters
-     * @param null $use_get Include current request GET parameters
+     * @param bool $useGet Include current request GET parameters
      * @return  string
      */
-    public static function query(array $params = null, $use_get = null)
+    public static function query(array $params = null, bool $useGet = false): string
     {
-        if ($use_get) {
+        if ($useGet) {
             if ($params === null) {
                 // Use only the current parameters
                 $params = $_GET;

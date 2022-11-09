@@ -13,10 +13,10 @@ class Expression
 {
 
     // Unquoted parameters
-    protected $params;
+    protected array $params;
 
     // Raw expression string
-    protected $value;
+    protected string $value;
 
     /**
      * Sets the expression string.
@@ -53,9 +53,8 @@ class Expression
      *
      * @param string $param parameter key to replace
      * @param mixed  $value value to use
-     * @return  $this
      */
-    public function param(string $param, mixed $value)
+    public function param(string $param, mixed $value): self
     {
         $this->params[$param] = $value;
 
@@ -93,7 +92,6 @@ class Expression
      *     echo $expression;
      *
      * @return  string
-     * @uses    Database_Expression::value
      */
     public function __toString()
     {
@@ -103,14 +101,10 @@ class Expression
     /**
      * Compile the SQL expression and return it. Replaces any parameters with
      * their given values.
-     *
-     * @param mixed    Database instance or name of instance
-     * @return  string
      */
     public function compile(Database $db = null): string
     {
         if ($db === null) {
-            // Get the database instance
             $db = \Mii::$app->db;
         }
 

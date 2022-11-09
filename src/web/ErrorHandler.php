@@ -10,7 +10,7 @@ use mii\util\Debug;
 
 class ErrorHandler extends \mii\core\ErrorHandler
 {
-    public $route;
+    public ?string $route = null;
 
     public function prepareException(\Throwable $e): \Throwable
     {
@@ -39,14 +39,14 @@ class ErrorHandler extends \mii\core\ErrorHandler
         }
 
         if ($exception instanceof HttpException) {
-            $response->status($exception->status_code);
+            $response->status($exception->getStatusCode());
         } else {
             $response->status(500);
         }
 
         if ($response->format === Response::FORMAT_HTML) {
             if ($this->route && !\config('debug')) {
-                \Mii::$app->request->uri($this->route);
+                \Mii::$app->request->setUri($this->route);
                 try {
                     \Mii::$app->run();
                     return;
@@ -92,7 +92,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         }
 
         if ($e instanceof HttpException) {
-            $arr['status'] = $e->status_code;
+            $arr['status'] = $e->getStatusCode();
         }
 
         if (config('debug')) {

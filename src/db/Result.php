@@ -17,7 +17,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
     protected int $_current_row = 0;
 
     // Return rows as an object or associative array
-    protected $_as_object;
+    protected ?string $asObject;
 
     // Parameters for __construct when using object results
     protected ?array $_object_params = null;
@@ -35,13 +35,13 @@ class Result implements \Countable, \Iterator, \ArrayAccess
      * @param mixed $asObject
      * @param array|null $params
      */
-    public function __construct(\mysqli_result $result, bool|string $asObject = false, array $params = null)
+    public function __construct(\mysqli_result $result, ?string $asObject = null, array $params = null)
     {
         // Store the result locally
         $this->_result = $result;
 
         // Results as objects or associative arrays
-        $this->_as_object = $asObject;
+        $this->asObject = $asObject;
 
         if ($params !== null) {
             // Object constructor params
@@ -86,9 +86,9 @@ class Result implements \Countable, \Iterator, \ArrayAccess
         // Increment internal row for optimization assuming rows are fetched in order
         $this->_internal_row++;
 
-        if ($this->_as_object) {
+        if ($this->asObject !== null) {
             // Return an object of given class name
-            return $this->_result->fetch_object($this->_as_object, !\is_null($this->_object_params) ?: [null, true]);
+            return $this->_result->fetch_object($this->asObject, !\is_null($this->_object_params) ?: [null, true]);
         }
 
         // Return an array of the row
@@ -98,12 +98,12 @@ class Result implements \Countable, \Iterator, \ArrayAccess
     public function all(): array
     {
         if ($this->_index_by) {
-            return $this->_as_object
+            return $this->asObject !== null
                 ? $this->index($this)
                 : $this->index($this->_result->fetch_all(\MYSQLI_ASSOC));
         }
 
-        return $this->_as_object
+        return $this->asObject !== null
             ? $this->toArray()
             : $this->_result->fetch_all(\MYSQLI_ASSOC);
     }
@@ -126,7 +126,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
         $indexBy = $this->_index_by;
         $this->_index_by = null;
 
-        if ($this->_as_object) {
+        if ($this->asObject !== null) {
             foreach ($rows as $row) {
                 $result[$row->$indexBy] = $row;
             }
@@ -156,7 +156,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
             }
         }
 
-        if ($this->_as_object) {
+        if ($this->asObject !== null) {
             foreach ($this as $row) {
                 $rows[$row->$key] = $row->$display;
             }
@@ -221,7 +221,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
     {
         $row = $this->current();
 
-        if ($this->_as_object) {
+        if ($this->asObject !== null) {
             if (isset($row->$name)) {
                 return $row->$name;
             }
@@ -236,7 +236,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
     {
         $result = [];
 
-        if ($this->_as_object) {
+        if ($this->asObject !== null) {
             foreach ($this as $row) {
                 $result[] = $row->$name;
             }

@@ -12,12 +12,7 @@ class Arr
      */
     public static function isAssoc(array $array) : bool
     {
-        // Keys of the array
-        $keys = \array_keys($array);
-
-        // If the array keys of the keys match the keys, then the array must
-        // not be associative (e.g. the keys array looked like {0:0, 1:1...}).
-        return \array_keys($keys) !== $keys;
+        return !\array_is_list($array);
     }
 
     /**
@@ -29,7 +24,7 @@ class Arr
      * @param string $delimiter key path delimiter
      * @return  mixed
      */
-    public static function path($array, $path, $default = null, string $delimiter = '.')
+    public static function path(mixed $array, mixed $path, mixed $default = null, string $delimiter = '.'): mixed
     {
         if (!\is_array($array) && !\is_object($array) && !($array instanceof \Traversable)) {
             // This is not an array!
@@ -96,7 +91,7 @@ class Arr
         // Split the keys by delimiter
         $keys = \explode($delimiter, $path);
 
-        // Set current $array to inner-most array path
+        // Set current $array to innermost array path
         while (\count($keys) > 1) {
             $key = \array_shift($keys);
 
@@ -157,45 +152,24 @@ class Arr
      * @param array $array2,... array to merge
      * @return  array
      */
-    public static function merge($array1, $array2) : array
+    public static function merge(array $array1, array ...$arrays) : array
     {
-        if (static::isAssoc($array2)) {
-            foreach ($array2 as $key => $value) {
-                if (\is_array($value)
-                    && isset($array1[$key])
-                    && \is_array($array1[$key])
-                ) {
-                    $array1[$key] = static::merge($array1[$key], $value);
-                } else {
-                    $array1[$key] = $value;
-                }
-            }
-        } else {
-            foreach ($array2 as $value) {
-                if (!\in_array($value, $array1, true)) {
-                    $array1[] = $value;
-                }
-            }
-        }
-
-        if (\func_num_args() > 2) {
-            foreach (\array_slice(\func_get_args(), 2) as $array2) {
-                if (static::isAssoc($array2)) {
-                    foreach ($array2 as $key => $value) {
-                        if (\is_array($value)
-                            && isset($array1[$key])
-                            && \is_array($array1[$key])
-                        ) {
-                            $array1[$key] = static::merge($array1[$key], $value);
-                        } else {
-                            $array1[$key] = $value;
-                        }
+        foreach ($arrays as $array2) {
+            if (static::isAssoc($array2)) {
+                foreach ($array2 as $key => $value) {
+                    if (\is_array($value)
+                        && isset($array1[$key])
+                        && \is_array($array1[$key])
+                    ) {
+                        $array1[$key] = static::merge($array1[$key], $value);
+                    } else {
+                        $array1[$key] = $value;
                     }
-                } else {
-                    foreach ($array2 as $value) {
-                        if (!\in_array($value, $array1, true)) {
-                            $array1[] = $value;
-                        }
+                }
+            } else {
+                foreach ($array2 as $value) {
+                    if (!\in_array($value, $array1, true)) {
+                        $array1[] = $value;
                     }
                 }
             }
@@ -218,20 +192,14 @@ class Arr
      *     array('name' => 'jack', 'mood' => 'happy', 'food' => 'tacos')
      *
      * @param array $array1 master array
-     * @param array $array2 input arrays that will overwrite existing values
+     * @param array ...$arrays
      * @return  array
      */
-    public static function overwrite($array1, $array2) : array
+    public static function overwrite(array $array1, array ...$arrays) : array
     {
-        foreach (\array_intersect_key($array2, $array1) as $key => $value) {
-            $array1[$key] = $value;
-        }
-
-        if (\func_num_args() > 2) {
-            foreach (\array_slice(\func_get_args(), 2) as $array2) {
-                foreach (\array_intersect_key($array2, $array1) as $key => $value) {
-                    $array1[$key] = $value;
-                }
+        foreach ($arrays as $array2) {
+            foreach (\array_intersect_key($array2, $array1) as $key => $value) {
+                $array1[$key] = $value;
             }
         }
 
@@ -255,7 +223,7 @@ class Arr
      * @param array $array array to flatten
      * @return  array
      */
-    public static function flatten($array)
+    public static function flatten($array): array
     {
         $is_assoc = static::isAssoc($array);
 

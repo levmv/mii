@@ -8,7 +8,7 @@ use mii\core\Router;
 /**
  * Class App
  *
- * @property Session       $session The session component.
+ * @property Session       $session
  * @property Request       $request
  * @property Blocks        $blocks
  * @property Router        $router
@@ -23,30 +23,21 @@ class App extends \mii\core\App
      */
     public function run(): void
     {
-        $params = $this->router->match($this->request->uri());
-
-        if ($params === false) {
+        if(!$this->request->setUri($_SERVER['REQUEST_URI'], $this->base_url)) { // TODO: not the best place for this?
             throw new InvalidRouteException();
         }
 
-        $this->request->controller = $controller_name = $params['controller'];
+        if (false === ($params = $this->router->match($this->request->uri()))) {
+            throw new InvalidRouteException();
+        }
 
-        $this->request->action = $params['action'];
-
-        // These are accessible as public vars and can be overloaded
-        unset($params['controller'], $params['action']);
-
-        // Params cannot be changed once matched
         $this->request->params = $params;
 
-        // Create a new instance of the controller
-        $this->controller = new $controller_name;
-
-        // Save links to request and response just for usability
-        $this->controller->request = $this->request;
-        $this->controller->response = $this->response;
+        $controller = new $params['controller'];
+        $controller->request = $this->request;
+        $controller->response = $this->response;
         try {
-            $this->controller->execute($this->request->action, $params);
+            $controller->execute($params['action'], $params);
         } catch (RedirectHttpException $e) {
             $this->response->redirect($e->url);
         }

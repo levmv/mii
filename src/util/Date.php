@@ -41,67 +41,6 @@ class Date
     }
 
 
-    /**
-     * @deprecated
-     */
-    public static function fuzzy(int $timestamp, int $local_timestamp = null): string
-    {
-        $local_timestamp = $local_timestamp ?? \time();
-
-        // Determine the difference in seconds
-        $offset = \abs($local_timestamp - $timestamp);
-
-        if ($timestamp > $local_timestamp) {
-            // this is future
-            return static::fuzzyFuture($timestamp, $offset);
-        }
-
-        if ($offset < 61) {
-            return 'только что';
-        } elseif ($offset < 60 * 55) {
-            $minutes = (int) \round($offset / 60);
-            return $minutes . ' ' . Text::decl($minutes, ['минуту', 'минуты', 'минут']) . ' назад';
-        } elseif ($offset < 3600 + 60 * 15) {
-            return 'час назад';
-        } elseif ($offset < (3600 * 2)) {
-            $span = 'два часа назад';
-        } else {
-            $span = self::nice($timestamp);
-        }
-
-        return $span;
-    }
-
-    private static function fuzzyFuture(int $timestamp, int $offset): string
-    {
-        if ($offset < 60) {
-            return 'через мгновение';
-        } elseif ($offset < 60 * 55) {
-            $minutes = (int) \round($offset / 60);
-            return "через $minutes " . Text::decl($minutes, ['минуту', 'минуты', 'минут']);
-        } elseif ($offset < 60 * 65) {
-            return 'через час';
-        }
-
-        static::$today ??= \mktime(0, 0, 0);
-
-        if ($offset < self::DAY) {
-            $tomorrow = \mktime(24, 0, 1);
-            return ($timestamp < $tomorrow ? 'сегодня в ' : 'завтра в ') . \date('H:i', $timestamp);
-        }
-
-        return \strftime('%e %B в %k:%M', $timestamp);
-    }
-
-
-    /**
-     * @deprecated
-     */
-    public static function formated($timestamp, $local_timestamp = null): string
-    {
-        return static::fuzzy($timestamp, $local_timestamp);
-    }
-
     public static function dayOfWeek($date = null, $ucfirst = true) : string
     {
         $days = [
