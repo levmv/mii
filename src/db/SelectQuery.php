@@ -89,11 +89,7 @@ class SelectQuery
 
     public function asArray(): self
     {
-        if($this->modelClass) {
-            $this->_from[] = $this->modelClass::table();
-            $this->modelClass = null;
-        }
-
+        $this->modelClass = null;
         return $this;
     }
 
@@ -106,6 +102,11 @@ class SelectQuery
     public function asModel(?string $class): self
     {
         $this->modelClass = $class;
+
+        if($class !== null && empty($this->_from)) {
+            $this->_from[] = $this->modelClass::table();
+        }
+
         return $this;
     }
 

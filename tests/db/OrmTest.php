@@ -69,6 +69,12 @@ class OrmTest extends DatabaseTestCase
         $this->assertSame(1, $item->id);
     }
 
+    public function testFindCount()
+    {
+        $count = Item::find()->where('id', '=', 1)->count();
+        $this->assertSame(1, $count);
+    }
+
 
     public function testWhere()
     {
