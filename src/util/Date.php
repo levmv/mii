@@ -16,28 +16,31 @@ class Date
     private static ?int $today = null;
     private static ?int $year = null;
 
-    public static function nice(int $timestamp, bool $withTime = true): string
+    public static function nice(int $timestamp, string $format = '%D в %T'): string
+    {
+        return strtr($format, [
+            '%D' => self::niceDate($timestamp),
+            '%T' => \date('G:i', $timestamp)
+        ]);
+    }
+
+    /**
+     * Hint: Intl is more than two times slower than naive-straight-php-date-months-array-way. So, if you need
+     * to format some hundred thousand dates very fast and do not care about multiple locales - maybe use old way?
+     *
+     * @param int $timestamp
+     * @return string
+     */
+    public static function niceDate(int $timestamp): string
     {
         static::$today ??= \mktime(0, 0, 0);
         static::$year ??= \mktime(0, 0, 0, 1, 1);
 
         if ($timestamp > static::$today) {
-            $result = 'сегодня';
-            if ($withTime) {
-                $result .= ' в ' . \date('H:i', $timestamp);
-            }
-            return $result;
+            return 'сегодня';
         }
 
-        $format = $timestamp > static::$year
-            ? 'd MMMM'
-            : 'd MMMM YYYY';
-
-        if($withTime) {
-            $format .= " 'в' H:mm";
-        }
-
-        return self::intl($format)->format($timestamp);
+        return self::intl($timestamp > static::$year ? 'd MMMM' : 'd MMMM YYYY')->format($timestamp);
     }
 
 
@@ -78,7 +81,6 @@ class Date
      * Support only simple patterns that have real usage in our projects
      *
      * Strongly not recommended to use in new code!
-     *
      */
     static function strftime(string $format, int $timestamp = null): string
     {
