@@ -2,7 +2,6 @@
 
 namespace mii\util;
 
-use mii\core\Exception;
 use mii\db\DB;
 use mii\db\ORM;
 use mii\db\SelectQuery;
@@ -59,5 +58,16 @@ class Misc
         } catch (\Exception $e) {
             throw new \RuntimeException("Failed to change permissions for directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+
+    public static function getPercentile(int $percentile, array $array)
+    {
+        sort($array);
+        $index = ($percentile / 100) * (count($array) - 1);
+
+        return $index == floor($index)
+            ? ($array[$index - 1] + $array[$index]) / 2
+            : $array[floor($index)];
     }
 }

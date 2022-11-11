@@ -12,9 +12,8 @@ class Date
     public const HOUR = 3600;
     public const MINUTE = 60;
 
-
-    private static ?int $today = null;
-    private static ?int $year = null;
+    protected static ?int $today = null;
+    protected static ?int $thisYear = null;
 
     public static function nice(int $timestamp, string $format = '%D в %T'): string
     {
@@ -34,13 +33,14 @@ class Date
     public static function niceDate(int $timestamp): string
     {
         static::$today ??= \mktime(0, 0, 0);
-        static::$year ??= \mktime(0, 0, 0, 1, 1);
 
         if ($timestamp > static::$today) {
             return 'сегодня';
         }
 
-        return self::intl($timestamp > static::$year ? 'd MMMM' : 'd MMMM YYYY')->format($timestamp);
+        static::$thisYear ??= \mktime(0, 0, 0, 1, 1);
+
+        return self::intl($timestamp > static::$thisYear ? 'd MMMM' : 'd MMMM YYYY')->format($timestamp);
     }
 
 
