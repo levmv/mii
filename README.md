@@ -15,9 +15,5 @@ The whole story of mii's development is search for a balance/compromise between 
 So, conceptual purity, versatility, good design patterns - all this is not about mii :) But serving 100-300k visitors
 on 5 bucks vps without any fullpage cache? Easy! :)
 
-It had some original ideas, i.e. about organizing templates in blocks system with some naming conventions (for css). 
-
-### Requirements
-
-Since mii 1.12: php8.1+. And php-mysqli for db (Arguable decision many years ago to support only mysql, but not once there
-were a need to migrate to another db in real project). 
+It had some original ideas, e.g. about organizing templates in blocks system with some naming conventions (for css), but 
+it's not so hot in modern JS era.
