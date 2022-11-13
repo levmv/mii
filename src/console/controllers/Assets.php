@@ -16,12 +16,16 @@ use mii\util\Text;
  *
  *  Global options:
  *
- *  --config=<path>  Path to configuration file. By default, it's «@app/config/assets.php»
- *  --set=<setname> Name of set to process
- *  --force         Don't check if files changed
- *  --minify        Post-process files with minifiers (need mii-assets package)
- *  --gzip          Make gzipped version of files
- *  --json          To print assets paths as json
+ *  --config=<path>       Path to configuration file.
+ *                        By default, it's «@app/config/assets.php»
+ *  --set=<setname>       Name of set to process
+ *  --force               Don't check if files changed
+ *  --minify              Post-process files with minifiers
+ *                        (need mii-assets package)
+ *  --only=<names>        Name or comma separated names of assets to process
+ *  --skip=<names>        Name or comma separated names of assets to skip
+ *  --json                To print assets paths as json
+
  *
  * @package mii\console\controllers
  */
@@ -54,12 +58,13 @@ class Assets extends Controller
     private float $_time;
     private int $_memory;
 
-    private bool $gzip = false;
-
     private string|bool $browserTargets = false;
     private bool $minify = false;
     private string $binPackagePath;
     private string $swcConfig;
+
+    private array $skip = [];
+    private array $only = [];
 
 
     protected function before()
@@ -83,8 +88,10 @@ class Assets extends Controller
         $this->json_output = $params['json'] ?? false;
         $this->force_mode = $params['force'] ?? false;
         $this->minify = $params['minify'] ?? false;
-        $this->gzip = $params['gzip'] ?? false;
         $this->browserTargets = $params['browsers'] ?? false;
+
+        $this->skip = $this->convToArray($params['skip'] ?? []);
+        $this->only = $this->convToArray($params['only'] ?? []);
 
         $this->filtered_sets = (array) ($this->request->params['set'] ?? \array_keys($this->sets));
 
@@ -175,7 +182,7 @@ class Assets extends Controller
     }
 
 
-    protected function testSet($set_name): void
+    protected function testSet(string $set_name): void
     {
         $this->info('==========================');
         $this->info('Testing of set «:name»', [':name' => $set_name]);
@@ -274,7 +281,7 @@ class Assets extends Controller
     }
 
 
-    protected function initSet($set_name): void
+    protected function initSet(string $set_name): void
     {
         $this->base_path = null;
         $this->libraries = [];
@@ -325,12 +332,20 @@ class Assets extends Controller
     }
 
 
-    protected function buildSet($set_name): void
+    protected function buildSet(string $set_name): void
     {
         $this->initSet($set_name);
 
         $this->results[$set_name] = [];
         foreach ($this->assets[$this->assets_group] as $filename => $data) {
+            if(in_array($filename, $this->skip)) {
+                continue;
+            }
+
+            if(!empty($this->only) && !in_array($filename, $this->only)) {
+                continue;
+            }
+
             foreach (['css', 'js'] as $type) {
                 if (!isset($data[$type])) {
                     continue;
@@ -412,7 +427,7 @@ class Assets extends Controller
     }
 
 
-    protected function mergeFilesToOne($files, $path, $filename)
+    protected function mergeFilesToOne(array $files, string $path, string $filename): string
     {
         $tmp = '';
 
@@ -440,7 +455,7 @@ class Assets extends Controller
     }
 
 
-    protected function cssProcess($file): bool
+    protected function cssProcess(string $file): bool
     {
         $command = "lightningcss --minify";
 
@@ -454,7 +469,7 @@ class Assets extends Controller
     }
 
 
-    protected function jsProcess($file): bool
+    protected function jsProcess(string $file): bool
     {
         $command = "swc compile '$file' --config-file={$this->swcConfig} --out-file='$file'";
 
@@ -470,6 +485,8 @@ class Assets extends Controller
         $output = '';
         $status = 0;
 
+        echo $this->binPackagePath."/bin/$command\n";
+
         exec($this->binPackagePath."/bin/$command", $status, $output);
 
         if($output) {
@@ -477,5 +494,33 @@ class Assets extends Controller
         }
 
         return $status === 0;
+    }
+
+
+    /**
+     * Converts argument to one flat array:
+     * "string" => ["string"]
+     * ["a,b","c,d"] => ["a","b","c","d"]
+     * "a,b,c" => ["a","b","c"]
+     *
+     * @param array|string $array
+     * @return array
+     */
+    protected function convToArray(array|string $array): array
+    {
+        if(is_string($array)) {
+            $array = [$array];
+        }
+        $result = [];
+        foreach($array as $el) {
+            if(is_string($el)) {
+                $el = explode(',', $el);
+            }
+            foreach($el as $name) {
+                $result[] = trim($name);
+            }
+        }
+
+        return $result;
     }
 }
