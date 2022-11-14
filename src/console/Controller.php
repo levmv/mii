@@ -172,9 +172,9 @@ class Controller
     }
 
 
-    protected function stdout($string)
+    protected function stdout($string, ...$args)
     {
-        return Console::stdout($string);
+        return Console::stdout($string, ...$args);
     }
 
     protected function stderr($string)
@@ -215,7 +215,8 @@ class Controller
     protected function error($msg, $options = []): void
     {
         $msg = \strtr((string)$msg, $options);
-        Console::stderr($msg . "\n", Console::FG_GREY, Console::BG_RED);
+        Console::stderr($msg , Console::BG_RED);
+        Console::stderr("\n");
         \Mii::error($msg, 'console');
     }
 }
