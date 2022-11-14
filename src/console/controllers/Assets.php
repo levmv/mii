@@ -7,6 +7,7 @@ use Composer\InstalledVersions;
 use Mii;
 use mii\console\Controller;
 use mii\core\Exception;
+use mii\util\Console;
 use mii\util\Debug;
 use mii\util\Misc;
 use mii\util\Text;
@@ -25,10 +26,27 @@ use mii\util\Text;
  *  --only=<names>        Name or comma separated names of assets to process
  *  --skip=<names>        Name or comma separated names of assets to skip
  *  --json                To print assets paths as json
-
  *
  * @package mii\console\controllers
  */
+enum AssetType: string
+{
+    case CSS = 'css';
+    case JS = 'js';
+    case ASSETS = 'assets';
+
+    public function isFile(): bool
+    {
+        return $this !== self::ASSETS;
+    }
+
+    public function extension(): string
+    {
+        return "." . $this->value;
+    }
+}
+
+
 class Assets extends Controller
 {
     public string $config_file;
@@ -48,15 +66,12 @@ class Assets extends Controller
 
     protected string $assets_group = 'static';
 
-    private array $results = [];
-
     private array $processed = [
         'css' => [],
         'js' => [],
     ];
 
     private float $_time;
-    private int $_memory;
 
     private string|bool $browserTargets = false;
     private bool $minify = false;
@@ -70,7 +85,6 @@ class Assets extends Controller
     protected function before()
     {
         $this->_time = \microtime(true);
-        $this->_memory = \memory_get_usage();
 
         $this->sets = config('components.blocks.sets', [
             'default' => [
@@ -93,7 +107,7 @@ class Assets extends Controller
         $this->skip = $this->convToArray($params['skip'] ?? []);
         $this->only = $this->convToArray($params['only'] ?? []);
 
-        $this->filtered_sets = (array) ($this->request->params['set'] ?? \array_keys($this->sets));
+        $this->filtered_sets = (array)($this->request->params['set'] ?? \array_keys($this->sets));
 
         if (!\file_exists(Mii::resolve($this->config_file))) {
             $this->error("Config $this->config_file does not exist.");
@@ -102,15 +116,19 @@ class Assets extends Controller
 
         $this->assets = require Mii::resolve($this->config_file);
 
-        if($this->minify) {
-            if(!InstalledVersions::isInstalled('levmv/mii-assets')) {
+        if ($this->minify) {
+            if (!InstalledVersions::isInstalled('levmv/mii-assets')) {
                 $this->error("mii-assets are not installed. `minify` option disabled");
                 $this->minify = false;
             } else {
                 $this->binPackagePath = realpath(InstalledVersions::getInstallPath('levmv/mii-assets'));
-                $this->swcConfig = file_exists(path('root')."/.swcrc")
-                    ? path('root')."/.swcrc"
-                    : $this->binPackagePath."/.swcrc";
+                $this->swcConfig = file_exists(path('root') . "/.swcrc")
+                    ? path('root') . "/.swcrc"
+                    : $this->binPackagePath . "/.swcrc";
+            }
+
+            if ($this->json_output) {
+                $this->warning("--json and --minify used together. Possible mistake? Disabled minify");
             }
         }
     }
@@ -120,12 +138,8 @@ class Assets extends Controller
      */
     public function test()
     {
-        if (\count($this->sets)) {
-            foreach ($this->sets as $name => $set) {
-                $this->testSet($name);
-            }
-        } else {
-            $this->testSet('default');
+        foreach ($this->sets as $name => $set) {
+            $this->testSet($name);
         }
     }
 
@@ -134,37 +148,20 @@ class Assets extends Controller
      */
     public function build()
     {
-        if (\count($this->sets)) {
-            foreach ($this->filtered_sets as $name) {
-                $this->buildSet($name);
-            }
-        } else {
-            $this->buildSet('default');
-        }
+        foreach ($this->filtered_sets as $name) {
 
-        foreach ($this->results as $set_name => $list) {
+            $result = $this->buildSet($name);
+
             \file_put_contents(
-                $this->assets_map_path . '/' . $set_name . '.assets',
-                '<?php return ' . \var_export($list, true) . ';'
+                $this->assets_map_path . '/' . $name . '.assets',
+                '<?php return ' . \var_export($result, true) . ';'
             );
         }
 
         if ($this->json_output) {
-            $this->stdout(\json_encode($this->processed, Text::JSON_FLAGS));
+            Console::stdout(\json_encode($this->processed, Text::JSON_FLAGS));
             return;
         }
-
-        if($this->minify) {
-            foreach($this->processed['css'] as $css) {
-                $this->cssProcess($css);
-                $this->gzipFile($css);
-            }
-            foreach($this->processed['js'] as $js) {
-                $this->jsProcess($js);
-                $this->gzipFile($js);
-            }
-        }
-
 
         if (\count($this->processed['css']) || \count($this->processed['js'])) {
             $this->info(':N css and :M js files compiled.', [
@@ -175,9 +172,8 @@ class Assets extends Controller
             $this->info('No recompiled files. No need to regenerate config');
         }
 
-        $this->info('All done. Spent :Ts and :MMb', [
+        $this->info('All done. Spent :Ts', [
             ':T' => \number_format(\microtime(true) - $this->_time, 2),
-            ':M' => \number_format((\memory_get_usage() - $this->_memory) / 1024 / 1024, 1),
         ]);
     }
 
@@ -236,7 +232,7 @@ class Assets extends Controller
             foreach (['css', 'js'] as $type) {
                 if (isset($file[$type])) {
                     if (!\is_array($file[$type])) {
-                        $file[$type] = (array) $file[$type];
+                        $file[$type] = (array)$file[$type];
                     }
 
                     foreach ($file[$type] as $block) {
@@ -318,12 +314,12 @@ class Assets extends Controller
                 : '@root/public' . $this->base_url;
         }
 
-        $this->base_path = Mii::resolve($this->base_path);
+        $this->base_path = rtrim(Mii::resolve($this->base_path), '/') . '/';
 
         $this->assets_map_path = Mii::resolve($this->assets_map_path);
 
         if (!\is_dir($this->base_path)) {
-            Misc::mkdir($this->base_path, 0777);
+            Misc::mkdir($this->base_path, 0775, true);
         }
 
         if (!isset($this->assets[$this->assets_group])) {
@@ -332,126 +328,185 @@ class Assets extends Controller
     }
 
 
-    protected function buildSet(string $set_name): void
+    protected function buildSet(string $set_name): array
     {
         $this->initSet($set_name);
 
-        $this->results[$set_name] = [];
+        $results = [];
         foreach ($this->assets[$this->assets_group] as $filename => $data) {
-            if(in_array($filename, $this->skip)) {
+            if (in_array($filename, $this->skip)) {
                 continue;
             }
 
-            if(!empty($this->only) && !in_array($filename, $this->only)) {
+            if (!empty($this->only) && !in_array($filename, $this->only)) {
                 continue;
             }
 
-            foreach (['css', 'js'] as $type) {
-                if (!isset($data[$type])) {
+            $usedBlocks = [];
+
+            foreach ([AssetType::CSS, AssetType::JS] as $type) {
+                if (!isset($data[$type->value])) {
+                    continue;
+                }
+                $blocks = $data[$type->value];
+
+                if (!\is_array($blocks)) {
+                    $blocks = [$blocks];
+                }
+
+                $result_file_name = $this->buildFile($filename, $blocks, $type);
+
+                if ($result_file_name === null) {
+                    $this->warning("Files to build $type->value for $filename not found");
                     continue;
                 }
 
-                if (!\is_array($data[$type])) {
-                    $data[$type] = (array) $data[$type];
+                // In results we store reverse list: block_name => output file
+                foreach ($blocks as $block_name) {
+                    $usedBlocks[$block_name] = true;
+                    $results[$type->value][$block_name] = $result_file_name;
                 }
 
-                $result_file_name = $this->buildFile($filename, $data[$type], $type);
+                $fullResultPath = $this->base_path . $result_file_name . $type->extension();
 
-                if(isset($data['block_name'])) {
-                    $this->results[$set_name][$type][$data['block_name']] = $result_file_name;
-                } else {
-                    foreach ($data[$type] as $block_name) {
-                        $this->results[$set_name][$type][$block_name] = $result_file_name;
-                    }
+                $this->stdout(Debug::path($fullResultPath));
+                $this->stdout(" merged ", Console::FG_GREEN);
+
+                if ($this->minify && $this->minify($type, $fullResultPath)) {
+                    $this->stdout("& minified ", Console::FG_GREEN);
                 }
+                $this->gzipFile($fullResultPath);
+
+                $this->stdout("\n");
             }
+            $this->linkAssets($filename, array_keys($usedBlocks));
         }
+        return $results;
     }
 
-
-    protected function buildFile($filename, $blocks, $type): string
+    protected function buildFile(string $filename, array $blocks, AssetType $type): ?string
     {
-        $out_path = $this->base_path . '/';
-
         $files = [];
 
-        $hashes = '';
+        $hashesStr = '';
 
-        foreach ($blocks as $block_name) {
-            $block_path = '/' . \implode('/', \explode('_', $block_name));
-            $block_file = $block_path . '/' . $block_name;
-
-            foreach ($this->libraries as $library_path) {
-                $result_filename = Mii::resolve($library_path) . $block_file . '.' . $type;
-
-                if (\is_file($result_filename)) {
-                    $files[] = $result_filename;
-                    $hashes .= \hash_file('sha256', $result_filename, true) . \pack('L', \filesize($result_filename));
-
-                    break;
-                }
-            }
-            // Can't merge with previous cycle because of the break
-            foreach ($this->libraries as $library_path) {
-                $library_path = Mii::resolve($library_path);
-
-                if (\is_dir($library_path . $block_path . '/assets')) {
-                    $output = $this->base_path . '/' . $block_name;
-
-                    if (!\is_link($output)) {
-                        \symlink($library_path . $block_path . '/assets', $output);
-                    }
-                    break;
-                }
-            }
+        foreach ($this->iterateBlocks($blocks, $type) as $file) {
+            $files[] = $file;
+            // Yep, little paranoid, hence filesize :)
+            $hashesStr .= hash_file('sha256', $file, true) . pack('L', \filesize($file));
         }
 
-        $outname = $filename . $this->hash($hashes);
+        $outname = $filename . $this->encodePartialHash($hashesStr);
 
-        if (!empty($files)) {
-            if (!\file_exists($out_path . $outname . '.' . $type) || $this->force_mode) {
-                $this->processed[$type][] = $this->mergeFilesToOne($files, $out_path, $outname . '.' . $type);
-            }
+        if (empty($files)) {
+            return null;
+        }
+
+        $fullResultPath = $this->base_path . $outname . $type->extension();
+
+        if (!\file_exists($fullResultPath) || $this->force_mode) {
+            $this->mergeFilesToOne($files, $fullResultPath);
+            $this->processed[$type->value][] = $fullResultPath;
         }
 
         return $outname;
     }
 
 
-    protected function hash(string $str): string
+    // TODO: do we need unlinking?
+    protected function linkAssets($filename, $blocks)
     {
-        return '.'.Text::b64Encode(
-                \substr(\md5($str, true), 0, 6) .
-                \substr(\sha1($str, true), 0, 1)
-            );
+        foreach ($this->iterateBlocks($blocks, AssetType::ASSETS) as $blockName => $assetsDirPath) {
+            $output = $this->base_path . $blockName;
+
+            if (!is_link($output)) {
+                symlink($assetsDirPath, $output);
+            }
+        }
+    }
+
+    protected function iterateBlocks(array $blockNames, AssetType $type): \Generator
+    {
+        foreach ($blockNames as $block_name) {
+            $blockPath = $this->nameToPath($block_name);
+
+            foreach ($this->libraries as $libPath) {
+                if ($type->isFile()) {
+                    $result_filename = $libPath . $blockPath . $block_name . $type->extension();
+                    if (\is_file($result_filename)) {
+                        yield $result_filename;
+                        break;
+                    }
+                } else {
+                    if (\is_dir($libPath . $blockPath . $type->value)) {
+                        yield $block_name => $libPath . $blockPath . $type->value;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    protected function nameToPath(string $name): string
+    {
+        return '/' . \implode('/', \explode('_', $name)) . '/';
     }
 
 
-    protected function mergeFilesToOne(array $files, string $path, string $filename): string
+    protected function encodePartialHash(string $str): string
+    {
+        // Yep, still paranoid
+        return '.' . Text::b64Encode(
+                \substr(\md5($str, true), 0, 3) .
+                \substr(\sha1($str, true), 0, 3)
+            );
+    }
+
+    protected function stdout($string, ...$args)
+    {
+        if ($this->json_output) {
+            return;
+        }
+        return parent::stdout($string, ...$args);
+    }
+
+    protected function warning($msg, $options = []): void
+    {
+        if ($this->json_output) {
+            parent::error($msg, $options);
+            return;
+        }
+        parent::warning($msg, $options); // TODO: Change the autogenerated stub
+    }
+
+
+    protected function mergeFilesToOne(array $files, string $path): void
     {
         $tmp = '';
-
         foreach ($files as $file) {
             $tmp .= \file_get_contents($file) . "\n";
         }
 
-        if (!\is_dir($path)) {
-            Misc::mkdir($path, 0777, true);
+        $written = \file_put_contents($path, $tmp);
+        if ($written === 0) {
+            $this->warning("$path has zero size");
         }
-
-        \file_put_contents($path . $filename, $tmp);
-
-        if (!$this->json_output) {
-            $this->info(':block compiled.', [':block' => Debug::path($path) . $filename]);
-        }
-
-        return $path . $filename;
     }
 
 
     protected function gzipFile(string $path): void
     {
-        file_put_contents($path.".gz", gzencode(file_get_contents($path), 7));
+        file_put_contents($path . ".gz", gzencode(file_get_contents($path), 7));
+    }
+
+
+    protected function minify(AssetType $type, string $file): bool
+    {
+        return match ($type) {
+            AssetType::CSS => $this->cssProcess($file),
+            AssetType::JS => $this->jsProcess($file),
+            AssetType::ASSETS => throw new \Exception('To be implemented')
+        };
     }
 
 
@@ -459,10 +514,9 @@ class Assets extends Controller
     {
         $command = "lightningcss --minify";
 
-        if($this->browserTargets) {
+        if ($this->browserTargets) {
             $command .= " --targets '{$this->browserTargets}'";
         }
-
         $command .= " '$file' --output-file='$file'";
 
         return $this->executeBinary($command);
@@ -473,26 +527,23 @@ class Assets extends Controller
     {
         $command = "swc compile '$file' --config-file={$this->swcConfig} --out-file='$file'";
 
-        if($this->browserTargets) {
-            $command .= " -C env.targets={$this->browserTargets}";
+        if ($this->browserTargets) {
+            $command .= " --config env.targets=\"{$this->browserTargets}\"";
         }
-
         return $this->executeBinary($command);
     }
 
 
-    protected function executeBinary(string $command): bool {
+    protected function executeBinary(string $command): bool
+    {
         $output = '';
         $status = 0;
 
-        echo $this->binPackagePath."/bin/$command\n";
+        exec($this->binPackagePath . "/bin/$command", $output, $status); // may be 2>&1 ?
 
-        exec($this->binPackagePath."/bin/$command", $status, $output);
-
-        if($output) {
-            echo $output;
+        if ($output) {
+            $this->error("\n" . implode("\n", $output));
         }
-
         return $status === 0;
     }
 
@@ -508,15 +559,15 @@ class Assets extends Controller
      */
     protected function convToArray(array|string $array): array
     {
-        if(is_string($array)) {
+        if (is_string($array)) {
             $array = [$array];
         }
         $result = [];
-        foreach($array as $el) {
-            if(is_string($el)) {
+        foreach ($array as $el) {
+            if (is_string($el)) {
                 $el = explode(',', $el);
             }
-            foreach($el as $name) {
+            foreach ($el as $name) {
                 $result[] = trim($name);
             }
         }
