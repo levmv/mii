@@ -207,7 +207,7 @@ class Debug
                 \Mii::$paths['vendor'] = path('root') . '/vendor';
             }
 
-            \Mii::$paths['mii'] = path('vendor') . '/levmorozov/mii/src';
+            \Mii::$paths['mii'] = path('vendor') . '/levmv/mii/src';
             \uasort(\Mii::$paths, static function ($a, $b) {
                 return \strlen($b) - \strlen($a);
             });
