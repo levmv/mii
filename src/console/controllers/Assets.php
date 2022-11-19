@@ -172,7 +172,7 @@ class Assets extends Controller
             $this->info('No recompiled files. No need to regenerate config');
         }
 
-        $this->info('All done. Spent :Ts', [
+        $this->info("All done. Spent :Ts\n", [
             ':T' => \number_format(\microtime(true) - $this->_time, 2),
         ]);
     }
@@ -332,6 +332,8 @@ class Assets extends Controller
     {
         $this->initSet($set_name);
 
+        $this->info("Build $set_name set");
+
         $results = [];
         foreach ($this->assets[$this->assets_group] as $filename => $data) {
             if (in_array($filename, $this->skip)) {
@@ -357,7 +359,6 @@ class Assets extends Controller
                 $result_file_name = $this->buildFile($filename, $blocks, $type);
 
                 if ($result_file_name === null) {
-                    $this->warning("Files to build $type->value for $filename not found");
                     continue;
                 }
 
@@ -399,6 +400,7 @@ class Assets extends Controller
         $outname = $filename . $this->encodePartialHash($hashesStr);
 
         if (empty($files)) {
+            $this->warning("Files to build $type->value for $filename not found");
             return null;
         }
 
@@ -407,9 +409,10 @@ class Assets extends Controller
         if (!\file_exists($fullResultPath) || $this->force_mode) {
             $this->mergeFilesToOne($files, $fullResultPath);
             $this->processed[$type->value][] = $fullResultPath;
+            return $outname;
         }
 
-        return $outname;
+        return null;
     }
 
 
