@@ -77,6 +77,7 @@ class Assets extends Controller
     private bool $minify = false;
     private string $binPackagePath;
     private string $swcConfig;
+    private bool $es5 = false;
 
     private array $skip = [];
     private array $only = [];
@@ -103,6 +104,7 @@ class Assets extends Controller
         $this->force_mode = $params['force'] ?? false;
         $this->minify = $params['minify'] ?? false;
         $this->browserTargets = $params['browsers'] ?? false;
+        $this->es5 = isset($params['es5']);
 
         $this->skip = $this->convToArray($params['skip'] ?? []);
         $this->only = $this->convToArray($params['only'] ?? []);
@@ -527,6 +529,17 @@ class Assets extends Controller
 
 
     protected function jsProcess(string $file): bool
+    {
+        $command = "esbuild --minify '$file' --target=es6 --allow-overwrite --log-level=warning --outfile='$file'";
+
+        $result = $this->executeBinary($command);
+
+        return ($this->es5)
+            ? $this->es5Process($file)
+            : $result;
+    }
+
+    protected function es5Process(string $file): bool
     {
         $command = "swc compile '$file' --config-file={$this->swcConfig} --out-file='$file'";
 
