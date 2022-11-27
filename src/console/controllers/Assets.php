@@ -358,11 +358,17 @@ class Assets extends Controller
                     $blocks = [$blocks];
                 }
 
-                $result_file_name = $this->buildFile($filename, $blocks, $type);
+                $files = [];
+                foreach ($this->iterateBlocks($blocks, $type) as $file) {
+                    $files[] = $file;
+                }
 
-                if ($result_file_name === null) {
+                if (empty($files)) {
+                    $this->warning("Files to build $type->value for \"$filename\" not found");
                     continue;
                 }
+
+                $result_file_name = $filename.$this->calculateHashName($files);
 
                 // In results we store reverse list: block_name => output file
                 foreach ($blocks as $block_name) {
@@ -372,49 +378,38 @@ class Assets extends Controller
 
                 $fullResultPath = $this->base_path . $result_file_name . $type->extension();
 
-                $this->stdout(Debug::path($fullResultPath));
-                $this->stdout(" merged ", Console::FG_GREEN);
+                if (!\file_exists($fullResultPath) || $this->force_mode) {
+                    $this->mergeFilesToOne($files, $fullResultPath);
+                    $this->processed[$type->value][] = $fullResultPath;
 
-                if ($this->minify && $this->minify($type, $fullResultPath)) {
-                    $this->stdout("& minified ", Console::FG_GREEN);
+                    $this->stdout(Debug::path($fullResultPath));
+                    $this->stdout(" merged ", Console::FG_GREEN);
+
+                    if ($this->minify && $this->minify($type, $fullResultPath)) {
+                        $this->stdout("& minified ", Console::FG_GREEN);
+                    }
+                    $this->gzipFile($fullResultPath);
+
+                    $this->stdout("\n");
                 }
-                $this->gzipFile($fullResultPath);
-
-                $this->stdout("\n");
             }
             $this->linkAssets($filename, array_keys($usedBlocks));
         }
         return $results;
     }
 
-    protected function buildFile(string $filename, array $blocks, AssetType $type): ?string
+
+    protected function calculateHashName(array $files): string
     {
-        $files = [];
+        // Yep, little paranoid, hence filesize :)
+        $hashesStr = array_reduce($files,
+            fn($carry, $file) => $carry .= hash_file('sha256', $file, true) . pack('L', \filesize($file))
+        );
 
-        $hashesStr = '';
-
-        foreach ($this->iterateBlocks($blocks, $type) as $file) {
-            $files[] = $file;
-            // Yep, little paranoid, hence filesize :)
-            $hashesStr .= hash_file('sha256', $file, true) . pack('L', \filesize($file));
-        }
-
-        $outname = $filename . $this->encodePartialHash($hashesStr);
-
-        if (empty($files)) {
-            $this->warning("Files to build $type->value for $filename not found");
-            return null;
-        }
-
-        $fullResultPath = $this->base_path . $outname . $type->extension();
-
-        if (!\file_exists($fullResultPath) || $this->force_mode) {
-            $this->mergeFilesToOne($files, $fullResultPath);
-            $this->processed[$type->value][] = $fullResultPath;
-            return $outname;
-        }
-
-        return null;
+        return '.' . Text::b64Encode(
+                \substr(\md5($hashesStr, true), 0, 3) .
+                \substr(\sha1($hashesStr, true), 0, 3)
+            );
     }
 
 
@@ -455,16 +450,6 @@ class Assets extends Controller
     protected function nameToPath(string $name): string
     {
         return '/' . \implode('/', \explode('_', $name)) . '/';
-    }
-
-
-    protected function encodePartialHash(string $str): string
-    {
-        // Yep, still paranoid
-        return '.' . Text::b64Encode(
-                \substr(\md5($str, true), 0, 3) .
-                \substr(\sha1($str, true), 0, 3)
-            );
     }
 
     protected function stdout($string, ...$args)
