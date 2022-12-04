@@ -48,7 +48,7 @@ class Opcache extends File
      * @return  boolean
      * @throws Exception
      */
-    public function set(string $id, $data, int $lifetime = null): bool
+    public function set(string $id, mixed $data, int $lifetime = null): bool
     {
         if ($lifetime === null) {
             $lifetime = $this->default_expire;

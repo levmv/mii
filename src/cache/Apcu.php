@@ -23,11 +23,11 @@ class Apcu extends Cache
      * Set a value to cache with id and lifetime
      *
      * @param string $id id of cache entry
-     * @param string  $data data to set to cache
+     * @param mixed  $data data to set to cache
      * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-    public function set(string $id, $data, int $lifetime = null): bool
+    public function set(string $id, mixed $data, int $lifetime = null): bool
     {
         if ($lifetime === null) {
             $lifetime = $this->default_expire;

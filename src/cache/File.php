@@ -57,7 +57,7 @@ class File extends Cache
      * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-    public function set(string $id, string $data, int $lifetime = null): bool
+    public function set(string $id, mixed $data, int $lifetime = null): bool
     {
         if ($lifetime === null) {
             $lifetime = $this->default_expire;
