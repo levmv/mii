@@ -247,6 +247,10 @@ class Request extends Component
 
     protected function findControllers($namespace, $path, &$files)
     {
+        if(!is_dir($path)) {
+            return;
+        }
+
         $dir = \dir($path);
         while (false !== $entry = $dir->read()) {
             if ($entry === '.' || $entry === '..' || $entry === '.git' || \is_dir($dir->path . '/' . $entry)) {
