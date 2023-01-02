@@ -228,7 +228,7 @@ class Request extends Component
         return $this->_csrf_token;
     }
 
-    public function loadCsrfToken(): string
+    public function loadCsrfToken(): ?string
     {
         if ($this->enable_csrf_cookie) {
             return $this->getCookie($this->csrf_token_name);
