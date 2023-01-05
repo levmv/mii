@@ -21,9 +21,12 @@ class App extends \mii\core\App
     /**
      * @throws InvalidRouteException|\JsonException
      */
-    public function run(): void
+    public function run(string $uri = null): void
     {
-        if(!$this->request->setUri($_SERVER['REQUEST_URI'], $this->base_url)) { // TODO: not the best place for this?
+        if($uri === null) {
+            $uri = $_SERVER['REQUEST_URI'];
+        }
+        if(!$this->request->setUri($uri, $this->base_url)) { // TODO: not the best place for this?
             throw new InvalidRouteException();
         }
 

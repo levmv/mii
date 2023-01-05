@@ -46,9 +46,8 @@ class ErrorHandler extends \mii\core\ErrorHandler
 
         if ($response->format === Response::FORMAT_HTML) {
             if ($this->route && !\config('debug')) {
-                \Mii::$app->request->setUri($this->route);
                 try {
-                    \Mii::$app->run();
+                    \Mii::$app->run($this->route);
                     return;
                 } catch (\Throwable) {
                     $response->content(static::exceptionToText($exception));
