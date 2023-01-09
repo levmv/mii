@@ -190,7 +190,7 @@ class Request extends Component
      * @param null $default
      * @return  mixed
      */
-    public function get($key = null, $default = null): mixed
+    public function get($key = null, mixed $default = null): mixed
     {
         if ($key) {
             return $_GET[$key] ?? $default;
@@ -199,12 +199,28 @@ class Request extends Component
         return $_GET;
     }
 
-    public function param(string $key, $default = null): mixed
+    /**
+     * Gets HTTP POST parameters of the request.
+     *
+     * @param mixed  $key Parameter name
+     * @param string|null $default Default value if parameter does not exist
+     * @return  mixed
+     */
+    public function post(string $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $_POST;
+        }
+
+        return $_POST[$key] ?? $default;
+    }
+
+    public function param(string $key, mixed $default = null): mixed
     {
         return $this->params[$key] ?? $default;
     }
 
-    public function input(string $name, $default = null): mixed
+    public function input(string $name, mixed $default = null): mixed
     {
         return $_POST[$name] ?? $_GET[$name] ?? $default;
     }
@@ -237,22 +253,6 @@ class Request extends Component
         return \Mii::$app->session->get($this->csrf_token_name);
     }
 
-
-    /**
-     * Gets HTTP POST parameters of the request.
-     *
-     * @param mixed  $key Parameter name
-     * @param string|null $default Default value if parameter does not exist
-     * @return  mixed
-     */
-    public function post(string $key = null, string $default = null): mixed
-    {
-        if ($key === null) {
-            return $_POST;
-        }
-
-        return $_POST[$key] ?? $default;
-    }
 
     /**
      * Returns whether this is an AJAX (XMLHttpRequest) request.
