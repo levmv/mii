@@ -18,7 +18,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
                 $message = $this->formatMessage('Exception');
             }
 
-            $message .= $this->formatMessage(" '" . \get_class($exception) . "'", [Console::BOLD, Console::FG_BLUE])
+            $message .= $this->formatMessage(" '" . $exception::class . "'", [Console::BOLD, Console::FG_BLUE])
                 . ' with message ' . $this->formatMessage("'{$exception->getMessage()}'", [Console::BOLD]) //. "\n"
                 . "\n\nin " . \dirname($exception->getFile()) . \DIRECTORY_SEPARATOR . $this->formatMessage(\basename($exception->getFile()), [Console::BOLD])
                 . ':' . $this->formatMessage($exception->getLine(), [Console::BOLD, Console::FG_YELLOW]) . "\n"

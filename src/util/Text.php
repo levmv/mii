@@ -6,7 +6,7 @@ use mii\core\Exception;
 
 class Text
 {
-    public const JSON_FLAGS = JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+    final public const JSON_FLAGS = JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
     | JSON_PRESERVE_ZERO_FRACTION | JSON_INVALID_UTF8_SUBSTITUTE;
 
     /**
@@ -17,7 +17,6 @@ class Text
      * @param string $str phrase to limit words of
      * @param integer $limit number of words to limit to
      * @param string $end_char end character or entity
-     * @return  string
      */
     public static function limitWords(string $str, int $limit = 100, string $end_char = '…'): string
     {
@@ -80,7 +79,6 @@ class Text
      *
      * @param string|null $type a type of pool, or a string of characters to use as the pool
      * @param integer $length length of string to return
-     * @return  string
      */
     public static function random(string $type = null, int $length = 8): string
     {
@@ -123,9 +121,6 @@ class Text
 
     /**
      * А unicode-safe implementation of built-in PHP function `ucfirst()`
-     *
-     * @param string $string string to transform
-     * @return  string
      */
     public static function ucfirst(string $string): string
     {
@@ -146,7 +141,6 @@ class Text
      *
      * @param string  $str subject
      * @param boolean $br convert single linebreaks to <br />
-     * @return  string
      */
     public static function autoP(string $str, bool $br = true): string
     {
@@ -198,7 +192,6 @@ class Text
      *     echo Text::widont($text);
      *
      * @param string $str text to remove widows from
-     * @return  string
      */
     public static function widont(string $str): string
     {
@@ -217,9 +210,7 @@ class Text
      *
      *     echo Text::title('Мой блог пост'); // "moi-blog-post"
      *
-     * @param string $text
      * @param string $separator Word separator (any single character)
-     * @return string
      */
     public static function toSlug(string $text, string $separator = '-'): string
     {
@@ -258,9 +249,7 @@ class Text
 
     /**
      * Declination of number
-     * @param int $number
      * @param mixed $array
-     * @return mixed
      */
     public static function decl(int $number, array $array): mixed
     {
@@ -333,7 +322,7 @@ class Text
         $fl = '';
         for ($i = 0; $i < 2; $i++) {
             if (isset($words[$i])) {
-                $fl .= \mb_substr($words[$i], 0, 1);
+                $fl .= \mb_substr((string) $words[$i], 0, 1);
             }
         }
 

@@ -10,7 +10,6 @@ class Apcu extends Cache
      *
      * @param string $id id of cache to entry
      * @param string $default default value to return if cache miss
-     * @return  mixed
      */
     public function get(string $id, $default = null): mixed
     {
@@ -25,7 +24,6 @@ class Apcu extends Cache
      * @param string $id id of cache entry
      * @param mixed  $data data to set to cache
      * @param integer|null $lifetime lifetime in seconds
-     * @return  boolean
      */
     public function set(string $id, mixed $data, int $lifetime = null): bool
     {
@@ -40,7 +38,6 @@ class Apcu extends Cache
      * Delete a cache entry based on id
      *
      * @param string $id id to remove from cache
-     * @return  boolean
      */
     public function delete(string $id): bool
     {

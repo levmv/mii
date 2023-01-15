@@ -15,10 +15,10 @@ use mii\core\Component;
 class Database extends Component
 {
     // Query types
-    public const SELECT = 1;
-    public const INSERT = 2;
-    public const UPDATE = 3;
-    public const DELETE = 4;
+    final public const SELECT = 1;
+    final public const INSERT = 2;
+    final public const UPDATE = 3;
+    final public const DELETE = 4;
 
     protected string $hostname = '127.0.0.1';
     protected string $username = '';
@@ -33,7 +33,6 @@ class Database extends Component
     /**
      * Connect to the database. This is called automatically when the first query is executed.
      *
-     * @return  void
      * @throws  DatabaseException
      */
     public function connect(): void
@@ -79,8 +78,6 @@ class Database extends Component
 
     /**
      * Disconnect from the database. This is called automatically.
-     *
-     * @return  boolean
      */
     public function disconnect(): bool
     {
@@ -101,7 +98,7 @@ class Database extends Component
     }
 
 
-    public function __toString()
+    public function __toString(): string
     {
         return 'db';
     }
@@ -199,7 +196,6 @@ class Database extends Component
      * All other objects will be converted using the `__toString` method.
      *
      * @param mixed $value any value to quote
-     * @return  string
      * @throws DatabaseException
      */
     public function quote(mixed $value): string
@@ -251,7 +247,6 @@ class Database extends Component
      * Sanitize a string by escaping characters that could cause an SQL injection attack.
      *
      * @param string $value value to quote
-     * @return  string
      * @throws DatabaseException
      */
     public function escape(string $value): string
@@ -269,7 +264,6 @@ class Database extends Component
      * Start an SQL transaction
      *
      * @param string|null $mode transaction mode
-     * @return  boolean
      * @throws DatabaseException
      */
     public function begin(string $mode = null): bool
@@ -286,8 +280,6 @@ class Database extends Component
 
     /**
      * Commit the current transaction
-     *
-     * @return  boolean
      * @throws DatabaseException
      */
     public function commit(): bool
@@ -300,8 +292,6 @@ class Database extends Component
 
     /**
      * Abort the current transaction
-     *
-     * @return  boolean
      * @throws DatabaseException
      */
     public function rollback(): bool
@@ -341,7 +331,6 @@ class Database extends Component
      *
      * @param mixed $column column name or array(column, alias)
      * @param null  $table
-     * @return  string
      * @uses    Database::quoteIdentifier
      */
     public function quoteColumn(mixed $column, $table = null): string
@@ -397,8 +386,6 @@ class Database extends Component
      * Quote a database table name and adds the table prefix if needed.
      *
      * @param mixed $table table name or array(table, alias)
-     * @return  string
-     * @uses    Database::quoteIdentifier
      */
     public function quoteTable(mixed $table): string
     {
@@ -445,7 +432,6 @@ class Database extends Component
      * Quote a database identifier
      *
      * @param mixed $value any identifier
-     * @return  string
      */
     public function quoteIdentifier(mixed $value): string
     {

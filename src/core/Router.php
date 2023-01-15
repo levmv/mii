@@ -16,12 +16,12 @@ class Router extends Component
     // What must be escaped in the route regex
     protected const REGEX_ESCAPE = '[.+*?[^\\]$<>=!|]';
 
-    public const R_COMPILED = 0;
-    public const R_PATTERN = 1;
-    public const R_PATH = 2;
-    public const R_METHOD = 3;
-    public const R_NAMESPACE = 4;
-    public const R_VALUES = 5;
+    final public const R_COMPILED = 0;
+    final public const R_PATTERN = 1;
+    final public const R_PATH = 2;
+    final public const R_METHOD = 3;
+    final public const R_NAMESPACE = 4;
+    final public const R_VALUES = 5;
 
     public string $namespace = 'app\\controllers';
 

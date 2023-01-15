@@ -24,8 +24,8 @@ class ErrorHandler extends Component
     public function register(): void
     {
         \ini_set('display_errors', '0');
-        \set_exception_handler([$this, 'handleException']);
-        \set_error_handler([$this, 'handleError']);
+        \set_exception_handler($this->handleException(...));
+        \set_error_handler($this->handleError(...));
 
         if ($this->memoryReserveSize > 0) {
             $this->memoryReserve = \str_repeat('x', $this->memoryReserveSize);
@@ -42,7 +42,7 @@ class ErrorHandler extends Component
 
     public function report($exception): void
     {
-        \Mii::error($exception, \get_class($exception));
+        \Mii::error($exception, $exception::class);
     }
 
 
@@ -132,7 +132,7 @@ class ErrorHandler extends Component
         }
 
         if ($e instanceof UserException) {
-            return \get_class($e) . ' : ' . $e->getMessage();
+            return $e::class . ' : ' . $e->getMessage();
         }
 
         return 'An internal server error occurred.';

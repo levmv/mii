@@ -71,9 +71,8 @@ class HTML
      *
      * @param string  $value string to convert
      * @param boolean $double_encode encode existing entities
-     * @return  string
      */
-    public static function chars($value, bool $double_encode = true)
+    public static function chars($value, bool $double_encode = true): string
     {
         return \htmlspecialchars((string) $value, \ENT_QUOTES, 'utf-8', $double_encode);
     }
@@ -87,14 +86,13 @@ class HTML
      *
      * @param string  $value string to convert
      * @param boolean $double_encode encode existing entities
-     * @return  string
      */
-    public static function entities($value, bool $double_encode = true)
+    public static function entities($value, bool $double_encode = true): string
     {
         return \htmlentities((string) $value, \ENT_QUOTES, 'utf-8', $double_encode);
     }
 
-    public static function tag($name, $content = '', array $attributes = null)
+    public static function tag($name, $content = '', array $attributes = null): string
     {
         $html = "<$name" . static::attributes($attributes) . '>';
         return isset(static::$void_elements[\strtolower($name)]) ? $html : "$html$content</$name>";
@@ -110,10 +108,9 @@ class HTML
      * @param string $uri URL or URI string
      * @param null $title link text
      * @param array|null $attributes HTML anchor attributes
-     * @param mixed $protocol protocol to pass to URL::base()
-     * @return  string
+     * @param mixed|null $protocol protocol to pass to URL::base()
      */
-    public static function anchor(string $uri, $title = null, array $attributes = null, $protocol = null): string
+    public static function anchor(string $uri, $title = null, array $attributes = null, mixed $protocol = null): string
     {
         if ($title === null) {
             // Use the URI as the title
@@ -147,10 +144,9 @@ class HTML
      *
      * @param string $file file name
      * @param array|null $attributes default attributes
-     * @param mixed $protocol protocol to pass to URL::base()
-     * @return  string
+     * @param mixed|null $protocol protocol to pass to URL::base()
      */
-    public static function style(string $file, array $attributes = null, $protocol = null): string
+    public static function style(string $file, array $attributes = null, mixed $protocol = null): string
     {
         if (!\str_contains($file, '://')) {
             // Add the base URL
@@ -176,10 +172,9 @@ class HTML
      *
      * @param string $file file name
      * @param array|null $attributes default attributes
-     * @param mixed $protocol protocol to pass to URL::base()
-     * @return  string
+     * @param mixed|null $protocol protocol to pass to URL::base()
      */
-    public static function script(string $file, array $attributes = null, $protocol = null): string
+    public static function script(string $file, array $attributes = null, mixed $protocol = null): string
     {
         if (!\str_contains($file, '://') && !\str_starts_with($file, '//')) {
             // Add the base URL
@@ -197,10 +192,9 @@ class HTML
      *
      * @param string $file file name
      * @param array|null $attributes default attributes
-     * @param mixed $protocol protocol to pass to URL::base()
-     * @return  string
+     * @param mixed|null $protocol protocol to pass to URL::base()
      */
-    public static function image(string $file, array $attributes = null, $protocol = null)
+    public static function image(string $file, array $attributes = null, mixed $protocol = null): string
     {
         if (!\str_contains($file, '://')) {
             // Add the base URL
@@ -218,7 +212,6 @@ class HTML
      * Attributes will be sorted using HTML::$attribute_order for consistency.
      *
      * @param array|null $attributes attribute list
-     * @return  string
      */
     public static function attributes(array $attributes = null): string
     {
@@ -276,7 +269,6 @@ class HTML
      *
      * @param mixed|null $action form action, defaults to the current request URI, or [Request] class to use
      * @param array|null $attributes html attributes
-     * @return  string
      */
     public static function open(mixed $action = null, array $attributes = null): string
     {
@@ -288,7 +280,7 @@ class HTML
         if (!$action) {
             // Allow empty form actions (submits back to the current url).
             $action = '';
-        } elseif (!\str_contains($action, '://')) {
+        } elseif (!\str_contains((string) $action, '://')) {
             // Make the URI absolute
             $action = Url::site($action);
         }
@@ -309,12 +301,8 @@ class HTML
 
     /**
      * Creates the closing form tag.
-     *
-     *     echo Form::close();
-     *
-     * @return  string
      */
-    public static function close()
+    public static function close(): string
     {
         return '</form>';
     }
@@ -328,7 +316,6 @@ class HTML
      * @param string $name input name
      * @param null $value input value
      * @param array|null $attributes html attributes
-     * @return  string
      */
     public static function input(string $name, $value = null, array $attributes = null): string
     {
@@ -467,7 +454,7 @@ class HTML
      * @param mixed $selected selected option string, or an array of selected options
      * @param array|null $attributes html attributes
      */
-    public static function select(string $name, array $options = null, $selected = null, array $attributes = null): string
+    public static function select(string $name, array $options = null, mixed $selected = null, array $attributes = null): string
     {
         // Set the input name
         $attributes['name'] = $name;

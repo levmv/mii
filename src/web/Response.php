@@ -6,10 +6,10 @@ use mii\core\Component;
 
 class Response extends Component
 {
-    public const FORMAT_RAW = 0;
-    public const FORMAT_HTML = 1;
-    public const FORMAT_JSON = 2;
-    public const FORMAT_XML = 3;
+    final public const FORMAT_RAW = 0;
+    final public const FORMAT_HTML = 1;
+    final public const FORMAT_JSON = 2;
+    final public const FORMAT_XML = 3;
 
     public int $format = self::FORMAT_HTML;
 
@@ -56,7 +56,6 @@ class Response extends Component
      * be appended to it instead of replacing it.
      * @param string $name the name of the header
      * @param string $value the value of the header
-     * @return static the collection object itself
      */
     public function addHeader(string $name, string $value): static
     {
@@ -66,7 +65,7 @@ class Response extends Component
     }
 
 
-    public function removeHeader($name)
+    public function removeHeader(string $name): static
     {
         $name = \strtolower($name);
         if (isset($this->_headers[$name])) {

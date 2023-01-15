@@ -10,14 +10,14 @@ class Logger extends Component
 
     public array $targets_objs = [];
 
-    public const DEBUG = 1;
-    public const INFO = 2;
-    public const NOTICE = 4;
-    public const WARNING = 8;
-    public const ERROR = 16;
-    public const CRITICAL = 32;
-    public const ALERT = 64;
-    public const ALL = 127;
+    final public const DEBUG = 1;
+    final public const INFO = 2;
+    final public const NOTICE = 4;
+    final public const WARNING = 8;
+    final public const ERROR = 16;
+    final public const CRITICAL = 32;
+    final public const ALERT = 64;
+    final public const ALL = 127;
 
     public static array $level_names = [
         1 => 'debug',

@@ -40,7 +40,7 @@ class Log
             }
 
             if (\is_object($arg)) {
-                $classname = \get_class($arg);
+                $classname = $arg::class;
 
                 if ($arg instanceof \Throwable) {
                     $exceptions[] = $arg;

@@ -9,36 +9,36 @@ namespace mii\util;
 
 class Console
 {
-    public const FG_BLACK = 30;
-    public const FG_RED = 31;
-    public const FG_GREEN = 32;
-    public const FG_YELLOW = 33;
-    public const FG_BLUE = 34;
-    public const FG_PURPLE = 35;
-    public const FG_CYAN = 36;
-    public const FG_GREY = 37;
+    final public const FG_BLACK = 30;
+    final public const FG_RED = 31;
+    final public const FG_GREEN = 32;
+    final public const FG_YELLOW = 33;
+    final public const FG_BLUE = 34;
+    final public const FG_PURPLE = 35;
+    final public const FG_CYAN = 36;
+    final public const FG_GREY = 37;
 
-    public const BG_BLACK = 40;
-    public const BG_RED = 41;
-    public const BG_GREEN = 42;
-    public const BG_YELLOW = 43;
-    public const BG_BLUE = 44;
-    public const BG_PURPLE = 45;
-    public const BG_CYAN = 46;
-    public const BG_GREY = 47;
+    final public const BG_BLACK = 40;
+    final public const BG_RED = 41;
+    final public const BG_GREEN = 42;
+    final public const BG_YELLOW = 43;
+    final public const BG_BLUE = 44;
+    final public const BG_PURPLE = 45;
+    final public const BG_CYAN = 46;
+    final public const BG_GREY = 47;
 
-    public const RESET = 0;
-    public const NORMAL = 0;
-    public const BOLD = 1;
-    public const ITALIC = 3;
-    public const UNDERLINE = 4;
-    public const BLINK = 5;
-    public const NEGATIVE = 7;
-    public const CONCEALED = 8;
-    public const CROSSED_OUT = 9;
-    public const FRAMED = 51;
-    public const ENCIRCLED = 52;
-    public const OVERLINED = 53;
+    final public const RESET = 0;
+    final public const NORMAL = 0;
+    final public const BOLD = 1;
+    final public const ITALIC = 3;
+    final public const UNDERLINE = 4;
+    final public const BLINK = 5;
+    final public const NEGATIVE = 7;
+    final public const CONCEALED = 8;
+    final public const CROSSED_OUT = 9;
+    final public const FRAMED = 51;
+    final public const ENCIRCLED = 52;
+    final public const OVERLINED = 53;
 
 
     /**
@@ -48,7 +48,6 @@ class Console
      * @param array  $format An array containing formatting values.
      * You can pass any of the FG_*, BG_* and TEXT_* constants
      * and also [[xtermFgColor]] and [[xtermBgColor]] to specify a format.
-     * @return string
      */
     public static function ansiFormat(string $string, array $format = []): string
     {
@@ -61,7 +60,6 @@ class Console
      * Strips ANSI control codes from a string
      *
      * @param string $string String to strip
-     * @return string
      */
     public static function stripAnsiFormat(string $string): string
     {
@@ -74,9 +72,6 @@ class Console
      * the string is parsed by [[renderColoredString]]
      *
      * @param string $string String to escape
-     *
-     * @access public
-     * @return string
      */
     public static function escape(string $string): string
     {
@@ -90,9 +85,8 @@ class Console
      * - not tty consoles
      *
      * @param mixed $stream
-     * @return boolean true if the stream supports ANSI colors, otherwise false.
      */
-    public static function streamSupportsAnsiColors($stream): bool
+    public static function streamSupportsAnsiColors(mixed $stream): bool
     {
         return \DIRECTORY_SEPARATOR === '\\'
             ? \getenv('ANSICON') !== false || \getenv('ConEmuANSI') === 'ON'
@@ -118,7 +112,7 @@ class Console
      * @param array  $args
      * @return int|boolean Number of bytes printed or false on error
      */
-    public static function stdout(mixed $string, ...$args)
+    public static function stdout(mixed $string, ...$args): bool|int
     {
         return static::writeToStream(\STDOUT, (string) $string, ...$args);
     }
@@ -129,17 +123,17 @@ class Console
      * @param string $string the string to print
      * @return int|boolean Number of bytes printed or false on error
      */
-    public static function stderr(mixed $string, ...$args)
+    public static function stderr(mixed $string, ...$args): bool|int
     {
         return static::writeToStream(\STDERR, (string) $string, ...$args);
     }
 
-    public static function writeToStream($stream, $string, ...$args)
+    public static function writeToStream($stream, $string, ...$args): bool|int
     {
         if (!empty($args) && static::streamSupportsAnsiColors($stream)) {
             $string = static::ansiFormat($string, $args);
         }
-        return \fwrite($stream, $string);
+        return \fwrite($stream, (string) $string);
     }
 
 
@@ -162,10 +156,10 @@ class Console
     /**
      * Prints text to STDOUT appended with a carriage return (PHP_EOL).
      *
-     * @param string $string the text to print
+     * @param string|null $string the text to print
      * @return integer|boolean number of bytes printed or false on error.
      */
-    public static function output($string = null)
+    public static function output(string $string = null): bool|int
     {
         return static::stdout($string . \PHP_EOL);
     }
@@ -176,7 +170,7 @@ class Console
      * @param string|null $string the text to print
      * @return integer|boolean number of bytes printed or false on error.
      */
-    public static function error(string $string = null)
+    public static function error(string $string = null): bool|int
     {
         return static::stderr($string . \PHP_EOL);
     }

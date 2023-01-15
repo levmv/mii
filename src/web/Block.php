@@ -6,11 +6,8 @@ namespace mii\web;
 
 use Mii;
 
-class Block
+class Block implements \Stringable
 {
-    // Block name
-    public string $__name;
-
     public bool $__has_parent = false;
 
     // Full path to php template
@@ -20,8 +17,8 @@ class Block
     protected array $_data = [];
 
     // List of remote assets
-    public $__remote_css;
-    public $__remote_js;
+    public ?array $__remote_css = null;
+    public ?array $__remote_js = null;
 
     // List of inline codes
     public $__inline_js;
@@ -36,13 +33,10 @@ class Block
     /**
      * Sets the block name and local data. Blocks should almost
      * always only be created using [Blocks::factory] or [block].
-     *
-     *
-     * @param string $name block name
      */
-    public function __construct(string $name)
+    public function __construct(
+        public string $__name)
     {
-        $this->__name = $name;
     }
 
 
@@ -96,8 +90,6 @@ class Block
 
     /**
      * Magic method, returns the output of [Block::render].
-     *
-     * @return  string
      */
     public function __toString(): string
     {
@@ -219,7 +211,6 @@ class Block
      * overwritten by the local variable.
      *
      * @param bool $force is force render needed
-     * @return  string
      */
     public function render(bool $force = false): string
     {
@@ -254,7 +245,6 @@ class Block
      * The view data will be extracted to make local variables.
      *
      * @param string $block_filename filename
-     * @return  string
      * @throws \Throwable
      */
     protected function capture(string $block_filename): string

@@ -93,7 +93,6 @@ class Migrate extends Controller
     /**
      * Create new migration file
      * @param string|null $name
-     * @param bool $php
      * @throws \Throwable
      */
     public function create(string $name = null, bool $php = false)
@@ -209,7 +208,7 @@ class ' . $name . '
                 try {
                     $obj->safe_up();
                     DB::commit();
-                } catch (\Throwable $e) {
+                } catch (\Throwable) {
                     DB::rollback();
                 }
             }

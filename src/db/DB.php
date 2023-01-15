@@ -10,8 +10,6 @@ class DB
     }
 
     /**
-     * @param string $q
-     * @param array  $params
      * @return Result
      * @throws DatabaseException
      */
@@ -21,19 +19,15 @@ class DB
     }
 
     /**
-     * @param int|null $type
-     * @param string $q
-     * @param array $params
-     * @return Result|int|string
      * @throws DatabaseException
      */
-    public static function query(?int $type, string $q, array $params = [])
+    public static function query(?int $type, string $q, array $params = []): Result|int|string
     {
         $db = \Mii::$app->db;
 
         if (!empty($params)) {
-            // Quote all of the values
-            $values = \array_map([$db, 'quote'], $params);
+            // Quote all the values
+            $values = \array_map($db->quote(...), $params);
 
             // Replace the values in the SQL
             $q = \strtr($q, $values);
@@ -54,7 +48,7 @@ class DB
 
         if (!empty($params)) {
             // Quote all the values
-            $values = \array_map([$db, 'quote'], $params);
+            $values = \array_map($db->quote(...), $params);
 
             // Replace the values in the SQL
             $q = \strtr($q, $values);
@@ -64,9 +58,6 @@ class DB
 
 
     /**
-     * @param string $q
-     * @param array  $params
-     * @return int
      * @throws DatabaseException
      */
     public static function alter(string $q, array $params = []): int
@@ -75,9 +66,6 @@ class DB
     }
 
     /**
-     * @param string $q
-     * @param array  $params
-     * @return int
      * @throws DatabaseException
      */
     public static function update(string $q, array $params = []): int
@@ -86,20 +74,14 @@ class DB
     }
 
     /**
-     * @param string $q
-     * @param array  $params
-     * @return Result
      * @throws DatabaseException
      */
-    public static function insert(string $q, array $params = [])
+    public static function insert(string $q, array $params = []): Result|int|string
     {
         return static::query(Database::INSERT, $q, $params);
     }
 
     /**
-     * @param string $q
-     * @param array  $params
-     * @return int
      * @throws DatabaseException
      */
     public static function delete(string $q, array $params = []): int
@@ -107,11 +89,6 @@ class DB
         return static::query(Database::DELETE, $q, $params);
     }
 
-    /**
-     * @param string $value
-     * @param array  $params
-     * @return Expression
-     */
     public static function expr(string $value, array $params = []): Expression
     {
         return new Expression($value, $params);

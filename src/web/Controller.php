@@ -34,7 +34,7 @@ class Controller
     public function execute(string $action, $params): void
     {
         if (!\method_exists($this, $action)) {
-            throw new InvalidRouteException('Method "' . \get_class($this) . "::$action\" does not exists");
+            throw new InvalidRouteException('Method "' . static::class . "::$action\" does not exists");
         }
 
         $method = new \ReflectionMethod($this, $action);
@@ -77,7 +77,7 @@ class Controller
                     $type_name = $type->getName();
                     switch ($type_name) {
                         case 'int':
-                            if(\strlen($params[$name]) > 1 && $params[$name][0] === '0') {
+                            if(\strlen((string)$params[$name]) > 1 && $params[$name][0] === '0') {
                                 $params[$name] = \substr($params[$name], 1);
                             }
                             $params[$name] = \filter_var($params[$name], \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE);

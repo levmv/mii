@@ -38,7 +38,6 @@ class Profiler
      *
      * @param string $group group name
      * @param string $name benchmark name
-     * @return  string
      */
     public static function start(string $group, string $name): string
     {
@@ -69,7 +68,6 @@ class Profiler
      *     Profiler::stop($token);
      *
      * @param string $token
-     * @return bool
      */
     public static function stop(string $token): bool
     {
@@ -87,7 +85,6 @@ class Profiler
      *     Profiler::delete($token);
      *
      * @param string $token
-     * @return bool
      */
     public static function delete(string $token): bool
     {
@@ -100,8 +97,6 @@ class Profiler
      * Returns all the benchmark tokens by group and name as an array.
      *
      *     $groups = Profiler::groups();
-     *
-     * @return  array
      */
     public static function groups(): array
     {
@@ -122,7 +117,6 @@ class Profiler
      *
      * @param array $tokens profiler tokens
      * @return  array   min, max, average, total
-     * @uses    Profiler::total
      */
     public static function stats(array $tokens): array
     {

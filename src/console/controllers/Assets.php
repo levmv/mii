@@ -59,7 +59,7 @@ class Assets extends Controller
 
     private array $sets = [];
 
-    private ?string $base_path;
+    private ?string $base_path = null;
     private string $base_url = '/assets';
 
     private string $assets_map_path;
@@ -554,9 +554,6 @@ class Assets extends Controller
      * "string" => ["string"]
      * ["a,b","c,d"] => ["a","b","c","d"]
      * "a,b,c" => ["a","b","c"]
-     *
-     * @param array|string $array
-     * @return array
      */
     protected function convToArray(array|string $array): array
     {

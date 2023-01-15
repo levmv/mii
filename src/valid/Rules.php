@@ -11,11 +11,7 @@ class Rules
     /**
      * Checks if a value is unique in database.
      *
-     * @param $value
-     * @param string $key
-     * @param string $model
      * @param null $id
-     * @return bool
      */
     public static function unique($value, string $key, string $model, $id = null) : bool
     {
@@ -28,9 +24,6 @@ class Rules
 
     /**
      * Checks if a field is not empty.
-     *
-     * @param $value
-     * @return  boolean
      */
     public static function required($value) : bool
     {
@@ -48,7 +41,6 @@ class Rules
      * Checks if a field is not empty.
      *
      * @param $value
-     * @return  boolean
      */
     public static function notEmpty($value) : bool
     {
@@ -60,7 +52,6 @@ class Rules
      *
      * @param string $value value
      * @param string $expression regular expression to match (including delimiters)
-     * @return  boolean
      */
     public static function regex($value, string $expression) : bool
     {
@@ -71,8 +62,6 @@ class Rules
      * Checks that a field is long enough.
      *
      * @param string $value value
-     * @param int $limit
-     * @return  boolean
      */
     public static function min($value, int $limit) : bool
     {
@@ -83,8 +72,6 @@ class Rules
      * Checks that a field is short enough.
      *
      * @param string $value value
-     * @param int $limit
-     * @return  boolean
      */
     public static function max($value, int $limit) : bool
     {
@@ -97,7 +84,6 @@ class Rules
      *
      * @param string        $value value
      * @param integer|array $length exact length required, or array of valid lengths
-     * @return  boolean
      */
     public static function length($value, int|array $length) : bool
     {
@@ -116,7 +102,6 @@ class Rules
      *
      * @param string $value value
      * @param string $required required value
-     * @return  boolean
      */
     public static function equals($value, $required) : bool
     {
@@ -131,7 +116,6 @@ class Rules
      *
      * @param string  $email email address
      * @param boolean $strict strict RFC compatibility
-     * @return  boolean
      */
     public static function email(string $email, bool $strict = false) : bool
     {
@@ -167,7 +151,6 @@ class Rules
      * @link  http://php.net/checkdnsrr  not added to Windows until PHP 5.3.0
      *
      * @param string $email email address
-     * @return  boolean
      */
     public static function emailDomain($email) : bool
     {
@@ -183,7 +166,6 @@ class Rules
      * Validate a URL.
      *
      * @param string $url URL
-     * @return  boolean
      */
     public static function url($url) : bool
     {
@@ -249,7 +231,6 @@ class Rules
      *
      * @param string  $ip IP address
      * @param boolean $allow_private allow private IP networks
-     * @return  boolean
      */
     public static function ip($ip, bool $allow_private = true) : bool
     {
@@ -269,7 +250,6 @@ class Rules
      *
      * @param string $number phone number to check
      * @param array|null $lengths
-     * @return  boolean
      */
     public static function phone($number, array $lengths = null) : bool
     {
@@ -288,7 +268,6 @@ class Rules
      * Tests if a string is a valid date string.
      *
      * @param string $str date to check
-     * @return  boolean
      */
     public static function date(string $str) : bool
     {
@@ -300,7 +279,6 @@ class Rules
      *
      * @param string $str input string
      * @param boolean $utf8 trigger UTF-8 compatibility
-     * @return  boolean
      */
     public static function alpha($str, bool $utf8 = false) : bool
     {
@@ -318,7 +296,6 @@ class Rules
      *
      * @param string  $str input string
      * @param boolean $utf8 trigger UTF-8 compatibility
-     * @return  boolean
      */
     public static function alphaNumeric($str, bool $utf8 = false) : bool
     {
@@ -334,7 +311,6 @@ class Rules
      *
      * @param string  $str input string
      * @param boolean $utf8 trigger UTF-8 compatibility
-     * @return  boolean
      */
     public static function alphaDash($str, bool $utf8 = false) : bool
     {
@@ -352,7 +328,6 @@ class Rules
      *
      * @param string  $str input string
      * @param boolean $utf8 trigger UTF-8 compatibility
-     * @return  boolean
      */
     public static function digit($str, bool $utf8 = false) : bool
     {
@@ -370,7 +345,6 @@ class Rules
      * to allow decimal point to be locale specific.
      *
      * @param string $str input string
-     * @return  boolean
      */
     public static function numeric($str) : bool
     {
@@ -388,7 +362,6 @@ class Rules
      * @param integer $min minimum value
      * @param integer $max maximum value
      * @param integer $step increment size
-     * @return  boolean
      */
     public static function range($number, int $min, int $max, int $step = 1) : bool
     {
@@ -410,7 +383,6 @@ class Rules
      * @param string  $str number to check
      * @param integer $places number of decimal places
      * @param integer|null $digits number of digits
-     * @return  boolean
      */
     public static function decimal($str, int $places = 2, int $digits = null) : bool
     {
@@ -434,7 +406,6 @@ class Rules
      * the short notation using only three instead of six hexadecimal characters.
      *
      * @param string $str input string
-     * @return  boolean
      */
     public static function color(string $str) : bool
     {
@@ -447,7 +418,6 @@ class Rules
      * @param array  $array array of values
      * @param string $field field name
      * @param string $match field name to match
-     * @return  boolean
      */
     public static function matches($array, $field, $match) : bool
     {
@@ -468,7 +438,6 @@ class Rules
      *
      * @param UploadedFile $file
      * @param array $allowed allowed file extensions
-     * @return  bool
      */
     public static function fileType($file, array $allowed): bool
     {
@@ -488,10 +457,9 @@ class Rules
      *
      * @param UploadedFile $file $_FILES item
      * @param string|int $size maximum file size allowed
-     * @return  bool
      * @throws Exception
      */
-    public static function maxFileSize($file, $size) : bool
+    public static function maxFileSize($file, string|int $size) : bool
     {
         if (!$file instanceof UploadedFile) {
             return true;

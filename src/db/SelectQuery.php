@@ -579,7 +579,7 @@ class SelectQuery
                 ? ' FROM ' . $this->db->quoteTable($table)
                 : " FROM $table_q";
         } elseif (!empty($this->_from)) {
-            $query .= ' FROM ' . \implode(', ', \array_map([$this->db, 'quoteTable'], $this->_from));
+            $query .= ' FROM ' . \implode(', ', \array_map($this->db->quoteTable(...), $this->_from));
         }
 
         if (!empty($this->_joins)) {
@@ -657,7 +657,7 @@ class SelectQuery
 
             if (!empty($join['using'])) {
                 // Quote and concat the columns
-                $sql .= ' USING (' . \implode(', ', \array_map([$this->db, 'quoteColumn'], $join['using'])) . ')';
+                $sql .= ' USING (' . \implode(', ', \array_map($this->db->quoteColumn(...), $join['using'])) . ')';
             } else {
                 $conditions = [];
                 foreach ($join['on'] as [$c1, $op, $c2]) {
@@ -726,9 +726,9 @@ class SelectQuery
                     }
 
                     if ($op === 'IN' && \is_array($value)) {
-                        $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
+                        $value = '(' . \implode(',', \array_map($this->db->quote(...), $value)) . ')';
                     } elseif ($op === 'NOT IN' && \is_array($value)) {
-                        $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
+                        $value = '(' . \implode(',', \array_map($this->db->quote(...), $value)) . ')';
                     } elseif ($op === 'BETWEEN' && \is_array($value)) {
                         // BETWEEN always has exactly two arguments
                         [$min, $max] = $value;
@@ -781,7 +781,7 @@ class SelectQuery
         }
 
         if ($op === 'IN' && \is_array($value)) {
-            $value = '(' . \implode(',', \array_map([$this->db, 'quote'], $value)) . ')';
+            $value = '(' . \implode(',', \array_map($this->db->quote(...), $value)) . ')';
             return "$column $op $value";
         }
 

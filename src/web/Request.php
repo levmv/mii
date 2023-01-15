@@ -7,17 +7,17 @@ use mii\core\Component;
 class Request extends Component
 {
     // HTTP Methods
-    public const GET = 'GET';
-    public const POST = 'POST';
-    public const PUT = 'PUT';
-    public const DELETE = 'DELETE';
-    public const HEAD = 'HEAD';
-    public const OPTIONS = 'OPTIONS';
+    final public const GET = 'GET';
+    final public const POST = 'POST';
+    final public const PUT = 'PUT';
+    final public const DELETE = 'DELETE';
+    final public const HEAD = 'HEAD';
+    final public const OPTIONS = 'OPTIONS';
 
     protected ?string $_method = null;
 
-    public const SAME_SITE_LAX = 'Lax';
-    public const SAME_SITE_STRICT = 'Strict';
+    final public const SAME_SITE_LAX = 'Lax';
+    final public const SAME_SITE_STRICT = 'Strict';
 
     /**
      * @var  string  the URI of the request
@@ -107,9 +107,6 @@ class Request extends Component
     }
 
 
-    /**
-     * @return  string
-     */
     public function uri(): string
     {
         return $this->_uri;
@@ -188,7 +185,6 @@ class Request extends Component
      *
      * @param null $key
      * @param null $default
-     * @return  mixed
      */
     public function get($key = null, mixed $default = null): mixed
     {
@@ -204,7 +200,6 @@ class Request extends Component
      *
      * @param mixed  $key Parameter name
      * @param string|null $default Default value if parameter does not exist
-     * @return  mixed
      */
     public function post(string $key = null, mixed $default = null): mixed
     {
@@ -353,7 +348,6 @@ class Request extends Component
      * @param string $name name of cookie
      * @param string $value value of cookie
      * @param int|null $expiration lifetime in seconds
-     * @return  boolean
      */
     public function setCookie(string $name, string $value, ?int $expiration = null): bool
     {
@@ -405,7 +399,6 @@ class Request extends Component
      *
      * @param string $name name of cookie
      * @param string $value value of cookie
-     * @return  string
      * @noinspection PhpFullyQualifiedNameUsageInspection
      */
     public function salt(string $name, string $value): string

@@ -60,10 +60,8 @@ abstract class Form
     /**
      * Load form from _POST values or $data values
      * Return true if form is loaded
-     * @param null $data
-     * @return bool
      */
-    public function load($data = null): bool
+    public function load(mixed $data = null): bool
     {
         if ($this->_loaded && $data === null) {
             return true;
@@ -155,9 +153,7 @@ abstract class Form
      * Checks if the field (or any) was changed
      *
      * @param array|string|null $field_name
-     * @return bool
      */
-
     public function changed(array|string $field_name = null): bool
     {
         if ($field_name === null) {

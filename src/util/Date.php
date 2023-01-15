@@ -5,12 +5,11 @@ namespace mii\util;
 
 class Date
 {
-    // Second amounts for various time increments
-    public const MONTH = 2629744;
-    public const WEEK = 604800;
-    public const DAY = 86400;
-    public const HOUR = 3600;
-    public const MINUTE = 60;
+    final public const MONTH = 2_629_744;
+    final public const WEEK = 604800;
+    final public const DAY = 86400;
+    final public const HOUR = 3600;
+    final public const MINUTE = 60;
 
     protected static ?int $today = null;
     protected static ?int $thisYear = null;
@@ -26,9 +25,6 @@ class Date
     /**
      * Hint: Intl is more than two times slower than naive-straight-php-date-months-array-way. So, if you need
      * to format some hundred thousand dates very fast and do not care about multiple locales - maybe use old way?
-     *
-     * @param int $timestamp
-     * @return string
      */
     public static function niceDate(int $timestamp): string
     {

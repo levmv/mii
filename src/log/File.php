@@ -17,7 +17,7 @@ class File extends Target
             Misc::mkdir(\dirname($this->file));
         }
 
-        $text = \implode("\n", \array_map([$this, 'formatMessage'], $messages)) . "\n";
+        $text = \implode("\n", \array_map($this->formatMessage(...), $messages)) . "\n";
 
         if (($fp = \fopen($this->file, 'a')) === false) {
             \error_log("Unable to append to log file: $this->file");

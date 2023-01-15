@@ -2,32 +2,19 @@
 
 namespace mii\core;
 
-use ReturnTypeWillChange;
 
-class Exception extends \Exception
+class Exception extends \Exception implements \Stringable
 {
-
-    /**
-     * Magic object-to-string method.
-     *
-     *     echo $exception;
-     *
-     * @return  string
-     * @uses    Exception::text
-     */
-    #[ReturnTypeWillChange] public function __toString()
+    public function __toString(): string
     {
         return static::text($this);
     }
-
 
     /**
      * Get a single line of text representing the exception:
      *
      * Error [Code]: Message ~ File [ Line ]
      *
-     * @param \Throwable $e
-     * @return  string
      * @noinspection PhpFullyQualifiedNameUsageInspection
      */
     public static function text(\Throwable $e): string

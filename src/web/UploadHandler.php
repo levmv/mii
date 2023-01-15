@@ -22,7 +22,6 @@ class UploadHandler extends Component
 
 
     /**
-     * @param string $name
      * @return array UploadedFile
      */
     public function getFiles(string $name): array
@@ -63,7 +62,7 @@ class UploadHandler extends Component
      * @param mixed  $sizes file sizes provided by PHP
      * @param mixed  $errors uploading issues provided by PHP
      */
-    private function loadFilesRecursive(string $key, $names, $tmp_names, $types, $sizes, $errors): void
+    private function loadFilesRecursive(string $key, mixed $names, mixed $tmp_names, mixed $types, mixed $sizes, mixed $errors): void
     {
         if (\is_array($names)) {
             foreach ($names as $i => $name) {

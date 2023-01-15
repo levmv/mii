@@ -4,8 +4,6 @@ namespace mii\web;
 
 class HttpException extends \RuntimeException
 {
-    private int $statusCode;
-
     public static array $messages = [
         400 => 'Bad Request',
         401 => 'Unauthorized',
@@ -15,13 +13,13 @@ class HttpException extends \RuntimeException
         501 => 'Not Implemented',
     ];
 
-    public function __construct($status = 500, $message = '', $code = 0, \Throwable $previous = null)
+    public function __construct(private readonly int $statusCode = 500, $message = '', $code = 0, \Throwable $previous = null)
     {
-        $this->statusCode = $status;
         parent::__construct($message, $code, $previous);
     }
 
-    public function getStatusCode(): int {
+    public function getStatusCode(): int
+    {
         return $this->statusCode;
     }
 

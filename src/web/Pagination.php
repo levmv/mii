@@ -97,7 +97,6 @@ class Pagination
     /**
      * Generates the full URL for a certain page.
      *
-     * @param int|null $page
      * @return  string   page URL
      * @throws InvalidRouteException
      */
@@ -125,7 +124,6 @@ class Pagination
      * Checks whether the given page number exists.
      *
      * @param integer $page page number
-     * @return  boolean
      */
     public function valid_page(int $page): bool
     {
@@ -146,7 +144,7 @@ class Pagination
             return '';
         }
 
-        $block = $block ?? $this->block;
+        $block ??= $this->block;
 
         if($block === null) {
             return $this->renderHtml();
@@ -210,7 +208,6 @@ class Pagination
      * URL::query() replacement for Pagination use only
      *
      * @param array|null $params
-     * @return    string
      */
     public function query(array $params = null): string
     {

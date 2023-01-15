@@ -73,10 +73,6 @@ class Blocks extends BaseBlocks
 
     /**
      * Recursively process a block and its dependencies
-     *
-     * @param string $block_name
-     * @param string $parent_block
-     * @param array $depends
      */
     public function processBlockAssets(string $block_name, string $parent_block, array $depends): void
     {

@@ -17,6 +17,9 @@ abstract class BaseBlocks extends Component
 
     protected array $sets = [];
 
+    /**
+     * @var Block[] $_blocks
+     */
     protected array $_blocks = [];
 
     protected array $libraries;
@@ -76,7 +79,6 @@ abstract class BaseBlocks extends Component
     /**
      * Create a new block, or get an existing block
      * @param $name string Block name
-     * @return Block
      */
     public function get(string $name): Block
     {

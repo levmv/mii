@@ -5,12 +5,10 @@ declare(strict_types=1);
 if (!\function_exists('abort')) {
 
     /**
-     * @param int    $code
-     * @param string $message
      * @throws \mii\web\HttpException
      * @throws \mii\web\NotFoundHttpException
      */
-    function abort(int $code = 404, string $message = '')
+    function abort(int $code = 404, string $message = ''): never
     {
         if ($code === 404) {
             throw new \mii\web\NotFoundHttpException();
@@ -22,10 +20,8 @@ if (!\function_exists('abort')) {
 if (!\function_exists('redirect')) {
     /**
      * @param      $url
-     * @param bool $use_back_url
-     * @return never-return
      */
-    function redirect($url, bool $use_back_url = false)
+    function redirect($url, bool $use_back_url = false): never
     {
         if ($use_back_url) {
             $url = \mii\util\Url::back($url);
@@ -38,7 +34,6 @@ if (!\function_exists('block')) {
     /**
      * @param $name string
      * @param array|null $params
-     * @return \mii\web\Block
      */
     function block(string $name, array $params = null): \mii\web\Block
     {
@@ -51,9 +46,7 @@ if (!\function_exists('block')) {
 
 if (!\function_exists('renderBlock')) {
     /**
-     * @param string     $name
      * @param array|null $params
-     * @return string
      */
     function renderBlock(string $name, array $params = null): string
     {
@@ -73,9 +66,8 @@ if (!\function_exists('getCached')) {
      *
      * @param string $id id of cache to entry
      * @param string $default default value to return if cache miss
-     * @return  mixed
      */
-    function getCached(string $id, $default = null, $lifetime = null)
+    function getCached(string $id, $default = null, $lifetime = null): mixed
     {
         if ($default instanceof \Closure) {
             $cached = Mii::$app->cache->get($id);
@@ -111,9 +103,7 @@ if (!\function_exists('clearCache')) {
      * Delete a cache entry based on id, or delete all cache entries.
      *
      * @param string|null $id id to remove from cache
-     * @return  boolean
      */
-
     function clearCache(string $id = null): bool
     {
         if ($id === null) {

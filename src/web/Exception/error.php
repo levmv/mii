@@ -135,7 +135,7 @@ $error_id = uniqid('error');
     $ex = 0;
     do {
         $ex++;
-        $class = $exception instanceof \mii\core\ErrorException ? $exception->getName() : get_class($exception);
+        $class = $exception instanceof \mii\core\ErrorException ? $exception->getName() : $exception::class;
         $code = $exception->getCode();
         $message = $exception->getMessage();
         $file = $exception->getFile();

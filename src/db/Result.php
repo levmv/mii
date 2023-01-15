@@ -172,8 +172,6 @@ class Result implements \Countable, \Iterator, \ArrayAccess
 
     /**
      * Return all the rows as an array.
-     * @param array $properties
-     * @return array
      */
     public function toArray(array $properties = []): array
     {
@@ -214,10 +212,9 @@ class Result implements \Countable, \Iterator, \ArrayAccess
      * Return the named column from the current row.
      *
      * @param string $name column to get
-     * @param mixed  $default default value if the column does not exist
-     * @return  mixed
+     * @param mixed|null $default default value if the column does not exist
      */
-    public function column(string $name, $default = null)
+    public function column(string $name, mixed $default = null): mixed
     {
         $row = $this->current();
 
@@ -258,8 +255,6 @@ class Result implements \Countable, \Iterator, \ArrayAccess
 
     /**
      * Implements [Countable::count], returns the total number of rows.
-     *
-     * @return  integer
      */
     public function count(): int
     {
@@ -270,7 +265,6 @@ class Result implements \Countable, \Iterator, \ArrayAccess
      * Implements [ArrayAccess::offsetExists], determines if row exists.
      *
      * @param int $offset
-     * @return  boolean
      */
     public function offsetExists($offset): bool
     {
@@ -281,7 +275,6 @@ class Result implements \Countable, \Iterator, \ArrayAccess
      * Implements [ArrayAccess::offsetGet], gets a given row.
      *
      * @param int $offset
-     * @return  mixed
      */
     public function offsetGet($offset): mixed
     {
@@ -299,10 +292,9 @@ class Result implements \Countable, \Iterator, \ArrayAccess
      *
      * @param int $offset
      * @param mixed $value
-     * @return  void
      * @throws DatabaseException
      */
-    final public function offsetSet($offset, $value): void
+    final public function offsetSet($offset, mixed $value): void
     {
         throw new DatabaseException('Database results are read-only');
     }
@@ -313,7 +305,6 @@ class Result implements \Countable, \Iterator, \ArrayAccess
      * [!!] You cannot modify a database result.
      *
      * @param int $offset
-     * @return  void
      * @throws DatabaseException
      */
     final public function offsetUnset($offset): void
@@ -323,10 +314,6 @@ class Result implements \Countable, \Iterator, \ArrayAccess
 
     /**
      * Implements [Iterator::key], returns the current row number.
-     *
-     *     echo key($result);
-     *
-     * @return  integer
      */
     public function key(): int
     {
@@ -335,10 +322,6 @@ class Result implements \Countable, \Iterator, \ArrayAccess
 
     /**
      * Implements [Iterator::next], moves to the next row.
-     *
-     *     next($result);
-     *
-     * @return  $this
      */
     public function next(): void
     {
@@ -347,12 +330,8 @@ class Result implements \Countable, \Iterator, \ArrayAccess
 
     /**
      * Implements [Iterator::prev], moves to the previous row.
-     *
-     *     prev($result);
-     *
-     * @return  $this
      */
-    public function prev()
+    public function prev(): static
     {
         --$this->_current_row;
 
@@ -361,10 +340,6 @@ class Result implements \Countable, \Iterator, \ArrayAccess
 
     /**
      * Implements [Iterator::rewind], sets the current row to zero.
-     *
-     *     rewind($result);
-     *
-     * @return  $this
      */
     public function rewind(): void
     {

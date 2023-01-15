@@ -26,7 +26,7 @@ class Mii
     }
 
 
-    public static function set_path($name, $value = null): void
+    public static function set_path(string|array $name, string $value = null): void
     {
         if (\is_array($name)) {
             if (empty(static::$paths)) {
@@ -71,7 +71,7 @@ class Mii
         static::log(Logger::INFO, $msg, $category);
     }
 
-    public static function log($level, $msg, $category)
+    public static function log($level, $msg, $category): void
     {
         if (static::$app->has(static::$log_component_name)) {
             static::$app->get(static::$log_component_name)->log($level, $msg, $category);
@@ -94,7 +94,7 @@ class Mii
             $messages[$file] = $content;
         }
         if ($path === null) {
-            // Return all of the messages
+            // Return all the messages
             return $messages[$file];
         }
 

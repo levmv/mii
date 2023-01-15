@@ -9,29 +9,18 @@ namespace mii\db;
  * @copyright  (c) 2015 Lev Morozov
  * @copyright  (c) 2009 Kohana Team
  */
-class Expression
+class Expression implements \Stringable
 {
-
-    // Unquoted parameters
-    protected array $params;
-
-    // Raw expression string
-    protected string $value;
-
     /**
      * Sets the expression string.
-     *
-     *     $expression = new Expression('COUNT(users.id)');
-     *
-     * @param string $value raw SQL expression string
-     * @param array $parameters unquoted parameter values
-     * @return  void
+     * $expression = new Expression('COUNT(users.id)');
      */
-    public function __construct(string $value, array $parameters = [])
+    public function __construct(
+        // Raw expression string
+        protected string $value,
+        // Unquoted parameters_
+        protected array $params = [])
     {
-        // Set the expression string
-        $this->value = $value;
-        $this->params = $parameters;
     }
 
     /**
@@ -41,7 +30,7 @@ class Expression
      * @param mixed  $var variable to use
      * @return  $this
      */
-    public function bind(string $param, &$var)
+    public function bind(string $param, mixed &$var)
     {
         $this->params[$param] =&$var;
 
@@ -78,22 +67,13 @@ class Expression
      * Get the expression value as a string.
      *
      *     $sql = $expression->value();
-     *
-     * @return  string
      */
     public function value(): string
     {
         return $this->value;
     }
 
-    /**
-     * Return the value of the expression as a string.
-     *
-     *     echo $expression;
-     *
-     * @return  string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->value();
     }
@@ -112,7 +92,7 @@ class Expression
 
         if (!empty($this->params)) {
             // Quote all the parameter values
-            $params = \array_map([$db, 'quote'], $this->params);
+            $params = \array_map($db->quote(...), $this->params);
 
             // Replace the values in the expression
             $value = \strtr($value, $params);

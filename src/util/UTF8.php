@@ -9,9 +9,6 @@ class UTF8
      * Replaces all 4-bytes characters in utf8 string
      *
      * Note: it's maybe a good idea to use "\xEF\xBF\xBD" for $replace
-     * @param string $str
-     * @param string $replace
-     * @return string
      */
     public static function strip4b(string $str, string $replace = ''): string
     {
@@ -122,8 +119,6 @@ class UTF8
      * Makes a UTF-8 string's first character uppercase. This is a UTF8-aware
      * version of [ucfirst](http://php.net/ucfirst).
      *
-     * @param string $str mixed case string
-     * @return  string
      * @author  Harry Fuecks <hfuecks@gmail.com>
      */
     public static function ucfirst(string $str): string
@@ -143,7 +138,6 @@ class UTF8
      *
      * @param string $str input string
      * @param string|null $charlist string of characters to remove
-     * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
     public static function trim(string $str, string $charlist = null): string
@@ -161,7 +155,6 @@ class UTF8
      *
      * @param string $str input string
      * @param string|null $charlist string of characters to remove
-     * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
     public static function ltrim(string $str, string $charlist = null): string
@@ -185,7 +178,6 @@ class UTF8
      *
      * @param string $str input string
      * @param string|null $charlist string of characters to remove
-     * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
     public static function rtrim(string $str, string $charlist = null): string

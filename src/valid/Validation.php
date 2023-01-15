@@ -40,7 +40,7 @@ class Validation
      * Returns the array of data to be validated.
      *
      * @param array|null $data
-     * @return mixed
+     * @return array|void
      */
     public function data(array $data = null)
     {
@@ -60,7 +60,6 @@ class Validation
      *
      * @param string $field field name
      * @param string $label label
-     * @return  $this
      */
     public function label(string $field, string $label): self
     {
@@ -73,7 +72,6 @@ class Validation
      * Sets labels using an array.
      *
      * @param array $labels list of field => label names
-     * @return  $this
      */
     public function labels(array $labels): self
     {
@@ -99,7 +97,7 @@ class Validation
      * @param string|null $message Optional error message
      * @return $this
      */
-    public function rule(string $field, $rule, array $params = [], string $message = null): self
+    public function rule(string $field, string|callable $rule, array $params = [], string $message = null): self
     {
         if (!isset($this->_labels[$field])) {
             // Set the field label to the field name
@@ -153,8 +151,6 @@ class Validation
      *     {
      *          // The data is valid, do something here
      *     }
-     *
-     * @return  boolean
      */
     public function check(): bool
     {
@@ -279,7 +275,6 @@ class Validation
      *
      * @param string|null $file file to load error messages from
      * @param mixed $translate translate the message
-     * @return  array
      * @throws \Exception
      * @noinspection PhpUndefinedFunctionInspection
      */
@@ -352,8 +347,6 @@ class Validation
 
     /**
      * Returns the error values.
-     *
-     * @return  array
      */
     public function errorsValues(): array
     {

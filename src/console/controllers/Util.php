@@ -102,9 +102,7 @@ class Util extends Controller
             }
         }
 
-        \uasort($scripts, static function ($a, $b) {
-            return $b[0] <=> $a[0];
-        });
+        \uasort($scripts, static fn($a, $b) => $b[0] <=> $a[0]);
 
         $this->info("\nTop scripts:\nhits   mem, kb  path\n--------------------------");
         foreach ($scripts as $path => [$hits, $mem]) {
@@ -181,7 +179,6 @@ class Util extends Controller
 
     /**
      * Print table columns as phpdoc properties
-     * @param string $name
      * @throws DatabaseException
      */
     public function table(string $name)

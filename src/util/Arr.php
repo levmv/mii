@@ -8,7 +8,6 @@ class Arr
      * Tests if an array is associative or not.
      *
      * @param array $array array to check
-     * @return  boolean
      */
     public static function isAssoc(array $array) : bool
     {
@@ -22,7 +21,6 @@ class Arr
      * @param mixed  $path key path string (delimiter separated) or array of keys
      * @param mixed  $default default value if the path is not set
      * @param string $delimiter key path delimiter
-     * @return  mixed
      */
     public static function path(mixed $array, mixed $path, mixed $default = null, string $delimiter = '.'): mixed
     {
@@ -41,7 +39,7 @@ class Arr
             }
 
             // Remove  delimiters and spaces
-            $path = \trim($path, "$delimiter ");
+            $path = \trim((string) $path, "$delimiter ");
 
             // Split the keys by delimiter
             $keys = \explode($delimiter, $path);
@@ -119,9 +117,8 @@ class Arr
      * @param array $array array to extract paths from
      * @param array $paths list of path
      * @param mixed $default default value
-     * @return  array
      */
-    public static function extract($array, array $paths, $default = null): array
+    public static function extract($array, array $paths, mixed $default = null): array
     {
         $found = [];
         foreach ($paths as $path) {
@@ -149,8 +146,7 @@ class Arr
      *     array('name' => 'mary', 'children' => array('fred', 'paul', 'sally', 'jane'))
      *
      * @param array $array1 initial array
-     * @param array $array2,... array to merge
-     * @return  array
+     * @param array ...$arrays
      */
     public static function merge(array $array1, array ...$arrays) : array
     {
@@ -193,7 +189,6 @@ class Arr
      *
      * @param array $array1 master array
      * @param array ...$arrays
-     * @return  array
      */
     public static function overwrite(array $array1, array ...$arrays) : array
     {
@@ -221,7 +216,6 @@ class Arr
      * [!!] The keys of array values will be discarded.
      *
      * @param array $array array to flatten
-     * @return  array
      */
     public static function flatten($array): array
     {

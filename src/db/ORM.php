@@ -51,7 +51,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * Gets the table name for this object
-     * @return string
      */
     public static function table(): string
     {
@@ -69,9 +68,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return $short;
     }
 
-    /**
-     * @return SelectQuery
-     */
     public static function find(): SelectQuery
     {
         return static::prepareQuery(new SelectQuery(static::class));
@@ -105,7 +101,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * @param array $args
-     * @return SelectQuery
      */
     public static function where(...$args): SelectQuery
     {
@@ -125,10 +120,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
 
-    /**
-     * @param int $value
-     * @return static|null
-     */
     public static function one(int $value): ?self
     {
         return static::find()
@@ -139,7 +130,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * @param array $conditions
-     * @return static|null
      */
     public static function oneWhere(...$conditions): ?self
     {
@@ -147,10 +137,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
 
-    /**
-     * @param int $id
-     * @return static
-     */
     public static function oneOrFail(int $id): self
     {
         return static::find()
@@ -160,10 +146,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
 
-    /**
-     *
-     * @return Query
-     */
     public static function query(): Query
     {
         return new Query(static::class);
@@ -177,8 +159,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param string $key the key to use for the array
      * @param string $display the value to use for the display
      * @param string $first first value
-     *
-     * @return array
      */
     public static function selectList(string $key, string $display, $first = null): array
     {
@@ -261,9 +241,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * Gets an array version of the model
-     *
-     * @param array $properties
-     * @return array
      */
     public function toArray(array $properties = []): array
     {
@@ -290,9 +267,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * Checks if the field (or any) was changed
-     *
-     * @param array|string|null $fieldName
-     * @return bool
      */
     public function changed(array|string $fieldName = null): bool
     {
@@ -310,9 +284,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * Checks if the field (or any) was changed during update/create
-     *
-     * @param array|string|null $fieldName
-     * @return bool
      */
     public function wasChanged(array|string $fieldName = null): bool
     {
@@ -330,8 +301,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     /**
      * Determine if this model is loaded.
-     *
-     * @return bool
      */
     public function loaded(): bool
     {
@@ -465,7 +434,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return;
         }
 
-        throw new \RuntimeException('Cannot delete a non-loaded model ' . \get_class($this) . ' or model without id pk!');
+        throw new \RuntimeException('Cannot delete a non-loaded model ' . static::class . ' or model without id pk!');
     }
 
 

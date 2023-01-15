@@ -86,7 +86,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         ];
 
         if ($e instanceof UserException || config('debug')) {
-            $arr['name'] = \get_class($e);
+            $arr['name'] = $e::class;
             $arr['message'] = $e->getMessage();
         }
 
@@ -95,7 +95,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         }
 
         if (config('debug')) {
-            $arr['type'] = \get_class($e);
+            $arr['type'] = $e::class;
             $arr['file'] = Debug::path($e->getFile());
             $arr['line'] = $e->getLine();
         }

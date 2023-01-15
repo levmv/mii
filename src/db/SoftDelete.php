@@ -20,9 +20,6 @@ trait SoftDelete
         return parent::prepareQuery((new SelectQuery(static::class))->where(static::table().'.deleted', 'is not', null));
     }
 
-    /**
-     * @return SelectQuery
-     */
     public static function findAny(): SelectQuery
     {
         return parent::prepareQuery(new SelectQuery(static::class));
@@ -52,7 +49,7 @@ trait SoftDelete
         }
 
         if (!$this->loaded()) {
-            throw new \Exception('Cannot delete a non-loaded model ' . \get_class($this) . '!');
+            throw new \Exception('Cannot delete a non-loaded model ' . $this::class . '!');
         }
 
         $this->__loaded = false;

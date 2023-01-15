@@ -55,9 +55,7 @@ class Local extends Component implements StorageInterface
     }
 
     /**
-     * @param string $path
      * @param string|\Stringable|resource $content
-     * @return bool
      */
     public function put(string $path, $content): bool
     {

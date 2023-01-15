@@ -26,7 +26,7 @@ class ACL
      * @param string $action
      * @return $this
      */
-    public function allow($role, $action = '*'): self
+    public function allow(mixed $role, $action = '*'): self
     {
         $this->addRule(true, $role, $action);
 
@@ -40,7 +40,7 @@ class ACL
      * @param string $action
      * @return $this
      */
-    public function deny($role, $action = '*'): self
+    public function deny(mixed $role, $action = '*'): self
     {
         $this->addRule(false, $role, $action);
 
@@ -62,7 +62,6 @@ class ACL
     /**
      * Add rule to array of ACL rules.
      *
-     * @param bool $access
      * @param mixed  $role single role or array of roles
      * @param string $action
      */
@@ -82,8 +81,6 @@ class ACL
      * Check if a role (or one of roles) is allowed to an action.
      *
      * @param mixed  $role single role or array of roles
-     * @param string $action
-     * @return bool
      */
     public function check(mixed $role, string $action = '*'): bool
     {
@@ -105,7 +102,6 @@ class ACL
      *
      * @param $role
      * @param $action
-     * @return bool
      */
     protected function match($role, $action): bool
     {

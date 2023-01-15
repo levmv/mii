@@ -4,8 +4,8 @@ namespace mii\util;
 
 class Url
 {
-    public const CURRENT = 1;
-    public const ACTIVE = 2;
+    final public const CURRENT = 1;
+    final public const ACTIVE = 2;
 
     private static bool $inited = false;
     private static string $uri = '';
@@ -69,7 +69,6 @@ class Url
      *     echo URL::base('//');
      *
      * @param mixed $protocol Protocol string or boolean
-     * @return  string
      */
     public static function base(mixed $protocol = null): string
     {
@@ -97,10 +96,9 @@ class Url
      *     echo URL::site('foo/bar');
      *
      * @param string $uri Site URI to convert
-     * @param mixed  $protocol Protocol string or true
-     * @return  string
+     * @param mixed|null $protocol Protocol string or true
      */
-    public static function site(string $uri = '', $protocol = null): string
+    public static function site(string $uri = '', mixed $protocol = null): string
     {
         // Chop off possible scheme, host, port, user and pass parts
         $path = \preg_replace('~^[-a-z0-9+.]++://[^/]++/?~', '', \trim($uri, '/'));
@@ -119,7 +117,6 @@ class Url
      * Used by URL::site()
      *
      * @param array $matches Array of matches from preg_replace_callback()
-     * @return string          Encoded string
      */
     protected static function _rawurlencode_callback(array $matches): string
     {
@@ -140,7 +137,6 @@ class Url
      *
      * @param array|null $params Array of GET parameters
      * @param bool $useGet Include current request GET parameters
-     * @return  string
      */
     public static function query(array $params = null, bool $useGet = false): string
     {

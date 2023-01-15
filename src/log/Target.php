@@ -33,7 +33,7 @@ abstract class Target extends Component
             if (!$pass) {
                 foreach ($this->categories as $category) {
                     if ($msg[2] === $category ||
-                        (\substr_compare($category, '*', -1, 1) === 0 && \str_starts_with($msg[2], \rtrim($category, '*')))) {
+                        (str_ends_with($category, '*') && \str_starts_with($msg[2], \rtrim($category, '*')))) {
                         $pass = true;
                         break;
                     }
@@ -131,7 +131,7 @@ abstract class Target extends Component
     /** @noinspection PhpFullyQualifiedNameUsageInspection */
     public static function shortExceptionText(\Throwable $e): string
     {
-        $name = \get_class($e);
+        $name = $e::class;
         $msg = $e->getMessage();
         $file = \mii\util\Debug::path($e->getFile());
 

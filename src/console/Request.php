@@ -311,10 +311,6 @@ class Request extends Component
         return $results;
     }
 
-    /**
-     * @param \Reflector $ref
-     * @return array
-     */
     public static function getPhpdocSummary(\Reflector $ref): array
     {
         $comment = $ref->getDocComment();

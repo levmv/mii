@@ -36,7 +36,6 @@ class Debug
      * @param mixed   $value variable to dump
      * @param integer $length maximum length of strings
      * @param integer $level_recursion recursion limit
-     * @return  string
      */
     public static function dump(mixed $value, int $length = 128, int $level_recursion = 10): string
     {
@@ -50,7 +49,6 @@ class Debug
      * @param integer $length maximum length of strings
      * @param integer $limit recursion limit
      * @param integer $level current recursion level (internal usage only!)
-     * @return  string
      */
     protected static function _dump(mixed &$var, int $length = 128, int $limit = 10, int $level = 0): string
     {
@@ -186,7 +184,7 @@ class Debug
                 $output[] = "{\n$space$s...\n$space}";
             }
 
-            return '<small>object</small> <span>' . \get_class($var) . '(' . \count($array) . ')</span> ' . \implode("\n", $output);
+            return '<small>object</small> <span>' . $var::class . '(' . \count($array) . ')</span> ' . \implode("\n", $output);
         }
 
         return '<small>' . \get_debug_type($var) . '</small> ' . \htmlspecialchars(\print_r($var, true), \ENT_NOQUOTES, 'utf-8');
@@ -198,7 +196,6 @@ class Debug
      * when you want to display a shorter path.
      *
      * @param string $file path to debug
-     * @return  string
      */
     public static function path(string $file): string
     {
@@ -208,9 +205,7 @@ class Debug
             }
 
             \Mii::$paths['mii'] = path('vendor') . '/levmv/mii/src';
-            \uasort(\Mii::$paths, static function ($a, $b) {
-                return \strlen($b) - \strlen($a);
-            });
+            \uasort(\Mii::$paths, static fn($a, $b) => \strlen($b) - \strlen($a));
         }
         foreach (\Mii::$paths as $name => $path) {
             if (\str_starts_with($file, $path)) {
@@ -292,7 +287,6 @@ class Debug
      *     echo implode('<br/>', Debug::trace());
      *
      * @param array|null $trace
-     * @return  array
      * @throws \ReflectionException
      */
     public static function trace(array $trace = null): array
@@ -388,7 +382,7 @@ class Debug
     }
 
 
-    public static function shortTextTrace(array $trace = null)
+    public static function shortTextTrace(array $trace = null): string
     {
         $trace = static::trace($trace);
 
@@ -410,7 +404,7 @@ class Debug
                     } elseif (\is_bool($arg)) {
                         $args[] = ($arg) ? 'true' : 'false';
                     } elseif (\is_object($arg)) {
-                        $args[] = \get_class($arg);
+                        $args[] = $arg::class;
                     } elseif (\is_resource($arg)) {
                         $args[] = \get_resource_type($arg);
                     } else {

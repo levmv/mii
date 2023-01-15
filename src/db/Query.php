@@ -105,8 +105,6 @@ class Query extends SelectQuery
 
     /**
      * Compile the SQL query and return it.
-     *
-     * @return  string
      */
     public function compileInsert(): string
     {
@@ -114,7 +112,7 @@ class Query extends SelectQuery
         $query = 'INSERT INTO ' . $this->getTable();
 
         // Add the column names
-        $query .= ' (' . \implode(', ', \array_map([$this->db, 'quoteColumn'], $this->_columns)) . ') ';
+        $query .= ' (' . \implode(', ', \array_map($this->db->quoteColumn(...), $this->_columns)) . ') ';
 
         if (\is_array($this->_values)) {
             $groups = [];
@@ -214,7 +212,6 @@ class Query extends SelectQuery
      * given values.
      *
      * @param mixed $db Database instance or name of instance
-     * @return  string
      */
     public function compile(Database $db = null): string
     {

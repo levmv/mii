@@ -56,7 +56,7 @@ class Controller
             return;
         }
 
-        $controller = \strtolower($this->request->controller);
+        $controller = \strtolower((string) $this->request->controller);
 
         foreach ($methods as ['name' => $method,
                  'summary' => $summary,
@@ -105,8 +105,8 @@ class Controller
                     $type_name = $type->getName();
                     switch ($type_name) {
                         case 'int':
-                            if (\strlen($params[$name]) > 1 && $params[$name][0] === '0') {
-                                $params[$name] = \substr($params[$name], 1);
+                            if (\strlen((string) $params[$name]) > 1 && $params[$name][0] === '0') {
+                                $params[$name] = \substr((string) $params[$name], 1);
                             }
                             $params[$name] = \filter_var($params[$name], \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE);
                             break;
@@ -153,7 +153,6 @@ class Controller
      * 3. After the controller action is called, the [Controller::after] method
      * will be called.
      *
-     * @return  int
      * @throws  Exception
      */
     public function _execute(): int

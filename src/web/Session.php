@@ -25,8 +25,6 @@ class Session extends Component
 
     /**
      * Checks for session cookie without starting session itself
-     *
-     * @return bool
      */
     public function checkCookie(): bool
     {
@@ -35,8 +33,6 @@ class Session extends Component
 
     /**
      * Get the current session cookie name.
-     *
-     * @return  string
      */
     public function name(): string
     {
@@ -47,10 +43,9 @@ class Session extends Component
      * Get a variable from the session array.
      *
      * @param string $key variable name
-     * @param mixed  $default default value to return
-     * @return  mixed
+     * @param mixed|null $default default value to return
      */
-    public function get(string $key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $this->open();
 
@@ -122,9 +117,8 @@ class Session extends Component
      *
      * @param string $key variable name
      * @param mixed  $value value
-     * @return  $this
      */
-    public function set(string $key, $value): self
+    public function set(string $key, mixed $value): self
     {
         $this->open();
 
@@ -138,9 +132,8 @@ class Session extends Component
      *
      * @param string $key variable name
      * @param mixed  $value referenced value
-     * @return  $this
      */
-    public function bind(string $key, &$value): self
+    public function bind(string $key, mixed &$value): self
     {
         $this->open();
 
@@ -153,7 +146,6 @@ class Session extends Component
      * Removes a variable in the session array.
      *
      * @param array $args
-     * @return  $this
      */
     public function delete(...$args): self
     {
@@ -168,9 +160,6 @@ class Session extends Component
 
     /**
      * Generates a new session id and returns it.
-     *
-     * @param bool $delete_old
-     * @return  string
      */
     public function regenerate(bool $delete_old = false): string
     {
@@ -192,7 +181,6 @@ class Session extends Component
      * [!!] Any errors that occur during session writing will be logged,
      * but not displayed, because sessions are written after output has
      * been sent.
-     *
      */
     public function close(): void
     {
