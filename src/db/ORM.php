@@ -120,7 +120,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     }
 
 
-    public static function one(int $value): ?self
+    public static function one(int $value): ?static
     {
         return static::find()
             ->orderBy(null)
@@ -131,13 +131,13 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     /**
      * @param array $conditions
      */
-    public static function oneWhere(...$conditions): ?self
+    public static function oneWhere(...$conditions): ?static
     {
         return static::where(...$conditions)->one();
     }
 
 
-    public static function oneOrFail(int $id): self
+    public static function oneOrFail(int $id): static
     {
         return static::find()
             ->orderBy(null)
