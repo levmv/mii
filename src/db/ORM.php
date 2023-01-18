@@ -190,7 +190,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return $this->$key ?? null;
     }
 
-    public function set($values, $value = null): ORM
+    public function set($values, $value = null): static
     {
         /** @noinspection PhpFullyQualifiedNameUsageInspection */
         if ($values instanceof \mii\web\Form) {
