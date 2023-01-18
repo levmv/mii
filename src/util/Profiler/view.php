@@ -7,7 +7,7 @@ namespace mii\util;
     .mii {
         padding: 5px;
         overflow: auto;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif
     }
 
     .mii table.profiler {
@@ -19,7 +19,7 @@ namespace mii\util;
         border-collapse: collapse
     }
 
-    .mii table.profiler td, .mii table.profiler th {
+    .mii table.profiler td,.mii table.profiler th {
         padding: .2em .4em .15em;
         background: #fff;
         border: 1px solid #bbb;
@@ -75,7 +75,7 @@ namespace mii\util;
         padding: .2em .4em
     }
 
-    .mii table.profiler tr.mark td > div {
+    .mii table.profiler tr.mark td>div {
         position: relative;
         padding: .2em .4em
     }
@@ -173,7 +173,7 @@ $application_cols = ['min', 'max', 'average', 'current'];
                                     title="seconds">s</abbr>
                         <?php else: ?>
 
-                            <?php echo \number_format($stats[$key]['time'], 5) * 1000 ?> <abbr title="seconds">ms</abbr>
+                            <?php echo \number_format($stats[$key]['time']*1000, 2) ?> <abbr title="seconds">ms</abbr>
                         <?php endif; ?>
                     </td>
                 <?php endforeach;
@@ -195,7 +195,7 @@ $application_cols = ['min', 'max', 'average', 'current'];
                 <td class="time"
                     colspan="4">
                     <?= \number_format($group_stats[$group]['total']['memory'] / 1024, 3) ?>&thinsp;kB |
-                    <span style="color:#bbb"><?= \number_format($group_stats[$group]['total']['time'], 6) * 1000 ?></span>&thinsp;ms
+                    <span style="color:#bbb"><?= \number_format($group_stats[$group]['total']['time']*1000, 3) ?></span>&thinsp;ms
                 </td>
             </tr>
             <tr class="headers">
@@ -217,7 +217,7 @@ $application_cols = ['min', 'max', 'average', 'current'];
                         $is_total = $key === 'total'; ?>
                         <td class="<?php echo $key ?>">
                             <div>
-                                <div class="value"><?php echo \number_format($stats[$key]['time'], 6) * 1000 ?><?php
+                                <div class="value"><?php echo \number_format($stats[$key]['time']*1000, 4) ?><?php
                                     if ($is_total) {
                                         echo '&thinsp;<abbr>ms</abbr>';
                                     }

@@ -62,16 +62,20 @@ class Controller
         foreach ($method->getParameters() as $param) {
             $name = $param->getName();
             if (\array_key_exists($name, $params)) {
-                $is_valid = true;
+                $isValid = true;
 
+                /**
+                 * Yeah, we silently don't support Intersection|Union types O_o
+                 * @var \ReflectionNamedType|null $type
+                 */
                 $type = $param->getType();
 
-                if ($type && $type->getName() === 'array') {
+                if ($type !== null && $type->getName() === 'array') {
                     $params[$name] = (array) $params[$name];
                 } elseif (\is_array($params[$name])) {
-                    $is_valid = false;
+                    $isValid = false;
                 } elseif (
-                    $type && $type->isBuiltin() &&
+                    $type !== null && $type->isBuiltin() &&
                     ($params[$name] !== null || !$type->allowsNull())
                 ) {
                     $type_name = $type->getName();
@@ -90,10 +94,10 @@ class Controller
                             break;
                     }
                     if ($params[$name] === null) {
-                        $is_valid = false;
+                        $isValid = false;
                     }
                 }
-                if (!$is_valid) {
+                if (!$isValid) {
                     throw new BadRequestHttpException("Invalid data received for parameter \"$name\".");
                 }
                 $args[] = $params[$name];

@@ -32,7 +32,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
      * Sets the total number of rows and stores the result locally.
      *
      * @param \mysqli_result $result query result
-     * @param mixed $asObject
+     * @param string|null $asObject
      * @param array|null $params
      */
     public function __construct(\mysqli_result $result, ?string $asObject = null, array $params = null)
@@ -56,9 +56,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
      */
     public function __destruct()
     {
-        if (\is_resource($this->_result)) {
-            $this->_result->free();
-        }
+        $this->_result->free();
     }
 
 

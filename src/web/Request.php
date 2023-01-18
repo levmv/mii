@@ -157,8 +157,6 @@ class Request extends Component
     /**
      * Gets or sets the HTTP method. Usually GET, POST, PUT or DELETE in
      * traditional CRUD applications.
-     *
-     * @return  mixed
      */
     public function method(): string
     {
@@ -199,7 +197,7 @@ class Request extends Component
      * Gets HTTP POST parameters of the request.
      *
      * @param mixed  $key Parameter name
-     * @param string|null $default Default value if parameter does not exist
+     * @param string|int|null $default Default value if parameter does not exist
      */
     public function post(string $key = null, mixed $default = null): mixed
     {

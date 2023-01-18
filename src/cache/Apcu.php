@@ -57,37 +57,6 @@ class Apcu extends Cache
         return \apcu_clear_cache();
     }
 
-    /**
-     * Increments a given value by the step value supplied.
-     * Useful for shared counters and other persistent integer based
-     * tracking.
-     *
-     * @param string $id of cache entry to increment
-     * @param int $step value to increment by
-     * @return  integer
-     * @return  boolean
-     */
-    public function increment(string $id, int $step = 1)
-    {
-        return \apcu_inc($id, $step);
-    }
-
-    /**
-     * Decrements a given value by the step value supplied.
-     * Useful for shared counters and other persistent integer based
-     * tracking.
-     *
-     * @param string $id of cache entry to decrement
-     * @param int $step value to decrement by
-     * @return  integer
-     * @return  boolean
-     */
-    public function decrement(string $id, int $step = 1)
-    {
-        return \apcu_dec($id, $step);
-    }
-
-
     protected function sanitizeId(string $id): string
     {
         return $this->prefix . $id;

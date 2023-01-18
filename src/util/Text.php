@@ -249,7 +249,6 @@ class Text
 
     /**
      * Declination of number
-     * @param mixed $array
      */
     public static function decl(int $number, array $array): mixed
     {

@@ -108,7 +108,7 @@ class Database extends Component
      *
      * @param int|null $type Database::SELECT, Database::INSERT, etc
      * @param string $sql SQL query
-     * @param mixed $asObject result object class string, TRUE for stdClass, FALSE for assoc array
+     * @param string|null $asObject result object class string, TRUE for stdClass, FALSE for assoc array
      * @param array|null $params object construct parameters for result class
      * @return Result|null  Result for SELECT queries or null
      * @throws DatabaseException

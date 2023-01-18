@@ -101,10 +101,10 @@ class Date
 
     public static function intl(string $pattern = ''): \IntlDateFormatter {
 
-        if(!isset(static::$formatters[$pattern])) {
-            static::$formatters[$pattern] = new \IntlDateFormatter(\Mii::$app->locale, 0, 0, null, null, $pattern);
+        if(!isset(self::$formatters[$pattern])) {
+            self::$formatters[$pattern] = new \IntlDateFormatter(\Mii::$app->locale, 0, 0, null, null, $pattern);
         }
 
-        return static::$formatters[$pattern];
+        return self::$formatters[$pattern];
     }
 }

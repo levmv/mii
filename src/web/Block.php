@@ -154,7 +154,7 @@ class Block implements \Stringable
      * Assigns a variable by name. Assigned values will be available as a
      * variable within the view file:
      *
-     * @param mixed $key variable name or an array of variables
+     * @param string|array $key variable name or an array of variables
      * @param mixed|null $value value
      * @return  $this
      */

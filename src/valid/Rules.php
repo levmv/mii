@@ -10,10 +10,8 @@ class Rules
 {
     /**
      * Checks if a value is unique in database.
-     *
-     * @param null $id
      */
-    public static function unique($value, string $key, string $model, $id = null) : bool
+    public static function unique($value, string $key, string $model, string|int $id = null) : bool
     {
         if ($id) {
             $res = $model::find()->where($key, '=', $value)->one();
@@ -326,10 +324,11 @@ class Rules
     /**
      * Checks whether a string consists of digits only (no dots or dashes).
      *
-     * @param string  $str input string
+     * @param string|int $str input string
      * @param boolean $utf8 trigger UTF-8 compatibility
+     * @return bool
      */
-    public static function digit($str, bool $utf8 = false) : bool
+    public static function digit(string| int $str, bool $utf8 = false) : bool
     {
         if ($utf8 === true) {
             return (bool) \preg_match('/^\pN++$/uD', $str);

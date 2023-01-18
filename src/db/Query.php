@@ -59,7 +59,6 @@ class Query extends SelectQuery
      * Adds or overwrites values. Multiple value sets can be added.
      *
      * @param array $values values list
-     * @param   ...
      * @return  $this
      */
     public function values(...$values): self

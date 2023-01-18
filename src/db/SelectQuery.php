@@ -115,8 +115,6 @@ class SelectQuery
 
     /**
      * Sets the initial columns to select
-     *
-     * @return  Query
      */
     public function select(...$columns): self
     {
@@ -338,7 +336,7 @@ class SelectQuery
     /***** WHERE ****/
 
     /**
-     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $column column name or array($column, $alias) or object
      * @param string $op logic operator
      * @param mixed  $value column value
      * @return  $this
@@ -352,7 +350,7 @@ class SelectQuery
     /**
      * Alias of andFilter()
      *
-     * @param mixed  $column column name or array($column, $alias) or object
+     * @param string $column column name or array($column, $alias) or object
      * @param string $op logic operator
      * @param mixed  $value column value
      * @return  $this
@@ -365,12 +363,12 @@ class SelectQuery
     /**
      * Creates a new "AND WHERE" condition for the query.
      *
-     * @param mixed $column column name or array($column, $alias) or object
+     * @param string|null $column column name or array($column, $alias) or object
      * @param string|null $op logic operator
-     * @param mixed $value column value
+     * @param mixed|null $value column value
      * @return  $this
      */
-    public function andWhere(?string $column = null, string $op = null, $value = null): self
+    public function andWhere(?string $column = null, string $op = null, mixed $value = null): self
     {
         if ($column === null) {
             $this->_where[] = ['AND' => '('];
@@ -831,7 +829,7 @@ class SelectQuery
      * Compile the SQL query and return it. Replaces any parameters with their
      * given values.
      *
-     * @param mixed $db Database instance or name of instance
+     * @param Database|null $db Database instance or name of instance
      * @return  string
      */
     public function compile(Database $db = null): string
@@ -845,7 +843,7 @@ class SelectQuery
     /**
      * Execute the current query on the given database.
      *
-     * @param mixed $db Database instance or name of instance
+     * @param Database|null $db Database instance or name of instance
      * @return Result|null Result for SELECT queries
      * @throws DatabaseException
      */

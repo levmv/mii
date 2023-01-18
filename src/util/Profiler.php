@@ -184,7 +184,7 @@ class Profiler
      *
      *     $stats = Profiler::group_stats('test');
      *
-     * @param mixed $groups single group name string, or array with group names; all groups by default
+     * @param string|array|null $groups single group name string, or array with group names; all groups by default
      * @return  array   min, max, average, total
      */
     public static function groupStats(string|array $groups = null): array

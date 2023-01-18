@@ -13,6 +13,8 @@ abstract class BaseBlocks extends Component
 
     protected string $base_url = '/assets';
 
+    public ?string $base_path = null;
+
     protected ?string $current_set = null;
 
     protected array $sets = [];
