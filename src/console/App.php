@@ -10,7 +10,7 @@ namespace mii\console;
 
 /**
  * Class App
- * @property \mii\console\Request $request
+ * @property Request $request
  */
 class App extends \mii\core\App
 {
@@ -31,8 +31,8 @@ class App extends \mii\core\App
             'router' => \mii\core\Router::class,
             'db' => \mii\db\Database::class,
             'cache' => \mii\cache\Apcu::class,
-            'request' => \mii\console\Request::class,
-            'error' => \mii\console\ErrorHandler::class,
+            'request' => Request::class,
+            'error' => ErrorHandler::class,
         ];
     }
 }

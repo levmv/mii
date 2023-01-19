@@ -537,7 +537,7 @@ class Assets extends Controller
 
     protected function executeBinary(string $command): bool
     {
-        $output = '';
+        $output = [];
         $status = 0;
 
         exec($this->binPackagePath . "/bin/$command", $output, $status); // may be 2>&1 ?

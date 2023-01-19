@@ -4,16 +4,17 @@ namespace mii\db;
 
 class DB
 {
-    public static function raw(string $q, array $params = [])
+    public static function raw(string $q, array $params = []): Result|int|string
     {
         return static::query(null, $q, $params);
     }
 
     /**
+     * @param string $q
+     * @param array $params
      * @return Result
-     * @throws DatabaseException
      */
-    public static function select(string $q, array $params = [])
+    public static function select(string $q, array $params = []): Result
     {
         return static::query(Database::SELECT, $q, $params);
     }

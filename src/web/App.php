@@ -4,6 +4,15 @@ namespace mii\web;
 
 use mii\core\InvalidRouteException;
 use mii\core\Router;
+use mii\log\Logger;
+use mii\web\Blocks;
+use mii\db\Database;
+use mii\cache\Apcu;
+use mii\web\Session;
+use mii\web\Request;
+use mii\web\Response;
+use mii\web\UploadHandler;
+use mii\web\ErrorHandler;
 
 /**
  * Class App
@@ -52,16 +61,16 @@ class App extends \mii\core\App
     protected function defaultComponents(): array
     {
         return [
-            'log' => 'mii\log\Logger',
-            'blocks' => 'mii\web\Blocks',
-            'db' => 'mii\db\Database',
-            'cache' => 'mii\cache\Apcu',
-            'session' => 'mii\web\Session',
-            'router' => 'mii\core\Router',
-            'request' => 'mii\web\Request',
-            'response' => 'mii\web\Response',
-            'upload' => 'mii\web\UploadHandler',
-            'error' => 'mii\web\ErrorHandler',
+            'log' => Logger::class,
+            'blocks' => Blocks::class,
+            'db' => Database::class,
+            'cache' => Apcu::class,
+            'session' => Session::class,
+            'router' => Router::class,
+            'request' => Request::class,
+            'response' => Response::class,
+            'upload' => UploadHandler::class,
+            'error' => ErrorHandler::class,
         ];
     }
 }

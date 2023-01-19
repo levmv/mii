@@ -90,7 +90,10 @@ trait JsonAttributes
         }
     }
 
-    protected function _serializeValue($value)
+    /**
+     * @throws \JsonException
+     */
+    protected function _serializeValue($value): bool|string
     {
         return \json_encode($value, JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES);
     }

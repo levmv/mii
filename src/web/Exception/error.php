@@ -1,15 +1,13 @@
 <?php declare(strict_types=1);
 
-/**
- * @var Exception $exception
- */
-
-// Unique error identifier
 use mii\util\Debug;
 use mii\util\HTML;
 
 $error_id = uniqid('error');
 
+/**
+ * @var Exception $exception
+ */
 ?>
 <style>
     #mii_error {

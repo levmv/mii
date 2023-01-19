@@ -106,12 +106,6 @@ abstract class Form
         $this->_loaded = true;
     }
 
-
-    public function beforeValidate()
-    {
-    }
-
-
     public function prepare()
     {
     }
@@ -207,8 +201,6 @@ abstract class Form
 
     public function validate(): bool
     {
-        $this->beforeValidate();
-
         $this->validation->rules($this->rules());
         if(!empty($this->labels)) {
             $this->validation->labels($this->labels);

@@ -92,7 +92,7 @@ if (!\function_exists('cache')) {
      * @param integer|null $lifetime lifetime in seconds
      * @return  boolean
      */
-    function cache(string $id, mixed $data, int $lifetime = null)
+    function cache(string $id, mixed $data, int $lifetime = null): bool
     {
         return Mii::$app->cache->set($id, $data, $lifetime);
     }
@@ -132,7 +132,7 @@ if (!\function_exists('dd')) {
     /**
      * Dump and die
      */
-    function dd(...$params)
+    function dd(...$params): never
     {
         if (Mii::$app instanceof \mii\web\App && Mii::$app->response->format === \mii\web\Response::FORMAT_HTML) {
             echo '<style>pre{font-size:14px;text-align:left;color:#111;overflow:auto;white-space:pre-wrap}';
@@ -189,7 +189,7 @@ if (!\function_exists('config')) {
 }
 
 if (!\function_exists('configSet')) {
-    function configSet(string $key, $value)
+    function configSet(string $key, $value): void
     {
         \mii\util\Arr::setPath(Mii::$app->_config, $key, $value);
     }

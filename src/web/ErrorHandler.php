@@ -10,7 +10,7 @@ use mii\util\Debug;
 
 class ErrorHandler extends \mii\core\ErrorHandler
 {
-    public ?string $route = null;
+    public ?string $route = 'error_page';
 
     public function prepareException(\Throwable $e): \Throwable
     {
@@ -45,7 +45,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         }
 
         if ($response->format === Response::FORMAT_HTML) {
-            if ($this->route && !\config('debug')) {
+            if ($this->route !== null && !\config('debug')) {
                 try {
                     \Mii::$app->run($this->route);
                     return;
@@ -67,7 +67,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
     }
 
 
-    public function renderFile($__file, $__params)
+    public function renderFile($__file, $__params): bool|string
     {
         $__params['handler'] = $this;
         \ob_start();
@@ -77,7 +77,7 @@ class ErrorHandler extends \mii\core\ErrorHandler
         return \ob_get_clean();
     }
 
-    protected function exceptionToArray($e)
+    protected function exceptionToArray($e): array
     {
         $arr = [
             'name' => 'Exception',

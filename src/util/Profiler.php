@@ -64,10 +64,6 @@ class Profiler
 
     /**
      * Stops a benchmark.
-     *
-     *     Profiler::stop($token);
-     *
-     * @param string $token
      */
     public static function stop(string $token): bool
     {
@@ -81,14 +77,9 @@ class Profiler
      * Deletes a benchmark. If an error occurs during the benchmark, it is
      * recommended to delete the benchmark to prevent statistics from being
      * adversely affected.
-     *
-     *     Profiler::delete($token);
-     *
-     * @param string $token
      */
     public static function delete(string $token): bool
     {
-        // Remove the benchmark
         unset(self::$_marks[$token]);
         return true;
     }

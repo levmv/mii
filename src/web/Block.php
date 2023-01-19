@@ -190,7 +190,7 @@ class Block implements \Stringable
         return $this;
     }
 
-    public function bindGlobal(string $key, &$value)
+    public function bindGlobal(string $key, &$value): static
     {
         self::$_global_data[$key] = &$value;
 

@@ -227,10 +227,9 @@ class Debug
      * @param string $file file to open
      * @param integer $line_number line number to highlight
      * @param integer $padding number of padding lines
-     * @return  string   source of file
-     * @return  FALSE    file is unreadable
+     * @return bool|string source of file
      */
-    public static function source(string $file, int $line_number, int $padding = 5)
+    public static function source(string $file, int $line_number, int $padding = 5): bool|string
     {
         if (!$file || !\is_readable($file)) {
             // Continuing will cause errors

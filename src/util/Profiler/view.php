@@ -165,21 +165,17 @@ $application_cols = ['min', 'max', 'average', 'current'];
         <tr class="final mark time">
             <th class="name" rowspan="2"
                 scope="rowgroup"><?php echo 'Application Execution' . ' (' . $stats['count'] . ')' ?></th>
-            <?php try {
-                foreach ($application_cols as $key): ?>
-                    <td class="<?php echo $key ?>">
-                        <?php if ($stats[$key]['time'] > 2): ?>
-                            <?php echo \number_format($stats[$key]['time'], 3, ',', '') ?> <abbr
-                                    title="seconds">s</abbr>
-                        <?php else: ?>
+            <?php foreach ($application_cols as $key): ?>
+                <td class="<?php echo $key ?>">
+                    <?php if ($stats[$key]['time'] > 2): ?>
+                        <?php echo \number_format($stats[$key]['time'], 3, ',', '') ?> <abbr
+                                title="seconds">s</abbr>
+                    <?php else: ?>
 
-                            <?php echo \number_format($stats[$key]['time']*1000, 2) ?> <abbr title="seconds">ms</abbr>
-                        <?php endif; ?>
-                    </td>
-                <?php endforeach;
-            } catch (\Throwable $t) {
-                throw  $t;
-            } ?>
+                        <?php echo \number_format($stats[$key]['time']*1000, 2) ?> <abbr title="seconds">ms</abbr>
+                    <?php endif; ?>
+                </td>
+            <?php endforeach; ?>
         </tr>
         <tr class="final mark memory">
             <?php foreach ($application_cols as $key): ?>

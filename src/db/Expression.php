@@ -30,7 +30,7 @@ class Expression implements \Stringable
      * @param mixed  $var variable to use
      * @return  $this
      */
-    public function bind(string $param, mixed &$var)
+    public function bind(string $param, mixed &$var): static
     {
         $this->params[$param] =&$var;
 
