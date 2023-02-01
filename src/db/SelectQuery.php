@@ -245,12 +245,12 @@ class SelectQuery
     /**
      * Alias of and_having()
      *
-     * @param string|array|null $column column name or array($column, $alias) or object
+     * @param mixed $column column name or array($column, $alias) or object
      * @param string|null $op logic operator
-     * @param string|array|null $value column value
+     * @param mixed $value column value
      * @return  $this
      */
-    public function having(string|array|null $column = null, ?string $op = null, mixed $value = null): self
+    public function having(mixed $column = null, ?string $op = null, mixed $value = null): self
     {
         return $this->andHaving($column, $op, $value);
     }
@@ -263,7 +263,7 @@ class SelectQuery
      * @param mixed $value column value
      * @return  $this
      */
-    public function andHaving(string|array|null $column, ?string $op, mixed $value = null): self
+    public function andHaving(mixed $column, ?string $op, mixed $value = null): self
     {
         if ($column === null) {
             $this->_having[] = ['AND' => '('];
@@ -282,12 +282,12 @@ class SelectQuery
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param string|array|null $column column name or array($column, $alias) or object
+     * @param mixed $column column name or array($column, $alias) or object
      * @param string|null $op logic operator
-     * @param string|array|null $value column value
+     * @param mixed $value column value
      * @return  $this
      */
-    public function orHaving(string|array|null $column = null, ?string $op = null, mixed $value = null): self
+    public function orHaving(mixed $column = null, ?string $op = null, mixed $value = null): self
     {
         if ($column === null) {
             $this->_having[] = ['OR' => '('];
@@ -442,7 +442,7 @@ class SelectQuery
      * @param mixed $value column value
      * @return  $this
      */
-    public function orWhere(string|array|null $column = null, ?string $op = null, mixed $value = null): self
+    public function orWhere(mixed $column = null, ?string $op = null, mixed $value = null): self
     {
         if ($column === null) {
             $this->_where[] = ['OR' => '('];
@@ -487,11 +487,11 @@ class SelectQuery
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param string|array|null $column column name or array($column, $alias) or array([$column, $direction], [$column, $direction], ...)
+     * @param mixed $column column name or array($column, $alias) or array([$column, $direction], [$column, $direction], ...)
      * @param string|null $direction direction of sorting
      * @return  $this
      */
-    public function orderBy(string|array|null $column, ?string $direction = null): self
+    public function orderBy(mixed $column, ?string $direction = null): self
     {
         if (\is_array($column) && $direction === null) {
             $this->_order_by = $column;
