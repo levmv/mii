@@ -21,9 +21,9 @@ class Response extends Component
     public string $status_message = '';
 
     /**
-     * @var  string      The response body
+     * @var  string|array|null The response body
      */
-    protected string $_content = '';
+    protected string|array|null $_content = '';
 
     protected array $_headers = [];
 
