@@ -124,7 +124,7 @@ if (!\function_exists('path')) {
 if (!\function_exists('e')) {
     function e(?string $text): string
     {
-        return mii\util\HTML::entities($text, false);
+        return \htmlspecialchars((string) $text, \ENT_QUOTES | \ENT_SUBSTITUTE, 'utf-8');
     }
 }
 
