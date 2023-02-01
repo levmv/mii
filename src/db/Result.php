@@ -60,7 +60,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
     }
 
 
-    public function seek($offset)
+    public function seek($offset): bool
     {
         if ($this->offsetExists($offset) && $this->_result->data_seek($offset)) {
             // Set the current row to the offset
@@ -142,7 +142,7 @@ class Result implements \Countable, \Iterator, \ArrayAccess
     }
 
 
-    public function toList(string $key, string $display, $first = null): array
+    public function toList(string $key, string $display, array|string $first = null): array
     {
         $rows = [];
 

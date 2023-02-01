@@ -21,7 +21,7 @@ class Block implements \Stringable
     public ?array $__remote_js = null;
 
     // List of inline codes
-    public $__inline_js;
+    public array $__inline_js = [];
 
     public array $_depends = [];
 

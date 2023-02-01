@@ -368,7 +368,7 @@ class Profiler
     }
 
 
-    public static function show()
+    public static function show(): void
     {
         include \dirname(__DIR__) . '/util/Profiler/view.php';
     }

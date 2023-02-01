@@ -279,10 +279,9 @@ class Text
      * Num::$byte_units
      *
      * @param string $size file size in SB format
-     * @return  float
      * @throws Exception
      */
-    public static function bytes(string $size)
+    public static function bytes(string $size): int
     {
         // Prepare the size
         $size = \trim($size);
@@ -299,7 +298,7 @@ class Text
         // Find the actual unit, assume B if no unit specified
         $unit = $matches[2] ?? 'B';
         // Convert the size into bytes
-        return $size * (2 ** self::$byte_units[$unit]);
+        return (int) ($size * (2 ** self::$byte_units[$unit]));
     }
 
 

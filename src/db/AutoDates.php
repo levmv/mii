@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUndefinedMethodInspection */
+<?php /** @noinspection PhpDynamicFieldDeclarationInspection */
+/** @noinspection PhpUndefinedMethodInspection */
 /** @noinspection MagicMethodsValidityInspection */
 declare(strict_types=1);
 

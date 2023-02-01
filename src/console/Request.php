@@ -17,7 +17,7 @@ class Request extends Component
     /**
      * @var  string  controller to be executed
      */
-    public $controller;
+    public string $controllerName;
 
     /**
      * @var  string  action to be executed in the controller
@@ -42,7 +42,7 @@ class Request extends Component
             return;
         }
 
-        $this->controller = \ucfirst($argv[0]);
+        $this->controllerName = \ucfirst($argv[0]);
         \array_shift($argv);
 
         $this->action = 'index';
@@ -71,9 +71,9 @@ class Request extends Component
         $this->params = $params;
     }
 
-    public function execute()
+    public function execute(): int
     {
-        if (empty($this->controller)) {
+        if (empty($this->controllerName)) {
             $this->genHelp();
             return 0;
         }
@@ -90,7 +90,7 @@ class Request extends Component
         $namespaces[] = 'mii\\console\\controllers';
 
         while (\count($namespaces)) {
-            $controller_class = \array_shift($namespaces) . '\\' . $this->controller;
+            $controller_class = \array_shift($namespaces) . '\\' . $this->controllerName;
 
             \class_exists($controller_class); // always return false, but autoload class if it exists
 
@@ -103,7 +103,7 @@ class Request extends Component
         }
 
         if (!$controller_class) {
-            Console::stderr("Unknown command $this->controller\n", Console::FG_RED);
+            Console::stderr("Unknown command $this->controllerName\n", Console::FG_RED);
             return 1;
         }
 

@@ -18,8 +18,6 @@ abstract class App
 
     public string $language = 'ru';
 
-    public $controller;
-
     public array $_config;
 
     public ?string $base_url = null;

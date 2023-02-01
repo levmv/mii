@@ -99,9 +99,6 @@ class ACL
 
     /**
      * Check if a role is allowed to an action.
-     *
-     * @param $role
-     * @param $action
      */
     protected function match($role, $action): bool
     {

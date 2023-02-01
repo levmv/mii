@@ -158,9 +158,10 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      *
      * @param string $key the key to use for the array
      * @param string $display the value to use for the display
-     * @param string $first first value
+     * @param array|string|null $first first value
+     * @return array
      */
-    public static function selectList(string $key, string $display, $first = null): array
+    public static function selectList(string $key, string $display, array|string $first = null): array
     {
         return static::find()->select($key, $display)->get()->toList($key, $display, $first);
     }
@@ -318,17 +319,15 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     {
     }
 
-    protected function onCreate()
+    protected function onCreate(): void
     {
-        return true;
     }
 
-    protected function onUpdate()
+    protected function onUpdate(): void
     {
-        return true;
     }
 
-    protected function onChange()
+    protected function onChange(): void
     {
     }
 
@@ -348,11 +347,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
     public function create(): int
     {
         $this->innerBeforeChange();
-
-        if ($this->onCreate() === false) {
-            return 0;
-        }
-
+        $this->onCreate();
         $this->onChange();
 
         static::query()
@@ -388,11 +383,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         }
 
         $this->innerBeforeChange();
-
-        if ($this->onUpdate() === false) {
-            return 0;
-        }
-
+        $this->onUpdate();
         $this->onChange();
 
         $data = \array_intersect_key($this->attributes, $this->_changed);

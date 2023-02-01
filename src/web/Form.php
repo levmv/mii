@@ -106,7 +106,7 @@ abstract class Form
         $this->_loaded = true;
     }
 
-    public function prepare()
+    public function prepare(): void
     {
     }
 

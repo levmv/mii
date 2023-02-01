@@ -18,9 +18,6 @@ if (!\function_exists('abort')) {
 }
 
 if (!\function_exists('redirect')) {
-    /**
-     * @param      $url
-     */
     function redirect($url, bool $use_back_url = false): never
     {
         if ($use_back_url) {
@@ -31,10 +28,6 @@ if (!\function_exists('redirect')) {
 }
 
 if (!\function_exists('block')) {
-    /**
-     * @param $name string
-     * @param array|null $params
-     */
     function block(string $name, array $params = null): \mii\web\Block
     {
         if (!\is_null($params)) {
@@ -65,9 +58,9 @@ if (!\function_exists('getCached')) {
      * Retrieve a cached value entry by id.
      *
      * @param string $id id of cache to entry
-     * @param string $default default value to return if cache miss
+     * @param mixed $default default value to return if cache miss
      */
-    function getCached(string $id, $default = null, $lifetime = null): mixed
+    function getCached(string $id, mixed $default = null, $lifetime = null): mixed
     {
         if ($default instanceof \Closure) {
             $cached = Mii::$app->cache->get($id);

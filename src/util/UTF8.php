@@ -50,7 +50,7 @@ class UTF8
      * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
-    public static function transliterateToAscii(string $str, int $case = 0)
+    public static function transliterateToAscii(string $str, int $case = 0): string
     {
         static $utf8_lower_accents = null;
         static $utf8_upper_accents = null;

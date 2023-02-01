@@ -28,16 +28,16 @@ class Pagination
     protected $block = 'pagination';
 
     // Previous page number; FALSE if the current page is the first one
-    protected $previous_page;
+    protected bool|int $previous_page;
 
     // Next page number; FALSE if the current page is the last one
-    protected $next_page;
+    protected bool|int $next_page;
 
     // First page number; FALSE if the current page is the first one
-    protected $first_page;
+    protected bool|int $first_page;
 
     // Last page number; FALSE if the current page is the last one
-    protected $last_page;
+    protected bool|int $last_page;
 
     // Query offset
     protected int $offset;

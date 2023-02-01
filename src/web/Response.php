@@ -23,7 +23,7 @@ class Response extends Component
     /**
      * @var  string      The response body
      */
-    protected $_content = '';
+    protected string $_content = '';
 
     protected array $_headers = [];
 
@@ -40,10 +40,10 @@ class Response extends Component
      * Adds a new header.
      * If there is already a header with the same name, it will be replaced.
      * @param string $name the name of the header
-     * @param string $value the value of the header
+     * @param string|array $value the value of the header
      * @return static object itself
      */
-    public function setHeader(string $name, $value = ''): static
+    public function setHeader(string $name, string|array $value = ''): static
     {
         $name = \strtolower($name);
         $this->_headers[$name] = (array) $value;

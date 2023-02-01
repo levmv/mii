@@ -62,9 +62,9 @@ class SelectQuery
 
     protected ?string $_index_by = null;
 
-    protected $_last_condition_where;
+    protected bool $_last_condition_where = false;
 
-    protected $_pagination;
+    protected Pagination|null $_pagination = null;
 
     /**
      * Creates a new SQL query of the specified type.
@@ -160,10 +160,10 @@ class SelectQuery
     /**
      * Choose the tables to select "FROM ..."
      *
-     * @param mixed $table table name or array($table, $alias) or object
+     * @param string|array $table table name or array($table, $alias) or object
      * @return  $this
      */
-    public function from($table): self
+    public function from(string|array $table): self
     {
         if (empty($this->_from)) {
             $this->_from[] = $table;
@@ -183,11 +183,11 @@ class SelectQuery
     /**
      * Adds addition tables to "JOIN ...".
      *
-     * @param mixed  $table column name or array($column, $alias) or object
+     * @param string|array  $table column name or array($column, $alias) or object
      * @param string|null $type join type (LEFT, RIGHT, INNER, etc.)
      * @return  $this
      */
-    public function join($table, string $type = null): self
+    public function join(string|array $table, string $type = null): self
     {
         $this->_joins[] = [
             'table' => $table,
@@ -204,12 +204,12 @@ class SelectQuery
     /**
      * Adds "ON ..." conditions for the last created JOIN statement.
      *
-     * @param mixed  $c1 column name or array($column, $alias) or object
+     * @param string|array $c1 column name or array($column, $alias) or object
      * @param string $op logic operator
-     * @param mixed  $c2 column name or array($column, $alias) or object
+     * @param string|array  $c2 column name or array($column, $alias) or object
      * @return  $this
      */
-    public function on($c1, $op, $c2): self
+    public function on(string|array $c1, string $op, string|array $c2): self
     {
         $this->_joins[$this->_last_join]['on'][] = [$c1, $op, $c2];
 
@@ -245,12 +245,12 @@ class SelectQuery
     /**
      * Alias of and_having()
      *
-     * @param mixed  $column column name or array($column, $alias) or object
-     * @param string $op logic operator
-     * @param mixed  $value column value
+     * @param string|array|null $column column name or array($column, $alias) or object
+     * @param string|null $op logic operator
+     * @param string|array|null $value column value
      * @return  $this
      */
-    public function having($column = null, $op = null, $value = null): self
+    public function having(string|array|null $column = null, ?string $op = null, mixed $value = null): self
     {
         return $this->andHaving($column, $op, $value);
     }
@@ -258,12 +258,12 @@ class SelectQuery
     /**
      * Creates a new "AND HAVING" condition for the query.
      *
-     * @param mixed  $column column name or array($column, $alias) or object
-     * @param string $op logic operator
-     * @param mixed  $value column value
+     * @param mixed $column column name or array($column, $alias) or object
+     * @param string|null $op logic operator
+     * @param mixed $value column value
      * @return  $this
      */
-    public function andHaving($column, $op, $value = null): self
+    public function andHaving(string|array|null $column, ?string $op, mixed $value = null): self
     {
         if ($column === null) {
             $this->_having[] = ['AND' => '('];
@@ -282,12 +282,12 @@ class SelectQuery
     /**
      * Creates a new "OR HAVING" condition for the query.
      *
-     * @param mixed  $column column name or array($column, $alias) or object
-     * @param string $op logic operator
-     * @param mixed  $value column value
+     * @param string|array|null $column column name or array($column, $alias) or object
+     * @param string|null $op logic operator
+     * @param string|array|null $value column value
      * @return  $this
      */
-    public function orHaving($column = null, $op = null, $value = null): self
+    public function orHaving(string|array|null $column = null, ?string $op = null, mixed $value = null): self
     {
         if ($column === null) {
             $this->_having[] = ['OR' => '('];
@@ -424,7 +424,7 @@ class SelectQuery
      * @param mixed  $value column value
      * @return  $this
      */
-    public function andFilter($column, $op, $value): self
+    public function andFilter(string|array $column, string $op, mixed $value): self
     {
         if ($value === null || $value === '' || !Rules::required((\is_string($value) ? \trim($value) : $value))) {
             return $this;
@@ -437,12 +437,12 @@ class SelectQuery
     /**
      * Creates a new "OR WHERE" condition for the query.
      *
-     * @param mixed  $column column name or array($column, $alias) or object
-     * @param string $op logic operator
-     * @param mixed  $value column value
+     * @param mixed $column column name or array($column, $alias) or object
+     * @param string|null $op logic operator
+     * @param mixed $value column value
      * @return  $this
      */
-    public function orWhere($column = null, $op = null, $value = null): self
+    public function orWhere(string|array|null $column = null, ?string $op = null, mixed $value = null): self
     {
         if ($column === null) {
             $this->_where[] = ['OR' => '('];
@@ -487,11 +487,11 @@ class SelectQuery
     /**
      * Applies sorting with "ORDER BY ..."
      *
-     * @param mixed  $column column name or array($column, $alias) or array([$column, $direction], [$column, $direction], ...)
-     * @param string $direction direction of sorting
+     * @param string|array|null $column column name or array($column, $alias) or array([$column, $direction], [$column, $direction], ...)
+     * @param string|null $direction direction of sorting
      * @return  $this
      */
-    public function orderBy($column, $direction = null): self
+    public function orderBy(string|array|null $column, ?string $direction = null): self
     {
         if (\is_array($column) && $direction === null) {
             $this->_order_by = $column;
@@ -862,7 +862,7 @@ class SelectQuery
             $result->indexBy($this->_index_by);
         }
 
-        if ($this->_pagination) {
+        if ($this->_pagination !== null) {
             $result->setPagination($this->_pagination);
         }
 
@@ -931,7 +931,7 @@ class SelectQuery
     /**
      * @return mixed|null
      */
-    public function one()
+    public function one(): mixed
     {
         $this->limit(1);
         $result = $this->execute();

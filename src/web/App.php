@@ -5,14 +5,8 @@ namespace mii\web;
 use mii\core\InvalidRouteException;
 use mii\core\Router;
 use mii\log\Logger;
-use mii\web\Blocks;
 use mii\db\Database;
 use mii\cache\Apcu;
-use mii\web\Session;
-use mii\web\Request;
-use mii\web\Response;
-use mii\web\UploadHandler;
-use mii\web\ErrorHandler;
 
 /**
  * Class App

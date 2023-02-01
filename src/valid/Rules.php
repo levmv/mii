@@ -51,27 +51,23 @@ class Rules
      * @param string $value value
      * @param string $expression regular expression to match (including delimiters)
      */
-    public static function regex($value, string $expression) : bool
+    public static function regex(string $value, string $expression) : bool
     {
-        return (bool) \preg_match($expression, (string) $value);
+        return (bool) \preg_match($expression, $value);
     }
 
     /**
      * Checks that a field is long enough.
-     *
-     * @param string $value value
      */
-    public static function min($value, int $limit) : bool
+    public static function min(?string $value, int $limit) : bool
     {
         return \mb_strlen((string)$value) >= $limit;
     }
 
     /**
      * Checks that a field is short enough.
-     *
-     * @param string $value value
      */
-    public static function max($value, int $limit) : bool
+    public static function max(?string $value, int $limit) : bool
     {
         return \mb_strlen((string)$value) <= $limit;
     }
@@ -80,10 +76,10 @@ class Rules
     /**
      * Checks that a field is exactly the right length.
      *
-     * @param string        $value value
+     * @param string|null   $value value
      * @param integer|array $length exact length required, or array of valid lengths
      */
-    public static function length($value, int|array $length) : bool
+    public static function length(?string $value, int|array $length) : bool
     {
         if (\is_array($length)) {
             if (in_array(\mb_strlen($value), $length, true)) {

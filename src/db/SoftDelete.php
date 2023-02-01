@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUndefinedClassInspection */
+<?php /** @noinspection PhpDynamicFieldDeclarationInspection */
+/** @noinspection PhpUndefinedClassInspection */
 declare(strict_types=1);
 
 namespace mii\db;

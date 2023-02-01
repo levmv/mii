@@ -83,8 +83,6 @@ class Console
      *
      * - windows without ansicon
      * - not tty consoles
-     *
-     * @param mixed $stream
      */
     public static function streamSupportsAnsiColors(mixed $stream): bool
     {

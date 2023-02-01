@@ -7,13 +7,11 @@ use mii\util\Console;
 
 class Controller
 {
-    public $color;
-
     public bool $interactive = true;
 
-    public $auto_params = true;
+    public bool $auto_params = true;
 
-    public $request;
+    public Request $request;
 
     public int $response_code = 0;
 
@@ -56,7 +54,7 @@ class Controller
             return;
         }
 
-        $controller = \strtolower((string) $this->request->controller);
+        $controller = \strtolower((string) $this->request->controllerName);
 
         foreach ($methods as ['name' => $method,
                  'summary' => $summary,

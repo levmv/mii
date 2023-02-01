@@ -2,8 +2,6 @@
 
 namespace mii\web;
 
-use Mii;
-
 class PageController extends Controller
 {
     public ?Block $layout = null;

@@ -162,7 +162,7 @@ class ' . $name . '
      * @throws DatabaseException
      * @throws \Throwable
      */
-    public function up($limit = null)
+    public function up(int|null $limit = null)
     {
         $applied = 0;
 

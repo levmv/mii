@@ -403,7 +403,7 @@ class Assets extends Controller
     {
         // Yep, little paranoid, hence filesize :)
         $hashesStr = array_reduce($files,
-            fn($carry, $file) => $carry .= hash_file('sha256', $file, true) . pack('L', \filesize($file))
+            fn($carry, $file) => $carry . hash_file('sha256', $file, true) . pack('L', \filesize($file))
         );
 
         return '.' . Text::b64Encode(
