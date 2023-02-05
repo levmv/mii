@@ -9,7 +9,7 @@ class Arr
      *
      * @param array $array array to check
      */
-    public static function isAssoc(array $array) : bool
+    public static function isAssoc(array $array): bool
     {
         return !\array_is_list($array);
     }
@@ -17,9 +17,9 @@ class Arr
     /**
      * Gets a value from an array using a dot separated path.
      *
-     * @param mixed  $array array to search
-     * @param mixed  $path key path string (delimiter separated) or array of keys
-     * @param mixed  $default default value if the path is not set
+     * @param mixed $array array to search
+     * @param mixed $path key path string (delimiter separated) or array of keys
+     * @param mixed $default default value if the path is not set
      * @param string $delimiter key path delimiter
      */
     public static function path(mixed $array, mixed $path, mixed $default = null, string $delimiter = '.'): mixed
@@ -39,7 +39,7 @@ class Arr
             }
 
             // Remove  delimiters and spaces
-            $path = \trim((string) $path, "$delimiter ");
+            $path = \trim((string)$path, "$delimiter ");
 
             // Split the keys by delimiter
             $keys = \explode($delimiter, $path);
@@ -78,9 +78,9 @@ class Arr
     /**
      * Set a value on an array by path.
      *
-     * @param array  $array Array to update
+     * @param array $array Array to update
      * @param string $path Path
-     * @param mixed  $value Value to set
+     * @param mixed $value Value to set
      * @param string $delimiter Path delimiter
      * @see Arr::path()
      */
@@ -95,14 +95,14 @@ class Arr
 
             if (\is_string($key) && \ctype_digit($key)) {
                 // Make the key an integer
-                $key = (int) $key;
+                $key = (int)$key;
             }
 
             if (!isset($array[$key])) {
                 $array[$key] = [];
             }
 
-            $array =&$array[$key];
+            $array =& $array[$key];
         }
 
         // Set key on inner-most array
@@ -148,7 +148,7 @@ class Arr
      * @param array $array1 initial array
      * @param array ...$arrays
      */
-    public static function merge(array $array1, array ...$arrays) : array
+    public static function merge(array $array1, array ...$arrays): array
     {
         foreach ($arrays as $array2) {
             if (static::isAssoc($array2)) {
@@ -190,7 +190,7 @@ class Arr
      * @param array $array1 master array
      * @param array ...$arrays
      */
-    public static function overwrite(array $array1, array ...$arrays) : array
+    public static function overwrite(array $array1, array ...$arrays): array
     {
         foreach ($arrays as $array2) {
             foreach (\array_intersect_key($array2, $array1) as $key => $value) {
@@ -234,8 +234,24 @@ class Arr
         return $flat;
     }
 
+    public static function only(array $from, array $properties): array
+    {
+        $result = [];
 
-    public static function toArray($object, array $properties = [], bool $recursive = true) : array
+        foreach ($properties as $key => $name) {
+            if (\is_int($key)) {
+                $result[$name] = $from[$name];
+            } elseif (\is_string($name)) {
+                $result[$key] = $from[$name];
+            } elseif ($name instanceof \Closure) {
+                $result[$key] = $name($from[$key]);
+            }
+        }
+        return $result;
+    }
+
+
+    public static function toArray($object, array $properties = [], bool $recursive = true): array
     {
         if (\is_array($object)) {
             if ($recursive) {

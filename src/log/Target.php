@@ -111,7 +111,7 @@ abstract class Target extends Component
 
             $user_id = '-';
 
-            if (\Mii::$app->has('auth', true)) {
+            if (\Mii::$app->hasInstance('auth')) {
                 $user = \Mii::$app->auth->getUser(false);
                 if ($user !== null) {
                     $user_id = $user->id;

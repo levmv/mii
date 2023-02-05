@@ -94,6 +94,10 @@ class ErrorHandler extends \mii\core\ErrorHandler
             $arr['status'] = $e->getStatusCode();
         }
 
+        if ($e instanceof BadRequestHttpException && $e->validateErrors !== null) {
+            $arr['errors'] = $e->validateErrors;
+        }
+
         if (config('debug')) {
             $arr['type'] = $e::class;
             $arr['file'] = Debug::path($e->getFile());

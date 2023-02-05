@@ -6,6 +6,8 @@ use Mii;
 
 class BadRequestHttpException extends HttpException
 {
+    public ?array $validateErrors = null;
+
     public function __construct($message = null)
     {
         if ($message === null) { // TODO: do we need this?

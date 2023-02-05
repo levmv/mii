@@ -51,7 +51,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function destroyApplication()
     {
-        if (\Mii::$app && \Mii::$app->has('session', true)) {
+        if (\Mii::$app && \Mii::$app->hasInstance('session')) {
             \Mii::$app->session->close();
         }
         \Mii::$app = null;

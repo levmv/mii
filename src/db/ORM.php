@@ -218,6 +218,11 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return \array_key_exists($key, $this->attributes);
     }
 
+    public function has(string $key): bool
+    {
+        return \array_key_exists($key, $this->attributes);
+    }
+
 
     public function __unset($key)
     {

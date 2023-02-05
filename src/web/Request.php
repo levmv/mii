@@ -3,6 +3,8 @@
 namespace mii\web;
 
 use mii\core\Component;
+use mii\util\Arr;
+use mii\valid\Validator;
 
 class Request extends Component
 {
@@ -78,9 +80,9 @@ class Request extends Component
             $this->$key = $value;
         }
 
-      /*  if ($this->_method === 'PUT') {
-            \parse_str($this->rawBody(), $_POST);
-        }*/
+        /*  if ($this->_method === 'PUT') {
+              \parse_str($this->rawBody(), $_POST);
+          }*/
     }
 
 
@@ -88,11 +90,11 @@ class Request extends Component
     {
         $uri = \parse_url($uri, \PHP_URL_PATH);
 
-        if($uri === null || $uri === false) {
+        if ($uri === null || $uri === false) {
             return false;
         }
 
-        if(empty($uri)) {
+        if (empty($uri)) {
             $uri = '/';
         }
 
@@ -173,7 +175,7 @@ class Request extends Component
      */
     public function isSecure(): bool
     {
-        return (isset($_SERVER['HTTPS']) && (\strcasecmp($_SERVER['HTTPS'], 'on') === 0 || (int) $_SERVER['HTTPS'] === 1))
+        return (isset($_SERVER['HTTPS']) && (\strcasecmp($_SERVER['HTTPS'], 'on') === 0 || (int)$_SERVER['HTTPS'] === 1))
             || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && \strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') === 0);
     }
 
@@ -196,7 +198,7 @@ class Request extends Component
     /**
      * Gets HTTP POST parameters of the request.
      *
-     * @param mixed  $key Parameter name
+     * @param mixed $key Parameter name
      * @param string|int|null $default Default value if parameter does not exist
      */
     public function post(string $key = null, mixed $default = null): mixed
@@ -217,6 +219,26 @@ class Request extends Component
     {
         return $_POST[$name] ?? $_GET[$name] ?? $default;
     }
+
+    public function all($keys = null): array
+    {
+        if (empty($_FILES)) {
+            return array_replace_recursive($_GET, $_POST);
+        }
+        return array_replace_recursive($_GET, $_POST, UploadedFile::allFiles());
+    }
+
+    public function only(array $props): array
+    {
+        return Arr::only($this->all(), $props);
+    }
+
+
+    public function has(string $name): bool
+    {
+        return isset($_POST[$name]) || isset($_GET[$name]);
+    }
+
 
     public function csrfToken(bool $new = false): string
     {
@@ -294,6 +316,23 @@ class Request extends Component
         }
 
         return $this->_json_items[$key] ?? $default;
+    }
+
+
+    public function file(string $name): ?UploadedFile
+    {
+        return UploadedFile::getFile($name);
+    }
+
+
+    public function validate(array $rules, array $messages = null): array
+    {
+        $v = new Validator($this->input(), $rules, $messages);
+        if (!$v->validate()) {
+            throw new BadRequestHttpException($v->errors());
+        }
+
+        return $v->validated();
     }
 
 

@@ -97,4 +97,85 @@ class UploadedFile
     {
         return \strtolower(\pathinfo($this->name, \PATHINFO_FILENAME));
     }
+
+
+    public static function getFile(string $name): ?self
+    {
+        $files = self::loadFiles();
+
+        return isset($files[$name])
+            ? new static($files[$name])
+            : null;
+    }
+
+    /**
+     * @return UploadedFile[]
+     */
+    public static function getFiles(string $name): array
+    {
+        $files = self::loadFiles();
+
+        if (isset($files[$name])) {
+            return [new static($files[$name])];
+        }
+        $results = [];
+        foreach ($files as $key => $file) {
+            if (\str_starts_with($key, "{$name}[")) {
+                $results[] = new static($file);
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * @return UploadedFile[]
+     */
+    public static function allFiles(): array
+    {
+        return array_map(fn(array $file) => new static($file), self::loadFiles());
+    }
+
+
+    private static ?array $_files = null;
+
+    private static function loadFiles(): array
+    {
+        if (static::$_files === null) {
+            self::$_files = [];
+            if (!empty($_FILES)) {
+                foreach ($_FILES as $class => $info) {
+                    self::loadFilesRecursive($class, $info['name'], $info['tmp_name'], $info['type'], $info['size'], $info['error']);
+                }
+            }
+        }
+        return self::$_files;
+    }
+
+
+    /**
+     * Creates UploadedFile instances from $_FILE recursively.
+     * @param string $key key for identifying uploaded file: class name and sub-array indexes
+     * @param mixed $names file names provided by PHP
+     * @param mixed $tmp_names temporary file names provided by PHP
+     * @param mixed $types file types provided by PHP
+     * @param mixed $sizes file sizes provided by PHP
+     * @param mixed $errors uploading issues provided by PHP
+     * @copyright Copyright (c) 2008 Yii Software LLC
+     */
+    private static function loadFilesRecursive(string $key, mixed $names, mixed $tmp_names, mixed $types, mixed $sizes, mixed $errors): void
+    {
+        if (\is_array($names)) {
+            foreach ($names as $i => $name) {
+                self::loadFilesRecursive($key . '[' . $i . ']', $name, $tmp_names[$i], $types[$i], $sizes[$i], $errors[$i]);
+            }
+        } elseif ((int)$errors !== \UPLOAD_ERR_NO_FILE) {
+            self::$_files[$key] = [
+                'name' => $names,
+                'tmp_name' => $tmp_names,
+                'type' => $types,
+                'size' => $sizes,
+                'error' => $errors,
+            ];
+        }
+    }
 }

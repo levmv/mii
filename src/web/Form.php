@@ -5,14 +5,13 @@ namespace mii\web;
 use mii\db\ORM;
 use mii\util\HTML;
 use mii\valid\Validation;
+use mii\valid\Validator;
 
 abstract class Form
 {
     public Validation $validation;
 
     public array $_fields = [];
-
-    public array $labels = [];
 
     public ?string $message_file = null;
 
@@ -33,7 +32,6 @@ abstract class Form
     {
         $this->validation = new Validation();
 
-        $this->labels = $this->labels();
         $this->_fields = $this->fields();
 
         if ($data instanceof ORM) {
@@ -43,8 +41,8 @@ abstract class Form
 
         if (\is_array($data)) {
             foreach (\array_intersect_key($data, $this->_fields) as $key => $value) {
-                $initier = 'init'.ucfirst($key);
-                if(\method_exists($this, $initier)) {
+                $initier = 'init' . ucfirst($key);
+                if (\method_exists($this, $initier)) {
                     $value = $this->$initier($value);
                 }
                 $this->set($key, $value);
@@ -128,11 +126,6 @@ abstract class Form
         return [];
     }
 
-    public function labels(): array
-    {
-        return [];
-    }
-
     public function model(): ?ORM
     {
         return $this->_model;
@@ -186,7 +179,7 @@ abstract class Form
         return $this->_fields[$name];
     }
 
-    public function set($name, $value = null) : void
+    public function set($name, $value = null): void
     {
         if (!\is_array($name)) {
             $name = [$name => $value];
@@ -202,7 +195,7 @@ abstract class Form
     public function validate(): bool
     {
         $this->validation->rules($this->rules());
-        if(!empty($this->labels)) {
+        if (!empty($this->labels)) {
             $this->validation->labels($this->labels);
 
         }
@@ -212,7 +205,7 @@ abstract class Form
         return $this->validation->check();
     }
 
-    public function error($field, $error) : self
+    public function error($field, $error): self
     {
         $this->validation->error($field, $error);
 
@@ -345,10 +338,4 @@ abstract class Form
         throw new \mii\core\Exception("Wrong field type $type");
     }
 
-    public function label($field_name, $label_name, $attributes = null): string
-    {
-        $this->labels[$field_name] = $label_name;
-
-        return HTML::label($field_name, $label_name, $attributes);
-    }
 }

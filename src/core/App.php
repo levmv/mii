@@ -9,7 +9,7 @@ use Mii;
  * Class App
  * @property \mii\cache\Cache $cache The cache application component.
  * @property \mii\db\Database $db The database connection.
- * @property ErrorHandler     $error;
+ * @property ErrorHandler $error;
  * @noinspection PhpFullyQualifiedNameUsageInspection
  */
 abstract class App
@@ -62,6 +62,10 @@ abstract class App
 
     private array $_instances = [];
 
+    // We keep old `id` references for compatibility reasons and have parallel `classes` links.
+    // So, most legacy code work as usual, but now we have a little more DI
+    private array $_classToId = [];
+
     public function __get($id)
     {
         if (!isset($this->_instances[$id])) {
@@ -81,15 +85,50 @@ abstract class App
         return $this->_instances[$id];
     }
 
-    public function has(string $id, bool $checkInstance = false): bool
+    public function getByClass(string $class)
     {
-        return $checkInstance ? isset($this->_instances[$id]) : isset($this->_config['components'][$id]);
+        return $this->get($this->_classToId[$class]);
+    }
+
+    public function has(string $id): bool
+    {
+        return isset($this->_config['components'][$id])
+            || isset($this->_classToId[$id])
+            || !$this->_processed && $this->preprocessComponents() && isset($this->_classToId[$id]);
+    }
+
+    public function hasClass(string $class): bool
+    {
+        return isset($this->_classToId[$class]) || $this->preprocessComponents() && isset($this->_classToId[$class]);
+    }
+
+    public function hasInstance(string $id): bool
+    {
+        return isset($this->_instances[$id]);
     }
 
 
     public function __isset($name)
     {
         return $this->has($name);
+    }
+
+
+    protected bool $_processed = false;
+
+    public function preprocessComponents()
+    {
+        if (!$this->_processed) {
+            foreach ($this->_config['components'] as $id => $conf) {
+                if (\is_array($conf) && isset($conf['class'])) {
+                    $this->_classToId[$conf['class']] = $id;
+                } elseif (\is_string($conf)) {
+                    $this->_classToId[$conf] = $id;
+                }
+            }
+            $this->_processed = true;
+        }
+        return true;
     }
 
     /**
@@ -121,6 +160,7 @@ abstract class App
         }
 
         if (\is_string($class)) {
+            $this->_classToId[$class] = $id;
             return new $class($params);
         }
 
