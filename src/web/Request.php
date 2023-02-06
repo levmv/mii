@@ -220,23 +220,16 @@ class Request extends Component
         return $_POST[$name] ?? $_GET[$name] ?? $default;
     }
 
-    public function all($keys = null): array
-    {
-        if (empty($_FILES)) {
-            return array_replace_recursive($_GET, $_POST);
-        }
-        return array_replace_recursive($_GET, $_POST, UploadedFile::allFiles());
-    }
 
-    public function only(array $props): array
+    public function fromPost(array $props): array
     {
-        return Arr::only($this->all(), $props);
+        return Arr::only($this->post(), $props);
     }
 
 
-    public function has(string $name): bool
+    public function postHas(string $name): bool
     {
-        return isset($_POST[$name]) || isset($_GET[$name]);
+        return isset($_POST[$name]);
     }
 
 

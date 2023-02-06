@@ -47,8 +47,8 @@ class ValidationTest extends TestCase
             'int' => 'numeric|min:5|max:10',
             'float' => 'numeric|min:0.5|max:1',
             'str' => 'min:3|max:6',
-            'str2' => 'between:2:10',
-            'int2' => 'numeric|between:1:10'
+            'str2' => 'between:2,10',
+            'int2' => 'numeric|between:1,10'
         ]);
 
         $this->assertEquals($expected, $v->validate());

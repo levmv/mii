@@ -459,20 +459,16 @@ class HTML
         // Set the input name
         $attributes['name'] = $name;
 
-
         if (\is_array($selected)) {
             // This is a multi-select, god save us!
-            $attributes[] = 'multiple';
-        }
-
-        if (!\is_array($selected)) {
-            if ($selected === null) {
-                // Use an empty array
-                $selected = [];
-            } else {
-                // Convert the selected options to an array
-                $selected = [(string) $selected];
+            if(!in_array('multiple', $attributes)) {
+                // TODO: Not sure if need this
+                $attributes[] = 'multiple';
             }
+        } elseif ($selected === null) {
+            $selected = [];
+        } else {
+            $selected = [(string) $selected];
         }
 
         if (empty($options)) {

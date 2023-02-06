@@ -11,13 +11,13 @@ class Form2
 {
     public ?Validator $validation = null;
 
-    protected Request $request;
-
     public ?string $message_file = null;
 
     protected ?ORM $_model = null;
 
     protected ?array $_data = null;
+
+    protected ?array $_defaults = [];
 
 
     public function __construct($data = null)
@@ -26,13 +26,16 @@ class Form2
             $this->_model = $data;
         }
 
-        $this->validation = new Validator($this->rules());
-
-        $this->request = \Mii::$app->request;
+        $this->validation = new Validator([], $this->rules());
     }
 
-    public function prepare(): void
+    public function prepare($model): void
     {
+    }
+
+    public function setDefault(string $key, string|array $value): void
+    {
+        $this->_defaults[$key] = $value;
     }
 
     public function ok(): bool
@@ -52,7 +55,9 @@ class Form2
             return true;
         }
 
-        $this->prepare();
+        if ($this->_model) {
+            $this->prepare($this->_model);
+        }
 
         return false;
     }
@@ -77,22 +82,27 @@ class Form2
         return $this->_model;
     }
 
+    public function has(string $name): bool
+    {
+        return isset($this->_data[$name]);
+    }
+
+
+    public function set(string $name, string|array $value): void
+    {
+        $this->_data[$name] = $value;
+    }
 
     public function get(string $name)
     {
-        if (\Mii::$app->request->has($name)) {
-            return \Mii::$app->request->input($name);
+        if (isset($this->_data[$name])) {
+            return $this->_data[$name];
         }
 
         if ($this->_model && $this->_model->has($name)) {
             return $this->_model->get($name);
         }
-
-        if (isset($this->$name)) {
-            return $this->$name;
-        }
-
-        return null;
+        return $this->_defaults[$name] ?? $this->$name ?? null;
     }
 
 
@@ -100,7 +110,13 @@ class Form2
     {
         $this->validation->setData($this->data());
         $this->validation->setMessages($this->messages());
+
         return $this->validation->validate();
+    }
+
+    public function validated(array $params = null): array
+    {
+        return $this->validation->validated($params);
     }
 
 
@@ -212,14 +228,12 @@ class Form2
             case 'password':
                 return HTML::password($name, $value, $attributes);
             case 'select':
-                if ($attributes && isset($attributes['multiple']) && $attributes['multiple'] !== false) {
-                    return HTML::select(
-                        $name . '[]',
-                        $selectData ?? [],
-                        $value,
-                        $attributes
-                    );
+                if ($attributes) {
+                    if ((isset($attributes['multiple']) && $attributes['multiple'] !== false) || in_array('multiple', $attributes)) {
+                        $name .= '[]';
+                    }
                 }
+
                 return HTML::select(
                     $name,
                     $selectData ?? [],
@@ -229,7 +243,7 @@ class Form2
             case 'file':
                 return HTML::file($name, $attributes);
         }
-        throw new \mii\core\Exception("Wrong field type $type");
+        throw new \RuntimeException("Wrong field type $type");
     }
 
 }

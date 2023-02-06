@@ -13,7 +13,7 @@ class Validator
     protected bool $stopOnFirstFailure = true;
 
     // Rules that are executed even when the value is empty
-    protected array $emptyRules = ['required'];
+    protected array $emptyRules = ['required', 'requiredWith'];
 
     protected array $rules = [];
 
@@ -56,9 +56,12 @@ class Validator
             $rules = explode('|', $rules);
             foreach ($rules as $rule) {
                 if ($rule === 'required') {
+                    $this->rules[$field][] = [$rule, ''];
                     $this->requiredFields[$field] = true;
+                } else {
+                    $parsed = explode(':', $rule, 2);
+                    $this->rules[$field][] = [$parsed[0], $parsed[1] ?? ''];
                 }
-                $this->rules[$field][] = explode(':', $rule);
             }
         }
     }
@@ -81,7 +84,11 @@ class Validator
                 if (!is_array($ruleData) && is_callable($ruleData)) {
                     $passed = \call_user_func_array($ruleData, [$this, $field, $value]);
                 } else {
-                    $rule = array_shift($ruleData);
+                    $rule = $ruleData[0];
+
+                    if(empty($rule)) {
+                        continue;
+                    }
 
                     if (!$this->validateRequired($field, $value) && !in_array($rule, $this->emptyRules)) {
                         continue;
@@ -89,7 +96,7 @@ class Validator
 
                     $funcName = 'validate' . ucfirst($rule);
                     if (\method_exists(__CLASS__, $funcName)) { // Is it rule from default set?
-                        if (!$this->$funcName($field, $value, ...$ruleData)) {
+                        if (!$this->$funcName($field, $value, ...$this->parseRuleParams($ruleData[1]))) {
                             $passed = false;
                             $this->error($field, $rule);
                         }
@@ -109,14 +116,33 @@ class Validator
         return !$this->hasErrors();
     }
 
-
-    public function validated(): array
+    private function parseRuleParams(string $paramStr): array
     {
-        return array_intersect_key(array_flip(array_keys($this->rules)), array_filter($this->data));
+        if(empty($paramStr)) {
+            return [];
+        }
+
+        return \preg_split('~(?<!\\\)\,~', $paramStr);
     }
 
 
-    public function validateRequired(string $field, mixed $value): bool
+    public function field(string $name): mixed
+    {
+        return $this->data[$name] ?? null;
+    }
+
+
+    public function validated(array $params = null): array
+    {
+        $validated = array_intersect_key($this->data, array_flip(array_keys($this->rules)));
+        if($params) {
+            return Arr::only($validated, $params);
+        }
+        return $validated;
+    }
+
+
+    protected function validateRequired(string $field, mixed $value): bool
     {
         if (\is_null($value)) {
             return false;
@@ -130,6 +156,16 @@ class Validator
 
         return true;
     }
+
+    public function validateRequiredWith(string $field, mixed $value, string $anotherField): bool
+    {
+        if($this->validateRequired($anotherField, $this->data[$anotherField] ?? null)) {
+
+            return $this->validateRequired($field, $value);
+        }
+        return true;
+    }
+
 
     public function validateNumeric(string $field, mixed $value): bool
     {
@@ -202,7 +238,7 @@ class Validator
     /**
      * Checks whether a string consists of alphabetical characters, numbers, underscores and dashes only.
      */
-    public static function validateAlpha_dash(string $field, mixed $value): bool
+    public function validateAlpha_dash(string $field, mixed $value): bool
     {
         return (bool)\preg_match('/^[-a-z0-9_]++$/iD', (string)$value);
     }
@@ -210,19 +246,63 @@ class Validator
     /**
      * For new `Validator`, temporary under new name for this release
      */
-    public static function validateUnique(string $field, mixed $value, string $table, string $key = null, string|int $id = null): bool
+    public function validateUnique(string $field, mixed $value, string $table, string|int $id = null, string $key = null,): bool
     {
         if ($key === null) {
             $key = $field;
         }
 
         if ($id) {
-            $res = (new SelectQuery())->from($table)->where($key, '=', $value)->one();
-            return (null === $res) || ($res->id === $id);
+            $res = (new SelectQuery())->select('id')->from($table)->where($key, '=', $value)->limit(2)->get();
+            if($res->count() > 1) {
+                return false;
+            }
+            return $res->count() === 0 || ($res->column('id') !== $id);
         }
 
-        return null === (new SelectQuery())->from($table)->where($key, '=', $value)->one();
+        return null === (new SelectQuery())->from($table)->where($key, '=', $value)->exists();
     }
+
+    public function validateEqual(string $field, mixed $value, string $compareWith): bool
+    {
+        return isset($this->data[$compareWith]) && $this->data[$compareWith] === $value;
+    }
+
+
+    public function validateDate(string $field, mixed $value): bool
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return true;
+        }
+
+        try {
+            if ((! is_string($value) && ! is_numeric($value)) || strtotime($value) === false) {
+                return false;
+            }
+        } catch (Exception $e) {
+            return false;
+        }
+
+        $date = date_parse($value);
+
+        return checkdate($date['month'], $date['day'], $date['year']);
+    }
+
+    /**
+     * Validate that an attribute matches a date format.
+     *
+     */
+    public function validateDateFormat(string $field, mixed $value, mixed $format): bool
+    {
+        if (! is_string($value) && ! is_numeric($value)) {
+            return false;
+        }
+
+        $date = \DateTime::createFromFormat('!'.$format, $value);
+
+        return ($date && $date->format($format) == $value);
+    }
+
 
 
     /**
