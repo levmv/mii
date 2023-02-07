@@ -84,7 +84,14 @@ class ValidationTest extends TestCase
                     return false;
                 }
                 return true;
-            }
+            },
+            'surname' => ['max:123', function (Validator $v, string $field, mixed $value) {
+                if ($value !== 'bar') {
+                    $v->error($field, $field);
+                    return false;
+                }
+                return true;
+            }]
         ]);
 
         $this->assertEquals($expected, $v->validate());
@@ -96,6 +103,7 @@ class ValidationTest extends TestCase
         return [
             [true, ['name' => 'abc']],
             [false, ['name' => 'foo']],
+            [true, ['name' => 'abc', 'surname' => 'bar']]
         ];
     }
 

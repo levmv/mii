@@ -7,6 +7,18 @@ use Mii;
 use mii\db\SelectQuery;
 use mii\util\Arr;
 use mii\web\UploadedFile;
+use function in_array;
+use function is_countable;
+use function is_string;
+use function is_null;
+use function is_numeric;
+use function explode;
+use function method_exists;
+use function preg_split;
+use function trim;
+use function ucfirst;
+use function count;
+use function mb_strlen;
 
 class Validator
 {
@@ -48,13 +60,18 @@ class Validator
                 $this->rules[$field] = [];
             }
 
-            if ($rules instanceof \Closure) {
-                $this->rules[$field][] = $rules;
-                continue;
+            if (is_string($rules)) {
+                $rules = explode('|', $rules);
+            } elseif ($rules instanceof \Closure) {
+                $rules = [$rules];
             }
 
-            $rules = explode('|', $rules);
             foreach ($rules as $rule) {
+                if ($rule instanceof \Closure) {
+                    $this->rules[$field][] = $rule;
+                    continue;
+                }
+
                 if ($rule === 'required') {
                     $this->rules[$field][] = [$rule, ''];
                     $this->requiredFields[$field] = true;
@@ -79,23 +96,27 @@ class Validator
             $value = $this->data[$field] ?? null;
             $passed = true;
 
+            $isEmpty = !$this->validateRequired($field, $value);
+
             foreach ($rules as $ruleData) {
 
-                if (!is_array($ruleData) && is_callable($ruleData)) {
-                    $passed = \call_user_func_array($ruleData, [$this, $field, $value]);
+                if ($ruleData instanceof \Closure) {
+                    if (!$isEmpty) {
+                        $passed = \call_user_func_array($ruleData, [$this, $field, $value]);
+                    }
                 } else {
                     $rule = $ruleData[0];
 
-                    if(empty($rule)) {
+                    if (empty($rule)) {
                         continue;
                     }
 
-                    if (!$this->validateRequired($field, $value) && !in_array($rule, $this->emptyRules)) {
+                    if ($isEmpty && !in_array($rule, $this->emptyRules)) {
                         continue;
                     }
 
                     $funcName = 'validate' . ucfirst($rule);
-                    if (\method_exists(__CLASS__, $funcName)) { // Is it rule from default set?
+                    if (method_exists(self::class, $funcName)) { // Is it rule from default set?
                         if (!$this->$funcName($field, $value, ...$this->parseRuleParams($ruleData[1]))) {
                             $passed = false;
                             $this->error($field, $rule);
@@ -118,11 +139,11 @@ class Validator
 
     private function parseRuleParams(string $paramStr): array
     {
-        if(empty($paramStr)) {
+        if (empty($paramStr)) {
             return [];
         }
 
-        return \preg_split('~(?<!\\\)\,~', $paramStr);
+        return preg_split('~(?<!\\\)\,~', $paramStr);
     }
 
 
@@ -135,20 +156,20 @@ class Validator
     public function validated(array $params = null): array
     {
         $validated = array_intersect_key($this->data, array_flip(array_keys($this->rules)));
-        if($params) {
+        if ($params) {
             return Arr::only($validated, $params);
         }
         return $validated;
     }
 
 
-    protected function validateRequired(string $field, mixed $value): bool
+    public function validateRequired(string $field, mixed $value): bool
     {
-        if (\is_null($value)) {
+        if (is_null($value)) {
             return false;
-        } elseif (\is_string($value) && \trim($value) === '') {
+        } elseif (is_string($value) && trim($value) === '') {
             return false;
-        } elseif (\is_countable($value) && \count($value) < 1) {
+        } elseif (is_countable($value) && count($value) < 1) {
             return false;
         } elseif ($value instanceof UploadedFile) {
             return $value->isUploadedFile();
@@ -159,7 +180,7 @@ class Validator
 
     public function validateRequiredWith(string $field, mixed $value, string $anotherField): bool
     {
-        if($this->validateRequired($anotherField, $this->data[$anotherField] ?? null)) {
+        if ($this->validateRequired($anotherField, $this->data[$anotherField] ?? null)) {
 
             return $this->validateRequired($field, $value);
         }
@@ -209,7 +230,7 @@ class Validator
 
     public function validateEmail(string $field, mixed $value): bool
     {
-        if (\mb_strlen((string)$value) > 254) {
+        if (mb_strlen((string)$value) > 254) {
             return false;
         }
         $expression = '/^[-_a-z0-9\'+*$^&%=~!?{}]++(?:\.[-_a-z0-9\'+*$^&%=~!?{}]+)*+@(?:(?![-.])[-a-z0-9.]+(?<![-.])\.[a-z]{2,6}|\d{1,3}(?:\.\d{1,3}){3})$/iD';
@@ -232,7 +253,7 @@ class Validator
         $number = \preg_replace('/\D+/', '', $value);
 
         // Check if the number is within range
-        return \in_array(\strlen($number), $lengths, true);
+        return in_array(\strlen($number), $lengths, true);
     }
 
     /**
@@ -246,7 +267,7 @@ class Validator
     /**
      * For new `Validator`, temporary under new name for this release
      */
-    public function validateUnique(string $field, mixed $value, string $table, string|int $id = null, string $key = null,): bool
+    public function validateUnique(string $field, mixed $value, string $table, string|int $id = null, string $key = null): bool
     {
         if ($key === null) {
             $key = $field;
@@ -254,7 +275,7 @@ class Validator
 
         if ($id) {
             $res = (new SelectQuery())->select('id')->from($table)->where($key, '=', $value)->limit(2)->get();
-            if($res->count() > 1) {
+            if ($res->count() > 1) {
                 return false;
             }
             return $res->count() === 0 || ($res->column('id') !== $id);
@@ -276,10 +297,10 @@ class Validator
         }
 
         try {
-            if ((! is_string($value) && ! is_numeric($value)) || strtotime($value) === false) {
+            if ((!is_string($value) && !is_numeric($value)) || strtotime($value) === false) {
                 return false;
             }
-        } catch (Exception $e) {
+        } catch (\Throwable) {
             return false;
         }
 
@@ -294,24 +315,16 @@ class Validator
      */
     public function validateDateFormat(string $field, mixed $value, mixed $format): bool
     {
-        if (! is_string($value) && ! is_numeric($value)) {
+        if (!is_string($value) && !is_numeric($value)) {
             return false;
         }
 
-        $date = \DateTime::createFromFormat('!'.$format, $value);
+        $date = \DateTime::createFromFormat('!' . $format, $value);
 
         return ($date && $date->format($format) == $value);
     }
 
 
-
-    /**
-     * Get the size of a field.
-     *
-     * @param string $field
-     * @param mixed $value
-     * @return int|float|string
-     */
     protected function getSize(string $field, mixed $value): int|float|string
     {
         $hasNumeric = $this->hasRule($field, 'numeric');
@@ -324,7 +337,7 @@ class Validator
             return $value->size;
         } elseif (is_null($value)) {
             return 0;
-        };
+        }
         return mb_strlen((string)$value);
     }
 
@@ -332,7 +345,7 @@ class Validator
     public function hasRule(string $field, string $name): bool
     {
         foreach ($this->rules[$field] as $rule) {
-            if ($rule[0] === $name) {
+            if (is_array($rule) && $rule[0] === $name) {
                 return true;
             }
         }
@@ -390,11 +403,11 @@ class Validator
             ];
 
             if ($file) {
-                if (($message = Mii::message($file, "{$field}.{$error}")) && \is_string($message)) {
+                if (($message = Mii::message($file, "{$field}.{$error}")) && is_string($message)) {
                     // Found a message for this field and error
-                } elseif (($message = Mii::message($file, "{$field}.default")) && \is_string($message)) {
+                } elseif (($message = Mii::message($file, "{$field}.default")) && is_string($message)) {
                     // Found a default message for this field
-                } elseif (($message = Mii::message($file, $error)) && \is_string($message)) {
+                } elseif (($message = Mii::message($file, $error)) && is_string($message)) {
                     // Found a default message for this error
                 } else {
 
@@ -402,7 +415,10 @@ class Validator
                     $message = "{$file}.{$field}.{$error}";
                 }
             } else {
-                $message = $this->_error_messages["{$field}.{$error}"] ?? "{$field}.{$error}";
+                $message = $this->_error_messages["{$field}.{$error}"]
+                    ?? $this->_error_messages["{$field}.default"]
+                    ?? $this->_error_messages["{$error}"]
+                    ?? "{$field}.{$error}";
             }
 
             if ($translate) {
