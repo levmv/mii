@@ -194,6 +194,7 @@ class Util extends Controller
             $column_name = $info['field'];
             $column['allow_null'] = $info['null'] === 'YES';
             $column['type'] = $info['type'];
+            $column['comment'] = $info['comment'] ? ' // '.$info['comment'] : '';
 
             if (\preg_match('/^(\w+)(?:\(([^)]+)\))?/', $info['type'], $matches)) {
                 $column['type'] = $this->convertTypeNames(\strtolower($matches[1]));
@@ -214,10 +215,9 @@ class Util extends Controller
             }
             $columns[$column_name] = $column;
         }
-
         foreach ($columns as $column_name => $column) {
             $nullable = $column['allow_null'] ? '?' : '';
-            $this->stdout('* @property ' . \str_pad($nullable.$column['type'], 8) . '$' . $column_name . "\n");
+            $this->stdout('* @property ' . \str_pad($nullable.$column['type'], 8) . '$' . $column_name . $column['comment']. "\n");
         }
     }
 
