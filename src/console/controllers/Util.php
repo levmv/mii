@@ -210,8 +210,10 @@ class Util extends Controller
             if (\preg_match('/^(\w+)(?:\(([^)]+)\))?/', $info['type'], $matches)) {
                 $column['type'] = $this->convertTypeNames(strtolower($matches[1]));
 
-                if (strlen($column['type']) > $maxTypeLength) {
-                    $maxTypeLength = strlen($column['type']) + 1;
+                $curLength = strlen($column['type']) + (int)$column['allow_null'];
+
+                if ($curLength > $maxTypeLength) {
+                    $maxTypeLength = $curLength;
                 }
 
                 $type = strtolower($matches[1]);
@@ -229,10 +231,9 @@ class Util extends Controller
             }
             $columns[$column_name] = $column;
         }
-
         foreach ($columns as $column_name => $column) {
             $nullable = $column['allow_null'] ? '?' : '';
-            $this->stdout('* @property ' . str_pad($nullable . $column['type'], $maxTypeLength) . '$' . $column_name . $column['comment'] . "\n");
+            $this->stdout('* @property ' . str_pad($nullable . $column['type'], $maxTypeLength + 1) . '$' . $column_name . $column['comment'] . "\n");
         }
     }
 
