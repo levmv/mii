@@ -2,7 +2,9 @@
 
 namespace mii\valid;
 
-
+/**
+ * @deprecated
+ */
 class ValidationException extends \RuntimeException
 {
 }

@@ -9,6 +9,7 @@ class Controller
 
     /**
      * @var  Request  Request that created the controller
+     * @deprecated
      */
     public Request $request;
 
@@ -24,7 +25,7 @@ class Controller
 
     protected function after($content = null): void
     {
-        $this->response->content($content);
+        \Mii::$app->response->content($content);
     }
 
     /**
@@ -46,7 +47,7 @@ class Controller
         $returnType = $method->getReturnType();
 
         if ($returnType instanceof \ReflectionNamedType && $returnType->getName() === 'array') {
-            $this->response->format = Response::FORMAT_JSON;
+            \Mii::$app->response->format = Response::FORMAT_JSON;
         }
 
         $this->before();
@@ -54,7 +55,7 @@ class Controller
         $this->after($this->executeAction($method, $action, $params));
     }
 
-
+    // TODO: rewrite that simplier?
     protected function executeAction(\ReflectionMethod $method, string $action, $params)
     {
         $args = [];
@@ -101,15 +102,17 @@ class Controller
                 }
                 $args[] = $params[$name];
             } else {
-                if ($type->isBuiltin() && $param->isDefaultValueAvailable()) {
+                if (($type === null || $type->isBuiltin()) && $param->isDefaultValueAvailable()) {
                     $args[] = $param->getDefaultValue();
-                } else {
+                } elseif ($type !== null) {
                     $name = $type->getName();
                     if (!$type->isBuiltin() && \Mii::$app->hasClass($name)) {
                         $args[] = \Mii::$app->getByClass($name);
                     } else {
                         $missing[] = $name;
                     }
+                } else {
+                    $missing[] = $name;
                 }
             }
         }

@@ -6,6 +6,9 @@ use mii\core\Exception;
 use mii\util\Text;
 use mii\web\UploadedFile;
 
+/**
+ * @deprecated
+ */
 class Rules
 {
     /**

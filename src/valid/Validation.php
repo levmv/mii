@@ -6,6 +6,9 @@ namespace mii\valid;
 use Mii;
 use mii\util\Arr;
 
+/**
+ * @deprecated
+ */
 class Validation
 {
     // Field rules

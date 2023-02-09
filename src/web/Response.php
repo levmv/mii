@@ -20,10 +20,7 @@ class Response extends Component
 
     public string $status_message = '';
 
-    /**
-     * @var  string|array|null The response body
-     */
-    protected string|array|null $_content = '';
+    protected mixed $_content = '';
 
     protected array $_headers = [];
 

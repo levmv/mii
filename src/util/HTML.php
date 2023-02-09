@@ -339,10 +339,10 @@ class HTML
      *     echo Form::hidden('csrf', $token);
      *
      * @param string $name input name
-     * @param null $value input value
+     * @param mixed|null $value input value
      * @param array|null $attributes html attributes
      */
-    public static function hidden($name, $value = null, array $attributes = null): string
+    public static function hidden(string $name, mixed $value = null, array $attributes = null): string
     {
         $attributes['type'] = 'hidden';
 

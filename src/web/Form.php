@@ -5,8 +5,10 @@ namespace mii\web;
 use mii\db\ORM;
 use mii\util\HTML;
 use mii\valid\Validation;
-use mii\valid\Validator;
 
+/**
+ * @deprecated
+ */
 abstract class Form
 {
     public Validation $validation;

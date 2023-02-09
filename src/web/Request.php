@@ -320,7 +320,7 @@ class Request extends Component
 
     public function validate(array $rules, array $messages = null): array
     {
-        $v = new Validator($this->input(), $rules, $messages);
+        $v = new Validator($this->post(), $rules, $messages);
         if (!$v->validate()) {
             throw new BadRequestHttpException($v->errors());
         }
