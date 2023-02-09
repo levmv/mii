@@ -6,6 +6,15 @@ use mii\console\Controller;
 use mii\db\DatabaseException;
 use mii\db\DB;
 use mii\util\Debug;
+use function count;
+use function exec;
+use function explode;
+use function number_format;
+use function preg_match;
+use function str_contains;
+use function str_pad;
+use function strlen;
+use function strtolower;
 
 /**
  * Various utils
@@ -37,7 +46,7 @@ class Util extends Controller
 
         $result = [];
 
-        \exec("REQUEST_METHOD=GET SCRIPT_FILENAME=$tmp cgi-fcgi -bind -connect $fcgi $tmp 2>&1", $result, $code);
+        exec("REQUEST_METHOD=GET SCRIPT_FILENAME=$tmp cgi-fcgi -bind -connect $fcgi $tmp 2>&1", $result, $code);
 
         \unlink($tmp);
 
@@ -66,8 +75,8 @@ class Util extends Controller
         Total hits:       {hits}
         EOS, [
             '{opcache}' => $result['opcache_enabled'] ? 'True' : 'False',
-            '{usedmem}' => \number_format($result['memory_usage']['used_memory'] / 1024 / 1024, 2),
-            '{freemem}' => \number_format($result['memory_usage']['free_memory'] / 1024 / 1024, 2),
+            '{usedmem}' => number_format($result['memory_usage']['used_memory'] / 1024 / 1024, 2),
+            '{freemem}' => number_format($result['memory_usage']['free_memory'] / 1024 / 1024, 2),
             '{cached}' => $result['opcache_statistics']['num_cached_scripts'],
             '{max}' => $result['opcache_statistics']['max_cached_keys'],
             '{hits}' => $result['opcache_statistics']['hits'],
@@ -79,7 +88,7 @@ class Util extends Controller
 
         foreach ($result['scripts'] as $key => ['full_path' => $path,
                  'hits' => $hits,
-                 'memory_consumption' => $mem, ]) {
+                 'memory_consumption' => $mem,]) {
             if ($hits === 0) {
                 continue;
             }
@@ -88,14 +97,14 @@ class Util extends Controller
                 continue;
             }
 
-            if (\str_contains($path, 'composer')) {
+            if (str_contains($path, 'composer')) {
                 continue;
             }
-            if (\str_contains($path, 'preload.php')) {
+            if (str_contains($path, 'preload.php')) {
                 continue;
             }
 
-            if (\str_contains($path, 'blocks')) {
+            if (str_contains($path, 'blocks')) {
                 $blocks[$path] = [$hits, $mem];
             } else {
                 $scripts[$path] = [$hits, $mem];
@@ -106,21 +115,21 @@ class Util extends Controller
 
         $this->info("\nTop scripts:\nhits   mem, kb  path\n--------------------------");
         foreach ($scripts as $path => [$hits, $mem]) {
-            $mem = \number_format($mem / 1024, 2);
+            $mem = number_format($mem / 1024, 2);
 
             $this->info(
-                \str_pad((string)$hits, 7) . ' ' .
-                \str_pad($mem, 6, ' ', \STR_PAD_LEFT) . '  ' .
+                str_pad((string)$hits, 7) . ' ' .
+                str_pad($mem, 6, ' ', \STR_PAD_LEFT) . '  ' .
                 Debug::path($path)
             );
         }
 
         $this->info('Blocks:');
         foreach ($blocks as $path => [$hits, $mem]) {
-            $mem = \number_format($mem / 1024, 2);
+            $mem = number_format($mem / 1024, 2);
             $this->info(
-                \str_pad((string)$hits, 7) . ' ' .
-                \str_pad($mem, 6, ' ', \STR_PAD_LEFT) . '  ' .
+                str_pad((string)$hits, 7) . ' ' .
+                str_pad($mem, 6, ' ', \STR_PAD_LEFT) . '  ' .
                 Debug::path($path)
             );
         }
@@ -148,28 +157,28 @@ class Util extends Controller
     private function detectFcgiListen()
     {
         $default_link = '/var/run/php/php-fpm.sock';
-        if(file_exists($default_link)) {
+        if (file_exists($default_link)) {
             return realpath($default_link);
         }
 
         $output = [];
-        \exec("ps aux | grep \"php-fpm\" | awk '{print $11}'", $output, $code);
+        exec("ps aux | grep \"php-fpm\" | awk '{print $11}'", $output, $code);
 
-        if ($code !== 0 || !\count($output)) {
+        if ($code !== 0 || !count($output)) {
             return null;
         }
 
         $fpm = $output[0];
         $output = [];
-        \exec("$fpm -tt 2>&1 | grep 'listen = '", $output);
+        exec("$fpm -tt 2>&1 | grep 'listen = '", $output);
 
-        if (!\count($output)) {
+        if (!count($output)) {
             return null;
         }
 
-        \preg_match('/listen\s*=\s*(.*)/s', $output[0], $matches);
+        preg_match('/listen\s*=\s*(.*)/s', $output[0], $matches);
 
-        if (\count($matches) !== 2) {
+        if (count($matches) !== 2) {
             return null;
         }
 
@@ -186,6 +195,7 @@ class Util extends Controller
         $table_info = DB::select('SHOW FULL COLUMNS FROM ' . $name)->toArray();
 
         $columns = [];
+        $maxTypeLength = 4;
         foreach ($table_info as $info) {
             $column = [];
 
@@ -194,30 +204,35 @@ class Util extends Controller
             $column_name = $info['field'];
             $column['allow_null'] = $info['null'] === 'YES';
             $column['type'] = $info['type'];
-            $column['comment'] = $info['comment'] ? ' // '.$info['comment'] : '';
+
+            $column['comment'] = $info['comment'] ? ' ' . $info['comment'] : '';
 
             if (\preg_match('/^(\w+)(?:\(([^)]+)\))?/', $info['type'], $matches)) {
-                $column['type'] = $this->convertTypeNames(\strtolower($matches[1]));
+                $column['type'] = $this->convertTypeNames(strtolower($matches[1]));
 
-                $type = \strtolower($matches[1]);
+                if (strlen($column['type']) > $maxTypeLength) {
+                    $maxTypeLength = strlen($column['type']) + 1;
+                }
 
+                $type = strtolower($matches[1]);
 
                 if (!empty($matches[2]) && $type !== 'enum') {
-                    $values = \explode(',', $matches[2]);
-                    $column['size'] = (int) $values[0];
+                    $values = explode(',', $matches[2]);
+                    $column['size'] = (int)$values[0];
                     if (isset($values[1])) {
-                        $column['scale'] = (int) $values[1];
+                        $column['scale'] = (int)$values[1];
                     }
-                    if($type === 'bit') {
+                    if ($type === 'bit') {
                         $column['type'] = ($column['size'] === 1) ? 'bool' : 'int';
                     }
                 }
             }
             $columns[$column_name] = $column;
         }
+
         foreach ($columns as $column_name => $column) {
             $nullable = $column['allow_null'] ? '?' : '';
-            $this->stdout('* @property ' . \str_pad($nullable.$column['type'], 8) . '$' . $column_name . $column['comment']. "\n");
+            $this->stdout('* @property ' . str_pad($nullable . $column['type'], $maxTypeLength) . '$' . $column_name . $column['comment'] . "\n");
         }
     }
 
