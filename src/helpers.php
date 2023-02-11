@@ -121,6 +121,15 @@ if (!\function_exists('e')) {
     }
 }
 
+
+if (!\function_exists('emptyToNull')) {
+    function emptyToNull(mixed $value): mixed
+    {
+        return !empty($value) ? $value : null;
+    }
+}
+
+
 if (!\function_exists('dd')) {
     /**
      * Dump and die
