@@ -114,7 +114,7 @@ class Database extends Component
      * @throws DatabaseException
      * @noinspection PhpFullyQualifiedNameUsageInspection
      */
-    public function query(?int $type, string $sql, ?string $asObject = null, array $params = null): ?Result
+    public function query(?int $type, string $sql, ?string $asObject = null, array $params = null): Result|int|string
     {
         // Make sure the database is connected
         !\is_null($this->conn) || $this->connect();
@@ -141,7 +141,11 @@ class Database extends Component
             return new Result($result, $asObject, $params);
         }
 
-        return null;
+        if($type === self::INSERT) {
+            return $this->insertedId();
+        }
+
+        return $this->affectedRows();
     }
 
 
