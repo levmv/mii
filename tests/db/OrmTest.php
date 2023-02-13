@@ -4,10 +4,16 @@ namespace miit\db;
 
 use mii\db\DatabaseException;
 use mii\db\ModelNotFoundException;
+use mii\db\ORM;
 use mii\db\Result;
 use mii\db\SelectQuery;
 use mii\util\Text;
 use miit\data\models\Article;
+use miit\data\models\Article2;
+use miit\data\models\Article3;
+use miit\data\models\Article4;
+use miit\data\models\ArticleQQ;
+use miit\data\models\FooEnum;
 use miit\data\models\Item;
 
 class OrmTest extends DatabaseTestCase
@@ -120,7 +126,7 @@ class OrmTest extends DatabaseTestCase
         $this->assertCount(1, $items);
         $this->assertInstanceOf(Item::class, $items[0]);
 
-        $items = Item::all('id', 'in', [1,2]);
+        $items = Item::all('id', 'in', [1, 2]);
 
         $this->assertIsArray($items);
         $this->assertCount(2, $items);
@@ -149,9 +155,93 @@ class OrmTest extends DatabaseTestCase
         $this->assertSame(1, $a->update());
     }
 
+
+    public function testCast()
+    {
+        $arr = [1, 'foo' => 'bar'];
+        $arr2 = ['new' => 'list'];
+
+        $a = new Article2();
+        $a->data = $arr;
+        $a->create();
+
+        $id = $a->id;
+
+        $this->assertSame($arr, $a->data);
+        $this->assertTrue($a->wasChanged('data'));
+
+        $a = Article2::one($id);
+        $a->data = $arr;
+        $this->assertFalse($a->changed(['data']));
+        $this->assertSame($a->data, $arr);
+
+        $a->data = $arr2;
+        $this->assertTrue($a->changed(['data']));
+        $this->assertSame(1, $a->update());
+
+        $a->flag = true;
+        $this->assertTrue($a->changed(['flag']));
+        $this->assertSame($a->flag, true);
+        $a->update();
+
+        $a = Article2::one($id);
+        $this->assertSame($a->flag, true);
+        $a->flag = "ok";
+        $this->assertSame($a->flag, true);
+        $a->update();
+
+        $a = Article2::one($id);
+        $this->assertSame($a->flag, true);
+
+        $a->deleted = "123";
+        $a->update();
+        $this->assertTrue($a->wasChanged('deleted'));
+        $a->deleted = 123;
+
+        $this->assertFalse($a->changed('deleted'));
+    }
+
+    public function testCastNullable()
+    {
+        /*  $a = new Article2();
+          $a->data = null;
+          $a->flag = null;
+          $a->deleted = null;
+
+          $this->assertSame([], $a->data);
+          $this->assertSame(false, $a->flag);
+          $this->assertSame(0, $a->deleted);
+        */
+
+        $a = new Article2();
+        $a->data = null;
+        $a->flag = null;
+        $a->deleted = null;
+
+        $this->assertSame(null, $a->data);
+        $this->assertSame(null, $a->flag);
+        $this->assertSame(null, $a->deleted);
+    }
+
+    public function testEnumCast()
+    {
+        $a = new Article4();
+
+        $a->name = FooEnum::Two;
+        $a->data = '';
+        $this->assertSame(true, $a->changed('name'));
+        $this->assertSame(FooEnum::Two, $a->name);
+
+
+        $id = $a->create();
+
+        $a = Article4::one($id);
+        $this->assertSame(FooEnum::Two, $a->name);
+    }
+
     public function testJsonSerializable()
     {
-        $json = ['id' => 1, 'data' =>  ['new' => 'list'], 'deleted' => 0];
+        $json = ['id' => 1, 'name' => '', 'data' => ['new' => 'list'], 'flag' => 0, 'deleted' => 0];
 
         $a = Article::one(1);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace mii\db;
 
 /**
+ * @deprecated Use std ORM::$casts from now on
  *
  *  User must add property to his class:
  *  protected array $json_attributes = [];
