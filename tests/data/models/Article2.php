@@ -10,7 +10,7 @@ use mii\db\ORM;
  */
 class Article2 extends ORM
 {
-    protected static array $casts = [
+    protected array $casts = [
         'data' => 'array',
         'flag' => 'bool',
         'deleted' => 'int'

@@ -9,7 +9,7 @@ use mii\db\ORM;
  */
 class Article4 extends ORM
 {
-    public static array $casts = [
+    public array $casts = [
         'name' => FooEnum::class
     ];
 

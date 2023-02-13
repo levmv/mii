@@ -42,7 +42,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      */
     public ?bool $__loaded = null;
 
-    protected static array $casts = [];
+    protected array $casts = [];
 
     protected array $_serializeCache = [];
     protected bool $_serializeCacheDirty = false;
@@ -191,8 +191,8 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return;
         }
 
-        if (isset(static::$casts[$key])) {
-            if (static::$casts[$key] === 'array') {
+        if (isset($this->casts[$key])) {
+            if ($this->casts[$key] === 'array') {
                 $this->_serializeCache[$key] = $value;
                 $this->_serializeCacheDirty = true;
                 return;
@@ -208,7 +208,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     public function __get($key)
     {
-        if (isset(static::$casts[$key])) {
+        if (isset($this->casts[$key])) {
             return $this->_readCast($key);
         }
 
@@ -528,7 +528,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
 
     protected function _readCast(string $key): mixed
     {
-        $type = static::$casts[$key];
+        $type = $this->casts[$key];
 
         switch ($type) {
             case 'int':
@@ -550,7 +550,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             return null;
         }
 
-        switch (static::$casts[$key]) {
+        switch ($this->casts[$key]) {
             case 'int':
                 return (int)$value;
             case 'float':
