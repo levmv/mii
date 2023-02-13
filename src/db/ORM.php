@@ -18,7 +18,7 @@ use const JSON_THROW_ON_ERROR;
 class ORM implements \JsonSerializable, \IteratorAggregate
 {
     /**
-     * @var mixed
+     * @deprecated
      */
     public static array $order_by = [];
 
@@ -84,6 +84,13 @@ class ORM implements \JsonSerializable, \IteratorAggregate
         return $short;
     }
 
+
+    public static function defaultOrder(SelectQuery $query): SelectQuery
+    {
+        return $query;
+    }
+
+
     public static function find(): SelectQuery
     {
         return static::prepareQuery(new SelectQuery(static::class));
@@ -98,7 +105,7 @@ class ORM implements \JsonSerializable, \IteratorAggregate
             }
         }
 
-        return $query;
+        return static::defaultOrder($query);
     }
 
     /**
