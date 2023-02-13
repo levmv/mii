@@ -6,6 +6,8 @@ namespace mii\web;
 use mii\db\ORM;
 use mii\util\HTML;
 use mii\valid\Validator;
+use function is_string;
+use function trim;
 
 class Form2
 {
@@ -111,12 +113,24 @@ class Form2
         $this->validation->setData($this->data());
         $this->validation->setMessages($this->messages());
 
-        return $this->validation->validate();
+        return $this->validation
+            ->filter($this->filter(...))
+            ->validate();
     }
 
     public function validated(array $params = null): array
     {
         return $this->validation->validated($params);
+    }
+
+
+    public function filter(mixed $field, mixed $value): mixed
+    {
+        if(!is_string($value)) {
+            return $value;
+        }
+        $value = trim($value);
+        return $value === '' ? null : $value;
     }
 
 

@@ -24,6 +24,8 @@ class Validator
 {
     protected bool $stopOnFirstFailure = true;
 
+    protected ?\Closure $filterFunction = null;
+
     // Rules that are executed even when the value is empty
     protected array $emptyRules = ['required', 'requiredWith'];
 
@@ -89,11 +91,25 @@ class Validator
         return $this;
     }
 
+    public function filter(callable $callback): self
+    {
+        $this->filterFunction = $callback(...);
+        return $this;
+    }
+
 
     public function validate(): bool
     {
+        $filter = $this->filterFunction ?: fn($field, $value) => is_string($value) ? trim($value) : $value;
+
         foreach ($this->rules as $field => $rules) {
-            $value = $this->data[$field] ?? null;
+
+            if(isset($this->data[$field])) {
+                $this->data[$field] = $value = $filter($field, $this->data[$field]);
+            } else {
+                $value = null;
+            }
+
             $passed = true;
 
             $isEmpty = !$this->validateRequired($field, $value);

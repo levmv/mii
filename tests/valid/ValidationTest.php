@@ -107,4 +107,40 @@ class ValidationTest extends TestCase
         ];
     }
 
+
+    /**
+     * @dataProvider provideFilterData
+     */
+    public function testDefaultFilter(bool $expected, array $input)
+    {
+        $v = new Validator($input, [
+            'name' => 'required|max:6',
+            'foo' => 'numeric'
+        ]);
+        $this->assertEquals($expected, $v->validate());
+    }
+
+    /**
+     * @dataProvider provideFilterData
+     */
+    public function testCustomFilter(bool $expected, array $input)
+    {
+        $v = new Validator($input, [
+            'name' => 'required|max:3',
+            'foo' => 'numeric|max:124'
+        ]);
+        $v = $v->filter(fn($field, $value) => $field === 'name' ? 'foo' : $value);
+        $this->assertEquals($expected, $v->validate());
+    }
+
+
+    public function provideFilterData(): array
+    {
+        return [
+            [true, ['name' => '  foobar   ']],
+            [true, ['name' => 'abcdef', 'foo' => 123]],
+        ];
+    }
+
+
 }

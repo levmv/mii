@@ -318,9 +318,15 @@ class Request extends Component
     }
 
 
+    public function validator(array $rules, array $messages = null): Validator
+    {
+        return new Validator($this->post(), $rules, $messages);
+    }
+
+
     public function validate(array $rules, array $messages = null): array
     {
-        $v = new Validator($this->post(), $rules, $messages);
+        $v = $this->validator($rules, $messages);
         if (!$v->validate()) {
             throw new BadRequestHttpException($v->errors());
         }
