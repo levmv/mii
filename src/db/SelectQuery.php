@@ -9,6 +9,7 @@ use function array_merge;
 use function count;
 use function end;
 use function implode;
+use function in_array;
 use function is_array;
 use function is_int;
 use function str_replace;
@@ -805,6 +806,10 @@ class SelectQuery
         $sort = [];
         foreach ($this->_order_by as [$column, $direction]) {
             $column = $this->db->quoteIdentifier($column);
+            if($direction) {
+                assert(in_array($direction, ['asc', 'desc']));
+                $direction = $direction === 'desc' ? 'desc' : 'asc';
+            }
 
             $sort[] = "$column $direction";
         }
