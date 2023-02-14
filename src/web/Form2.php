@@ -90,7 +90,7 @@ class Form2
     }
 
 
-    public function set(string $name, string|array $value): void
+    public function set(string $name, string|array|null $value): void
     {
         $this->_data[$name] = $value;
     }
