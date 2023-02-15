@@ -142,5 +142,54 @@ class ValidationTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider provideValidatedData
+     */
+    public function testValidated(array $expected, array $input)
+    {
+        $v = new Validator($input, [
+            'name' => 'required|max:3',
+            'foo' => 'numeric|max:124'
+        ]);
+
+        $v->validate();
+
+        $this->assertEquals($expected, $v->validated([
+            'name',
+            'foo'
+        ]));
+    }
+
+    public function provideValidatedData(): array
+    {
+        return [
+            [['name' => 'foobar', 'foo' => null], ['name' => '  foobar   ']],
+            [['name' => 'abcdef', 'foo' => 123], ['name' => 'abcdef', 'foo' => 123]],
+        ];
+    }
+
+
+    /**
+     * @dataProvider provideArrayData
+     */
+    public function testArray(bool $expected, array $input)
+    {
+        $v = new Validator($input, [
+            'data' => 'required|array',
+            'data.name' => 'required|max:6',
+            'data.age' => 'numeric|between:6,100',
+            //'data.foo' => 'numeric|nullable',
+        ]);
+        $this->assertEquals($expected, $v->validate());
+    }
+
+
+    public function provideArrayData(): array
+    {
+        return [
+            [true, ['data' => ['name' => 'foo', 'age' => 91, 'foo' => null]]],
+        ];
+    }
+
 
 }

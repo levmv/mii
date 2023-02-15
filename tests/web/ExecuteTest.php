@@ -21,10 +21,8 @@ class ExecuteTest extends TestCase
     public function testWorking(string $action, array $params)
     {
         $v = new OneController();
-        $response = new Response();
-        $v->response = $response;
         $v->execute($action, $params);
-        $this->assertEquals('ok', $response->content());
+        $this->assertEquals('ok', \Mii::$app->response->content());
     }
 
 

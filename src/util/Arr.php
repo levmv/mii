@@ -2,34 +2,32 @@
 
 namespace mii\util;
 
+use function array_is_list;
+use function count;
+use function explode;
+use function in_array;
+use function is_array;
+use function is_int;
+use function is_object;
+use function is_string;
+
 class Arr
 {
-    /**
-     * Tests if an array is associative or not.
-     *
-     * @param array $array array to check
-     */
-    public static function isAssoc(array $array): bool
-    {
-        return !\array_is_list($array);
-    }
-
     /**
      * Gets a value from an array using a dot separated path.
      *
      * @param mixed $array array to search
      * @param mixed $path key path string (delimiter separated) or array of keys
      * @param mixed $default default value if the path is not set
-     * @param string $delimiter key path delimiter
      */
-    public static function path(mixed $array, mixed $path, mixed $default = null, string $delimiter = '.'): mixed
+    public static function path(mixed $array, mixed $path, mixed $default = null): mixed
     {
-        if (!\is_array($array) && !\is_object($array) && !($array instanceof \Traversable)) {
+        if (!is_array($array) && !is_object($array) && !($array instanceof \Traversable)) {
             // This is not an array!
             return $default;
         }
 
-        if (\is_array($path)) {
+        if (is_array($path)) {
             // The path has already been separated into keys
             $keys = $path;
         } else {
@@ -38,11 +36,8 @@ class Arr
                 return $array[$path];
             }
 
-            // Remove  delimiters and spaces
-            $path = \trim((string)$path, "$delimiter ");
-
             // Split the keys by delimiter
-            $keys = \explode($delimiter, $path);
+            $keys = explode('.', $path);
         }
 
         do {
@@ -59,7 +54,7 @@ class Arr
                     return $array[$key];
                 }
 
-                if (!\is_array($array[$key]) && !\is_iterable($array[$key])) {
+                if (!is_array($array[$key]) && !\is_iterable($array[$key])) {
                     // Unable to dig deeper
                     break;
                 }
@@ -78,22 +73,21 @@ class Arr
     /**
      * Set a value on an array by path.
      *
-     * @param array $array Array to update
+     * @param array  $array Array to update
      * @param string $path Path
-     * @param mixed $value Value to set
-     * @param string $delimiter Path delimiter
+     * @param mixed  $value Value to set
      * @see Arr::path()
      */
-    public static function setPath(&$array, string $path, mixed $value, string $delimiter = '.'): void
+    public static function setPath(&$array, string $path, mixed $value): void
     {
         // Split the keys by delimiter
-        $keys = \explode($delimiter, $path);
+        $keys = explode('.', $path);
 
         // Set current $array to innermost array path
-        while (\count($keys) > 1) {
+        while (count($keys) > 1) {
             $key = \array_shift($keys);
 
-            if (\is_string($key) && \ctype_digit($key)) {
+            if (is_string($key) && \ctype_digit($key)) {
                 // Make the key an integer
                 $key = (int)$key;
             }
@@ -151,11 +145,11 @@ class Arr
     public static function merge(array $array1, array ...$arrays): array
     {
         foreach ($arrays as $array2) {
-            if (static::isAssoc($array2)) {
+            if (!array_is_list($array2)) {
                 foreach ($array2 as $key => $value) {
-                    if (\is_array($value)
+                    if (is_array($value)
                         && isset($array1[$key])
-                        && \is_array($array1[$key])
+                        && is_array($array1[$key])
                     ) {
                         $array1[$key] = static::merge($array1[$key], $value);
                     } else {
@@ -164,7 +158,7 @@ class Arr
                 }
             } else {
                 foreach ($array2 as $value) {
-                    if (!\in_array($value, $array1, true)) {
+                    if (!in_array($value, $array1, true)) {
                         $array1[] = $value;
                     }
                 }
@@ -219,11 +213,11 @@ class Arr
      */
     public static function flatten($array): array
     {
-        $is_assoc = static::isAssoc($array);
+        $is_assoc = !array_is_list($array);
 
         $flat = [];
         foreach ($array as $key => $value) {
-            if (\is_array($value)) {
+            if (is_array($value)) {
                 $flat = \array_merge($flat, static::flatten($value));
             } elseif ($is_assoc) {
                 $flat[$key] = $value;
@@ -239,9 +233,9 @@ class Arr
         $result = [];
 
         foreach ($properties as $key => $name) {
-            if (\is_int($key)) {
+            if (is_int($key)) {
                 $result[$name] = $from[$name];
-            } elseif (\is_string($name)) {
+            } elseif (is_string($name)) {
                 $result[$key] = $from[$name];
             } elseif ($name instanceof \Closure) {
                 $result[$key] = $name($from[$key]);
@@ -253,10 +247,10 @@ class Arr
 
     public static function toArray($object, array $properties = [], bool $recursive = true): array
     {
-        if (\is_array($object)) {
+        if (is_array($object)) {
             if ($recursive) {
                 foreach ($object as $key => $value) {
-                    if (\is_array($value) || \is_object($value)) {
+                    if (is_array($value) || is_object($value)) {
                         $object[$key] = static::toArray($value, $properties);
                     }
                 }
@@ -264,13 +258,13 @@ class Arr
             return $object;
         }
 
-        if (\is_object($object)) {
+        if (is_object($object)) {
             $result = [];
             if (!empty($properties)) {
                 foreach ($properties as $key => $name) {
-                    if (\is_int($key)) {
+                    if (is_int($key)) {
                         $result[$name] = $object->$name;
-                    } elseif (\is_string($name)) {
+                    } elseif (is_string($name)) {
                         $result[$key] = $object->$name;
                     } elseif ($name instanceof \Closure) {
                         $result[$key] = $name($object);

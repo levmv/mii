@@ -104,10 +104,10 @@ class Validator
 
         foreach ($this->rules as $field => $rules) {
 
-            if(isset($this->data[$field])) {
-                $this->data[$field] = $value = $filter($field, $this->data[$field]);
-            } else {
-                $value = null;
+            $value = Arr::path($this->data, $field);
+            if ($value !== null) {
+                $value = $filter($field, $value);
+                Arr::setPath($this->data, $field, $value);
             }
 
             $passed = true;
@@ -171,7 +171,10 @@ class Validator
 
     public function validated(array $params = null): array
     {
-        $validated = array_intersect_key($this->data, array_flip(array_keys($this->rules)));
+        $validated = [];
+        foreach ($this->rules as $key => $rule) {
+            $validated[$key] = $this->field($key);
+        }
         if ($params) {
             return Arr::only($validated, $params);
         }
@@ -242,6 +245,14 @@ class Validator
         }
 
         return true;
+    }
+
+    public function validateIn(string $field, mixed $value, ...$variants): bool
+    {
+        if (is_array($value)) {
+            return false;
+        }
+        return in_array($value, $variants);
     }
 
     public function validateEmail(string $field, mixed $value): bool
@@ -390,7 +401,7 @@ class Validator
      * will be used for translation.
      *
      * @param string|null $file file to load error messages from
-     * @param mixed $translate translate the message
+     * @param mixed       $translate translate the message
      * @throws \Exception
      * @noinspection PhpUndefinedFunctionInspection
      */
