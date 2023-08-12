@@ -5,8 +5,8 @@ Anyhow, it's not particulry interesting in any way. Mostly ugly legacy code :)
 
 # mii
 
-mii - its tiny php-framework, borned as fork of Kohana, but transofrmed over time to something like Yii2 (with a big...
-big stretch). For about 10 years several dozen web projects are successfully working on mii. 
+mii - is tiny php-framework, borned as fork of Kohana, but transofrmed over time more in Yii2 direction.
+For about 10 years several dozen web projects are successfully working on mii. 
 
 ### Philosophy 
 Main values: simplicity, speed, minimal overhead. 
