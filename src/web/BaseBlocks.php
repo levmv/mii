@@ -34,6 +34,8 @@ abstract class BaseBlocks extends Component
 
     protected array $_used_blocks = [];
 
+    protected string $assets_group = '';
+
     public function init(array $config = []): void
     {
         parent::init($config);
