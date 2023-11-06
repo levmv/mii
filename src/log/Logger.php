@@ -73,6 +73,7 @@ class Logger extends Component
     {
         foreach ($this->targets as $name => $logger) {
             $ref = new \ReflectionClass($logger['class']);
+            unset($logger['class']);
             $this->targets_objs[$name] = $ref->newInstanceArgs([$logger]);
         }
     }
