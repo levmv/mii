@@ -85,6 +85,11 @@ abstract class App
         return $this->_instances[$id];
     }
 
+    public function setInstance(string $id, $component)
+    {
+        return $this->_instances[$id] = $component;
+    }
+
     public function getByClass(string $class)
     {
         return $this->get($this->_classToId[$class]);
