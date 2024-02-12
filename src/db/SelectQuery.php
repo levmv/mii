@@ -157,10 +157,9 @@ class SelectQuery
     }
 
     /**
-     * @param mixed ...$columns
      * @return $this
      */
-    public function selectAlso(...$columns): self
+    public function selectAlso(mixed ...$columns): self
     {
         $this->_select = array_merge($this->_select, $columns);
         return $this;
@@ -231,7 +230,7 @@ class SelectQuery
      * @param mixed ...$columns column name
      * @return  $this
      */
-    public function using(...$columns): self
+    public function using(mixed ...$columns): self
     {
         $this->_joins[$this->_last_join]['using'] = $columns;
 
@@ -244,7 +243,7 @@ class SelectQuery
      * @param mixed $columns column name or object
      * @return  $this
      */
-    public function groupBy(...$columns): self
+    public function groupBy(mixed ...$columns): self
     {
         $this->_group_by = array_merge($this->_group_by, $columns);
 

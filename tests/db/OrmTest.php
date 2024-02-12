@@ -245,7 +245,7 @@ class OrmTest extends DatabaseTestCase
 
         $a = Article::one(1);
 
-        $this->assertSame(\json_encode($json), \json_encode($a));
+        $this->assertSame(\json_encode($json), \json_encode($a, JSON_THROW_ON_ERROR));
     }
 
 

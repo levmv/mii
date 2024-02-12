@@ -9,11 +9,6 @@ class DB
         return static::query(null, $q, $params);
     }
 
-    /**
-     * @param string $q
-     * @param array $params
-     * @return Result
-     */
     public static function select(string $q, array $params = []): Result
     {
         return static::query(Database::SELECT, $q, $params);

@@ -55,10 +55,6 @@ class Pagination
 
     protected string $base_class = 'pagination';
 
-    /**
-     *
-     * @param array $config
-     */
     public function __construct(array $config = [])
     {
         foreach ($config as $key => $val) {
@@ -237,7 +233,7 @@ class Pagination
      * @return  string  pagination output (HTML)
      * @throws Exception
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

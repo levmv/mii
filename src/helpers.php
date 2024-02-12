@@ -83,7 +83,6 @@ if (!\function_exists('cache')) {
      * @param string $id id of cache entry
      * @param mixed   $data data to set to cache
      * @param integer|null $lifetime lifetime in seconds
-     * @return  boolean
      */
     function cache(string $id, mixed $data, int $lifetime = null): bool
     {

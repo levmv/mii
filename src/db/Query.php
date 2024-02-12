@@ -35,7 +35,7 @@ class Query extends SelectQuery
      * @param mixed $table table name or array($table, $alias) or object
      * @return  $this
      */
-    public function table($table): self
+    public function table(mixed $table): self
     {
         $this->_table = $table;
 
@@ -232,7 +232,7 @@ class Query extends SelectQuery
      * @param array $insert_data "column name" => "value" assoc list
      * @return  $this
      */
-    public function insert($table = null, array $insert_data = null): self
+    public function insert(mixed $table = null, array $insert_data = null): self
     {
         $this->_type = Database::INSERT;
 

@@ -47,7 +47,6 @@ class UTF8
      *
      * @param string $str string to transliterate
      * @param integer $case -1 lowercase only, +1 uppercase only, 0 both cases
-     * @return  string
      * @author  Andreas Gohr <andi@splitbrain.org>
      */
     public static function transliterateToAscii(string $str, int $case = 0): string

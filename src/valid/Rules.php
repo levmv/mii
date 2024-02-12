@@ -325,7 +325,6 @@ class Rules
      *
      * @param string|int $str input string
      * @param boolean $utf8 trigger UTF-8 compatibility
-     * @return bool
      */
     public static function digit(string| int $str, bool $utf8 = false) : bool
     {

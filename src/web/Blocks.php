@@ -8,7 +8,7 @@ use mii\util\HTML;
 
 class Blocks extends BaseBlocks
 {
-    public ?string $base_path;
+    public ?string $base_path = null;
 
     protected array $_files = [
         'css' => [

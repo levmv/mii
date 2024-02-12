@@ -34,7 +34,7 @@ class UploadedFile
     public int $error;
 
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->name;
     }

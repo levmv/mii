@@ -426,7 +426,13 @@ class Request extends Component
         unset($_COOKIE[$name]);
 
         // Nullify the cookie and make it expire
-        return \setcookie($name, '', -86400, $this->cookie_path, $this->cookie_domain, $this->cookie_secure, $this->cookie_httponly);
+        return \setcookie($name, '', [
+            'expires' => -86400,
+            'path' => $this->cookie_path,
+            'domain' => $this->cookie_domain,
+            'secure' => $this->cookie_secure,
+            'httponly' => $this->cookie_httponly
+        ]);
     }
 
 

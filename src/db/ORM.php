@@ -182,7 +182,6 @@ class ORM implements \JsonSerializable, \IteratorAggregate
      * @param string            $key the key to use for the array
      * @param string            $display the value to use for the display
      * @param array|string|null $first first value
-     * @return array
      */
     public static function selectList(string $key, string $display, array|string $first = null): array
     {
