@@ -515,7 +515,7 @@ class Assets extends Controller
 
     protected function jsProcess(string $file): bool
     {
-        $command = "esbuild --minify '$file' --target=es6 --allow-overwrite --log-level=warning --outfile='$file'";
+        $command = "esbuild --minify '$file' --target=es6 --charset=utf8 --allow-overwrite --log-level=warning --outfile='$file'";
 
         $result = $this->executeBinary($command);
 
