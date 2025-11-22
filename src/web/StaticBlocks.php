@@ -46,7 +46,7 @@ class StaticBlocks extends BaseBlocks
         if (isset($this->assets['css'][$block_name])) {
             $filename = $this->assets['css'][$block_name];
             if (!isset($this->_used_css[$filename])) {
-                $this->_css .= "<link type=\"text/css\" href=\"$this->base_url/$filename.css\" rel=\"stylesheet\">\n";
+                $this->_css .= "<link href=\"$this->base_url/$filename.css\" rel=\"stylesheet\">\n";
                 $this->_used_css[$filename] = true;
             }
         }
@@ -73,7 +73,7 @@ class StaticBlocks extends BaseBlocks
 
         if ($this->_blocks[$block_name]->__remote_css !== null) {
             foreach ($this->_blocks[$block_name]->__remote_css as $link) {
-                $this->_css .= '<link type="text/css" href="' . $link . '" rel="stylesheet" />';
+                $this->_css .= '<link href="' . $link . '" rel="stylesheet" />';
             }
         }
 
