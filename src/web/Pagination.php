@@ -68,7 +68,6 @@ class Pagination
         if ($this->base_uri === null) {
             $this->base_uri = $this->request->uri();
         }
-
         if ($this->current_page === null) {
             if ($this->route !== null) {
                 $this->current_page = (int)$this->request->param($this->page_param, 1);
@@ -107,8 +106,9 @@ class Pagination
         }
 
         if ($this->route !== null) {
+
             return \Mii::$app->router->url($this->route, \array_merge(
-                    $this->route_params,
+                    $this->request->params,
                     [$this->page_param => $page]
                 )) . $this->query();
         }
@@ -205,7 +205,7 @@ class Pagination
      *
      * @param array|null $params
      */
-    public function query(array $params = null): string
+    public function query(?array $params = null): string
     {
         if ($params === null) {
             // Use only the current parameters
