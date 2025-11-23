@@ -138,7 +138,7 @@ class Router extends Component
         }
     }
 
-    protected function compileRoute(string $pattern, array $parameters = null): string
+    protected function compileRoute(string $pattern, ?array $parameters = null): string
     {
         $parameters ??= $this->default_parameters;
 
@@ -275,26 +275,22 @@ class Router extends Component
         while (\preg_match('#\([^()]++\)#', $uri, $match)) {
             // Search for the matched value
             $search = $match[0];
-
             // Remove the parenthesis from the match as the replace
             $replace = \substr($match[0], 1, -1);
-
-
+            
             while (\preg_match('#' . static::REGEX_KEY . '#', $replace, $match)) {
                 [$key, $param] = $match;
-
-
-                if ($params !== null && isset($params[$param]) && $params[$param] !== ($defaults[$param] ?? null)) {
+                if ($params !== null && isset($params[$param]) && $params[$param] !== ($defaults[$param] ?? "")) {
                     // Future optional params should be required
                     $provided_optional = true;
-
                     // Replace the key with the parameter value
-                    $replace = \str_replace($key, $params[$param], $replace);
+                    $replace = \str_replace($key, (string)$params[$param], $replace);
                 } elseif ($provided_optional) {
                     // Look for a default
                     if (isset($defaults[$param])) {
                         $replace = \str_replace($key, $defaults[$param], $replace);
                     } else {
+                        exit;
                         // Ungrouped parameters are required
                         throw new InvalidRouteException("Required route parameter not passed: $param");
                     }
@@ -328,7 +324,6 @@ class Router extends Component
 
         // Trim all extra slashes from the URI
         $uri = \preg_replace('#//+#', '/', \rtrim($uri, '/'));
-
 
         return Url::site($uri);
     }
